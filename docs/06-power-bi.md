@@ -3,7 +3,7 @@
 ## 1. Data connection
 
 - **Source: PostgreSQL** `dubai_property` on the Mac, via Get Data → **PostgreSQL database**, **Import mode** (required for Publish to web). Connection details over the Parallels network are in docs/03 §8.
-- Log in as the read-only role **`pbi_reader`**, and select only **`rpt.*` views** (e.g. `rpt.transactions`, `rpt.rent_contracts`, `rpt.dim_area`, `rpt.price_index`, `rpt.stress_grid`). All business logic lives in dbt; Power Query only confirms data types.
+- Log in as the read-only role **`pbi_reader`**, and select only **`rpt.*` views** (built in Phase 2b: `rpt.transactions`, `rpt.area_month`, `rpt.rent_month`, `rpt.rates_monthly`, `rpt.report_info` and `rpt.dim_date` / `dim_area` / `dim_property_type` / `dim_procedure` / `dim_project`; Phase 4 adds `rpt.price_index`, `rpt.stress_grid` and the other model outputs). Columns have Title Case names (e.g. `"AED Counted Once"`), AED is whole dirhams, and medians are blank where n < 20 (docs/04 §3). All business logic lives in dbt; Power Query only confirms data types.
 - Server and database are **Power BI parameters** (`PgServer`, `PgDatabase`), so switching between the Parallels IP and localhost is one change.
 - Save as a **Power BI Project (.pbip)** for git, and attach a `.pbix` to GitHub Releases.
 - Refresh happens in Desktop (the Mac must be on, with Postgres running), then republish. No gateway is needed because the public report is republished from Desktop rather than refreshed in the Service.
@@ -20,11 +20,13 @@
 
 ## 3. Core DAX measures
 
+**Phase 2b note.** The measures below are the design sketch; Phase 5 rewrites them against the rpt column names (e.g. `transactions[AED Counted Once]`). Two are already corrected to the docs/01 §4 definitions: market sales count **every** market sale (quality flags only exclude rows from price statistics) and sum the AED **once per deal** (C16); mortgage share uses individual new mortgages only. `reports/kpi_reconciliation.md` holds the target values.
+
 ```dax
 // ---------- Market ----------
-Market Sales = CALCULATE ( COUNTROWS ( fct_transaction ), fct_transaction[is_market_sale] = 1, fct_transaction[has_quality_flag] = 0 )
+Market Sales = CALCULATE ( COUNTROWS ( fct_transaction ), fct_transaction[is_market_sale] = 1 )
 
-Market Sales Value = CALCULATE ( SUM ( fct_transaction[price_aed] ), fct_transaction[is_market_sale] = 1, fct_transaction[has_quality_flag] = 0 )
+Market Sales Value = CALCULATE ( SUM ( fct_transaction[aed_counted_once] ), fct_transaction[is_market_sale] = 1 )
 
 Sales Value YoY % =
 VAR _cy = [Market Sales Value]
@@ -35,9 +37,9 @@ Median Price per Sqm =
 CALCULATE ( MEDIAN ( fct_transaction[price_per_sqm] ), fct_transaction[is_market_sale] = 1, fct_transaction[has_quality_flag] = 0 )
 
 // ---------- Financing ----------
-Mortgage Registrations = CALCULATE ( COUNTROWS ( fct_transaction ), fct_transaction[procedure_category] = "mortgage" )
+New Mortgages = CALCULATE ( COUNTROWS ( fct_transaction ), fct_transaction[is_new_mortgage] = 1 )   // individual only; portfolio reported separately
 
-Mortgage Share = DIVIDE ( [Mortgage Registrations], [Mortgage Registrations] + [Market Sales] )
+Mortgage Share = DIVIDE ( [New Mortgages], [New Mortgages] + [Market Sales] )
 
 Off-plan Share (Value) =
 DIVIDE ( CALCULATE ( [Market Sales Value], fct_transaction[is_offplan] = 1 ), [Market Sales Value] )

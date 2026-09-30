@@ -27,9 +27,20 @@ vars:
   repeated_value_span_factor: 2       # C16: transaction_id sequence span <= 2 x lines ...
   repeated_value_area_ratio: 1.10     # ... and unit sizes differ by more than 10%
   rent_floor_aed: 1000                # C14: allocated annual rent below AED 1,000
-  rent_area_placeholder_sqm: 1        # C14: actual_area <= 1 sq m is a placeholder
+  rent_area_placeholder_sqm: 1        # C21: actual_area <= 1 sq m is a placeholder
+  # C21 (rents) and the area-weighted price population (sales): an area above the cap for its
+  # property class is a community / plot / building area, not the unit's (owner, 2026-09-30).
+  area_cap_apartment_sqm: 1000
+  area_cap_villa_sqm: 3000
+  area_cap_office_retail_sqm: 5000
+  area_cap_other_sqm: 10000
   rent_max_contract_days: 3653        # rent end_date_implausible: longer than 10 years
   rent_max_days_after_snapshot: 366   # rent date_invalid: starts > 1 year after the extract
+  # Gold / rpt (Phase 2b). The reporting scope runs from dim_date_start to the data snapshot
+  # date (the latest transaction date, int_data_snapshot); dim_date runs on to dim_date_end
+  # for forecasts. Facts outside the scope stay in gold but not in the aggregates or rpt.
+  dim_date_start: "2004-01-01"
+  dim_date_end: "2027-12-31"
 
 # Layer -> schema + materialisation (docs/03 §3 and §7). Schema names are used verbatim
 # thanks to macros/generate_schema_name.sql (no "<target>_" prefix).
@@ -52,11 +63,17 @@ seeds:
   dubai_property:
     +schema: silver
     seed_area:
-      +column_types: {area_id: integer, area_name_en: text, zone: text}
+      +column_types:
+        area_id: integer
+        area_name_en: text
+        zone: text
+        latitude: numeric
+        longitude: numeric
     seed_procedure_category:
       +column_types: {procedure_category: text, is_market_sale: boolean, description: text}
     seed_procedure_map:
       +column_types:
+        procedure_key: integer
         trans_group: text
         procedure_id: integer
         procedure_name_en: text
@@ -76,6 +93,23 @@ seeds:
         is_commercial_unit: boolean
     seed_rent_subtype_map:
       +column_types: {ejari_property_sub_type_en: text, bedrooms: smallint, room_class: text}
+    seed_property_class:
+      +column_types: {property_class_id: integer, property_class: text, description: text}
+    seed_property_usage_map:
+      +column_types: {source: text, property_usage: text, usage_group_id: integer, usage_group: text}
+    seed_property_type_map:
+      +column_types: {source: text, property_type: text, property_sub_type: text, property_class: text}
+    seed_ltv_rules:
+      +column_types:
+        rule_id: integer
+        borrower: text
+        property_status: text
+        home_number: text
+        value_band: text
+        max_ltv: numeric
+        source_citation: text
+        verified: boolean
+        note: text
     seed_phase1_reconciliation:
       +column_types:
         dataset: text

@@ -1,0 +1,382 @@
+version: 2
+
+# Gold star schema (docs/04 §3). Facts keep every silver line (reconciled in
+# tests/reconciliation/recon_gold_*); aggregates and rpt keep the reporting scope
+# (is_in_report_scope: dated inside dim_date, 2004-01-01 to var dim_date_end).
+# Keys are integers; -1 / 999 are the Unknown members.
+
+models:
+  # --------------------------------------------------------------------------------
+  # Dimensions
+  # --------------------------------------------------------------------------------
+  - name: dim_date
+    description: >
+      Day-grain calendar, dim_date_start to dim_date_end (beyond the data for Phase 4
+      forecasts). The Power BI date table. is_after_snapshot marks days after the data
+      snapshot date.
+    columns:
+      - name: is_after_snapshot
+        description: The day is after the data snapshot date (latest transaction date).
+        tests: [not_null]
+      - name: date
+        tests: [unique, not_null]
+      - name: month_start
+        description: First day of the month; the aggregates' `month` joins to `date` on this day.
+      - name: day_of_week
+        description: ISO day of week, 1 = Monday.
+
+  - name: dim_area
+    description: >
+      One row per DLD area (seed_area, 265 IDs, all zoned) plus Unknown (-1). area_key is the
+      DLD area_id. Latitude / longitude are NULL until the Phase 5 centroids are added to
+      seed_area.
+    columns:
+      - name: area_key
+        tests: [unique, not_null]
+      - name: area_name
+        tests: [not_null]
+      - name: zone
+        description: Market zone used for the min-n roll-up.
+        tests: [not_null]
+
+  - name: dim_property_type
+    description: >
+      Conformed property type (usage group x property class), shared by sales, rents and both
+      aggregates so one slicer filters them all. Every seed combination is listed.
+      property_type_key = usage_group_id * 100 + property_class_id; 999 = Unknown x Unknown.
+    columns:
+      - name: property_type_key
+        tests: [unique, not_null]
+      - name: usage_group
+        tests: [not_null]
+      - name: property_class
+        tests: [not_null]
+
+  - name: dim_procedure
+    description: One row per DLD (trans_group, procedure_id) from seed_procedure_map (C2), with its category.
+    columns:
+      - name: procedure_key
+        tests: [unique, not_null]
+      - name: procedure_category
+        tests: [not_null]
+
+  - name: dim_project
+    description: >
+      One row per DLD project in the transaction register, plus Unknown (-1) for lines with
+      no project (C9). Developer, status and completion date wait for the DLD projects file
+      (deferred for v1). master_project is the most frequent one where a project appears
+      under several (master_project_count > 1).
+    columns:
+      - name: project_key
+        description: DLD project_number (-1 = Unknown).
+        tests: [unique, not_null]
+      - name: master_project_count
+        description: Distinct master projects the project's lines were registered under.
+
+  # --------------------------------------------------------------------------------
+  # Facts
+  # --------------------------------------------------------------------------------
+  - name: fct_transaction
+    description: >
+      Every DLD transaction line (Sales, Gifts, Mortgages; 1.79M) with dimension keys and the
+      silver quality flags. Nothing is filtered. **Sum `aed_counted_once`**, never
+      `actual_worth_aed`, for AED totals (C16 portfolio deals repeat their value per line).
+    tests:
+      - dbt_utils.expression_is_true:
+          arguments:
+            expression: "not is_clean_market_sale or (is_market_sale and price_per_sqm_aed > 0)"
+      - dbt_utils.expression_is_true:
+          arguments:
+            expression: "has_quality_flag = (is_market_sale and not is_clean_market_sale)"
+      - dbt_utils.expression_is_true:
+          arguments:
+            expression: "aed_counted_once <= actual_worth_aed"
+      - dbt_utils.expression_is_true:
+          arguments:
+            expression: "not (is_market_sale and trans_group <> 'Sales')"
+    columns:
+      - name: transaction_id
+        tests: [unique, not_null]
+      - name: txn_date
+        description: Registration date (C18). NULL on the 4 Hijri-dated rows.
+        tests:
+          - relationships:
+              arguments:
+                to: ref('dim_date')
+                field: date
+              config:
+                where: "is_in_report_scope"
+      - name: area_key
+        description: DLD area_id (-1 = Unknown).
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_area')
+                field: area_key
+      - name: property_type_key
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_property_type')
+                field: property_type_key
+      - name: procedure_key
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_procedure')
+                field: procedure_key
+      - name: project_key
+        description: DLD project_number (-1 = no project, C9).
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_project')
+                field: project_key
+      - name: trans_group
+        tests:
+          - accepted_values:
+              arguments:
+                values: [Sales, Gifts, Mortgages]
+      - name: procedure_category
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [market_sale, offplan_sale, mortgage, lease_to_own, development, gift, inheritance, other]
+      - name: is_market_sale
+        description: Arm's-length sale (C3). The market-sales KPI population (docs/01 §4).
+        tests: [not_null]
+      - name: is_clean_market_sale
+        description: The price population (medians, AED per sq m, index, AVM).
+        tests: [not_null]
+      - name: has_quality_flag
+        description: A market sale excluded from price statistics by C4-C6, C16 or C18.
+      - name: bedrooms
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              arguments:
+                min_value: 0
+                max_value: 10
+      - name: actual_worth_aed
+        description: Value as registered (AED). Repeats a portfolio deal's total on each unit line.
+      - name: aed_counted_once
+        description: >
+          AED counted once per deal (C16): the deal value on the lead line, 0 on repeats.
+          The only transaction AED column that is safe to SUM.
+        tests: [not_null]
+      - name: price_per_sqm_aed
+        description: actual_worth_aed / area_sqm (C6), transfers only. AED per sq m.
+      - name: mortgage_amount_once_aed
+        description: Verified loan amount (C10), once per deal. NULL where the amount isn't a loan.
+      - name: portfolio_mortgage_value_once_aed
+        description: Portfolio mortgage registration value, once per deal (not a verified loan).
+      - name: property_class_id
+        description: Conformed property class (property_type_key % 100); sets the area cap.
+      - name: is_area_above_class_cap
+        description: >
+          Area above the cap for the property class (apartment 1,000 sq m, villa 3,000,
+          office / retail 5,000, other 10,000). Kept out of the area-weighted sums only;
+          does not change is_clean_market_sale.
+        tests: [not_null]
+      - name: is_in_report_scope
+        description: Dated from 2004 to the data snapshot date. False for 1900-2003 rows and the 4 Hijri-dated rows.
+        tests: [not_null]
+
+  - name: fct_rent_contract
+    description: >
+      Every Ejari contract line (10.5M) with dimension keys and the silver rent flags. Stays in
+      Postgres; Power BI reads agg_rent_month. **Sum `annual_rent_alloc_aed` only** (C11).
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns: [contract_id, line_number]
+      - dbt_utils.expression_is_true:
+          arguments:
+            expression: "is_market_rent = (is_new and is_rent_comparable)"
+      # int_rent_contracts resolves the class from the seeds for the C21 cap; the conformed
+      # lookup resolves it for the key. They must agree.
+      - dbt_utils.expression_is_true:
+          arguments:
+            expression: "property_type_key % 100 = property_class_id"
+    columns:
+      - name: start_date
+        tests:
+          - relationships:
+              arguments:
+                to: ref('dim_date')
+                field: date
+              config:
+                where: "is_in_report_scope"
+      - name: area_key
+        description: DLD area_id (-1 = Unknown).
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_area')
+                field: area_key
+      - name: property_type_key
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_property_type')
+                field: property_type_key
+      - name: bedrooms
+        description: >
+          C22, from the Ejari sub-type (Studio = 0). Up to 15: Ejari has 11- and 15-bedroom
+          labels (225 lines), unlike DLD's 0-10.
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              arguments:
+                min_value: 0
+                max_value: 15
+      - name: annual_rent_alloc_aed
+        description: >
+          Contract annual rent / line count (C11). The only rent column to SUM. Full precision,
+          not rounded to fils, so the shares add back to the contract amount exactly.
+      - name: rent_per_sqm_aed
+        description: Annual rent per sq m, single-line contracts with a real area only (C11, C21).
+      - name: is_rent_comparable
+        description: >
+          Like-for-like unit rent, new or renewed: single line, market property type (C20),
+          inside the C14 band, usable dates (C18).
+        tests: [not_null]
+      - name: is_market_rent
+        description: Comparable and a new contract (C13). The default market-rent population.
+        tests: [not_null]
+      - name: is_start_after_snapshot
+        description: C18. Starts after the data snapshot date (registered ahead); outside the report scope.
+      - name: is_in_report_scope
+        description: Valid start date from 2004 to the data snapshot date.
+        tests: [not_null]
+
+  - name: fct_rates_monthly
+    description: >
+      Monthly rate drivers from 2004: Fed Funds and Brent (FRED); EIBOR columns NULL until a
+      CBUAE file is loaded. Rates are decimals (0.0525 = 5.25%).
+    columns:
+      - name: month
+        tests:
+          - unique
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_date')
+                field: date
+      - name: fed_funds_rate
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              arguments:
+                min_value: 0
+                max_value: 0.25
+
+  # --------------------------------------------------------------------------------
+  # Aggregates
+  # --------------------------------------------------------------------------------
+  - name: agg_area_month
+    description: >
+      Sales and financing by month x area x property type x bedrooms x off-plan, reporting
+      scope only. Additive counts and AED (reconciled to fct_transaction); medians per cell
+      with their n (min-n applied in rpt.area_month).
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns: [month, area_key, property_type_key, bedrooms, is_offplan]
+      - dbt_utils.expression_is_true:
+          arguments:
+            expression: "clean_sales <= market_sales and market_sales <= transaction_lines"
+      - dbt_utils.expression_is_true:
+          arguments:
+            expression: "(median_price_per_sqm_aed is null) = (clean_sales = 0)"
+    columns:
+      - name: month
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_date')
+                field: date
+      - name: area_key
+        tests:
+          - relationships:
+              arguments:
+                to: ref('dim_area')
+                field: area_key
+      - name: property_type_key
+        tests:
+          - relationships:
+              arguments:
+                to: ref('dim_property_type')
+                field: property_type_key
+      - name: market_sales_value_aed
+        description: Σ aed_counted_once over market sales.
+      - name: clean_sales
+        description: n behind the medians (clean market sales).
+      - name: clean_sales_aw_n
+        description: Clean market sales with an area within the class cap (the area-weighted population).
+      - name: clean_sales_value_aed
+        description: >
+          Σ AED over clean market sales with an area within the class cap. ÷
+          clean_sales_area_sqm = area-weighted AED per sq m; meaningful within a property
+          class (the grain has property_type_key), not across land, buildings and units.
+      - name: clean_sales_area_sqm
+        description: Σ area (sq m) over the same sales.
+      - name: new_mortgages
+        description: Individual new mortgages (is_new_mortgage), the mortgage-share numerator.
+      - name: new_mortgage_loans_aed
+        description: Σ verified loan amounts (C10), once per deal.
+      - name: portfolio_mortgage_deals
+        description: Portfolio mortgage deals, counted on the lead line so the column adds up.
+
+  - name: agg_rent_month
+    description: >
+      Rents by month x area x property type x bedrooms x new/renewal, reporting scope only.
+      The only rent table Power BI imports. Additive counts and AED (reconciled to
+      fct_rent_contract); medians per cell with their n (min-n applied in rpt.rent_month).
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns: [month, area_key, property_type_key, bedrooms, is_new]
+      - dbt_utils.expression_is_true:
+          arguments:
+            expression: "market_rent_contracts <= comparable_contracts and comparable_contracts <= rent_lines and contracts <= rent_lines"
+      - dbt_utils.expression_is_true:
+          arguments:
+            expression: "is_new or market_rent_contracts = 0"
+    columns:
+      - name: month
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_date')
+                field: date
+      - name: area_key
+        tests:
+          - relationships:
+              arguments:
+                to: ref('dim_area')
+                field: area_key
+      - name: property_type_key
+        tests:
+          - relationships:
+              arguments:
+                to: ref('dim_property_type')
+                field: property_type_key
+      - name: contracts
+        description: Contracts counted on line 1, so the column adds up across cells.
+      - name: annual_rent_alloc_aed
+        description: Σ allocated annual rent (C11), each contract once.
+      - name: comparable_contracts
+        description: n behind median_annual_rent_aed.
+      - name: rent_per_sqm_n
+        description: n behind median_rent_per_sqm_aed (comparable lines with a real area).
+      - name: comparable_area_sqm
+        description: Σ area (sq m) over comparable lines with a real area.
+      - name: comparable_rent_with_area_aed
+        description: Σ annual rent over the same lines; ÷ comparable_area_sqm = area-weighted rent per sq m.

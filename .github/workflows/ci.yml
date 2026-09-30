@@ -71,5 +71,10 @@ jobs:
       - name: Load CI fixtures into bronze
         run: make bronze BRONZE_ROOT=tests/fixtures
 
-      - name: dbt build (silver) + DQ report on the fixtures
+      - name: dbt build (silver, gold, rpt) + DQ report, KPI check, dictionary on the fixtures
         run: make dbt
+
+      # The first pytest run happens before gold exists, so these skip there. Re-run them
+      # now: pbi_reader reads rpt and nothing else, and every KPI reconciles silver -> rpt.
+      - name: rpt access + KPI reconciliation (after the build)
+        run: uv run pytest tests/test_rpt_access.py tests/test_kpi_reconciliation.py

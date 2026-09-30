@@ -1,0 +1,12 @@
+property_class_id,property_class,description
+1,Apartment,"Flats, studios and penthouses (DLD Unit/Flat; Ejari Flat, Studio, Penthouse)"
+2,Villa / Townhouse,"Villas, townhouses and Arabian houses, incl. stacked townhouses and villa compounds"
+3,Hotel apartment / room,Hotel apartments and hotel rooms sold or leased as units
+4,Office,"Offices, desks and clinics"
+5,Retail,"Shops, showrooms, restaurants, kiosks and other customer-facing units"
+6,Industrial / Warehouse,"Warehouses, workshops, stores, factories and garages"
+7,Staff accommodation,"Labour camps, staff accommodation and portacabins (Ejari only; never market rent, C20)"
+8,Land,Plots and open land
+9,Building,Whole buildings
+10,Other,"Parking, schools, hospitals, sign boards and other special-purpose property"
+99,Unknown,No property type in the source

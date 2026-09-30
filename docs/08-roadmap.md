@@ -83,9 +83,36 @@ Phase 2 is split. **2a = silver** (seeds, staging, intermediate, DQ report, CI f
 - [x] Mortgage share = individual new mortgages only; portfolio registrations flagged `is_portfolio_mortgage` and reported separately (dq_report §5)
 - [x] CI green on 92b6191 (fixtures loaded, `make dbt` passes)
 - [x] All 265 areas zoned (42 by the owner, 2026-09-30); `make unzoned` lists 0
-- [ ] 2b: gold marts, rpt views, `seed_ltv_rules`, data dictionary
+- [x] 2b (see below)
 
-**2a timings** (full data, 16 GB M-series Mac, docs/03 §7 settings, 4 dbt threads): `dbt build` 4 min 38 s for 6 seeds, 7 models and 85 tests (`int_rent_contracts` 173 s, `int_market_sales` 32 s, `int_transaction_deal_groups` 12 s; slowest test 76 s, C11 per-contract sums). `make dq` 39 s. Fixture build in CI: under 5 s.
+**2b checklist (gold + rpt)**
+- [x] Seeds: conformed property type (`seed_property_class`, `seed_property_usage_map`, `seed_property_type_map`), `procedure_key` in `seed_procedure_map`, empty centroid columns in `seed_area`, `seed_ltv_rules` (**owner to verify** each row against the CBUAE rulebook; `verified = false`)
+- [x] Dimensions: `dim_date` (day, 2004-01-01 → 2027-12-31), `dim_area`, `dim_property_type` (conformed), `dim_procedure`, `dim_project` (no developer yet)
+- [x] Facts: `fct_transaction` (all lines, `aed_counted_once`), `fct_rent_contract` (all lines, allocated rent, market-rent flag), `fct_rates_monthly` (EIBOR columns NULL); indexed per docs/03 §7
+- [x] Aggregates: `agg_area_month`, `agg_rent_month` (additive, medians with n, Σ value / Σ area)
+- [x] rpt views (10), Title Case, AED whole dirhams, medians blank under min-n; pbi_reader reads rpt only (`tests/test_rpt_access.py`)
+- [x] Tests: keys and relationships on every fact / agg → dim; gold = silver (`recon_gold_*`), aggregates = facts (`recon_agg_*`); `tests/test_kpi_reconciliation.py` → `reports/kpi_reconciliation.md` (0 mismatches; residential apartment area-weighted vs median within ±40% every year from 2010)
+- [x] Owner review: per-class C21 area caps, area-weighted KPI on residential apartments + villas, data snapshot date (2026-09-25) ends the scope
+- [x] `docs/data-dictionary.md` (`make dictionary`), docs/04 §3 and Decisions updated
+- [ ] CI green on the 2b commit
+- [ ] Phase 5: centroids in `seed_area`, DAX rewritten against rpt column names
+
+**2b timings and rpt row counts**: full data, 16 GB M-series Mac, 4 dbt threads, final build (per-class C21 caps and the data snapshot date). `make dbt` **7 min 43 s** wall time: `dbt build` 6 min 37 s for 10 seeds, 16 tables, 13 views and 190 tests (gold: `fct_rent_contract` ~50 s, `fct_transaction` ~12 s, `agg_rent_month` ~8 s, `agg_area_month` ~2 s; the slowest step is still silver `int_rent_contracts`, ~140 s), then `make dq` ~45 s, `make kpi` 15 s, `make dictionary` < 1 s. Gold on disk: `fct_rent_contract` 2.6 GB, `fct_transaction` 0.6 GB. Fixture build in CI: seconds.
+
+| rpt view | Rows |
+|---|---|
+| `rpt.transactions` | 1,769,938 (gold 1,788,150 less 18,208 pre-2004 and 4 Hijri-dated lines) |
+| `rpt.rent_month` | 392,190 |
+| `rpt.area_month` | 120,799 |
+| `rpt.dim_date` | 8,766 |
+| `rpt.dim_project` | 3,421 |
+| `rpt.rates_monthly` | 273 |
+| `rpt.dim_area` | 266 |
+| `rpt.dim_property_type` | 66 |
+| `rpt.dim_procedure` | 58 |
+| `rpt.report_info` | 1 (Data As Of 2026-09-25) |
+
+Phase 2b changed two silver rules (docs/04 Decisions): C21 per-class rent area caps (85,298 lines) and C18 `is_start_after_snapshot` (24,223 lines). Market-rent lines went from 3,601,613 (2a) to 3,593,480.
 
 ---
 
@@ -174,7 +201,7 @@ Lighthouse ≥ 90 via Playwright.
 |---|---|---|---|---|
 | 0 Setup | ✓ | 2026-09-30 | 2026-09-30 | Scaffold done: `make setup`, `make db` (idempotent), `uv run pytest` (12 passed incl. pbi_reader grant tests) and `dbt debug` pass locally on PG 18.6 / dbt 1.12.5. First push e360d92, CI green |
 | 1 Ingestion | ✓ | 2026-09-30 | 2026-09-30 | CI green on 00340f6. Bronze loaded and reconciled (15 files: 1,788,150 transactions, 10,538,926 rent lines, FRED Fed Funds + Brent); re-runs are a no-op. Profiles, `phase1_findings.md` and docs/02 §7 done. Deferred: DLD increment download (stub), EIBOR (manual CBUAE file not yet placed). Open: C11 option and CI sample data (docs/04 §6) |
-| 2 dbt | 2a ✓, 2b ☐ | 2026-09-30 | 2a: 2026-09-30 | 2a (silver) done 2026-09-30, CI green on 92b6191: `dbt build` PASS=98 on full data in 4 min 38 s and on the CI fixtures; Phase 1 figures reproduced exactly (reports/dq_report.md §4). 1,267,760 clean market sales, 3,601,613 market-rent lines. All 265 areas zoned |
+| 2 dbt | 2a ✓, 2b ✓ (CI pending) | 2026-09-30 | 2a, 2b: 2026-09-30 | 2a (silver) done 2026-09-30, CI green on 92b6191: `dbt build` PASS=98 on full data in 4 min 38 s and on the CI fixtures; Phase 1 figures reproduced exactly (reports/dq_report.md §4). 1,267,760 clean market sales, 3,601,613 market-rent lines. All 265 areas zoned. 2b (gold + rpt) done 2026-09-30: `make dbt` 7 min 43 s on full data, 229 dbt nodes pass, gold = silver exactly, `reports/kpi_reconciliation.md` 0 mismatches and the apartment sanity check passes, 10 rpt views (1.77M transaction rows + 392k rent-month cells), data snapshot 2026-09-25 |
 | 3 EDA | ☐ | | | |
 | 4 Models | ☐ | | | |
 | 5 Power BI | ☐ | | | |

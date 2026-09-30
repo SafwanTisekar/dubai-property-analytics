@@ -1,6 +1,6 @@
 # Data-quality report: silver
 
-Generated 2026-09-30 13:59 UTC by `quality/dq_report.py` from database `dubai_property`. Regenerate with `make dq` (after `make dbt`). The rules are in docs/04 §2.
+Generated 2026-09-30 15:06 UTC by `quality/dq_report.py` from database `dubai_property`. Regenerate with `make dq` (after `make dbt`). The rules are in docs/04 §2.
 
 ## 1. Rows in and out per step
 
@@ -30,7 +30,7 @@ Every column documented with `meta.dq_rule` in the dbt YAML. Flags overlap, so r
 | C11 | `int_rent_contracts.is_amount_inconsistent` | 0 | 0.0 |  | Lines of one contract carry different annual amounts (0 in Phase 1). Makes C11 ambiguous. |
 | C11 | `int_rent_contracts.is_multi_unit` | 1,992,040 | 18.9 | 99.39 | C11. The contract has more than one line; its amount is a whole-contract total. |
 | C14 | `int_rent_contracts.is_rent_below_floor` | 39,079 | 0.37 | 0.01 | C14. Allocated annual rent under AED 1,000. |
-| C14 | `int_rent_contracts.is_rent_outlier` | 231,685 | 2.2 | 43.53 | C14. Below the floor, or outside the P0.5-P99.5 band of rent per sq m (annual rent where there is no usable area) by area x Ejari sub-type. |
+| C14 | `int_rent_contracts.is_rent_outlier` | 232,303 | 2.2 | 46.74 | C14. Below the floor, or outside the P0.5-P99.5 band of rent per sq m (annual rent where there is no usable area) by area x Ejari sub-type. |
 | C16 | `int_market_sales.is_repeated_deal_value` | 6,486 | 0.45 | 6.47 | C16. See int_transaction_deal_groups. |
 | C16 | `int_market_sales.is_similar_size_batch` | 46,192 | 3.22 | 91.63 | C16. See int_transaction_deal_groups. |
 | C16 | `int_mortgages.is_repeated_deal_value` | 10,795 | 3.06 | 56.78 | C16. |
@@ -47,9 +47,11 @@ Every column documented with `meta.dq_rule` in the dbt YAML. Flags overlap, so r
 | C18 | `int_rent_contracts.is_date_invalid` | 100 | 0.0 | 0.03 | C18. Start date unparseable or more than a year after the extract (up to year 2205). |
 | C18 | `int_rent_contracts.is_end_date_implausible` | 401 | 0.0 | 0.13 | C18. End date missing, before the start, or more than 10 years after it (up to year 5013). |
 | C18 | `int_rent_contracts.is_pre_2004` | 1 | 0.0 | 0.00 | C18. Starts before 2004. |
+| C18 | `int_rent_contracts.is_start_after_snapshot` | 24,223 | 0.23 | 2.68 | C18. A valid start date after the data snapshot date (the latest transaction date, int_data_snapshot): registered ahead of time. Not a market rent; outside the report scope. |
 | C18 | `stg_transactions.is_date_invalid` | 4 | 0.0 | 0.01 | C18. Unparseable, a Hijri year (4 rows, 1416-1422 AH) or after the extract date. |
 | C18 | `stg_transactions.is_pre_2004` | 18,208 | 1.02 | 62.74 | C18. Registered 1900-2003, before the charter's analysis window (flag, don't drop). |
 | C20 | `int_rent_contracts.is_non_market_property_type` | 1,996,808 | 18.95 | 77.52 | C20. Virtual Unit, Labor Camps or Room in labor Camp / Labor Camp. Not market rents. |
+| C21 | `int_rent_contracts.is_area_implausible` | 85,298 | 0.81 | 27.69 | C21. Area above the cap for its property class (apartment 1,000 sq m, villa / townhouse 3,000, office / retail 5,000, other 10,000): a community, plot or building area, not the unit's. Rent kept; no area, no rent per sq m. |
 | C21 | `int_rent_contracts.is_area_placeholder` | 1,551,171 | 14.72 | 86.79 | C21. Blank, 0 or 1 sq m area. No rent per sq m. |
 
 ## 3. Populations
@@ -76,10 +78,11 @@ Each row is counted once, under the **first** reason that keeps it out (in the o
 | 1 C11 multi-unit contract | 1,193,949 | 56.02 |
 | 2 C20 virtual unit / labour camp | 633,621 | 27.67 |
 | 3 C18 start date invalid | 4 | 0.00 |
-| 4 C18 before 2004 | 1 | 0.00 |
-| 5 C18 end date implausible | 128 | 0.09 |
-| 6 C14 outlier | 48,082 | 19.47 |
-| 7 market rent | 3,601,613 | 322.72 |
+| 4 C18 starts after the data snapshot | 8,086 | 0.94 |
+| 5 C18 before 2004 | 1 | 0.00 |
+| 6 C18 end date implausible | 128 | 0.09 |
+| 7 C14 outlier | 48,129 | 21.04 |
+| 8 market rent | 3,593,480 | 320.21 |
 
 ## 4. Reconciliation with Phase 1
 

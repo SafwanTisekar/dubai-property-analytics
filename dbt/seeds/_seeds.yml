@@ -39,6 +39,11 @@ seeds:
           arguments:
             expression: "not (is_new_mortgage and is_portfolio_mortgage)"
     columns:
+      - name: procedure_key
+        description: >
+          Stable integer key for dim_procedure. Append new procedures with the next number;
+          never renumber (Power BI relationships and saved filters use it).
+        tests: [unique, not_null]
       - name: trans_group
         tests:
           - not_null
@@ -101,6 +106,10 @@ seeds:
         tests: [not_null]
       - name: zone
         description: Market zone for roll-ups. NULL = not assigned yet.
+      - name: latitude
+        description: Area centroid latitude (WGS84) for the Power BI bubble map. Empty until Phase 5.
+      - name: longitude
+        description: Area centroid longitude (WGS84). Empty until Phase 5.
 
   - name: seed_phase1_reconciliation
     description: >
@@ -110,3 +119,78 @@ seeds:
     columns:
       - name: metric
         tests: [not_null]
+
+  - name: seed_property_class
+    description: >
+      Conformed property classes shared by DLD sales and Ejari rents (dim_property_type).
+      property_class_id is the last two digits of property_type_key; 99 = Unknown (no
+      property type in the source).
+    columns:
+      - name: property_class_id
+        tests: [unique, not_null]
+      - name: property_class
+        tests: [unique, not_null]
+
+  - name: seed_property_usage_map
+    description: >
+      Source usage label -> conformed usage group, per source (DLD and Ejari use different
+      labels, e.g. Hospitality vs Tourist origin). usage_group_id is the hundreds digit of
+      property_type_key; 9 = Unknown (blank usage in the source, 15,050 rent lines).
+      Mixed-use, education, health and agricultural labels share "Mixed & other" so no group
+      is too thin to publish (min-n rule).
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns: [source, property_usage]
+    columns:
+      - name: source
+        tests:
+          - accepted_values:
+              arguments:
+                values: [transactions, rents]
+      - name: usage_group_id
+        tests: [not_null]
+
+  - name: seed_property_type_map
+    description: >
+      Source property type (and sub-type) -> conformed property class. DLD rows are keyed
+      on type x sub-type (Unit/Flat -> Apartment); a blank sub-type is a wildcard used when
+      no exact row matches (Villa, Land, Building, other Units). Ejari rows are keyed on the
+      Ejari property type alone, because its sub-type is a layout (2 bed rooms+hall) that
+      becomes bedrooms (C22), not a property class. A label present in the data but missing
+      here fails the int_property_type_lookup tests.
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns: [source, property_type, property_sub_type]
+    columns:
+      - name: property_class
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('seed_property_class')
+                field: property_class
+
+  - name: seed_ltv_rules
+    description: >
+      CBUAE mortgage loan-to-value caps for the Phase 4 stress test (docs/05 §4). Values
+      follow the CBUAE Regulations Regarding Mortgage Loans (Notice 31/2013, as amended) as
+      commonly summarised; **verified = false until the owner checks each row against the
+      current CBUAE rulebook** and updates source_citation. The stress test is illustrative
+      and must say which LTVs it assumed.
+    columns:
+      - name: rule_id
+        tests: [unique, not_null]
+      - name: max_ltv
+        description: Maximum loan / property value, as a decimal (0.80 = 80%).
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_between:
+              arguments:
+                min_value: 0
+                max_value: 1
+      - name: source_citation
+        tests: [not_null]
+      - name: verified
+        description: The owner has checked this row against the current CBUAE regulation.

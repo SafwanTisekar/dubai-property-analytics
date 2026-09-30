@@ -1,0 +1,92 @@
+source,property_type,property_sub_type,property_class
+transactions,Unit,Flat,Apartment
+transactions,Unit,Unit,Apartment
+transactions,Unit,Stacked Townhouses,Villa / Townhouse
+transactions,Unit,Hotel Apartment,Hotel apartment / room
+transactions,Unit,Hotel Rooms,Hotel apartment / room
+transactions,Unit,Hotel,Hotel apartment / room
+transactions,Unit,Office,Office
+transactions,Unit,Clinic,Office
+transactions,Unit,Sized Partition,Office
+transactions,Unit,Shop,Retail
+transactions,Unit,Show Rooms,Retail
+transactions,Unit,Gymnasium,Retail
+transactions,Unit,Workshop,Industrial / Warehouse
+transactions,Unit,Store,Industrial / Warehouse
+transactions,Unit,Warehouse,Industrial / Warehouse
+transactions,Unit,Building,Building
+transactions,Unit,,Other
+transactions,Villa,,Villa / Townhouse
+transactions,Land,,Land
+transactions,Building,,Building
+rents,Flat,,Apartment
+rents,Studio,,Apartment
+rents,Penthouse,,Apartment
+rents,Villa,,Villa / Townhouse
+rents,Complex Villas,,Villa / Townhouse
+rents,Villa addendum,,Villa / Townhouse
+rents,Arabian House,,Villa / Townhouse
+rents,Hotel,,Hotel apartment / room
+rents,Hotel apartments,,Hotel apartment / room
+rents,hotel building,,Hotel apartment / room
+rents,Office,,Office
+rents,Desk,,Office
+rents,Clinic,,Office
+rents,Medical center,,Office
+rents,Lab,,Office
+rents,Shop,,Retail
+rents,Showroom,,Retail
+rents,Kiosk,,Retail
+rents,Restaurant,,Retail
+rents,Resturants Complex,,Retail
+rents,Supermarket,,Retail
+rents,"Supermarket, a multi-section",,Retail
+rents,Pharmacy,,Retail
+rents,Ladies Saloon,,Retail
+rents,Spa,,Retail
+rents,GYM,,Retail
+rents,Health club,,Retail
+rents,Laundry,,Retail
+rents,Bank,,Retail
+rents,ATM,,Retail
+rents,Car Wash,,Retail
+rents,Petrol station,,Retail
+rents,Pertol station,,Retail
+rents,Service Center,,Retail
+rents,Shopping Center,,Retail
+rents,Comercial Complex,,Retail
+rents,kitchen,,Retail
+rents,Cinema,,Retail
+rents,Mezzanine,,Retail
+rents,Warehouse,,Industrial / Warehouse
+rents,Warehouse complex,,Industrial / Warehouse
+rents,Complex Warehouse,,Industrial / Warehouse
+rents,Workshop,,Industrial / Warehouse
+rents,Store,,Industrial / Warehouse
+rents,Storage,,Industrial / Warehouse
+rents,Factory,,Industrial / Warehouse
+rents,Garage,,Industrial / Warehouse
+rents,OPEN STORAGE SHED,,Industrial / Warehouse
+rents,Labor Camps,,Staff accommodation
+rents,Staff Accommodation,,Staff accommodation
+rents,Portacabin,,Staff accommodation
+rents,Open Land,,Land
+rents,Open space,,Land
+rents,Farm,,Land
+rents,Garden,,Land
+rents,Land Parking,,Land
+rents,Building,,Building
+rents,Building multi-storey parking,,Building
+rents,Parking,,Other
+rents,Sign Board,,Other
+rents,Endowments attached to mosques,,Other
+rents,School,,Other
+rents,College,,Other
+rents,University,,Other
+rents,Nursery,,Other
+rents,Hospital,,Other
+rents,Horse stable,,Other
+rents,Sports Club,,Other
+rents,church,,Other
+rents,swimming pool,,Other
+rents,Hall,,Other

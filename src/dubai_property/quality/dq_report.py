@@ -157,10 +157,11 @@ from (
         when is_multi_unit then '1 C11 multi-unit contract'
         when is_non_market_property_type then '2 C20 virtual unit / labour camp'
         when is_date_invalid then '3 C18 start date invalid'
-        when is_pre_2004 then '4 C18 before 2004'
-        when is_end_date_implausible then '5 C18 end date implausible'
-        when is_rent_outlier then '6 C14 outlier'
-        else '7 market rent'
+        when is_start_after_snapshot then '4 C18 starts after the data snapshot'
+        when is_pre_2004 then '5 C18 before 2004'
+        when is_end_date_implausible then '6 C18 end date implausible'
+        when is_rent_outlier then '7 C14 outlier'
+        else '8 market rent'
     end as reason
     from silver.int_rent_contracts
 ) t

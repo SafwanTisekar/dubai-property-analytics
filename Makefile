@@ -28,7 +28,7 @@ BRONZE_ROOT ?= data/raw
 BRONZE_FLAGS ?=
 
 .PHONY: help setup db dbt-deps dbt-debug lint test \
-        download bronze reconcile profile sample fixtures dbt dq unzoned train score update pipeline
+        download bronze reconcile profile sample fixtures dbt dq kpi dictionary unzoned train score update pipeline
 
 help:  ## List targets
 	@grep -hE '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | \
@@ -88,18 +88,24 @@ sample:  ## 2% sample stratified by year x area (whole deals/contracts) -> data/
 fixtures:  ## Rebuild the committed CI fixtures (~2k lines per table) -> tests/fixtures
 	$(PY).ingest.fixtures
 
-# --- Phase 2: dbt silver (docs/04 §2) ------------------------------------------------
+# --- Phase 2: dbt silver, gold and rpt (docs/04 §2-4) -----------------------------------
 # CI runs the same targets on the fixtures: make bronze BRONZE_ROOT=tests/fixtures && make dbt
 
-dbt:  ## dbt build (seeds, silver models, tests), then the DQ report
+dbt:  ## dbt build (seeds, silver, gold, rpt, tests), then DQ report, KPI check, dictionary
 	@# Seeds are tiny: reload them from scratch so an added seed column never needs a manual
 	@# --full-refresh (dependent staging views are dropped and rebuilt by the build).
 	$(DBT) seed --full-refresh $(DBT_FLAGS)
 	$(DBT) build $(DBT_FLAGS)
-	$(MAKE) dq
+	$(MAKE) dq kpi dictionary
 
 dq:  ## Rows per step and per rule, Phase 1 reconciliation -> reports/dq_report.md
 	$(PY).quality.dq_report
+
+kpi:  ## Pre-ML KPIs from silver vs the rpt views -> reports/kpi_reconciliation.md (fails on a mismatch)
+	$(PY).quality.kpi_reconciliation
+
+dictionary:  ## Models, columns, types, docs and tests -> docs/data-dictionary.md
+	$(PY).quality.data_dictionary
 
 unzoned:  ## Worksheet of seed_area rows without a zone -> reports/unzoned_areas.md
 	$(PY).quality.unzoned_areas

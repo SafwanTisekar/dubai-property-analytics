@@ -1,0 +1,22 @@
+source,property_usage,usage_group_id,usage_group
+transactions,Residential,1,Residential
+transactions,Commercial,2,Commercial
+transactions,Hospitality,3,Hospitality
+transactions,Industrial,4,Industrial & storage
+transactions,Storage,4,Industrial & storage
+transactions,Agricultural,5,Mixed & other
+transactions,Multi-Use,5,Mixed & other
+transactions,Residential / Commercial,5,Mixed & other
+transactions,Other,5,Mixed & other
+rents,Residential,1,Residential
+rents,Commercial,2,Commercial
+rents,Tourist origin,3,Hospitality
+rents,Industrial,4,Industrial & storage
+rents,Storage,4,Industrial & storage
+rents,Industrial / Commercial,5,Mixed & other
+rents,Industrial / Commercial / Residential,5,Mixed & other
+rents,Residential / Commercial,5,Mixed & other
+rents,Multi Usage,5,Mixed & other
+rents,Educational facility,5,Mixed & other
+rents,Health Facility,5,Mixed & other
+rents,Agriculture,5,Mixed & other

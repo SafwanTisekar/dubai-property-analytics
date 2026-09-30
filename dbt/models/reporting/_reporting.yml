@@ -1,0 +1,30 @@
+version: 2
+
+# rpt: the only schema Power BI reads, as pbi_reader (docs/06 §1). Views over gold with
+# Title Case column names, AED rounded to whole dirhams (bigint), no _ar columns, no raw
+# C-rule flags, and medians published only where n >= var min_n. The access rules and the
+# naming are checked by tests/test_rpt_access.py; the KPIs by tests/test_kpi_reconciliation.py.
+
+models:
+  - name: rpt_dim_date
+    description: rpt.dim_date. Calendar; mark as the date table on "Date".
+  - name: rpt_dim_area
+    description: rpt.dim_area. Areas with zone and centroid.
+  - name: rpt_dim_property_type
+    description: rpt.dim_property_type. Conformed usage group x property class.
+  - name: rpt_dim_procedure
+    description: rpt.dim_procedure. DLD procedures and categories.
+  - name: rpt_dim_project
+    description: rpt.dim_project. DLD projects (no developer yet).
+  - name: rpt_transactions
+    description: >
+      rpt.transactions. Transaction lines in the reporting scope, without text ids or the
+      individual quality flags. Sum "AED Counted Once" for values.
+  - name: rpt_area_month
+    description: rpt.area_month. Monthly sales and financing aggregate.
+  - name: rpt_rent_month
+    description: rpt.rent_month. Monthly rent aggregate; the only rent table in Power BI.
+  - name: rpt_rates_monthly
+    description: rpt.rates_monthly. Fed Funds, Brent and (later) EIBOR by month.
+  - name: rpt_report_info
+    description: rpt.report_info. One row with the data-as-of date, min-n and attribution.

@@ -214,10 +214,10 @@ models:
             expression: "is_multi_unit = (line_count > 1)"
       - dbt_utils.expression_is_true:
           arguments:
-            expression: "rent_per_sqm_aed is null or (not is_multi_unit and not is_area_placeholder)"
+            expression: "rent_per_sqm_aed is null or (not is_multi_unit and not is_area_placeholder and not is_area_implausible)"
       - dbt_utils.expression_is_true:
           arguments:
-            expression: "not is_market_rent or (is_new and not is_multi_unit and not is_non_market_property_type and not is_rent_outlier)"
+            expression: "not is_market_rent or (is_new and not is_multi_unit and not is_non_market_property_type and not is_rent_outlier and not is_start_after_snapshot)"
     columns:
       - name: contract_id
         tests: [not_null]
@@ -243,6 +243,12 @@ models:
       - name: is_pre_2004
         description: C18. Starts before 2004.
         meta: {dq_rule: C18}
+      - name: is_start_after_snapshot
+        description: >
+          C18. A valid start date after the data snapshot date (the latest transaction date,
+          int_data_snapshot): registered ahead of time. Not a market rent; outside the report scope.
+        meta: {dq_rule: C18}
+        tests: [not_null]
       - name: is_end_date_implausible
         description: C18. End date missing, before the start, or more than 10 years after it (up to year 5013).
         meta: {dq_rule: C18}
@@ -270,10 +276,17 @@ models:
                 max_value: 15
                 row_condition: "bedrooms is not null"
       - name: area_sqm
-        description: C21. actual_area when above 1 sq m; NULL for blank / 0 / 1 placeholders.
+        description: C21. actual_area when above 1 sq m and up to 10,000 sq m; NULL for blank / 0 / 1 placeholders and implausible areas.
       - name: is_area_placeholder
         description: C21. Blank, 0 or 1 sq m area. No rent per sq m.
         meta: {dq_rule: C21}
+      - name: is_area_implausible
+        description: >
+          C21. Area above the cap for its property class (apartment 1,000 sq m, villa /
+          townhouse 3,000, office / retail 5,000, other 10,000): a community, plot or building
+          area, not the unit's. Rent kept; no area, no rent per sq m.
+        meta: {dq_rule: C21}
+        tests: [not_null]
       - name: rent_per_sqm_aed
         description: Annual rent per sq m, single-line contracts with a real area only.
       - name: is_rent_below_floor
@@ -286,6 +299,50 @@ models:
           C14. Below the floor, or outside the P0.5-P99.5 band of rent per sq m (annual rent
           where there is no usable area) by area x Ejari sub-type.
         meta: {dq_rule: C14}
+      - name: property_class_id
+        description: Conformed property class (seed_property_class) from the Ejari property type; sets the C21 area cap.
+        tests: [not_null]
       - name: is_market_rent
-        description: The market-rent population (see model description).
+        description: The market-rent population (see model description); starts on or before the data snapshot date.
+        tests: [not_null]
+
+  - name: int_property_type_lookup
+    description: >
+      Every (source, usage, property type, sub-type) combination in the data, resolved to the
+      conformed dim_property_type key (usage group x property class) via
+      seed_property_usage_map and seed_property_type_map. The facts join on the *_join
+      columns (NULL -> '') so the 10.5M-line rent join can hash.
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns: [source, property_usage_join, property_type_join, property_sub_type_join]
+    columns:
+      - name: property_type_key
+        description: usage_group_id * 100 + property_class_id.
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_property_type')
+                field: property_type_key
+      - name: is_usage_mapped
+        description: False when the source usage label exists but is missing from seed_property_usage_map.
+        tests:
+          - accepted_values:
+              arguments:
+                values: [true]
+      - name: is_type_mapped
+        description: False when the source property type exists but is missing from seed_property_type_map.
+        tests:
+          - accepted_values:
+              arguments:
+                values: [true]
+
+  - name: int_data_snapshot
+    description: >
+      One row: data_snapshot_date = the latest valid transaction date. Ends the reporting
+      scope, is the report's "Data As Of" date and anchors "last 12 months". Rent contracts
+      starting later are flagged is_start_after_snapshot (C18).
+    columns:
+      - name: data_snapshot_date
         tests: [not_null]

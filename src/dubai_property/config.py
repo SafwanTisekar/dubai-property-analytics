@@ -125,6 +125,18 @@ TEST_START = date(2025, 1, 1)  # test runs to the latest available transaction
 MIN_N = 20
 # Units (CLAUDE.md): areas are stored in sq m; convert explicitly when showing sq ft.
 SQM_TO_SQFT = 10.7639
+# Reporting scope (docs/04 §3): from dim_date_start (dbt var; tests/test_config.py checks
+# they agree) to the data snapshot date, which is data (silver.int_data_snapshot, the latest
+# transaction date), not config.
+REPORT_SCOPE_START = date(2004, 1, 1)
+# Largest plausible unit area (sq m) per conformed property class id (seed_property_class);
+# other classes use AREA_CAP_OTHER_SQM. Mirrors the dbt vars area_cap_* (checked by a test).
+AREA_CAP_SQM = {1: 1000, 2: 3000, 4: 5000, 5: 5000}
+AREA_CAP_OTHER_SQM = 10000
+# Headline area-weighted AED per sq m (owner, 2026-09-30): residential apartments and
+# villas / townhouses only, i.e. property_type_key 101 and 102 (usage group 1 x class 1, 2).
+RESIDENTIAL_HOMES_KEYS = (101, 102)
+RESIDENTIAL_APARTMENT_KEY = 101
 # Hedonic price index base (docs/01 §4): Jan 2019 = 100.
 INDEX_BASE_MONTH = date(2019, 1, 1)
 INDEX_BASE_VALUE = 100.0

@@ -1,59 +1,59 @@
-trans_group,procedure_id,procedure_name_en,procedure_category,is_market_sale,is_lease_to_own,is_new_mortgage,is_portfolio_mortgage,amount_is_loan,note
-Sales,11,Sell,market_sale,true,false,false,false,false,
-Sales,41,Delayed Sell,market_sale,true,false,false,false,false,reg_type is Existing on every row
-Sales,460,Sale On Payment Plan,market_sale,true,false,false,false,false,reg_type is Existing on every row
-Sales,102,Sell - Pre registration,offplan_sale,true,false,false,false,false,The only Sales procedure with reg_type Off-Plan
-Sales,110,Lease to Own Registration,lease_to_own,false,true,false,false,false,Sales leg of a lease-to-own deal: counted in volumes only (C16 decision)
-Sales,107,Lease to Own Registration Pre-Registration,lease_to_own,false,true,false,false,false,Sales leg of a lease-to-own deal
-Sales,361,Delayed Lease to Own Registration,lease_to_own,false,true,false,false,false,Sales leg of a lease-to-own deal
-Sales,371,Lease Development Registration,lease_to_own,false,true,false,false,false,Sales leg of a lease-development deal
-Sales,715,Delayed Sell Lease to Own Registration,lease_to_own,false,true,false,false,false,Sales leg of a lease-to-own deal
-Sales,814,Lease to Own on Development Registration,lease_to_own,false,true,false,false,false,Sales leg of a lease-to-own deal
-Sales,4,Adding Land By Sell,development,false,false,false,false,false,Land transfer
-Sales,45,Sell Development,development,false,false,false,false,false,Developer transfer
-Sales,93,Delayed Sell Development,development,false,false,false,false,false,Developer transfer
-Sales,95,Delayed Development,development,false,false,false,false,false,Developer transfer
-Sales,133,Development Registration,development,false,false,false,false,false,Developer transfer
-Sales,150,Portfolio Development Registration,development,false,false,false,false,false,Developer transfer
-Sales,851,Development Registration Pre-Registration,development,false,false,false,false,false,Developer transfer
-Sales,852,Sell Development - Pre Registration,development,false,false,false,false,false,Developer transfer
-Gifts,9,Grant,gift,false,false,false,false,false,
-Gifts,59,Grant Development,gift,false,false,false,false,false,
-Gifts,120,Grant Pre-Registration,gift,false,false,false,false,false,
-Gifts,219,Grant on Delayed Sell,gift,false,false,false,false,false,
-Mortgages,13,Mortgage Registration,mortgage,false,false,true,false,true,Loan amount: median 0.795 of the same-day sale price (phase1_findings §2)
-Mortgages,190,Delayed Mortgage,mortgage,false,false,true,false,true,Loan amount: median 0.800 of the same-day sale price (phase1_findings §2)
-Mortgages,105,Mortgage Pre-Registration,mortgage,false,false,true,false,false,Off-plan: 42.9% of matched rows equal the price; amount is not a reliable loan (C10)
-Mortgages,43,Portfolio Mortgage Registration,mortgage,false,false,false,true,false,"Portfolio: one loan over several units (amount not verified per unit), kept out of mortgage share"
-Mortgages,101,Portfolio Mortgage Registration Pre-Registration,mortgage,false,false,false,true,false,"Portfolio: one loan over several units, kept out of mortgage share"
-Mortgages,60,Delayed Portfolio Mortgage,mortgage,false,false,false,true,false,"Portfolio: one loan over several units, kept out of mortgage share"
-Mortgages,14,Modify Mortgage,mortgage,false,false,false,false,false,Change to an existing loan: count only
-Mortgages,108,Modify Mortgage Pre-Registration,mortgage,false,false,false,false,false,
-Mortgages,191,Modify Delayed Mortgage,mortgage,false,false,false,false,false,
-Mortgages,49,Portfolio Mortgage Modification,mortgage,false,false,false,false,false,
-Mortgages,135,Portfolio Mortgage Modification Pre-Registration,mortgage,false,false,false,false,false,
-Mortgages,44,Mortgage Transfer,mortgage,false,false,false,false,false,Existing loan moved to another lender: count only
-Mortgages,113,Mortgage Transfer Pre-Registration,mortgage,false,false,false,false,false,
-Mortgages,111,Portfolio Mortgage Transfer,mortgage,false,false,false,false,false,
-Mortgages,39,Development Mortgage,mortgage,false,false,false,false,false,Developer project finance: not a home loan
-Mortgages,56,Modify Development Mortgage,mortgage,false,false,false,false,false,
-Mortgages,57,Transfer Development Mortgage,mortgage,false,false,false,false,false,
-Mortgages,151,Portfolio Mortgage Development Registration,mortgage,false,false,false,false,false,
-Mortgages,152,Portfolio Mortgage Development Modification,mortgage,false,false,false,false,false,
-Mortgages,861,Development Mortgage Pre-Registration,mortgage,false,false,false,false,false,
-Mortgages,810,Lease Finance Registration,mortgage,false,false,false,false,false,Lease (ijara-style) finance; amount meaning not verified in Phase 1
-Mortgages,811,Lease Finance Modification,mortgage,false,false,false,false,false,
-Mortgages,110,Lease to Own Registration,lease_to_own,false,true,false,false,false,Financing leg of a lease-to-own deal (Sales leg has the same procedure_id)
-Mortgages,107,Lease to Own Registration Pre-Registration,lease_to_own,false,true,false,false,false,Financing leg
-Mortgages,361,Delayed Lease to Own Registration,lease_to_own,false,true,false,false,false,Financing leg
-Mortgages,371,Lease Development Registration,lease_to_own,false,true,false,false,false,Financing leg
-Mortgages,715,Delayed Sell Lease to Own Registration,lease_to_own,false,true,false,false,false,Financing leg
-Mortgages,814,Lease to Own on Development Registration,lease_to_own,false,true,false,false,false,Financing leg
-Mortgages,32,Lease to Own Modify,lease_to_own,false,true,false,false,false,
-Mortgages,37,Lease to Own Transfer,lease_to_own,false,true,false,false,false,
-Mortgages,103,Lease to Own Transfer Pre-Registration,lease_to_own,false,true,false,false,false,
-Mortgages,362,Delayed Lease to Own Modify,lease_to_own,false,true,false,false,false,
-Mortgages,363,Delayed Lease to Own Transfer,lease_to_own,false,true,false,false,false,
-Mortgages,372,Lease Development Modify,lease_to_own,false,true,false,false,false,
-Mortgages,716,Delayed Sell Lease To Own Modification,lease_to_own,false,true,false,false,false,
-Mortgages,815,Lease to Own on Development Modification,lease_to_own,false,true,false,false,false,
+procedure_key,trans_group,procedure_id,procedure_name_en,procedure_category,is_market_sale,is_lease_to_own,is_new_mortgage,is_portfolio_mortgage,amount_is_loan,note
+1,Sales,11,Sell,market_sale,true,false,false,false,false,
+2,Sales,41,Delayed Sell,market_sale,true,false,false,false,false,reg_type is Existing on every row
+3,Sales,460,Sale On Payment Plan,market_sale,true,false,false,false,false,reg_type is Existing on every row
+4,Sales,102,Sell - Pre registration,offplan_sale,true,false,false,false,false,The only Sales procedure with reg_type Off-Plan
+5,Sales,110,Lease to Own Registration,lease_to_own,false,true,false,false,false,Sales leg of a lease-to-own deal: counted in volumes only (C16 decision)
+6,Sales,107,Lease to Own Registration Pre-Registration,lease_to_own,false,true,false,false,false,Sales leg of a lease-to-own deal
+7,Sales,361,Delayed Lease to Own Registration,lease_to_own,false,true,false,false,false,Sales leg of a lease-to-own deal
+8,Sales,371,Lease Development Registration,lease_to_own,false,true,false,false,false,Sales leg of a lease-development deal
+9,Sales,715,Delayed Sell Lease to Own Registration,lease_to_own,false,true,false,false,false,Sales leg of a lease-to-own deal
+10,Sales,814,Lease to Own on Development Registration,lease_to_own,false,true,false,false,false,Sales leg of a lease-to-own deal
+11,Sales,4,Adding Land By Sell,development,false,false,false,false,false,Land transfer
+12,Sales,45,Sell Development,development,false,false,false,false,false,Developer transfer
+13,Sales,93,Delayed Sell Development,development,false,false,false,false,false,Developer transfer
+14,Sales,95,Delayed Development,development,false,false,false,false,false,Developer transfer
+15,Sales,133,Development Registration,development,false,false,false,false,false,Developer transfer
+16,Sales,150,Portfolio Development Registration,development,false,false,false,false,false,Developer transfer
+17,Sales,851,Development Registration Pre-Registration,development,false,false,false,false,false,Developer transfer
+18,Sales,852,Sell Development - Pre Registration,development,false,false,false,false,false,Developer transfer
+19,Gifts,9,Grant,gift,false,false,false,false,false,
+20,Gifts,59,Grant Development,gift,false,false,false,false,false,
+21,Gifts,120,Grant Pre-Registration,gift,false,false,false,false,false,
+22,Gifts,219,Grant on Delayed Sell,gift,false,false,false,false,false,
+23,Mortgages,13,Mortgage Registration,mortgage,false,false,true,false,true,Loan amount: median 0.795 of the same-day sale price (phase1_findings §2)
+24,Mortgages,190,Delayed Mortgage,mortgage,false,false,true,false,true,Loan amount: median 0.800 of the same-day sale price (phase1_findings §2)
+25,Mortgages,105,Mortgage Pre-Registration,mortgage,false,false,true,false,false,Off-plan: 42.9% of matched rows equal the price; amount is not a reliable loan (C10)
+26,Mortgages,43,Portfolio Mortgage Registration,mortgage,false,false,false,true,false,"Portfolio: one loan over several units (amount not verified per unit), kept out of mortgage share"
+27,Mortgages,101,Portfolio Mortgage Registration Pre-Registration,mortgage,false,false,false,true,false,"Portfolio: one loan over several units, kept out of mortgage share"
+28,Mortgages,60,Delayed Portfolio Mortgage,mortgage,false,false,false,true,false,"Portfolio: one loan over several units, kept out of mortgage share"
+29,Mortgages,14,Modify Mortgage,mortgage,false,false,false,false,false,Change to an existing loan: count only
+30,Mortgages,108,Modify Mortgage Pre-Registration,mortgage,false,false,false,false,false,
+31,Mortgages,191,Modify Delayed Mortgage,mortgage,false,false,false,false,false,
+32,Mortgages,49,Portfolio Mortgage Modification,mortgage,false,false,false,false,false,
+33,Mortgages,135,Portfolio Mortgage Modification Pre-Registration,mortgage,false,false,false,false,false,
+34,Mortgages,44,Mortgage Transfer,mortgage,false,false,false,false,false,Existing loan moved to another lender: count only
+35,Mortgages,113,Mortgage Transfer Pre-Registration,mortgage,false,false,false,false,false,
+36,Mortgages,111,Portfolio Mortgage Transfer,mortgage,false,false,false,false,false,
+37,Mortgages,39,Development Mortgage,mortgage,false,false,false,false,false,Developer project finance: not a home loan
+38,Mortgages,56,Modify Development Mortgage,mortgage,false,false,false,false,false,
+39,Mortgages,57,Transfer Development Mortgage,mortgage,false,false,false,false,false,
+40,Mortgages,151,Portfolio Mortgage Development Registration,mortgage,false,false,false,false,false,
+41,Mortgages,152,Portfolio Mortgage Development Modification,mortgage,false,false,false,false,false,
+42,Mortgages,861,Development Mortgage Pre-Registration,mortgage,false,false,false,false,false,
+43,Mortgages,810,Lease Finance Registration,mortgage,false,false,false,false,false,Lease (ijara-style) finance; amount meaning not verified in Phase 1
+44,Mortgages,811,Lease Finance Modification,mortgage,false,false,false,false,false,
+45,Mortgages,110,Lease to Own Registration,lease_to_own,false,true,false,false,false,Financing leg of a lease-to-own deal (Sales leg has the same procedure_id)
+46,Mortgages,107,Lease to Own Registration Pre-Registration,lease_to_own,false,true,false,false,false,Financing leg
+47,Mortgages,361,Delayed Lease to Own Registration,lease_to_own,false,true,false,false,false,Financing leg
+48,Mortgages,371,Lease Development Registration,lease_to_own,false,true,false,false,false,Financing leg
+49,Mortgages,715,Delayed Sell Lease to Own Registration,lease_to_own,false,true,false,false,false,Financing leg
+50,Mortgages,814,Lease to Own on Development Registration,lease_to_own,false,true,false,false,false,Financing leg
+51,Mortgages,32,Lease to Own Modify,lease_to_own,false,true,false,false,false,
+52,Mortgages,37,Lease to Own Transfer,lease_to_own,false,true,false,false,false,
+53,Mortgages,103,Lease to Own Transfer Pre-Registration,lease_to_own,false,true,false,false,false,
+54,Mortgages,362,Delayed Lease to Own Modify,lease_to_own,false,true,false,false,false,
+55,Mortgages,363,Delayed Lease to Own Transfer,lease_to_own,false,true,false,false,false,
+56,Mortgages,372,Lease Development Modify,lease_to_own,false,true,false,false,false,
+57,Mortgages,716,Delayed Sell Lease To Own Modification,lease_to_own,false,true,false,false,false,
+58,Mortgages,815,Lease to Own on Development Modification,lease_to_own,false,true,false,false,false,

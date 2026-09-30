@@ -1,0 +1,8 @@
+rule_id,borrower,property_status,home_number,value_band,max_ltv,source_citation,verified,note
+1,UAE national,ready,first,up to AED 5M,0.85,"CBUAE Regulations Regarding Mortgage Loans (Notice 31/2013), as amended in 2020 (+5pp for first-time buyers)",false,Owner to verify against the current CBUAE rulebook before Phase 4
+2,UAE national,ready,first,above AED 5M,0.75,"CBUAE Regulations Regarding Mortgage Loans (Notice 31/2013), as amended in 2020",false,
+3,UAE national,ready,second or more,any,0.65,"CBUAE Regulations Regarding Mortgage Loans (Notice 31/2013)",false,
+4,Expatriate,ready,first,up to AED 5M,0.80,"CBUAE Regulations Regarding Mortgage Loans (Notice 31/2013), as amended in 2020 (+5pp for first-time buyers)",false,Phase 1 found a median loan/price ratio of 0.800 from 2021 (phase1_findings §2)
+5,Expatriate,ready,first,above AED 5M,0.70,"CBUAE Regulations Regarding Mortgage Loans (Notice 31/2013), as amended in 2020",false,
+6,Expatriate,ready,second or more,any,0.60,"CBUAE Regulations Regarding Mortgage Loans (Notice 31/2013)",false,
+7,Any,off-plan,any,any,0.50,"CBUAE Regulations Regarding Mortgage Loans (Notice 31/2013): off-plan properties",false,docs/05 §4: off-plan uses a lower LTV

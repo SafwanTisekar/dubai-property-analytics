@@ -22,8 +22,20 @@ with lines as (
         -- snapshot breaks that, the allocation below would be ambiguous, so flag it.
         min(s.annual_amount_aed) over contract is distinct from max(s.annual_amount_aed) over contract
             as is_amount_inconsistent,
-        s.end_date - s.start_date + 1 as contract_days
+        s.end_date - s.start_date + 1 as contract_days,
+        -- Conformed property class for the C21 area cap. Ejari maps on property type alone
+        -- (seed_property_type_map rows for rents have no sub-type), exactly as
+        -- int_property_type_lookup does; fct_rent_contract tests that the two agree.
+        coalesce(pc.property_class_id, 99) as property_class_id,
+        snap.data_snapshot_date
     from {{ ref('stg_rent_contracts') }} as s
+    left join {{ ref('seed_property_type_map') }} as tm
+        on tm.source = 'rents'
+        and tm.property_type = s.property_type
+        and tm.property_sub_type is null
+    left join {{ ref('seed_property_class') }} as pc
+        on pc.property_class = tm.property_class
+    cross join {{ ref('int_data_snapshot') }} as snap
     window contract as (partition by s.contract_id)
 
 ),
@@ -52,6 +64,13 @@ measured as (
             or start_date > snapshot_date + {{ var('rent_max_days_after_snapshot') }}
         ) as is_date_invalid,
         coalesce(start_date < date '{{ var("analysis_start_date") }}', false) as is_pre_2004,
+        -- C18: a valid start after the data snapshot date (the latest transaction date).
+        -- Registered ahead of time; not yet a market rent, and outside the report scope.
+        coalesce(
+            start_date > data_snapshot_date
+            and start_date <= snapshot_date + {{ var('rent_max_days_after_snapshot') }},
+            false
+        ) as is_start_after_snapshot,
         -- End dates reach year 5013. More than 10 years, or ending before the start, is
         -- a keying error for a residential or commercial lease.
         (
@@ -69,11 +88,20 @@ measured as (
         ) as is_non_market_property_type,
 
         -- C21: blank, 0 and 1 sq m are placeholders (1.55M lines): no area, no rent/sq m.
+        -- Above the cap for the property class (apartment 1,000 sq m, villa 3,000, office /
+        -- retail 5,000, other 10,000; macro class_area_cap) the area is a whole community,
+        -- plot or building (e.g. 378,236 sq m on many 3-bed villas, one at 375M sq m). Such
+        -- lines were 0.3% of comparable lines but 89% of their summed area. The rent is
+        -- kept; the line gets no area and no rent per sq m.
         case
-            when actual_area_sqm > {{ var('rent_area_placeholder_sqm') }} then actual_area_sqm
+            when actual_area_sqm > {{ var('rent_area_placeholder_sqm') }}
+                and actual_area_sqm <= {{ class_area_cap('property_class_id') }}
+                then actual_area_sqm
         end as area_sqm,
         coalesce(actual_area_sqm <= {{ var('rent_area_placeholder_sqm') }}, true)
-            as is_area_placeholder
+            as is_area_placeholder,
+        coalesce(actual_area_sqm > {{ class_area_cap('property_class_id') }}, false)
+            as is_area_implausible
     from lines
 
 ),
@@ -199,6 +227,7 @@ select
     contract_days,
     is_date_invalid,
     is_pre_2004,
+    is_start_after_snapshot,
     is_end_date_implausible,
 
     contract_amount_aed,
@@ -217,6 +246,7 @@ select
     bedrooms,
     room_class,
 
+    property_class_id,
     area_id,
     area_name,
     zone,
@@ -230,6 +260,7 @@ select
     actual_area_sqm,
     area_sqm,
     is_area_placeholder,
+    is_area_implausible,
     rent_per_sqm_aed,
 
     is_rent_below_floor,
@@ -250,6 +281,7 @@ select
         and not is_rent_outlier
         and not is_date_invalid
         and not is_pre_2004
+        and not is_start_after_snapshot
         and not is_end_date_implausible
         as is_market_rent,
 
