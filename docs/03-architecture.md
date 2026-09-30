@@ -173,7 +173,9 @@ At ~1.6M transactions (+1M rent lines), Postgres is comfortably fast if you do t
 - **Load with COPY**, never row-by-row `INSERT`. Load bronze with indexes absent, then `ANALYZE`.
 - **Indexes in gold** via dbt `indexes` config: `fct_transaction(txn_date)`, `(area_key)`, `(is_market_sale, txn_date)`; the same pattern for rents.
 - **Materialisations:** staging = `view`, intermediate = `table`, marts = `table`, reporting = `view`.
-- **Server settings** (`postgresql.conf`, see §6 for its location; for a 16 GB Mac): `shared_buffers = 2GB`, `work_mem = 128MB`, `maintenance_work_mem = 1GB`, `effective_cache_size = 8GB`, `max_wal_size = 4GB` (the 1 GB default caused back-to-back checkpoints during the rent load, see reports/phase1_findings.md §0). Restart after changing.
+- **Server settings** (`postgresql.conf`, see §6 for its location; for a 16 GB Mac): `shared_buffers = 2GB`, `work_mem = 128MB`, `maintenance_work_mem = 1GB`, `effective_cache_size = 8GB`, `max_wal_size = 4GB`. Restart after changing `shared_buffers`; the others take effect on reload.
+  - **Applied 2026-09-30:** `max_wal_size = 4GB`, via `alter system set max_wal_size = '4GB'; select pg_reload_conf();` as the superuser. It is written to `postgresql.auto.conf` and takes effect on reload, with no restart. Why: with the 1 GB default, the Phase 1 rent load hit "checkpoints are occurring too frequently (9 seconds apart)", and one 483 MB file took 91 s instead of ~12 s (reports/phase1_findings.md §0). Check with `show max_wal_size;`.
+  - **Not yet applied:** `shared_buffers`, `work_mem`, `maintenance_work_mem`, `effective_cache_size` are still at their defaults. The loaders and profilers raise `work_mem` / `maintenance_work_mem` per session where they need it.
 - Pull data into Python with `connectorx` (fast) and write results back with `COPY`.
 - Target: full rebuild under 20 min. Record actual timings in docs/08.
 
