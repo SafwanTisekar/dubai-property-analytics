@@ -150,11 +150,61 @@ def test_share_rate_correlation_uses_levels_and_changes():
     months = pd.date_range("2010-01-01", periods=48, freq="MS")
     rate = np.linspace(0.0, 0.05, 48)
     df = pd.DataFrame(
-        {"month": months, "fed_funds_rate": rate, "mortgage_share_12m": 0.3 - 2 * rate}
+        {"month": months, "fed_funds_rate": rate, "purchase_share_12m": 0.3 - 2 * rate}
     )
     out = financing.share_rate_correlation(df)
     assert out["months"] == 48
     assert out["corr_levels"] == pytest.approx(-1.0)
+
+
+def test_mortgage_indicators_are_ratios_of_sums():
+    months = pd.date_range("2025-01-01", periods=2, freq="MS")
+    monthly = pd.DataFrame(
+        {
+            "month": months,
+            "market_sales": [100.0, 300.0],
+            "ready_sales": [40.0, 60.0],
+            "purchase_mortgages": [10.0, 20.0],
+            "new_mortgages": [20.0, 40.0],
+            "ready_unit_mortgages": [25.0, 35.0],
+            "fed_funds_rate": [0.04, 0.05],
+        }
+    )
+    y = financing.mortgage_indicators_by_year(monthly).set_index("year").loc[2025]
+    assert y["purchase_share"] == pytest.approx(30 / 100)  # not the mean of 0.25 and 0.33
+    assert y["upper_share"] == pytest.approx(60 / 100)
+    assert y["match_rate"] == pytest.approx(30 / 60)
+    assert y["new_per_100_sales"] == pytest.approx(15.0)
+    assert y["purchase_share"] <= y["upper_share"]
+
+
+def test_last_full_month_and_ytd_summary():
+    assert market_cycles.last_full_month(SNAP) == 8
+    assert market_cycles.last_full_month(date(2026, 8, 31)) == 8
+    by_zone = pd.DataFrame(
+        {
+            "zone": ["a", "a", "b"],
+            "is_offplan": [True, False, False],
+            "sales_prev": [100, 100, 50],
+            "sales_cur": [120, 60, 50],
+            "value_prev_aed": [1e9, 1e9, 5e8],
+            "value_cur_aed": [1.2e9, 0.5e9, 5e8],
+        }
+    )
+    total = market_cycles.ytd_summary(by_zone).iloc[0]
+    assert total["sales_change"] == pytest.approx(230 / 250 - 1)
+    by_type = market_cycles.ytd_summary(by_zone, ["is_offplan"]).set_index("is_offplan")
+    assert by_type.loc[False, "sales_change"] == pytest.approx(110 / 150 - 1)
+
+
+def test_snapshot_tail_ratio_detects_a_thin_tail():
+    days = pd.bdate_range("2026-08-01", "2026-09-25")
+    daily = pd.DataFrame(
+        {"txn_date": days, "iso_dow": days.isocalendar().day.values, "transaction_lines": 100}
+    )
+    assert market_cycles.snapshot_tail_ratio(daily, SNAP) == pytest.approx(1.0)
+    daily.loc[daily["txn_date"] > "2026-09-18", "transaction_lines"] = 40
+    assert market_cycles.snapshot_tail_ratio(daily, SNAP) == pytest.approx(0.4)
 
 
 def test_cycle_phases_are_ordered_and_cover_the_named_cycles():
@@ -216,14 +266,28 @@ def test_market_cycle_queries(snapshot):
     lag = market_cycles.registration_lag(2004, snapshot.year)
     assert lag["market_sales"].sum() == proc["market_sales"].sum()
     market_cycles.offplan_by_project_first_year(2009)
+    ytd = market_cycles.ytd_by_zone(snapshot)
+    assert set(ytd.columns) >= {"zone", "is_offplan", "sales_prev", "sales_cur"}
+    daily = market_cycles.daily_registrations(date(2004, 1, 1), snapshot)
+    assert daily["txn_date"].max() <= pd.Timestamp(snapshot)
     market_cycles.ppsqm_offplan_vs_ready(2004, snapshot.year)
 
 
 @pytest.mark.db
 def test_financing_queries(snapshot):
-    share = financing.mortgage_share_monthly(config.REPORT_SCOPE_START, snapshot)
-    assert share["mortgage_share"].dropna().between(0, 1).all()
-    assert share["month"].max() <= pd.Timestamp(snapshot)
+    mi = financing.mortgage_indicators_monthly(config.REPORT_SCOPE_START, snapshot)
+    assert mi["month"].max() <= pd.Timestamp(snapshot)
+    assert (mi["purchase_mortgages"] <= mi["ready_sales"]).all()
+    assert (mi["purchase_mortgages"] <= mi["ready_unit_mortgages"]).all()
+    assert (mi["ready_sales"] <= mi["market_sales"]).all()
+    # Same numerator and denominator as the aggregate Power BI reads.
+    agg = common.query(
+        "select sum(purchase_mortgages) as pm, sum(market_sales) filter (where not is_offplan)"
+        " as ready from gold.agg_area_month"
+    )
+    assert mi["purchase_mortgages"].sum() == agg["pm"].iloc[0]
+    assert mi["ready_sales"].sum() == agg["ready"].iloc[0]
+    financing.mortgage_indicators_by_year(mi)
     port = financing.portfolio_by_year(config.REPORT_SCOPE_START, snapshot)
     assert (port["portfolio_deals"] <= port["portfolio_lines"]).all()
     ltv = financing.ltv_by_year()
@@ -253,3 +317,5 @@ def test_price_and_rent_queries(snapshot):
     thin = (yc["sales_n"] < config.MIN_N) | (yc["rent_n"] < config.MIN_N)
     assert yc.loc[thin, "gross_yield"].isna().all()
     prices_rents.yield_by_zone(yc)
+    basis = prices_rents.area_basis()
+    assert basis["share_no_bedrooms"].between(0, 1).all()

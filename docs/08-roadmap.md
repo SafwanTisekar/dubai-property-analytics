@@ -135,7 +135,11 @@ reports/findings.md.
 - [x] `reports/findings.md`: executive summary, every finding with chart, function and caveat, sanity check vs DLD's published 2023–2025 totals (within ~1% on value)
 - [x] `tests/test_analysis.py` (15 tests: pure logic + every query on the DB), passing on full data and on the CI fixtures (scratch DB); added to the post-build CI step
 - [x] Q9 (developer HHI) deferred: needs the DLD projects file (developer names)
-- [ ] CI green on the Phase 3 commit (after push)
+- [x] **Revision after owner review (2026-09-30):**
+  - [x] Mortgage KPI redefined as the purchase-mortgage share of ready sales (`int_purchase_mortgage_pairs`, gold flags, rpt columns); new mortgages per 100 market sales kept as secondary; KPI reconciliation, DQ report §5, docs/01 §4, docs/04 Decisions and docs/06 measures updated
+  - [x] Villa AED/sq m area basis checked (villa areas mix plot and built-up sizes): "villas passed apartments" withdrawn, growth quoted on the bedroom-known subset and per unit
+  - [x] 2026 momentum (Jan–Aug vs 2025, by type and zone) with registration-lag checks (daily tail, published-vs-extracted)
+- [ ] CI green on the Phase 3 commits (after push)
 
 ---
 
@@ -212,7 +216,7 @@ Lighthouse ≥ 90 via Playwright.
 | 0 Setup | ✓ | 2026-09-30 | 2026-09-30 | Scaffold done: `make setup`, `make db` (idempotent), `uv run pytest` (12 passed incl. pbi_reader grant tests) and `dbt debug` pass locally on PG 18.6 / dbt 1.12.5. First push e360d92, CI green |
 | 1 Ingestion | ✓ | 2026-09-30 | 2026-09-30 | CI green on 00340f6. Bronze loaded and reconciled (15 files: 1,788,150 transactions, 10,538,926 rent lines, FRED Fed Funds + Brent); re-runs are a no-op. Profiles, `phase1_findings.md` and docs/02 §7 done. Deferred: DLD increment download (stub), EIBOR (manual CBUAE file not yet placed). Open: C11 option and CI sample data (docs/04 §6) |
 | 2 dbt | ✓ | 2026-09-30 | 2a, 2b: 2026-09-30 | 2a (silver) done 2026-09-30, CI green on 92b6191: `dbt build` PASS=98 on full data in 4 min 38 s and on the CI fixtures; Phase 1 figures reproduced exactly (reports/dq_report.md §4). 1,267,760 clean market sales, 3,601,613 market-rent lines. All 265 areas zoned. 2b (gold + rpt) done 2026-09-30: `make dbt` 7 min 43 s on full data, 229 dbt nodes pass, gold = silver exactly, `reports/kpi_reconciliation.md` 0 mismatches and the apartment sanity check passes, 10 rpt views (1.77M transaction rows + 392k rent-month cells), data snapshot 2026-09-25. CI green on 5076e27 ([run](https://github.com/SafwanTisekar/dubai-property-analytics/actions/runs/36736326132)) |
-| 3 EDA | ✓ (CI pending) | 2026-09-30 | 2026-09-30 | `make eda` runs the three notebooks in ~20 s on full data. Headlines: 211,007 market sales / AED 668.3bn in 2025; the 2009 spike is a backlog (93.5% of 2009 off-plan registrations applied for earlier); mortgage share 15.2% (2025), weakly related to Fed Funds (−0.23); LTV norm 75% → 80%; 2023 apartment prices +1.2% raw vs +14.5% like-for-like. Register totals match DLD's published 2023–25 figures within ~1% on value. Q9 deferred |
+| 3 EDA | ✓ (CI pending) | 2026-09-30 | 2026-09-30 | `make eda` runs the three notebooks in ~20 s on full data. Headlines: 211,007 market sales / AED 668.3bn in 2025; Jan–Aug 2026 −19% on 2025 (ready −37%, off-plan −7%), no sign of registration lag; the 2009 spike is a backlog (93.5% of 2009 off-plan registrations applied for earlier); 28–48% of 2025 ready purchases bank-financed (matched lower bound 27.9%); LTV norm 75% → 80%; 2023 apartment prices +1.2% raw vs +14.5% like-for-like. Register totals match DLD's published 2023–25 figures within ~1% on value. Revised the same day after owner review (mortgage KPI, villa area basis, 2026 momentum). `make dbt` 242 nodes pass. Q9 deferred |
 | 4 Models | ☐ | | | |
 | 5 Power BI | ☐ | | | |
 | 6 Website | ☐ | | | |

@@ -84,6 +84,8 @@ def test_compare_flags_a_missing_period():
 def test_derive_kpis_follow_docs_01_definitions():
     row = {
         "market_sales": 80,
+        "ready_sales": 30,
+        "purchase_mortgages": 6,
         "new_mortgages": 20,
         "offplan_sales": 40,
         "market_value": 1000,
@@ -92,7 +94,8 @@ def test_derive_kpis_follow_docs_01_definitions():
         "aw_area": 50,
     }
     d = kpi.derive(row)
-    assert d["mortgage_share"] == 0.2  # 20 / (20 + 80)
+    assert d["purchase_mortgage_share"] == 0.2  # 6 / 30 ready sales
+    assert d["new_mortgages_per_100"] == 25  # 20 per 80 market sales
     assert d["offplan_share_count"] == 0.5
     assert d["offplan_share_value"] == 0.25
     assert d["aw_ppsqm"] == 10

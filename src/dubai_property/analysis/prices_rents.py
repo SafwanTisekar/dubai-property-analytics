@@ -320,3 +320,38 @@ def yield_by_zone(cells: pd.DataFrame) -> pd.DataFrame:
             }
         )
     return pd.DataFrame(rows)
+
+
+# Is a villa's procedure_area the plot or the built-up area? DLD doesn't say. Lines with a
+# bedroom count look built-up (a 3-bed ~190 sq m); lines without look like plots (median
+# ~550-600 sq m). The mix of the two shifts over time, which moves AED per sq m by itself.
+AREA_BASIS_SQL = """
+select property_type_key, extract(year from txn_date)::int as year, count(*) as clean_sales,
+       avg((bedrooms is null)::int) as share_no_bedrooms,
+       percentile_cont(0.5) within group (order by area_sqm) as median_area_sqm,
+       percentile_cont(0.5) within group (order by area_sqm)
+           filter (where bedrooms is not null) as median_area_with_bedrooms,
+       percentile_cont(0.5) within group (order by area_sqm)
+           filter (where bedrooms is null) as median_area_no_bedrooms,
+       percentile_cont(0.5) within group (order by price_per_sqm_aed)
+           filter (where bedrooms is not null) as median_ppsqm_with_bedrooms,
+       percentile_cont(0.5) within group (order by actual_worth_aed) as median_price_aed
+from gold.fct_transaction
+where is_clean_market_sale and is_in_report_scope and property_type_key = any(:keys)
+group by 1, 2
+order by 1, 2
+"""
+
+
+def area_basis(keys: list[int] = HOMES, engine: Engine | None = None) -> pd.DataFrame:
+    """Area basis per class × year: bedrooms-missing share, median areas, per-unit price.
+
+    Columns: share of sales without bedrooms, median area with / without bedrooms, AED per
+    sq m on the bedroom-known (built-up-like) subset, and the median price per unit.
+
+    Used to test whether villa AED per sq m is comparable with apartments (it isn't when
+    part of the villa areas are plots) and whether within-class growth is driven by a
+    shift in the area basis.
+    """
+    df = query(AREA_BASIS_SQL, {"keys": list(keys)}, engine)
+    return df.astype({c: "float64" for c in df.columns if c not in ("property_type_key", "year")})

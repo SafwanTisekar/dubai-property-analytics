@@ -1,6 +1,6 @@
 # Data-quality report: silver
 
-Generated 2026-09-30 15:06 UTC by `quality/dq_report.py` from database `dubai_property`. Regenerate with `make dq` (after `make dbt`). The rules are in docs/04 §2.
+Generated 2026-09-30 18:29 UTC by `quality/dq_report.py` from database `dubai_property`. Regenerate with `make dq` (after `make dbt`). The rules are in docs/04 §2.
 
 ## 1. Rows in and out per step
 
@@ -117,32 +117,32 @@ AED counted once per deal / contract, and the C16 / C11 counts, against `seed_ph
 | transactions | Sales | similar_size_groups | 17,724 | 17,724 | match |
 | transactions | Sales | similar_size_lines | 42,458 | 42,458 | match |
 
-## 5. Mortgage share inputs
+## 5. Mortgage indicator inputs
 
-Mortgage share (docs/01 §4) = individual new mortgages / (individual new mortgages + market sales), by registration year. Individual new mortgages are Mortgage Registration, Delayed Mortgage and Mortgage Pre-Registration (`is_new_mortgage`). Loans (AED bn) are once per deal, and only for the two procedures whose amount is a verified loan (C10). **Portfolio mortgage registrations** (`is_portfolio_mortgage`: one loan over several units) are outside the ratio and shown separately, counted once per deal (C16). Their value is as recorded, not a verified loan amount.
+**Purchase-mortgage share of ready sales** (docs/01 §4) = ready market sales matched to a Mortgage Registration / Delayed Mortgage of the same unit on the same day (`int_purchase_mortgage_pairs`) / ready market sales, by registration year. It is a lower bound: loans registered on another day or keyed differently don't match. **New mortgages per 100 market sales** is the secondary indicator: individual new mortgages (Mortgage Registration, Delayed Mortgage, Mortgage Pre-Registration, `is_new_mortgage`) include refinancing and loans on units bought earlier. Loans (AED bn) are once per deal, and only for the two procedures whose amount is a verified loan (C10). **Portfolio mortgage registrations** (`is_portfolio_mortgage`: one loan over several units) are outside the ratio and shown separately, counted once per deal (C16). Their value is as recorded, not a verified loan amount.
 
-| Year | Market sales | New mortgages | Mortgage share % | Loans AED bn | Portfolio deals | Portfolio lines | Portfolio value AED bn |
-|---|---|---|---|---|---|---|---|
-| 2004 | 2,794 | 1,159 | 29.3 | 7.7 | 0 | 0 |  |
-| 2005 | 2,487 | 1,249 | 33.4 | 12.9 | 0 | 0 |  |
-| 2006 | 2,621 | 1,640 | 38.5 | 36.6 | 0 | 0 |  |
-| 2007 | 7,275 | 2,737 | 27.3 | 36.4 | 4 | 9 | 10.71 |
-| 2008 | 21,324 | 5,218 | 19.7 | 74.8 | 1 | 1 | 1.93 |
-| 2009 | 56,340 | 7,022 | 11.1 | 18.3 | 5 | 5 | 13.61 |
-| 2010 | 30,185 | 7,311 | 19.5 | 26.4 | 4 | 4 | 4.61 |
-| 2011 | 24,891 | 6,022 | 19.5 | 31.9 | 4 | 6 | 9.55 |
-| 2012 | 32,546 | 5,250 | 13.9 | 17.6 | 8 | 8 | 9.93 |
-| 2013 | 58,159 | 8,091 | 12.2 | 51.0 | 16 | 16 | 9.33 |
-| 2014 | 50,163 | 8,088 | 13.9 | 58.2 | 17 | 17 | 2.44 |
-| 2015 | 38,436 | 9,099 | 19.1 | 63.3 | 21 | 21 | 3.00 |
-| 2016 | 37,742 | 10,079 | 21.1 | 54.8 | 72 | 74 | 16.25 |
-| 2017 | 42,831 | 11,144 | 20.6 | 61.6 | 121 | 121 | 6.21 |
-| 2018 | 29,712 | 9,962 | 25.1 | 56.6 | 143 | 162 | 8.13 |
-| 2019 | 35,503 | 9,271 | 20.7 | 47.0 | 182 | 182 | 7.72 |
-| 2020 | 32,138 | 10,288 | 24.2 | 32.1 | 104 | 105 | 2.99 |
-| 2021 | 57,640 | 14,558 | 20.2 | 48.6 | 144 | 145 | 7.04 |
-| 2022 | 93,615 | 16,578 | 15.0 | 68.8 | 151 | 151 | 80.83 |
-| 2023 | 129,195 | 22,772 | 15.0 | 69.8 | 146 | 153 | 26.87 |
-| 2024 | 175,437 | 31,247 | 15.1 | 95.0 | 178 | 181 | 7.42 |
-| 2025 | 211,007 | 37,715 | 15.2 | 115.1 | 345 | 345 | 9.69 |
-| 2026 | 118,698 | 26,618 | 18.3 | 88.3 | 207 | 208 | 6.68 |
+| Year | Market sales | Ready market sales | Purchase mortgages | Purchase-mortgage share % | New mortgages | New mortgages per 100 sales | Loans AED bn | Portfolio deals | Portfolio lines | Portfolio value AED bn |
+|---|---|---|---|---|---|---|---|---|---|---|
+| 2004 | 2,794 | 2,782 | 139 | 5.0 | 1,159 | 41.5 | 7.7 | 0 | 0 |  |
+| 2005 | 2,487 | 2,484 | 156 | 6.3 | 1,249 | 50.2 | 12.9 | 0 | 0 |  |
+| 2006 | 2,621 | 2,614 | 291 | 11.1 | 1,640 | 62.6 | 36.6 | 0 | 0 |  |
+| 2007 | 7,275 | 7,273 | 812 | 11.2 | 2,737 | 37.6 | 36.4 | 4 | 9 | 10.71 |
+| 2008 | 21,324 | 21,311 | 1,751 | 8.2 | 5,218 | 24.5 | 74.8 | 1 | 1 | 1.93 |
+| 2009 | 56,340 | 26,442 | 1,583 | 6.0 | 7,022 | 12.5 | 18.3 | 5 | 5 | 13.61 |
+| 2010 | 30,185 | 20,005 | 1,779 | 8.9 | 7,311 | 24.2 | 26.4 | 4 | 4 | 4.61 |
+| 2011 | 24,891 | 22,271 | 1,551 | 7.0 | 6,022 | 24.2 | 31.9 | 4 | 6 | 9.55 |
+| 2012 | 32,546 | 28,745 | 1,877 | 6.5 | 5,250 | 16.1 | 17.6 | 8 | 8 | 9.93 |
+| 2013 | 58,159 | 46,497 | 2,735 | 5.9 | 8,091 | 13.9 | 51.0 | 16 | 16 | 9.33 |
+| 2014 | 50,163 | 36,516 | 2,240 | 6.1 | 8,088 | 16.1 | 58.2 | 17 | 17 | 2.44 |
+| 2015 | 38,436 | 24,989 | 1,910 | 7.6 | 9,099 | 23.7 | 63.3 | 21 | 21 | 3.00 |
+| 2016 | 37,742 | 22,086 | 2,330 | 10.5 | 10,079 | 26.7 | 54.8 | 72 | 74 | 16.25 |
+| 2017 | 42,831 | 21,004 | 3,014 | 14.3 | 11,144 | 26.0 | 61.6 | 121 | 121 | 6.21 |
+| 2018 | 29,712 | 14,853 | 2,591 | 17.4 | 9,962 | 33.5 | 56.6 | 143 | 162 | 8.13 |
+| 2019 | 35,503 | 15,393 | 2,654 | 17.2 | 9,271 | 26.1 | 47.0 | 182 | 182 | 7.72 |
+| 2020 | 32,138 | 17,521 | 3,439 | 19.6 | 10,288 | 32.0 | 32.1 | 104 | 105 | 2.99 |
+| 2021 | 57,640 | 34,247 | 6,495 | 19.0 | 14,558 | 25.3 | 48.6 | 144 | 145 | 7.04 |
+| 2022 | 93,615 | 51,280 | 8,550 | 16.7 | 16,578 | 17.7 | 68.8 | 151 | 151 | 80.83 |
+| 2023 | 129,195 | 61,811 | 12,040 | 19.5 | 22,772 | 17.6 | 69.8 | 146 | 153 | 26.87 |
+| 2024 | 175,437 | 68,172 | 17,947 | 26.3 | 31,247 | 17.8 | 95.0 | 178 | 181 | 7.42 |
+| 2025 | 211,007 | 77,154 | 21,537 | 27.9 | 37,715 | 17.9 | 115.1 | 345 | 345 | 9.69 |
+| 2026 | 118,698 | 37,115 | 12,526 | 33.7 | 26,618 | 22.4 | 88.3 | 207 | 208 | 6.68 |

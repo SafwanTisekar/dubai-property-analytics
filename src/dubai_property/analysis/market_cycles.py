@@ -184,3 +184,92 @@ def ppsqm_offplan_vs_ready(
     """Median AED per sq m of clean sales, off-plan vs ready, by year (one property type)."""
     params = {"first_year": first_year, "last_year": last_year, "ptk": property_type_key}
     return query(PPSQM_OFFPLAN_VS_READY_SQL, params, engine)
+
+
+# --- Momentum: year to date vs the same months a year earlier ----------------------------
+# Only whole months: the snapshot month is partial, so "YTD" runs to the last full month.
+YTD_BY_ZONE_SQL = """
+select a.zone, extract(year from t.txn_date)::int as year, t.is_offplan,
+       count(*) as market_sales, sum(t.aed_counted_once) as market_value_aed
+from gold.fct_transaction as t
+join gold.dim_area as a using (area_key)
+where t.is_market_sale and t.is_in_report_scope
+  and extract(year from t.txn_date) in (:year, :year - 1)
+  and extract(month from t.txn_date) between 1 and :last_month
+group by 1, 2, 3
+"""
+
+# Every registration (all groups) per day: a registration lag at the snapshot would show
+# as a tail of thin days just before it.
+DAILY_REGISTRATIONS_SQL = """
+select txn_date, extract(isodow from txn_date)::int as iso_dow,
+       count(*) as transaction_lines, count(*) filter (where is_market_sale) as market_sales
+from gold.fct_transaction
+where txn_date between :start and :end
+group by 1, 2
+order by 1
+"""
+
+
+def last_full_month(snapshot) -> int:
+    """The last complete month of the snapshot year (the snapshot month is partial)."""
+    ts = pd.Timestamp(snapshot)
+    return ts.month if ts.is_month_end else ts.month - 1
+
+
+def ytd_by_zone(snapshot, engine: Engine | None = None) -> pd.DataFrame:
+    """Market sales by zone × off-plan, Jan → last full month, snapshot year vs a year earlier.
+
+    Returns one row per zone × off-plan flag with ``sales_prev``, ``sales_cur``,
+    ``value_prev_aed``, ``value_cur_aed``.
+    """
+    year = pd.Timestamp(snapshot).year
+    params = {"year": year, "last_month": last_full_month(snapshot)}
+    df = query(YTD_BY_ZONE_SQL, params, engine)
+    df["market_value_aed"] = df["market_value_aed"].astype("float64")
+    wide = df.pivot_table(
+        index=["zone", "is_offplan"],
+        columns="year",
+        values=["market_sales", "market_value_aed"],
+        aggfunc="sum",
+        fill_value=0,
+    )
+    wide.columns = [
+        f"{'sales' if m == 'market_sales' else 'value'}_{'cur' if y == year else 'prev'}"
+        + ("_aed" if m == "market_value_aed" else "")
+        for m, y in wide.columns
+    ]
+    return wide.reset_index()
+
+
+def ytd_summary(by_zone: pd.DataFrame, by: list[str] | None = None) -> pd.DataFrame:
+    """Sum ``ytd_by_zone`` to any grouping (default: all) and add % changes."""
+    cols = ["sales_prev", "sales_cur", "value_prev_aed", "value_cur_aed"]
+    g = by_zone.groupby(by)[cols].sum().reset_index() if by else by_zone[cols].sum().to_frame().T
+    g["sales_change"] = g["sales_cur"] / g["sales_prev"] - 1
+    g["value_change"] = g["value_cur_aed"] / g["value_prev_aed"] - 1
+    return g
+
+
+def daily_registrations(start, end, engine: Engine | None = None) -> pd.DataFrame:
+    """Transaction lines and market sales per registration day (all groups)."""
+    df = query(DAILY_REGISTRATIONS_SQL, {"start": start, "end": end}, engine)
+    df["txn_date"] = pd.to_datetime(df["txn_date"])
+    return df
+
+
+def snapshot_tail_ratio(daily: pd.DataFrame, snapshot, tail_days: int = 7) -> float:
+    """Lines per working day in the last ``tail_days`` days vs the 4 weeks before them.
+
+    A registration lag at the extract would make recent days thin (ratio well below 1).
+    Weekends (Sat, Sun) are dropped; Friday is a short day in Dubai but appears in both
+    windows.
+    """
+    d = daily[daily["iso_dow"] <= 5].set_index("txn_date")["transaction_lines"]
+    end = pd.Timestamp(snapshot)
+    tail = d[d.index > end - pd.Timedelta(days=tail_days)]
+    base = d[
+        (d.index <= end - pd.Timedelta(days=tail_days))
+        & (d.index > end - pd.Timedelta(days=tail_days + 28))
+    ]
+    return float(tail.mean() / base.mean())

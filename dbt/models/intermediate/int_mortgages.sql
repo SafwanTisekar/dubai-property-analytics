@@ -9,7 +9,9 @@
 -- counts as volume only. The recorded value stays in `actual_worth_aed`.
 -- C16: portfolio loans repeat one value per unit line; `*_once_aed` count it once.
 --
--- Mortgage share counts individual new mortgages only (`is_new_mortgage`). Portfolio
+-- `is_new_mortgage` marks individual new mortgages, which include refinancing: the
+-- secondary indicator "new mortgages per 100 market sales". The headline purchase-mortgage
+-- share pairs a mortgage with its same-day sale (int_purchase_mortgage_pairs). Portfolio
 -- registrations (`is_portfolio_mortgage`: one loan over several units, often a developer
 -- or investor) are kept apart: count them per deal (count distinct deal_group_id) and sum
 -- `portfolio_mortgage_value_once_aed`, the recorded deal value once per deal. Their amount

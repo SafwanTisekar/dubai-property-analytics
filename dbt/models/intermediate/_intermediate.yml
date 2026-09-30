@@ -169,12 +169,14 @@ models:
       - name: is_new_mortgage
         description: >
           New individual (non-portfolio) mortgage: Mortgage Registration, Delayed Mortgage,
-          Mortgage Pre-Registration. The mortgage-share numerator (docs/01 §4).
+          Mortgage Pre-Registration. Includes refinancing and loans on units bought earlier,
+          so it is a secondary indicator (new mortgages per 100 market sales, docs/01 §4);
+          the headline is the purchase-mortgage share (int_purchase_mortgage_pairs).
         tests: [not_null]
       - name: is_portfolio_mortgage
         description: >
-          New portfolio mortgage registration (one loan over several units). Not in mortgage
-          share; count per deal with count(distinct deal_group_id).
+          New portfolio mortgage registration (one loan over several units). Not in either
+          mortgage indicator; count per deal with count(distinct deal_group_id).
         tests: [not_null]
       - name: portfolio_mortgage_value_once_aed
         description: >
@@ -195,6 +197,36 @@ models:
       - name: is_similar_size_batch
         description: C16.
         meta: {dq_rule: C16}
+
+  - name: int_purchase_mortgage_pairs
+    description: >
+      Purchase mortgages: a Mortgage Registration (Delayed Mortgage) and a Sell (Delayed
+      Sell) of the same unit on the same day, keyed on date, area, building, project, sq m,
+      rooms, type and sub-type, unique on both sides, inferred portfolio lines (C16)
+      excluded. One row per pair. The numerator of the purchase-mortgage share of ready
+      sales (docs/01 §4) and the source of observed LTVs. A lower bound: loans registered on
+      another day or keyed differently don't match.
+    columns:
+      - name: mortgage_transaction_id
+        tests:
+          - unique
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('int_mortgages')
+                field: transaction_id
+      - name: sale_transaction_id
+        tests:
+          - unique
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('int_market_sales')
+                field: transaction_id
+      - name: txn_date
+        tests: [not_null]
+      - name: purchase_ltv
+        description: Loan ÷ same-day sale price of the same unit (observed loan-to-value).
 
   - name: int_rent_contracts
     description: >

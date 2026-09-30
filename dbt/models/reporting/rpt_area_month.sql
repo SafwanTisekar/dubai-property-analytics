@@ -21,6 +21,7 @@ select
     {{ rpt_min_n_median('median_price_per_sqm_aed', 'clean_sales') }} as "Median Price per Sq M AED",
     {{ rpt_min_n_median('median_price_aed', 'clean_sales') }} as "Median Price AED",
 
+    purchase_mortgages as "Purchase Mortgages",
     new_mortgages as "New Mortgages",
     {{ rpt_aed('new_mortgage_loans_aed') }} as "New Mortgage Loans AED",
     portfolio_mortgage_deals as "Portfolio Mortgage Deals",

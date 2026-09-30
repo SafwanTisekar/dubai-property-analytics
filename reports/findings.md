@@ -3,19 +3,20 @@
 These are the findings of Phase 3 (exploratory analysis), taken from `notebooks/01_market_cycles.ipynb`, `02_financing_mix.ipynb` and `03_prices_and_rents.ipynb`.
 
 - **Data.** DLD transactions and Ejari rent contracts to the snapshot date, **2026-09-25**. Scope starts 2004-01-01. **2026 is a partial year** (1 Jan – 25 Sep) wherever it appears.
-- **Definitions.** Market sales, clean sales, mortgage share and the rest are defined in docs/01 §4 and docs/04.
+- **Definitions.** Market sales, clean sales, the purchase-mortgage share of ready sales and the rest are defined in docs/01 §4 and docs/04.
+- **Revised 2026-09-30** after owner review: the mortgage KPI was redefined (F2.1), the villa vs apartment comparison was withdrawn (F3.1), and a 2026 momentum check was added (F1.5).
 - **Regenerate.** Run `make eda` after `make dbt`. The charts are written to `reports/figures/`.
 - **Code.** Every number comes from a function in `src/dubai_property/analysis/`, which aggregates in SQL over `gold` and `rpt`. The functions are named below as `module.function`.
 
 ## Executive summary
 
 1. **Record boom.** Dubai recorded **211,007 market sales worth AED 668.3bn in 2025**: 6.6× the count and 10.2× the value of 2020. ([chart](figures/q1_market_sales_by_year.png))
-2. **The 2009 "spike" was paperwork, not demand.** **93.5%** of the 29,898 off-plan sales registered in 2009 were applied for in earlier years. They are a backlog of 2004–08 deals entered into the new off-plan register. ([chart](figures/q1_2009_registration_lag.png))
-3. **Off-plan is most sales but not most value.** Off-plan made up **63% of 2025 market sales but 44% of their value** (69% and 50% in 2026 to date). ([chart](figures/q2_offplan_share_count_value.png))
-4. **Cash buyers drive the boom.** Only about **1 purchase in 7 is mortgaged** (15.2% in 2025), and since 2010 the mortgage share has barely tracked interest rates (correlation −0.23 with Fed Funds). ([chart](figures/q2_mortgage_share_vs_fedfunds.png))
-5. **Lenders moved from a 75% to an 80% loan-to-value norm.** The median observed LTV was exactly 75% every year 2014–2019, and **half of 2026 loans sit at exactly 80%**. ([chart](figures/q2_ltv_by_year.png))
-6. **The raw median hid a double-digit price rise in 2023.** The apartment median per sq m rose **+1.2%**, but like-for-like prices rose **+14.5%**, because sales shifted to cheaper zones. This is why the Phase 4 index is hedonic. ([chart](figures/q3_mix_shift_example.png))
-7. **Villas have caught up with apartments per sq m.** Villa prices per sq m **more than doubled from 2020 to 2025 (+109%)** against +65% for apartments. In 2026 the villa median has passed the apartment median for the first time. ([chart](figures/q3_price_per_sqm_apartments_villas.png))
+2. **2026 has slowed, led by ready homes.** Market sales for January–August 2026 are **down 19% on the same months of 2025** (−22% by value). Ready sales fell **37%**, off-plan only **7%**. Registration-lag checks show no sign that the fall is late data. ([chart](figures/q1_2026_ytd_vs_2025.png))
+3. **The 2009 "spike" was paperwork, not demand.** **93.5%** of the 29,898 off-plan sales registered in 2009 were applied for in earlier years. They are a backlog of 2004–08 deals entered into the new off-plan register. ([chart](figures/q1_2009_registration_lag.png))
+4. **Off-plan is most sales but not most value.** Off-plan made up **63% of 2025 market sales but 44% of their value** (69% and 50% in 2026 to date). ([chart](figures/q2_offplan_share_count_value.png))
+5. **Between 28% and 48% of ready purchases were bank-financed in 2025.** 27.9% are matched to a same-day mortgage of the same unit (a lower bound). All ready-unit mortgages, including refinancing, come to 48.1% of ready sales (the upper bound). Most other purchases are off-plan, paid to developers in instalments, so they are **not bank-financed at registration** rather than "cash". ([chart](figures/q2_purchase_mortgage_share_vs_fedfunds.png))
+6. **Lenders moved from a 75% to an 80% loan-to-value norm.** The median observed LTV was exactly 75% every year 2014–2019, and **half of 2026 loans sit at exactly 80%**. ([chart](figures/q2_ltv_by_year.png))
+7. **The raw median hid a double-digit price rise in 2023.** The apartment median per sq m rose **+1.2%**, but like-for-like prices rose **+14.5%**, because sales shifted to cheaper zones. This is why the Phase 4 index is hedonic. ([chart](figures/q3_mix_shift_example.png))
 
 ---
 
@@ -51,26 +52,41 @@ These are the findings of Phase 3 (exploratory analysis), taken from `notebooks/
 - Function: `market_cycles.registration_lag`
 - Caveat: pre-2009 counts are also thin (2,487–7,275 a year in 2004–07), so pre-2009 growth rates are not comparable with later years.
 
+**F1.5 2026 is running well below 2025, and the checks point to a real slowdown, not late registrations.** Market sales for January–August 2026 were 109,093 (AED 339.7bn): −18.8% by count and −21.5% by value on January–August 2025 (134,339, AED 432.9bn).
+- **By type:** ready sales fell from 53,808 to 33,863 (−37.1%; −33.4% by value). Off-plan fell only from 80,531 to 75,230 (−6.6%; −4.3%).
+- **By month:** January (+19%) and February (+7%) were up. The fall began in March (−9%) and deepened from April (−22% in April, −46% in May, −34% in August).
+- **By zone:** Marina, JBR & JLT fell 50%, Downtown & Business Bay 48%, Bur Dubai & Karama 47% and JVC, JVT & Arjan 34%. Jebel Ali, Dubai South & Waterfront rose 40% and Palm & Islands 11%, by count.
+- **Lag check 1 (daily shape):** working-day registrations in the last 7 days before the snapshot run at 0.97× the previous 4 weeks, so recent days are not thin.
+- **Lag check 2 (published vs extracted):** DLD published Q1 2026 on 9 Apr 2026 (60,303 transactions, AED 252bn; [DLD](https://dubailand.gov.ae/en/news-media/dubai-s-real-estate-transactions-surge-31-to-reach-aed-252-billion-in-q1-2026/)) and H1 2025 on 20 Jul 2025 (125,538, ~AED 431bn; [Dubai Media Office](https://www.mediaoffice.ae/en/news/2025/july/20-07/dubai-real-estate-transactions-exceed-aed431-billion-in-h1-2025)). Our September 2026 extract has 59,951 / AED 250.8bn and 123,032 / AED 429.7bn for the same periods, 0.6% and 2.0% *fewer*, not more. Lines don't keep arriving after the period closes. Our Q1 2026 is +5.9% on Q1 2025 by count, matching DLD's reported +6%.
+- Chart: [q1_2026_ytd_vs_2025.png](figures/q1_2026_ytd_vs_2025.png)
+- Functions: `market_cycles.ytd_by_zone` + `ytd_summary`, `daily_registrations` + `snapshot_tail_ratio`, `sales_by_month`
+- Caveat: there is a single bulk snapshot, so a lag of more than a few weeks can't be ruled out directly; September 2026 is excluded as partial. The data shows *that* ready sales fell, not *why*.
+
 ## Q2. Financing mix (notebook 02)
 
-**F2.1 About one purchase in seven is mortgaged.** Mortgage share was 15.0–15.2% every year from 2022 to 2025, down from a 25.1% peak in 2018 and a 12.2% low in 2013. It is 18.3% in 2026 to date and 23.7% in September 2026.
-- Chart: [q2_mortgage_share_vs_fedfunds.png](figures/q2_mortgage_share_vs_fedfunds.png)
-- Function: `financing.mortgage_share_monthly` (matches `reports/dq_report.md` §5 and `kpi_reconciliation.md`)
-- Caveat: individual new mortgages only; portfolio mortgages are excluded (docs/01 §4). The 27–39% shares of 2004–07 sit on the thin, ready-only register (F1.4).
+**F2.1 Between about 28% and 48% of ready purchases were bank-financed in 2025 (headline KPI, redefined).**
+- **Lower bound:** 21,537 of 77,154 ready market sales (27.9%) are matched to a Mortgage Registration or Delayed Mortgage of the same unit on the same day.
+- **Upper bound:** all such mortgage lines, which include refinancing, equal 48.1% of ready sales.
+- **Trend:** the matched share rose from 5.9% (2013) to 19.5% (2023) and 27.9% (2025). The match rate (matched ÷ all ready-unit mortgages) also rose, from 22–40% before 2020 to 58% in 2024–25, so much of that rise is better matching, not only more borrowing.
+- **2026 to date:** both bounds jump (33.7% / 70.2%) because ready sales fell 37% while mortgage registrations held (23,306 in Jan–Aug vs 24,430).
+- **Secondary indicator:** new mortgages per 100 market sales has been flat at about 18 since 2022 (17.9 in 2025), against 26–34 in 2016–2020, as the market shifted to off-plan.
+- Chart: [q2_purchase_mortgage_share_vs_fedfunds.png](figures/q2_purchase_mortgage_share_vs_fedfunds.png)
+- Function: `financing.mortgage_indicators_monthly` / `mortgage_indicators_by_year`, reading `fct_transaction.has_purchase_mortgage` (dbt `int_purchase_mortgage_pairs`). It reconciles silver → rpt in `reports/kpi_reconciliation.md` and matches `reports/dq_report.md` §5
+- Caveat: **this replaces the earlier "mortgage share"** (new mortgages ÷ (new mortgages + market sales), 15.2% in 2025). That ratio double-counted: a mortgaged purchase registers both a sale and a mortgage line, and new mortgages include refinancing (docs/04 Decisions). The match misses loans registered on a different day or keyed differently. Sales without a matched mortgage are **not bank-financed at registration**, not necessarily cash: most are off-plan, paid to the developer in instalments. Portfolio mortgages are excluded.
 
-**F2.2 Rates explain little of the mortgage share.** Since 2010 the trailing-12-month share and the effective Fed Funds rate correlate at −0.23 in levels and −0.20 in 12-month changes. The 2022–23 hikes (0.1% → 5.3%) coincided with the share falling from 20.2% (2021) to 15.0% (2022), but the 2016–19 hikes coincided with a rising share.
-- Chart: [q2_mortgage_share_vs_fedfunds.png](figures/q2_mortgage_share_vs_fedfunds.png)
+**F2.2 Rates explain little of the mortgage share.** Since 2010 the trailing-12-month matched share and the effective Fed Funds rate correlate at +0.72 in levels, but that is two series trending up together in 2022–25. In 12-month changes the correlation is −0.22. The 2020 cuts and the 2022–23 rises both coincided with a steady or rising matched share.
+- Chart: [q2_purchase_mortgage_share_vs_fedfunds.png](figures/q2_purchase_mortgage_share_vs_fedfunds.png)
 - Function: `financing.share_rate_correlation`
-- Caveat: Fed Funds stands in for EIBOR, which isn't loaded yet; the AED is pegged to the USD. This is an association, not a causal estimate. The share falls when cash-heavy off-plan volume rises, whatever rates do.
+- Caveat: Fed Funds stands in for EIBOR, which isn't loaded yet; the AED is pegged to the USD. This is an association, not a causal estimate. The lower bound's rising match rate adds its own trend.
 
 **F2.3 Off-plan is most sales but not most value.** The off-plan share rose from 40.6% by count (31.0% by value) in 2021 to 63.4% (43.6%) in 2025, and to 68.7% (49.5%) in 2026 to date.
 - Chart: [q2_offplan_share_count_value.png](figures/q2_offplan_share_count_value.png)
 - Function: `market_cycles.sales_by_year` (`offplan_share_count`, `offplan_share_value`)
 - Caveat: off-plan is DLD's `reg_type` at registration. The lower value share reflects cheaper units and locations, not a like-for-like discount.
 
-**F2.4 Observed LTVs follow the regulatory caps.** The median loan ÷ same-day price was exactly 0.75 every year 2014–2019, with 28–34% of loans at exactly 75%. From 2021 the median is 0.80, and 41.1% (2025) and 50.3% (2026) of loans sit at exactly 80%. A second cluster at exactly **84.8%** appeared in 2020 (8.5% of pairs), peaked at 22.4% in 2024, and is 0.0% in 2026.
+**F2.4 Observed LTVs follow the regulatory caps.** The median loan ÷ same-day price was exactly 0.75 every year 2014–2019, with 28–34% of loans at exactly 75%. From 2021 the median is 0.80, and 41.1% (2025) and 50.3% (2026) of loans sit at exactly 80%. A second cluster at exactly **84.8%** appeared in 2020 (8.3% of pairs), peaked at 22.4% in 2024, and is 0.0% in 2026.
 - Chart: [q2_ltv_by_year.png](figures/q2_ltv_by_year.png), [q2_ltv_distribution_by_year.png](figures/q2_ltv_distribution_by_year.png)
-- Function: `financing.ltv_by_year`, `financing.ltv_histogram` (the Phase 1 same-day match rebuilt on `gold.fct_transaction`; 1,572–21,743 pairs a year)
+- Function: `financing.ltv_by_year`, `financing.ltv_histogram` (`fct_transaction.purchase_ltv` on the matched pairs, `int_purchase_mortgage_pairs`; 1,551–21,537 pairs a year from 2010)
 - Caveat: this covers purchase mortgages matched to a same-day sale (Mortgage Registration ↔ Sell, Delayed Mortgage ↔ Delayed Sell), not refinancing. 0.848 = 0.80 × 1.06 suggests a loan sized on price plus costs, but the cause **needs an external source**. The CBUAE caps behind 75% and 80% are to be cited in `seed_ltv_rules` (owner to verify).
 
 **F2.5 Portfolio mortgages are lumpy and kept separate.** Since 2004 there have been 1,873 portfolio mortgage deals worth AED 245.0bn (once per deal). 2022 alone had AED 80.8bn across 151 deals.
@@ -80,10 +96,18 @@ These are the findings of Phase 3 (exploratory analysis), taken from `notebooks/
 
 ## Q3. Prices and rents (notebook 03)
 
-**F3.1 Villas have caught up with apartments per sq m.** The median apartment price per sq m went from AED 11,314 (2020) to 18,657 (2025), +65%. Villas / townhouses went from 7,528 to 15,700, +109%. In 2026 to date the villa median (18,672) is above the apartment median (18,568) for the first time. Area-weighted apartment prices run 10–26% above the median every year from 2010 (larger units cost more per sq m).
+**F3.1 Villa prices roughly doubled from 2020 to 2025, and apartments rose about 65% (compare growth, not levels).**
+- **Apartments:** median AED per sq m went from 11,314 (2020) to 18,657 (2025), +65%; +50% per unit.
+- **Villas / townhouses:** on sales with a bedroom count, AED per sq m went from 7,934 to 16,080 (+103%), and the median price per unit from AED 1.66m to 3.55m (+114%).
+- **Area-weighted:** area-weighted apartment prices run 10–26% above the median every year from 2010 (larger units cost more per sq m).
 - Chart: [q3_price_per_sqm_apartments_villas.png](figures/q3_price_per_sqm_apartments_villas.png)
-- Function: `prices_rents.ppsqm_by_year` (exact medians over clean sales; area-weighted Σ AED ÷ Σ sq m from `agg_area_month`)
-- Caveat: these are raw medians, so composition shifts move them (F3.5). 1 sq m = 10.7639 sq ft.
+- Function: `prices_rents.ppsqm_by_year`, `prices_rents.area_basis`
+- Caveat: **villa and apartment AED per sq m are not comparable, so the earlier claim that villas passed apartments in 2026 is withdrawn.**
+  - DLD doesn't say whether a villa's `procedure_area` is the plot or the built-up area.
+  - Villa sales with a bedroom count have built-up-sized areas (a median of ~190–200 sq m).
+  - Villa sales without one have plot-sized areas (a median of 550–600 sq m). They were about 50% of villa sales before 2017, 20–26% in 2019–20 and 10% in 2026.
+  - The all-villa median area fell from 400 sq m (2010) to 224 (2025) and 188 (2026), which alone lifts the all-villa median per sq m.
+  - Within-class growth is quoted on the bedroom-known subset and per unit for that reason. 1 sq m = 10.7639 sq ft.
 
 **F3.2 Zone growth ranges from +13% to +108%.** From 2019 to 2025, median apartment prices per sq m rose +108% in DIFC, Trade Centre & Za'abeel (to AED 42,285), +104% in Marina, JBR & JLT and +104% in Palm & Islands, but +13% in Mirdif, Mizhar, Warqa & Khawaneej.
 - Chart: [q3_price_per_sqm_by_zone.png](figures/q3_price_per_sqm_by_zone.png)

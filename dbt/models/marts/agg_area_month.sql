@@ -17,8 +17,12 @@
 --   clean sales        is_clean_market_sale: the price population (medians)
 --   area-weighted      clean sales whose area is within the class cap
 --                      (not is_area_above_class_cap): Σ value / Σ sq m, per property type
---   new mortgages      is_new_mortgage (individual; the mortgage-share numerator). Loans
---                      only where the amount is a verified loan (C10), once per deal
+--   purchase mortgages ready market sales matched to a same-day purchase mortgage
+--                      (has_purchase_mortgage, counted on the sale line so it sits in the
+--                      sale's cell): ÷ ready market sales = purchase-mortgage share
+--   new mortgages      is_new_mortgage (individual; includes refinancing). Secondary
+--                      indicator: new mortgages per 100 market sales. Loans only where
+--                      the amount is a verified loan (C10), once per deal
 --   portfolio          is_portfolio_mortgage, reported apart from the share: deals = lead
 --                      lines (so deals add up), value once per deal
 --
@@ -62,6 +66,7 @@ select
         2
     ) as median_price_aed,
 
+    count(*) filter (where has_purchase_mortgage) as purchase_mortgages,
     count(*) filter (where is_new_mortgage) as new_mortgages,
     coalesce(sum(mortgage_amount_once_aed) filter (where is_new_mortgage), 0) as new_mortgage_loans_aed,
 

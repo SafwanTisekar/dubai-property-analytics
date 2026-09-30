@@ -1,6 +1,6 @@
 # Data dictionary
 
-Generated 2026-09-30 15:06 UTC by `quality/data_dictionary.py` from the dbt manifest (descriptions, tests) and the database catalogue (columns, types). Regenerate with `make dictionary` (after `make dbt`). Rules C1-C22 are in docs/04 §2; the star schema in docs/04 §3. Bronze is raw text (docs/04 §1) and not listed.
+Generated 2026-09-30 18:29 UTC by `quality/data_dictionary.py` from the dbt manifest (descriptions, tests) and the database catalogue (columns, types). Regenerate with `make dictionary` (after `make dbt`). Rules C1-C22 are in docs/04 §2; the star schema in docs/04 §3. Bronze is raw text (docs/04 §1) and not listed.
 
 ## Silver: seeds, staging views and intermediate tables (typed, cleaned, flagged)
 
@@ -20,6 +20,7 @@ Generated 2026-09-30 15:06 UTC by `quality/data_dictionary.py` from the dbt mani
 | [`silver.int_market_sales`](#silverint_market_sales) | table | Ownership transfers: every Sales- and Gifts-group line with the price-quality flags (C3-C6, C16-C19). Nothing is removed. is_market_sale picks arm's-length sales; is_clean_market_sale also drops every flagged row and is the population for prices, indices, yields and the AVM. Gifts, development transfers and the Sales leg of lease-to-own deals stay for volume counts only. |
 | [`silver.int_mortgages`](#silverint_mortgages) | table | Financing: every Mortgages-group line (C10, C16-C18), analysed separately from prices. mortgage_amount_aed is set only where actual_worth is a verified loan amount (Mortgage Registration, Delayed Mortgage); every other procedure counts as volume only. |
 | [`silver.int_property_type_lookup`](#silverint_property_type_lookup) | table | Every (source, usage, property type, sub-type) combination in the data, resolved to the conformed dim_property_type key (usage group x property class) via seed_property_usage_map and seed_property_type_map. The facts join on the *_join columns (NULL -> '') so the 10.5M-line rent join can hash. |
+| [`silver.int_purchase_mortgage_pairs`](#silverint_purchase_mortgage_pairs) | table | Purchase mortgages: a Mortgage Registration (Delayed Mortgage) and a Sell (Delayed Sell) of the same unit on the same day, keyed on date, area, building, project, sq m, rooms, type and sub-type, unique on both sides, inferred portfolio lines (C16) excluded. One row per pair. The numerator of the purchase-mortgage share of ready sales (docs/01 §4) and the source of observed LTVs. A lower bound: loans registered on another day or keyed differently don't match. |
 | [`silver.int_rent_contracts`](#silverint_rent_contracts) | table | Ejari contract lines (~10.5M) with the contract-level rent rules: C11 allocation, C12 annualisation, C13 new vs renewal, C14 outliers, C18 dates, C20 non-market types, C21 placeholder areas, C22 bedrooms. Nothing is removed. is_market_rent is the population for market rents and yields: new, single-line, market property type, inside the band, with usable dates. Never exposed to Power BI in detail. |
 | [`silver.int_transaction_deal_groups`](#silverint_transaction_deal_groups) | table | C16 at transaction-line grain (all groups). Infers portfolio deals that repeat one deal value on every unit line (the Phase 1 REPEATED_VALUE_GROUP rule) and gives each line a deal_group_id and an AED value counted once per deal. Contiguous same-value batches of similar-size units are flagged separately and not corrected. |
 | [`silver.stg_rates`](#silverstg_rates) | view | Monthly rate drivers: Fed Funds (monthly, as a decimal) and Brent (monthly mean of daily prices, USD). EIBOR is added when the CBUAE file is loaded. |
@@ -244,8 +245,8 @@ Financing: every Mortgages-group line (C10, C16-C18), analysed separately from p
 | `procedure_id` | integer |  |  |
 | `procedure_name` | text |  |  |
 | `procedure_category` | text | C2. From seed_procedure_map; NULL would mean a procedure the seed doesn't know. (from `stg_transactions`) | accepted_values |
-| `is_new_mortgage` | boolean | New individual (non-portfolio) mortgage: Mortgage Registration, Delayed Mortgage, Mortgage Pre-Registration. The mortgage-share numerator (docs/01 §4). | not_null |
-| `is_portfolio_mortgage` | boolean | New portfolio mortgage registration (one loan over several units). Not in mortgage share; count per deal with count(distinct deal_group_id). | not_null |
+| `is_new_mortgage` | boolean | New individual (non-portfolio) mortgage: Mortgage Registration, Delayed Mortgage, Mortgage Pre-Registration. Includes refinancing and loans on units bought earlier, so it is a secondary indicator (new mortgages per 100 market sales, docs/01 §4); the headline is the purchase-mortgage share (int_purchase_mortgage_pairs). | not_null |
+| `is_portfolio_mortgage` | boolean | New portfolio mortgage registration (one loan over several units). Not in either mortgage indicator; count per deal with count(distinct deal_group_id). | not_null |
 | `is_lease_to_own` | boolean | C17. Financing leg of a lease-to-own deal. |  |
 | `amount_is_loan` | boolean | C10. True for Mortgage Registration and Delayed Mortgage only. | not_null |
 | `txn_date` | date | Registration date. NULL when is_date_invalid. (from `stg_transactions`) |  |
@@ -304,6 +305,22 @@ Every (source, usage, property type, sub-type) combination in the data, resolved
 | `property_type_key` | integer | usage_group_id * 100 + property_class_id. | not_null, relationships |
 | `is_usage_mapped` | boolean | False when the source usage label exists but is missing from seed_property_usage_map. | accepted_values |
 | `is_type_mapped` | boolean | False when the source property type exists but is missing from seed_property_type_map. | accepted_values |
+
+<a id="silverint_purchase_mortgage_pairs"></a>
+### `silver.int_purchase_mortgage_pairs`
+
+Purchase mortgages: a Mortgage Registration (Delayed Mortgage) and a Sell (Delayed Sell) of the same unit on the same day, keyed on date, area, building, project, sq m, rooms, type and sub-type, unique on both sides, inferred portfolio lines (C16) excluded. One row per pair. The numerator of the purchase-mortgage share of ready sales (docs/01 §4) and the source of observed LTVs. A lower bound: loans registered on another day or keyed differently don't match.
+
+| Column | Type | Description | Tests |
+|---|---|---|---|
+| `mortgage_transaction_id` | text |  | not_null, relationships, unique |
+| `sale_transaction_id` | text |  | not_null, relationships, unique |
+| `txn_date` | date | Registration date. NULL when is_date_invalid. (from `stg_transactions`) | not_null |
+| `mortgage_procedure` | text |  |  |
+| `sale_procedure` | text |  |  |
+| `loan_aed` | numeric |  |  |
+| `sale_price_aed` | numeric |  |  |
+| `purchase_ltv` | numeric | Loan ÷ same-day sale price of the same unit (observed loan-to-value). |  |
 
 <a id="silverint_rent_contracts"></a>
 ### `silver.int_rent_contracts`
@@ -543,7 +560,8 @@ Sales and financing by month x area x property type x bedrooms x off-plan, repor
 | `sum_price_per_sqm_aed` | numeric |  |  |
 | `median_price_per_sqm_aed` | numeric |  |  |
 | `median_price_aed` | numeric |  |  |
-| `new_mortgages` | bigint | Individual new mortgages (is_new_mortgage), the mortgage-share numerator. |  |
+| `purchase_mortgages` | bigint | Ready market sales matched to a same-day purchase mortgage (has_purchase_mortgage), counted on the sale line. ÷ ready market sales (market_sales where not is_offplan) = purchase-mortgage share (docs/01 §4). |  |
+| `new_mortgages` | bigint | Individual new mortgages (is_new_mortgage), including refinancing. Secondary indicator: new mortgages per 100 market sales. |  |
 | `new_mortgage_loans_aed` | numeric | Σ verified loan amounts (C10), once per deal. |  |
 | `portfolio_mortgage_deals` | bigint | Portfolio mortgage deals, counted on the lead line so the column adds up. |  |
 | `portfolio_mortgage_lines` | bigint |  |  |
@@ -744,8 +762,8 @@ Every DLD transaction line (Sales, Gifts, Mortgages; 1.79M) with dimension keys 
 | `is_market_sale` | boolean | Arm's-length sale (C3). The market-sales KPI population (docs/01 §4). | not_null |
 | `is_clean_market_sale` | boolean | The price population (medians, AED per sq m, index, AVM). | not_null |
 | `has_quality_flag` | boolean | A market sale excluded from price statistics by C4-C6, C16 or C18. |  |
-| `is_new_mortgage` | boolean | New individual (non-portfolio) mortgage: Mortgage Registration, Delayed Mortgage, Mortgage Pre-Registration. The mortgage-share numerator (docs/01 §4). (from `int_mortgages`) |  |
-| `is_portfolio_mortgage` | boolean | New portfolio mortgage registration (one loan over several units). Not in mortgage share; count per deal with count(distinct deal_group_id). (from `int_mortgages`) |  |
+| `is_new_mortgage` | boolean | New individual (non-portfolio) mortgage: Mortgage Registration, Delayed Mortgage, Mortgage Pre-Registration. Includes refinancing and loans on units bought earlier, so it is a secondary indicator (new mortgages per 100 market sales, docs/01 §4); the headline is the purchase-mortgage share (int_purchase_mortgage_pairs). (from `int_mortgages`) |  |
+| `is_portfolio_mortgage` | boolean | New portfolio mortgage registration (one loan over several units). Not in either mortgage indicator; count per deal with count(distinct deal_group_id). (from `int_mortgages`) |  |
 | `amount_is_loan` | boolean | C10. True for Mortgage Registration and Delayed Mortgage only. (from `int_mortgages`) |  |
 | `is_lease_to_own` | boolean | C17. Sales leg of a lease-to-own deal; is_market_sale is false (volume only). (from `int_market_sales`) |  |
 | `reg_type` | text |  |  |
@@ -783,6 +801,9 @@ Every DLD transaction line (Sales, Gifts, Mortgages; 1.79M) with dimension keys 
 | `is_ppsqm_mismatch` | boolean | C6. Recomputed price per sq m more than 5% off DLD's meter_sale_price. (from `int_market_sales`) |  |
 | `is_repeated_deal_value` | boolean | C16. See int_transaction_deal_groups. (from `int_market_sales`) |  |
 | `is_similar_size_batch` | boolean | C16. See int_transaction_deal_groups. (from `int_market_sales`) |  |
+| `is_purchase_mortgage` | boolean | Mortgage Registration / Delayed Mortgage matched to a same-day ready sale of the same unit (int_purchase_mortgage_pairs): the loan that funded that purchase. | not_null |
+| `has_purchase_mortgage` | boolean | Ready market sale matched to a same-day purchase mortgage of the same unit (int_purchase_mortgage_pairs). The numerator of the purchase-mortgage share of ready sales (docs/01 §4); a lower bound on mortgaged purchases. | not_null |
+| `purchase_ltv` | numeric | Observed loan-to-value on a purchase mortgage line (loan ÷ matched sale price). |  |
 | `property_class_id` | integer | Conformed property class (property_type_key % 100); sets the area cap. |  |
 | `is_area_above_class_cap` | boolean | Area above the cap for the property class (apartment 1,000 sq m, villa 3,000, office / retail 5,000, other 10,000). Kept out of the area-weighted sums only; does not change is_clean_market_sale. | not_null |
 | `is_in_report_scope` | boolean | Dated from 2004 to the data snapshot date. False for 1900-2003 rows and the 4 Hijri-dated rows. | not_null |
@@ -824,6 +845,7 @@ rpt.area_month. Monthly sales and financing aggregate.
 | `Clean Sales Area Sq M` | numeric |  |  |
 | `Median Price per Sq M AED` | bigint |  |  |
 | `Median Price AED` | bigint |  |  |
+| `Purchase Mortgages` | bigint |  |  |
 | `New Mortgages` | bigint |  |  |
 | `New Mortgage Loans AED` | bigint |  |  |
 | `Portfolio Mortgage Deals` | bigint |  |  |
@@ -999,6 +1021,8 @@ rpt.transactions. Transaction lines in the reporting scope, without text ids or 
 | `Has Quality Flag` | boolean |  |  |
 | `Is New Mortgage` | boolean |  |  |
 | `Is Portfolio Mortgage` | boolean |  |  |
+| `Has Purchase Mortgage` | boolean |  |  |
+| `Is Purchase Mortgage` | boolean |  |  |
 | `Is Deal Lead` | boolean |  |  |
 | `Is Lease to Own` | boolean |  |  |
 | `Is Off-Plan` | boolean |  |  |
@@ -1016,3 +1040,4 @@ rpt.transactions. Transaction lines in the reporting scope, without text ids or 
 | `Price per Sq M AED` | bigint |  |  |
 | `Loan Amount AED` | bigint |  |  |
 | `Portfolio Mortgage Value AED` | bigint |  |  |
+| `Purchase LTV` | numeric |  |  |

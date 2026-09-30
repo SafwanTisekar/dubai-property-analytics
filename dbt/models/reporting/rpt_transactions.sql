@@ -22,6 +22,8 @@ select
     has_quality_flag as "Has Quality Flag",
     is_new_mortgage as "Is New Mortgage",
     is_portfolio_mortgage as "Is Portfolio Mortgage",
+    has_purchase_mortgage as "Has Purchase Mortgage",
+    is_purchase_mortgage as "Is Purchase Mortgage",
     is_deal_group_lead as "Is Deal Lead",
     is_lease_to_own as "Is Lease to Own",
     is_offplan as "Is Off-Plan",
@@ -40,6 +42,7 @@ select
     {{ rpt_aed('aed_counted_once') }} as "AED Counted Once",
     {{ rpt_aed('price_per_sqm_aed') }} as "Price per Sq M AED",
     {{ rpt_aed('mortgage_amount_once_aed') }} as "Loan Amount AED",
-    {{ rpt_aed('portfolio_mortgage_value_once_aed') }} as "Portfolio Mortgage Value AED"
+    {{ rpt_aed('portfolio_mortgage_value_once_aed') }} as "Portfolio Mortgage Value AED",
+    round(purchase_ltv, 4) as "Purchase LTV"
 from {{ ref('fct_transaction') }}
 where is_in_report_scope

@@ -13,8 +13,9 @@ rows, and docs/04 §2 for rows affected per cleaning rule. Four sections:
 3. **Populations.** How many rows reach the clean market-sale and market-rent populations,
    and the first rule that excludes each of the rest (a waterfall, so reasons add up).
 4. **Reconciliation.** AED counted once per deal / contract against the Phase 1 figures.
-5. **Mortgage share inputs.** Individual new mortgages vs market sales by year (the KPI),
-   with portfolio mortgage registrations reported separately, once per deal.
+5. **Mortgage indicator inputs.** Purchase mortgages matched to a same-day ready sale vs
+   ready market sales by year (the KPI), new mortgages per 100 market sales (secondary),
+   and portfolio mortgage registrations reported separately, once per deal.
 
 All counting is SQL; only the small result tables come back to Python.
 """
@@ -220,14 +221,23 @@ order by 1, 2, 3
 """
 
 
-# docs/01 §4: mortgage share = individual new mortgages / (individual new mortgages + market
-# sales), by registration date. Portfolio registrations sit outside the ratio; their deals
-# and values are counted once per deal (C16). Only dated, in-scope rows count.
+# docs/01 §4: purchase-mortgage share of ready sales = ready market sales matched to a
+# same-day purchase mortgage (silver.int_purchase_mortgage_pairs) / ready market sales, by
+# registration year; a lower bound. Secondary: new mortgages (incl. refinancing) per 100
+# market sales. Portfolio registrations sit outside both; their deals and values are
+# counted once per deal (C16). Only dated, in-scope rows count.
 MORTGAGE_SHARE_SQL = """
 with sales as (
-    select extract(year from txn_date)::int as yr, count(*) as market_sales
+    select extract(year from txn_date)::int as yr, count(*) as market_sales,
+           count(*) filter (where not is_offplan) as ready_sales
     from silver.int_market_sales
     where is_market_sale and not is_date_invalid and not is_pre_2004
+    group by 1
+),
+pairs as (
+    select extract(year from txn_date)::int as yr, count(*) as purchase_mortgages
+    from silver.int_purchase_mortgage_pairs
+    where txn_date >= date '2004-01-01'
     group by 1
 ),
 mortgages as (
@@ -242,11 +252,14 @@ mortgages as (
     where not is_date_invalid and not is_pre_2004
     group by 1
 )
-select coalesce(s.yr, m.yr)::text as year, s.market_sales, m.new_mortgages,
-       round(100.0 * m.new_mortgages / nullif(m.new_mortgages + s.market_sales, 0), 1)
-           as mortgage_share_pct,
+select coalesce(s.yr, m.yr)::text as year, s.market_sales, s.ready_sales,
+       coalesce(p.purchase_mortgages, 0) as purchase_mortgages,
+       round(100.0 * coalesce(p.purchase_mortgages, 0) / nullif(s.ready_sales, 0), 1)
+           as purchase_mortgage_share_pct,
+       m.new_mortgages,
+       round(100.0 * m.new_mortgages / nullif(s.market_sales, 0), 1) as new_per_100_sales,
        m.loans_bn, m.portfolio_deals, m.portfolio_lines, m.portfolio_value_bn
-from sales s full outer join mortgages m using (yr)
+from sales s full outer join mortgages m using (yr) left join pairs p using (yr)
 order by 1
 """
 
@@ -359,11 +372,15 @@ def run(path: Path = REPORT_PATH, manifest_path: Path = MANIFEST_PATH) -> Path:
         "",
         *md_table(["Dataset", "Group", "Metric", "Phase 1", "Silver", "Check"], recon),
         "",
-        "## 5. Mortgage share inputs",
+        "## 5. Mortgage indicator inputs",
         "",
-        "Mortgage share (docs/01 §4) = individual new mortgages / (individual new mortgages + "
-        "market sales), by registration year. Individual new mortgages are Mortgage "
-        "Registration, Delayed Mortgage and Mortgage Pre-Registration (`is_new_mortgage`). "
+        "**Purchase-mortgage share of ready sales** (docs/01 §4) = ready market sales matched "
+        "to a Mortgage Registration / Delayed Mortgage of the same unit on the same day "
+        "(`int_purchase_mortgage_pairs`) / ready market sales, by registration year. It is a "
+        "lower bound: loans registered on another day or keyed differently don't match. "
+        "**New mortgages per 100 market sales** is the secondary indicator: individual new "
+        "mortgages (Mortgage Registration, Delayed Mortgage, Mortgage Pre-Registration, "
+        "`is_new_mortgage`) include refinancing and loans on units bought earlier. "
         "Loans (AED bn) are once per deal, and only for the two procedures whose amount is a "
         "verified loan (C10). **Portfolio mortgage registrations** (`is_portfolio_mortgage`: "
         "one loan over several units) are outside the ratio and shown separately, counted "
@@ -373,8 +390,11 @@ def run(path: Path = REPORT_PATH, manifest_path: Path = MANIFEST_PATH) -> Path:
             [
                 "Year",
                 "Market sales",
+                "Ready market sales",
+                "Purchase mortgages",
+                "Purchase-mortgage share %",
                 "New mortgages",
-                "Mortgage share %",
+                "New mortgages per 100 sales",
                 "Loans AED bn",
                 "Portfolio deals",
                 "Portfolio lines",

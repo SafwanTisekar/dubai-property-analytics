@@ -204,6 +204,14 @@ select
     l.is_repeated_deal_value,
     l.is_similar_size_batch,
 
+    -- Purchase mortgages (int_purchase_mortgage_pairs): a new mortgage and a ready sale of
+    -- the same unit on the same day. The sale line carries has_purchase_mortgage (the
+    -- numerator of the purchase-mortgage share of ready sales, docs/01 §4); the mortgage
+    -- line carries is_purchase_mortgage and the observed loan-to-value.
+    pm_m.mortgage_transaction_id is not null as is_purchase_mortgage,
+    pm_s.sale_transaction_id is not null as has_purchase_mortgage,
+    pm_m.purchase_ltv,
+
     -- Area-weighted price population (Σ AED / Σ sq m): the area must be plausible for the
     -- property class (macro class_area_cap: apartment 1,000 sq m, villa 3,000, office /
     -- retail 5,000, other 10,000). Doesn't change is_clean_market_sale (the median
@@ -230,3 +238,7 @@ left join {{ ref('int_property_type_lookup') }} as pt
 left join {{ ref('seed_procedure_map') }} as pm
     on pm.trans_group = l.trans_group
     and pm.procedure_id = l.procedure_id
+left join {{ ref('int_purchase_mortgage_pairs') }} as pm_m
+    on pm_m.mortgage_transaction_id = l.transaction_id
+left join {{ ref('int_purchase_mortgage_pairs') }} as pm_s
+    on pm_s.sale_transaction_id = l.transaction_id

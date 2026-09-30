@@ -1,15 +1,24 @@
 """Q2: how much of the market is financed, and has that shifted with interest rates?
 
-* **Mortgage share** (docs/01 §4) = individual new mortgages ÷ (new mortgages + market
-  sales), by month, from ``gold.agg_area_month``. Portfolio mortgages are outside the
-  ratio and reported separately, one count per deal (C16).
+* **Purchase-mortgage share of ready sales** (docs/01 §4, the headline) = ready market
+  sales matched to a same-day purchase mortgage of the same unit
+  (``fct_transaction.has_purchase_mortgage``, from ``int_purchase_mortgage_pairs``) ÷ ready
+  market sales. The DLD register doesn't link a sale to its loan; a mortgaged purchase
+  registers both a sale and a mortgage line, and new mortgages include refinancing, so
+  "mortgages ÷ (mortgages + sales)" double-counts. The match is a **lower bound**: a loan
+  registered on another day or keyed differently isn't matched.
+* **Upper bound**: every Mortgage Registration / Delayed Mortgage line (the ready-unit
+  loans, excluding inferred portfolio lines) ÷ ready market sales. It includes refinancing
+  and loans on units bought earlier, so the true share lies between the two. The **match
+  rate** (matched ÷ those loans) rose over time, so part of the lower bound's trend is
+  better matching, not more borrowing.
+* **New mortgages per 100 market sales** is the secondary indicator (all individual new
+  mortgages, including off-plan pre-registration and refinancing).
+* Off-plan buyers mostly pay the developer in instalments; a sale with no mortgage is
+  "not bank-financed at registration", not necessarily a cash purchase.
 * **Rates.** EIBOR is not loaded yet (docs/08 Phase 1), so the effective Fed Funds rate
-  stands in: the dirham is pegged to the US dollar, so UAE policy rates track the Fed.
-  Any link to mortgage share is an association, not a causal estimate.
-* **Observed LTV.** The Phase 1 same-day match (phase1_findings §2), rebuilt on gold: a
-  Mortgage Registration and a Sell (or Delayed Mortgage and Delayed Sell) on the same day
-  for the same unit (area, building, project, sq m, rooms, type, sub-type), where the key
-  is unique on both sides. LTV = loan ÷ sale price. It covers purchase mortgages only.
+  stands in: the dirham is pegged to the US dollar. Associations only.
+* **Observed LTV** = loan ÷ price on the matched pairs (``fct_transaction.purchase_ltv``).
 """
 
 from __future__ import annotations
@@ -20,13 +29,22 @@ from sqlalchemy import Engine
 
 from dubai_property.analysis.common import query
 
-MORTGAGE_SHARE_MONTHLY_SQL = """
+# Monthly, grouped in SQL over the fact (the counts match gold.agg_area_month; the upper
+# bound needs the procedure, which the aggregate doesn't carry).
+MORTGAGE_INDICATORS_MONTHLY_SQL = """
 with m as (
-    select month, sum(new_mortgages) as new_mortgages, sum(market_sales) as market_sales,
-           sum(new_mortgage_loans_aed) as new_mortgage_loans_aed
-    from gold.agg_area_month
-    where month between :start and :end
-    group by month
+    select date_trunc('month', txn_date)::date as month,
+           count(*) filter (where is_market_sale) as market_sales,
+           count(*) filter (where is_market_sale and not is_offplan) as ready_sales,
+           count(*) filter (where has_purchase_mortgage) as purchase_mortgages,
+           count(*) filter (where is_new_mortgage) as new_mortgages,
+           count(*) filter (
+               where procedure_name in ('Mortgage Registration', 'Delayed Mortgage')
+                 and not is_repeated_deal_value
+           ) as ready_unit_mortgages
+    from gold.fct_transaction
+    where is_in_report_scope and txn_date between :start and :end
+    group by 1
 )
 select m.*, r.fed_funds_rate
 from m
@@ -47,39 +65,12 @@ group by 1
 order by 1
 """
 
-# Pairs of (mortgage procedure, sale procedure) whose amounts are a loan and a price (C10).
-_PAIRS = "('Mortgage Registration', 'Sell'), ('Delayed Mortgage', 'Delayed Sell')"
-
-LTV_PAIRS_CTE = f"""
-with base as (
-    select txn_date, area_key, coalesce(building_name, '') as building, project_key,
-           area_sqm, coalesce(rooms_en, '') as rooms, coalesce(property_type, '') as ptype,
-           coalesce(property_sub_type, '') as sub_type, procedure_name, actual_worth_aed,
-           case when trans_group = 'Sales' then 'sale' else 'mortgage' end as side
+LTV_BY_YEAR_SQL = """
+with pairs as (
+    select txn_date, purchase_ltv as ltv
     from gold.fct_transaction
-    where is_in_report_scope
-      and procedure_name in ('Mortgage Registration', 'Delayed Mortgage', 'Sell', 'Delayed Sell')
-),
-keyed as (
-    select *, count(*) over (
-        partition by txn_date, area_key, building, project_key, area_sqm, rooms, ptype,
-                     sub_type, side) as lines_on_key
-    from base
-),
-pairs as (
-    select m.txn_date, m.actual_worth_aed / nullif(s.actual_worth_aed, 0) as ltv
-    from keyed as m
-    join keyed as s
-        using (txn_date, area_key, building, project_key, area_sqm, rooms, ptype, sub_type)
-    where m.side = 'mortgage' and s.side = 'sale'
-      and m.lines_on_key = 1 and s.lines_on_key = 1
-      and (m.procedure_name, s.procedure_name) in ({_PAIRS})
+    where is_purchase_mortgage and is_in_report_scope
 )
-"""
-
-LTV_BY_YEAR_SQL = (
-    LTV_PAIRS_CTE
-    + """
 select extract(year from txn_date)::int as year, count(*) as pairs,
        percentile_cont(0.25) within group (order by ltv) as p25,
        percentile_cont(0.50) within group (order by ltv) as median,
@@ -93,49 +84,74 @@ from pairs
 group by 1
 order by 1
 """
-)
 
 # 0.025-wide bins from 0.40 to 1.10 (bucket 0 = below, 29 = above), per year.
-LTV_HISTOGRAM_SQL = (
-    LTV_PAIRS_CTE
-    + """
+LTV_HISTOGRAM_SQL = """
 select extract(year from txn_date)::int as year,
-       width_bucket(ltv, 0.40, 1.10, 28) as bucket, count(*) as pairs
-from pairs
-where extract(year from txn_date) = any(:years)
+       width_bucket(purchase_ltv, 0.40, 1.10, 28) as bucket, count(*) as pairs
+from gold.fct_transaction
+where is_purchase_mortgage and is_in_report_scope
+  and extract(year from txn_date) = any(:years)
 group by 1, 2
 order by 1, 2
 """
+
+
+_COUNTS = (
+    "market_sales",
+    "ready_sales",
+    "purchase_mortgages",
+    "new_mortgages",
+    "ready_unit_mortgages",
 )
 
 
-def mortgage_share_monthly(start, end, engine: Engine | None = None) -> pd.DataFrame:
-    """Monthly mortgage share with a trailing 12-month version and the Fed Funds rate.
-
-    The 12-month share is Σ mortgages ÷ Σ (mortgages + sales) over the window, not a
-    mean of monthly ratios, so busy months weigh more.
-    """
-    df = query(MORTGAGE_SHARE_MONTHLY_SQL, {"start": start, "end": end}, engine)
-    df["month"] = pd.to_datetime(df["month"])
-    for col in ("new_mortgages", "market_sales", "new_mortgage_loans_aed", "fed_funds_rate"):
-        df[col] = df[col].astype("float64")
-    denom = df["new_mortgages"] + df["market_sales"]
-    df["mortgage_share"] = df["new_mortgages"] / denom
-    roll_m = df["new_mortgages"].rolling(12, min_periods=12).sum()
-    roll_d = denom.rolling(12, min_periods=12).sum()
-    df["mortgage_share_12m"] = roll_m / roll_d
+def _indicators(df: pd.DataFrame) -> pd.DataFrame:
+    """Add the ratios to a frame of summed counts (any grain)."""
+    df["purchase_share"] = df["purchase_mortgages"] / df["ready_sales"]
+    df["upper_share"] = df["ready_unit_mortgages"] / df["ready_sales"]
+    df["match_rate"] = df["purchase_mortgages"] / df["ready_unit_mortgages"]
+    df["new_per_100_sales"] = 100 * df["new_mortgages"] / df["market_sales"]
     return df
 
 
-def share_rate_correlation(df: pd.DataFrame, from_year: int = 2010) -> dict[str, float]:
-    """Pearson correlation of the 12-month mortgage share with Fed Funds.
+def mortgage_indicators_monthly(start, end, engine: Engine | None = None) -> pd.DataFrame:
+    """Monthly purchase-mortgage share (and its upper bound) with Fed Funds.
+
+    ``purchase_share_12m`` is Σ matched ÷ Σ ready sales over the trailing 12 months (a
+    ratio of sums, so busy months weigh more), used for the rate comparison.
+    """
+    df = query(MORTGAGE_INDICATORS_MONTHLY_SQL, {"start": start, "end": end}, engine)
+    df["month"] = pd.to_datetime(df["month"])
+    for col in (*_COUNTS, "fed_funds_rate"):
+        df[col] = df[col].astype("float64")
+    df = _indicators(df)
+    roll = df[list(_COUNTS)].rolling(12, min_periods=12).sum()
+    df["purchase_share_12m"] = roll["purchase_mortgages"] / roll["ready_sales"]
+    df["upper_share_12m"] = roll["ready_unit_mortgages"] / roll["ready_sales"]
+    df["new_per_100_sales_12m"] = 100 * roll["new_mortgages"] / roll["market_sales"]
+    return df
+
+
+def mortgage_indicators_by_year(monthly: pd.DataFrame) -> pd.DataFrame:
+    """Yearly sums of ``mortgage_indicators_monthly`` with the ratios recomputed."""
+    y = monthly.groupby(monthly["month"].dt.year)[list(_COUNTS)].sum()
+    y.index.name = "year"
+    y = _indicators(y.reset_index())
+    rate = monthly.groupby(monthly["month"].dt.year)["fed_funds_rate"].mean()
+    return y.merge(rate.rename("fed_funds_avg"), left_on="year", right_index=True)
+
+
+def share_rate_correlation(
+    df: pd.DataFrame, from_year: int = 2010, col: str = "purchase_share_12m"
+) -> dict[str, float]:
+    """Pearson correlation of a trailing-12-month share with Fed Funds.
 
     Returns correlations in levels and in 12-month changes (changes remove the common
     trend that makes two slow series look related). Months before ``from_year`` are
     dropped: 2004–09 volumes are distorted by registration timing (see market_cycles).
     """
-    d = df.loc[df["month"].dt.year >= from_year, ["mortgage_share_12m", "fed_funds_rate"]]
-    d = d.dropna()
+    d = df.loc[df["month"].dt.year >= from_year, [col, "fed_funds_rate"]].dropna()
     diff = d.diff(12).dropna()
     return {
         "months": float(len(d)),

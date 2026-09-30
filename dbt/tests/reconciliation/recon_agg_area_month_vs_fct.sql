@@ -17,6 +17,7 @@ with fct as (
         sum(area_sqm) filter (
             where is_in_report_scope and is_clean_market_sale and not is_area_above_class_cap
         ) as clean_area,
+        count(*) filter (where is_in_report_scope and has_purchase_mortgage) as purchase_mortgages,
         count(*) filter (where is_in_report_scope and is_new_mortgage) as new_mortgages,
         sum(mortgage_amount_once_aed) filter (where is_in_report_scope and is_new_mortgage) as loans,
         count(*) filter (where is_in_report_scope and is_portfolio_mortgage and is_deal_group_lead)
@@ -38,6 +39,7 @@ agg as (
         sum(clean_sales_aw_n) as aw_n,
         sum(clean_sales_value_aed) as clean_value,
         sum(clean_sales_area_sqm) as clean_area,
+        sum(purchase_mortgages) as purchase_mortgages,
         sum(new_mortgages) as new_mortgages,
         sum(new_mortgage_loans_aed) as loans,
         sum(portfolio_mortgage_deals) as portfolio_deals,
@@ -56,6 +58,7 @@ where f.lines <> a.lines
    or f.aw_n <> a.aw_n
    or coalesce(f.clean_value, 0) <> a.clean_value
    or coalesce(f.clean_area, 0) <> a.clean_area
+   or f.purchase_mortgages <> a.purchase_mortgages
    or f.new_mortgages <> a.new_mortgages
    or coalesce(f.loans, 0) <> a.loans
    or f.portfolio_deals <> a.portfolio_deals

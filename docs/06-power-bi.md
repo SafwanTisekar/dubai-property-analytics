@@ -37,9 +37,16 @@ Median Price per Sqm =
 CALCULATE ( MEDIAN ( fct_transaction[price_per_sqm] ), fct_transaction[is_market_sale] = 1, fct_transaction[has_quality_flag] = 0 )
 
 // ---------- Financing ----------
-New Mortgages = CALCULATE ( COUNTROWS ( fct_transaction ), fct_transaction[is_new_mortgage] = 1 )   // individual only; portfolio reported separately
+New Mortgages = CALCULATE ( COUNTROWS ( fct_transaction ), fct_transaction[is_new_mortgage] = 1 )   // individual only (incl. refinancing); portfolio reported separately
 
-Mortgage Share = DIVIDE ( [New Mortgages], [New Mortgages] + [Market Sales] )
+// Headline (docs/01 §4, revised 2026-09-30): ready market sales matched to a same-day purchase
+// mortgage of the same unit ÷ ready market sales. A lower bound (see docs/04 Decisions).
+Purchase Mortgages = SUM ( area_month[Purchase Mortgages] )
+Ready Market Sales = CALCULATE ( SUM ( area_month[Market Sales] ), area_month[Is Off-Plan] = FALSE () )
+Purchase Mortgage Share = DIVIDE ( [Purchase Mortgages], [Ready Market Sales] )
+
+// Secondary indicator: new mortgages (incl. refinancing and off-plan pre-registration) per 100 market sales.
+New Mortgages per 100 Sales = DIVIDE ( [New Mortgages], [Market Sales] ) * 100
 
 Off-plan Share (Value) =
 DIVIDE ( CALCULATE ( [Market Sales Value], fct_transaction[is_offplan] = 1 ), [Market Sales Value] )
@@ -103,8 +110,8 @@ The shock and LTV values are stored as integers (e.g. −20, 80) in both the par
 
 | # | Page | Answers | Visuals |
 |---|---|---|---|
-| 1 | **Executive Overview** | Q1 | KPI cards (Sales Value, Sales Count, Median AED/sq m, Index YoY, Mortgage Share, Off-plan Share) · sales value by month with **cycle annotations** (2008, 2014, 2020, 2021+) · top 10 areas by value · 3 insight text boxes |
-| 2 | **Financing & Market Mix** | Q2 | Mortgage vs cash stacked area by month · mortgage share vs EIBOR 3M (dual axis) · off-plan vs ready share over time · off-plan share by area bar |
+| 1 | **Executive Overview** | Q1 | KPI cards (Sales Value, Sales Count, Median AED/sq m, Index YoY, Purchase Mortgage Share, Off-plan Share) · sales value by month with **cycle annotations** (2008, 2014, 2020, 2021+) · top 10 areas by value · 3 insight text boxes |
+| 2 | **Financing & Market Mix** | Q2 | Ready sales: bank-financed (matched purchase mortgage) vs not bank-financed at registration, by month · purchase-mortgage share and EIBOR 3M as stacked panels on one time axis (no dual axis) · new mortgages per 100 sales · off-plan vs ready share over time · off-plan share by area bar |
 | 3 | **Prices & Index** | Q3, Q6 | Hedonic index lines (Dubai / apartments / villas / zones) vs DLD official index · **raw median vs hedonic** (mix-shift story) · AED/sq m by area map · bedrooms × zone matrix · drawdown chart |
 | 4 | **Rental Yields** | Q4 | Yield by area map · yield vs 3-year growth scatter (bubble = sales volume; quadrant lines) · yield trend by zone · rent per sq m by bedrooms |
 | 5 | **Valuation Model (AVM)** | Q5 | AVM KPI cards (MdAPE, ±10%/±20% hit rates vs baseline) · accuracy by segment bar · top feature importance · actual vs predicted by month · table of the largest AVM gaps by area/project |

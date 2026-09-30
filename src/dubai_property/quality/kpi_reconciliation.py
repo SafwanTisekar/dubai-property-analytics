@@ -57,6 +57,8 @@ DIVERGENCE_MIN_LINES = 100_000
 # metric -> kind; the kind sets the tolerance (see ``tolerance``).
 METRICS: dict[str, str] = {
     "market_sales": "count",
+    "ready_sales": "count",
+    "purchase_mortgages": "count",
     "market_value": "aed",
     "offplan_sales": "count",
     "offplan_value": "aed",
@@ -97,18 +99,55 @@ _GROUPING = "group by grouping sets ((), (yr), (mon))"
 
 SNAPSHOT_SQL = "select data_snapshot_date from silver.int_data_snapshot"
 
+# Purchase mortgages (docs/01 §4), re-derived from silver with a different formulation
+# from dbt's int_purchase_mortgage_pairs (window counts over the unit key instead of a
+# GROUP BY), so an error in either shows up as a mismatch.
+_PM_KEY = """md5(concat_ws('|', txn_date, coalesce(area_id, -1), coalesce(building_name, ''),
+                  coalesce(project_number, -1), area_sqm, coalesce(rooms_en, ''),
+                  coalesce(property_type, ''), coalesce(property_sub_type, '')))"""
+
 SILVER_SALES_SQL = f"""
-with lines as (
+with pm_legs as (
+    select 'sale' as side, transaction_id, procedure_name, is_repeated_deal_value,
+           {_PM_KEY} as k
+    from silver.int_market_sales
+    where procedure_name in ('Sell', 'Delayed Sell') and is_market_sale and not is_offplan
+      and txn_date is not null and area_sqm is not null
+    union all
+    select 'mortgage', transaction_id, procedure_name, is_repeated_deal_value, {_PM_KEY}
+    from silver.int_mortgages
+    where procedure_name in ('Mortgage Registration', 'Delayed Mortgage')
+      and txn_date is not null and area_sqm is not null
+),
+pm_counted as (
+    select *,
+           count(*) filter (where side = 'sale') over w as sales_on_key,
+           count(*) filter (where side = 'mortgage') over w as mortgages_on_key,
+           max(procedure_name) filter (where side = 'mortgage') over w as mortgage_proc,
+           bool_or(is_repeated_deal_value) over w as any_repeated
+    from pm_legs
+    window w as (partition by k)
+),
+pm_sales as (
+    select transaction_id
+    from pm_counted
+    where side = 'sale' and sales_on_key = 1 and mortgages_on_key = 1 and not any_repeated
+      and (mortgage_proc, procedure_name) in (('Mortgage Registration', 'Sell'),
+                                              ('Delayed Mortgage', 'Delayed Sell'))
+),
+lines as (
     select txn_date, is_market_sale, is_clean_market_sale, is_offplan,
            actual_worth_once_aed as aed, price_per_sqm_aed as ppsqm, area_sqm,
            false as is_new_mortgage, false as is_portfolio_mortgage,
            null::text as deal_group_id, null::numeric as portfolio_value,
-           property_usage, property_type, property_sub_type
+           property_usage, property_type, property_sub_type,
+           transaction_id in (select transaction_id from pm_sales) as has_purchase_mortgage
     from silver.int_market_sales
     union all
     select txn_date, false, false, is_offplan, actual_worth_once_aed, null, area_sqm,
            is_new_mortgage, is_portfolio_mortgage, deal_group_id,
-           portfolio_mortgage_value_once_aed, property_usage, property_type, property_sub_type
+           portfolio_mortgage_value_once_aed, property_usage, property_type, property_sub_type,
+           false
     from silver.int_mortgages
 ),
 scoped as (
@@ -130,6 +169,8 @@ flagged as (
 select {_PERIOD},
     count(*) as _rows,
     count(*) filter (where is_market_sale) as market_sales,
+    count(*) filter (where is_market_sale and not is_offplan) as ready_sales,
+    count(*) filter (where has_purchase_mortgage) as purchase_mortgages,
     coalesce(sum(aed) filter (where is_market_sale), 0) as market_value,
     count(*) filter (where is_market_sale and is_offplan) as offplan_sales,
     coalesce(sum(aed) filter (where is_market_sale and is_offplan), 0) as offplan_value,
@@ -159,6 +200,8 @@ with scoped as (
 select {_PERIOD},
     count(*) as _rows,
     count(*) filter (where "Is Market Sale") as market_sales,
+    count(*) filter (where "Is Market Sale" and not "Is Off-Plan") as ready_sales,
+    count(*) filter (where "Has Purchase Mortgage") as purchase_mortgages,
     coalesce(sum("AED Counted Once") filter (where "Is Market Sale"), 0) as market_value,
     count(*) filter (where "Is Market Sale" and "Is Off-Plan") as offplan_sales,
     coalesce(sum("AED Counted Once") filter (where "Is Market Sale" and "Is Off-Plan"), 0)
@@ -191,6 +234,8 @@ with scoped as (
 select {_PERIOD},
     count(*) as _rows,
     sum("Market Sales") as market_sales,
+    coalesce(sum("Market Sales") filter (where not "Is Off-Plan"), 0) as ready_sales,
+    sum("Purchase Mortgages") as purchase_mortgages,
     sum("Market Sales Value AED") as market_value,
     coalesce(sum("Market Sales") filter (where "Is Off-Plan"), 0) as offplan_sales,
     coalesce(sum("Market Sales Value AED") filter (where "Is Off-Plan"), 0) as offplan_value,
@@ -321,9 +366,12 @@ def _ratio(num: Any, den: Any) -> float | None:
 
 def derive(row: dict[str, Any]) -> dict[str, float | None]:
     """The docs/01 §4 KPIs from one period's base metrics."""
-    new, sales = row.get("new_mortgages") or 0, row.get("market_sales") or 0
+    new, sales = row.get("new_mortgages"), row.get("market_sales") or 0
     return {
-        "mortgage_share": _ratio(new, new + sales),
+        # Headline: matched purchase mortgages / ready market sales (a lower bound).
+        "purchase_mortgage_share": _ratio(row.get("purchase_mortgages"), row.get("ready_sales")),
+        # Secondary: new mortgages (incl. refinancing) per 100 market sales.
+        "new_mortgages_per_100": None if new is None or not sales else 100 * float(new) / sales,
         "offplan_share_count": _ratio(row.get("offplan_sales"), sales),
         "offplan_share_value": _ratio(row.get("offplan_value"), row.get("market_value")),
         "aw_ppsqm": _ratio(row.get("aw_value"), row.get("aw_area")),
@@ -445,8 +493,11 @@ def kpi_rows(silver: Table, periods: list[str]) -> list[tuple]:
                 _bn(r.get("market_value")),
                 _aed(r.get("median_ppsqm")),
                 _aed(d["aw_ppsqm"]),
+                r.get("ready_sales"),
+                r.get("purchase_mortgages"),
+                _pct(d["purchase_mortgage_share"]),
                 r.get("new_mortgages"),
-                _pct(d["mortgage_share"]),
+                None if d["new_mortgages_per_100"] is None else f"{d['new_mortgages_per_100']:.1f}",
                 _pct(d["offplan_share_count"]),
                 _pct(d["offplan_share_value"]),
                 r.get("portfolio_deals"),
@@ -464,8 +515,11 @@ COLUMNS = [
     "Market sales AED bn",
     "Median AED / sq m (all clean sales)",
     "Area-weighted AED / sq m (res. apartments + villas)",
+    "Ready market sales",
+    "Purchase mortgages (matched)",
+    "Purchase-mortgage share of ready sales %",
     "New mortgages",
-    "Mortgage share %",
+    "New mortgages per 100 market sales",
     "Off-plan share % (count)",
     "Off-plan share % (value)",
     "Portfolio mortgage deals",
@@ -526,8 +580,12 @@ def render(result: Result) -> str:
         "(`is_clean_market_sale`); **area-weighted AED per sq m** = Σ AED / Σ sq m over clean "
         "sales of residential apartments and villas / townhouses whose area is within the "
         "class cap (1,000 / 3,000 sq m), because across property classes it would mix land, "
-        "buildings and units; **mortgage share** = individual new mortgages / (new mortgages "
-        "+ market sales); portfolio mortgages are outside the share, counted once per deal; "
+        "buildings and units; **purchase-mortgage share of ready sales** = ready market "
+        "sales matched to a same-day purchase mortgage of the same unit "
+        "(`has_purchase_mortgage`, a lower bound) / ready market sales; **new mortgages per "
+        "100 market sales** = individual new mortgages (incl. refinancing) x 100 / market "
+        "sales, a secondary indicator; portfolio mortgages are outside both, counted once "
+        "per deal; "
         "**off-plan share** = off-plan market sales / market sales; **new market rents** = "
         "`is_market_rent` (new, single-line, comparable, started by the snapshot); "
         "area-weighted rent = Σ annual rent / Σ sq m over new market rents of residential "
@@ -543,8 +601,7 @@ def render(result: Result) -> str:
         "",
         "## 3. Last 12 months",
         "",
-        f"The 12 months to the snapshot ({result.snapshot}); mortgage share is defined by month "
-        "(docs/01 §4). The snapshot month is partial.",
+        f"The 12 months to the snapshot ({result.snapshot}). The snapshot month is partial.",
         "",
         *md_table(COLUMNS, kpi_rows(result.silver, months)),
         "",

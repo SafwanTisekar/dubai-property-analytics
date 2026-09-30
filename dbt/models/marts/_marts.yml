@@ -94,9 +94,28 @@ models:
       - dbt_utils.expression_is_true:
           arguments:
             expression: "not (is_market_sale and trans_group <> 'Sales')"
+      - dbt_utils.expression_is_true:
+          arguments:
+            expression: "not has_purchase_mortgage or (is_market_sale and not is_offplan)"
+      - dbt_utils.expression_is_true:
+          arguments:
+            expression: "not is_purchase_mortgage or (is_new_mortgage and purchase_ltv is not null)"
     columns:
       - name: transaction_id
         tests: [unique, not_null]
+      - name: has_purchase_mortgage
+        description: >
+          Ready market sale matched to a same-day purchase mortgage of the same unit
+          (int_purchase_mortgage_pairs). The numerator of the purchase-mortgage share of
+          ready sales (docs/01 §4); a lower bound on mortgaged purchases.
+        tests: [not_null]
+      - name: is_purchase_mortgage
+        description: >
+          Mortgage Registration / Delayed Mortgage matched to a same-day ready sale of the same
+          unit (int_purchase_mortgage_pairs): the loan that funded that purchase.
+        tests: [not_null]
+      - name: purchase_ltv
+        description: Observed loan-to-value on a purchase mortgage line (loan ÷ matched sale price).
       - name: txn_date
         description: Registration date (C18). NULL on the 4 Hijri-dated rows.
         tests:
@@ -292,6 +311,9 @@ models:
             expression: "clean_sales <= market_sales and market_sales <= transaction_lines"
       - dbt_utils.expression_is_true:
           arguments:
+            expression: "purchase_mortgages <= market_sales and (purchase_mortgages = 0 or not is_offplan)"
+      - dbt_utils.expression_is_true:
+          arguments:
             expression: "(median_price_per_sqm_aed is null) = (clean_sales = 0)"
     columns:
       - name: month
@@ -326,8 +348,15 @@ models:
           class (the grain has property_type_key), not across land, buildings and units.
       - name: clean_sales_area_sqm
         description: Σ area (sq m) over the same sales.
+      - name: purchase_mortgages
+        description: >
+          Ready market sales matched to a same-day purchase mortgage (has_purchase_mortgage),
+          counted on the sale line. ÷ ready market sales (market_sales where not is_offplan)
+          = purchase-mortgage share (docs/01 §4).
       - name: new_mortgages
-        description: Individual new mortgages (is_new_mortgage), the mortgage-share numerator.
+        description: >
+          Individual new mortgages (is_new_mortgage), including refinancing. Secondary
+          indicator: new mortgages per 100 market sales.
       - name: new_mortgage_loans_aed
         description: Σ verified loan amounts (C10), once per deal.
       - name: portfolio_mortgage_deals
