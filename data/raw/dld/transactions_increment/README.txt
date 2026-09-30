@@ -1,0 +1,1 @@
+DLD Open Data portal exports (dubailand.gov.ae, date-filtered). Portal schema (TRANSACTION_NUMBER, INSTANCE_DATE, PROCEDURE_EN, TRANS_VALUE...), which differs from the Dubai Pulse bulk schema in ../transactions/. IDs do not match the bulk transaction_id, so top-ups must be de-duplicated by date window. This folder is gitignored (except this note).

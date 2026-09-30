@@ -1,0 +1,7 @@
+packages:
+  - package: dbt-labs/dbt_utils
+    version: [">=1.3.0", "<2.0.0"]
+  # calogica/dbt_expectations is archived; metaplane maintains the active fork
+  # (same macro names, e.g. dbt_expectations.expect_column_values_to_be_between).
+  - package: metaplane/dbt_expectations
+    version: [">=0.10.0", "<0.11.0"]

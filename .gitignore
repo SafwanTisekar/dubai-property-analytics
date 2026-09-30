@@ -1,0 +1,47 @@
+# --- Data (never committed: DLD raw files are multi-GB) -----------------------
+# Ignore everything under data/, but keep directories traversable so the
+# README notes in each raw folder (dataset schema notes) stay tracked.
+/data/**
+!/data/**/
+!/data/raw/**/README.txt
+
+# --- Secrets ------------------------------------------------------------------
+.env
+.env.*
+!.env.example
+
+# --- Trained model binaries (large, reproducible via `make train`) ------------
+/artifacts/
+
+# --- Database dumps -----------------------------------------------------------
+*.dump
+*.backup
+*.sql.gz
+
+# --- Python / uv ----------------------------------------------------------------
+__pycache__/
+*.py[cod]
+.venv/
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+
+# --- dbt ------------------------------------------------------------------------
+dbt/target/
+dbt/dbt_packages/
+dbt/logs/
+logs/
+.user.yml
+
+# --- Power BI (PBIP local/cache files) ----------------------------------------
+powerbi/**/.pbi/localSettings.json
+powerbi/**/.pbi/cache.abf
+
+# --- OS / editors ---------------------------------------------------------------
+.DS_Store
+.vscode/
+.idea/
+.claude/

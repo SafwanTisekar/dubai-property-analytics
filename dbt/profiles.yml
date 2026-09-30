@@ -1,0 +1,15 @@
+# Committed on purpose: holds no secrets, only env_var() lookups. The Makefile exports
+# .env, and CI sets the same variables. Always run dbt with `--profiles-dir .` from dbt/.
+dubai_property:
+  target: dev
+  outputs:
+    dev:
+      type: postgres
+      host: "{{ env_var('PG_HOST', 'localhost') }}"
+      port: "{{ env_var('PG_PORT', '5432') | as_number }}"
+      dbname: "{{ env_var('PG_DB', 'dubai_property') }}"
+      user: "{{ env_var('PG_USER', 'dpa_owner') }}"
+      password: "{{ env_var('PG_PASSWORD') }}"
+      schema: public  # default only; every model folder sets its own schema
+      threads: "{{ env_var('DBT_THREADS', '4') | as_number }}"
+      connect_timeout: 10

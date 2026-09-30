@@ -1,0 +1,65 @@
+[project]
+name = "dubai-property"
+version = "0.1.0"
+description = "Dubai property market & mortgage risk analytics on Dubai Land Department open data"
+readme = "README.md"
+authors = [{ name = "Safwan Tisekar" }]
+requires-python = ">=3.11,<3.13"
+dependencies = [
+    # Python <-> Postgres (docs/03 §4): psycopg for COPY, SQLAlchemy engine, connectorx for fast reads
+    "psycopg[binary]>=3.2",
+    "sqlalchemy>=2.0",
+    "connectorx>=0.4",
+    "python-dotenv>=1.0",
+    # Wrangling: Polars for heavy lifting, pandas only for model-sized frames
+    "polars>=1.0",
+    "pandas>=2.2",
+    "pyarrow>=17",
+    # Modelling (docs/05)
+    "scikit-learn>=1.5",
+    "lightgbm>=4.5",
+    "statsmodels>=0.14",
+    "shap>=0.46",
+    "optuna>=4.0",
+    # Transformations (docs/04)
+    "dbt-core~=1.12.0",
+    "dbt-postgres~=1.11",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3",
+    "ruff>=0.8",
+    "pre-commit>=4.0",
+    "ipykernel>=6.29",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/dubai_property"]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+src = ["src", "tests"]
+extend-exclude = ["dbt/dbt_packages", "dbt/target"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "D"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["D"]
+"notebooks/**" = ["D"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"
+markers = [
+    "db: integration tests that need the local dubai_property database (skipped if unreachable)",
+]

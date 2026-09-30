@@ -1,0 +1,33 @@
+name: dubai_property
+version: "0.1.0"
+config-version: 2
+profile: dubai_property
+
+model-paths: ["models"]
+seed-paths: ["seeds"]
+test-paths: ["tests"]
+macro-paths: ["macros"]
+analysis-paths: ["analyses"]
+snapshot-paths: ["snapshots"]
+clean-targets: ["target", "dbt_packages"]
+
+# Layer -> schema + materialisation (docs/03 §3 and §7). Schema names are used verbatim
+# thanks to macros/generate_schema_name.sql (no "<target>_" prefix).
+models:
+  dubai_property:
+    staging:        # typing, renaming, decoding: thin views over bronze
+      +schema: silver
+      +materialized: view
+    intermediate:   # cleaning rules C1-C15 as flags; heavy joins, so materialised
+      +schema: silver
+      +materialized: table
+    marts:          # star schema facts, dimensions, aggregates (indexed via config)
+      +schema: gold
+      +materialized: table
+    reporting:      # the only layer Power BI reads (pbi_reader has SELECT on rpt only)
+      +schema: rpt
+      +materialized: view
+
+seeds:
+  dubai_property:
+    +schema: silver
