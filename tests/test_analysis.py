@@ -294,6 +294,9 @@ def test_financing_queries(snapshot):
     assert set(ltv.columns) >= {"year", "pairs", "median", "share_at_0_75", "share_at_0_80"}
     shares = ltv.filter(like="share_").stack()
     assert shares.between(0, 1).all()
+    clusters = financing.ltv_cluster_shares_monthly(date(2004, 1, 1), snapshot)
+    assert clusters.filter(like="share_").stack().between(0, 1).all()
+    assert clusters["pairs"].sum() == ltv["pairs"].sum()
     hist = financing.ltv_histogram([2024, 2025])
     if not hist.empty:
         assert hist.groupby("year")["share"].sum().round(9).eq(1).all()

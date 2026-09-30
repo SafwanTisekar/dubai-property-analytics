@@ -183,3 +183,25 @@ def ltv_histogram(years: list[int], engine: Engine | None = None) -> pd.DataFram
     df["ltv_low"] = np.round(0.40 + (df["bucket"] - 1) * width, 3)
     df["share"] = df["pairs"] / df.groupby("year")["pairs"].transform("sum")
     return df
+
+
+# Monthly shares of matched purchase mortgages sitting at the regulatory caps, to date the
+# 2020 change (CBUAE Board Resolution 31/2/2020, effective 2020-04-08; seed_ltv_rules).
+LTV_CLUSTERS_MONTHLY_SQL = """
+select date_trunc('month', txn_date)::date as month, count(*) as pairs,
+       avg((purchase_ltv between 0.745 and 0.755)::int) as share_at_0_75,
+       avg((purchase_ltv between 0.795 and 0.805)::int) as share_at_0_80,
+       avg((purchase_ltv between 0.8475 and 0.8485)::int) as share_at_0_848,
+       avg((purchase_ltv between 0.845 and 0.855)::int) as share_0_845_to_0_855
+from gold.fct_transaction
+where is_purchase_mortgage and txn_date between :start and :end
+group by 1
+order by 1
+"""
+
+
+def ltv_cluster_shares_monthly(start, end, engine: Engine | None = None) -> pd.DataFrame:
+    """Monthly share of matched purchase mortgages at exactly 75%, 80% and 84.8% LTV."""
+    df = query(LTV_CLUSTERS_MONTHLY_SQL, {"start": start, "end": end}, engine)
+    df["month"] = pd.to_datetime(df["month"])
+    return df.astype({c: "float64" for c in df.columns if c.startswith("share")})

@@ -86,7 +86,7 @@ Phase 2 is split. **2a = silver** (seeds, staging, intermediate, DQ report, CI f
 - [x] 2b (see below)
 
 **2b checklist (gold + rpt)**
-- [x] Seeds: conformed property type (`seed_property_class`, `seed_property_usage_map`, `seed_property_type_map`), `procedure_key` in `seed_procedure_map`, empty centroid columns in `seed_area`, `seed_ltv_rules` (**owner to verify** each row against the CBUAE rulebook; `verified = false`)
+- [x] Seeds: conformed property type (`seed_property_class`, `seed_property_usage_map`, `seed_property_type_map`), `procedure_key` in `seed_procedure_map`, empty centroid columns in `seed_area`, `seed_ltv_rules` (verified by the owner 2026-09-30 against the CBUAE rulebook, with effective dates and the pre-2020 regime; see docs/04 Decisions)
 - [x] Dimensions: `dim_date` (day, 2004-01-01 → 2027-12-31), `dim_area`, `dim_property_type` (conformed), `dim_procedure`, `dim_project` (no developer yet)
 - [x] Facts: `fct_transaction` (all lines, `aed_counted_once`), `fct_rent_contract` (all lines, allocated rent, market-rent flag), `fct_rates_monthly` (EIBOR columns NULL); indexed per docs/03 §7
 - [x] Aggregates: `agg_area_month`, `agg_rent_month` (additive, medians with n, Σ value / Σ area)

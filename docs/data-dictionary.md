@@ -1,13 +1,13 @@
 # Data dictionary
 
-Generated 2026-09-30 18:29 UTC by `quality/data_dictionary.py` from the dbt manifest (descriptions, tests) and the database catalogue (columns, types). Regenerate with `make dictionary` (after `make dbt`). Rules C1-C22 are in docs/04 §2; the star schema in docs/04 §3. Bronze is raw text (docs/04 §1) and not listed.
+Generated 2026-09-30 19:00 UTC by `quality/data_dictionary.py` from the dbt manifest (descriptions, tests) and the database catalogue (columns, types). Regenerate with `make dictionary` (after `make dbt`). Rules C1-C22 are in docs/04 §2; the star schema in docs/04 §3. Bronze is raw text (docs/04 §1) and not listed.
 
 ## Silver: seeds, staging views and intermediate tables (typed, cleaned, flagged)
 
 | Object | Type | Description |
 |---|---|---|
 | [`silver.seed_area`](#silverseed_area) | seed | C8: every DLD area_id seen in transactions or rents (265 IDs; Phase 1's "266" counted the blank area_id on 3 rent lines as a value) -> canonical name and zone. Zones group areas into markets for the min-n roll-up. Every area has a zone; `make unzoned` (reports/unzoned_areas.md) lists any that don't, e.g. a new area in a later snapshot. |
-| [`silver.seed_ltv_rules`](#silverseed_ltv_rules) | seed | CBUAE mortgage loan-to-value caps for the Phase 4 stress test (docs/05 §4). Values follow the CBUAE Regulations Regarding Mortgage Loans (Notice 31/2013, as amended) as commonly summarised; **verified = false until the owner checks each row against the current CBUAE rulebook** and updates source_citation. The stress test is illustrative and must say which LTVs it assumed. |
+| [`silver.seed_ltv_rules`](#silverseed_ltv_rules) | seed | CBUAE mortgage loan-to-value caps for the Phase 4 stress test (docs/05 §4), one row per rule (borrower x property status x home number x value band) per regulatory period. Current regime: CBUAE Regulations Regarding Mortgage Loans, Art. 3(2), as amended by Board Resolution 31/2/2020 (effective 2020-04-08). Earlier regime: Circular No. 31/2013 (to 2020-04-07). Every row verified by the owner against the CBUAE rulebook (2026-09-30). The stress test is illustrative and must say which LTVs it assumed. |
 | [`silver.seed_phase1_reconciliation`](#silverseed_phase1_reconciliation) | seed | The Phase 1 figures (reports/phase1_findings.md, phase1_evidence.md) that silver must reproduce. The reconciliation tests check them only when bronze holds exactly the Phase 1 snapshot (the `bronze_rows` gate), so they are skipped on the CI fixtures. |
 | [`silver.seed_procedure_category`](#silverseed_procedure_category) | seed | The procedure categories used by seed_procedure_map, with the market-sale flag each implies. `inheritance` is kept although no procedure maps to it in the 2026-09 extract (phase1_findings §1), so a future snapshot has a place to land. |
 | [`silver.seed_procedure_map`](#silverseed_procedure_map) | seed | C2: every (trans_group, procedure_id) pair in the DLD register (58 in the 2026-09 extract) -> category and flags. Keyed on the pair, not the name, because six lease-to-own codes are registered under both Sales and Mortgages (phase1_findings §1). A procedure missing from this seed fails the stg_transactions not_null test on procedure_category, so a new DLD procedure can't slip through unmapped. |
@@ -43,7 +43,7 @@ C8: every DLD area_id seen in transactions or rents (265 IDs; Phase 1's "266" co
 <a id="silverseed_ltv_rules"></a>
 ### `silver.seed_ltv_rules`
 
-CBUAE mortgage loan-to-value caps for the Phase 4 stress test (docs/05 §4). Values follow the CBUAE Regulations Regarding Mortgage Loans (Notice 31/2013, as amended) as commonly summarised; **verified = false until the owner checks each row against the current CBUAE rulebook** and updates source_citation. The stress test is illustrative and must say which LTVs it assumed.
+CBUAE mortgage loan-to-value caps for the Phase 4 stress test (docs/05 §4), one row per rule (borrower x property status x home number x value band) per regulatory period. Current regime: CBUAE Regulations Regarding Mortgage Loans, Art. 3(2), as amended by Board Resolution 31/2/2020 (effective 2020-04-08). Earlier regime: Circular No. 31/2013 (to 2020-04-07). Every row verified by the owner against the CBUAE rulebook (2026-09-30). The stress test is illustrative and must say which LTVs it assumed.
 
 | Column | Type | Description | Tests |
 |---|---|---|---|
@@ -52,9 +52,13 @@ CBUAE mortgage loan-to-value caps for the Phase 4 stress test (docs/05 §4). Val
 | `property_status` | text |  |  |
 | `home_number` | text |  |  |
 | `value_band` | text |  |  |
-| `max_ltv` | numeric | Maximum loan / property value, as a decimal (0.80 = 80%). | between, not_null |
+| `max_ltv` | numeric | Maximum loan / property value, as a decimal (0.80 = 80%). | expression_is_true, not_null |
+| `effective_from` | date | First day the cap applies; NULL = open start (the 2013 start date is not recorded). |  |
+| `effective_to` | date | Last day the cap applies; NULL = still in force. |  |
 | `source_citation` | text |  | not_null |
-| `verified` | boolean | The owner has checked this row against the current CBUAE regulation. |  |
+| `source_url` | text | CBUAE rulebook page for the regulation. | not_null |
+| `secondary_source_url` | text | Secondary summary used alongside the rulebook (pre-2020 rows). |  |
+| `verified` | boolean | The owner has checked this row against the CBUAE regulation (2026-09-30). | expression_is_true, not_null |
 | `note` | text |  |  |
 
 <a id="silverseed_phase1_reconciliation"></a>

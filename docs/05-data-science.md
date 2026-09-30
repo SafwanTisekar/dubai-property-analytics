@@ -64,7 +64,7 @@ Five components, in priority order. Components 1–3 are core; 4–5 are core bu
 **Question:** if prices fall X%, what share of recent buyers would be in negative equity at typical loan-to-value (LTV) ratios, and in which areas?
 
 - **Population:** clean market sales in the last 24–36 months (the recent-vintage buyers).
-- **Assumed loan** = price × LTV, with an LTV scenario grid (50%, 60%, 70%, 80%). Default the caps to CBUAE mortgage rules (seed `seed_ltv_rules`, **verify current rules and cite them**). Off-plan uses a lower LTV assumption.
+- **Assumed loan** = price × LTV, with an LTV scenario grid (50%, 60%, 70%, 80%). Default the caps to CBUAE mortgage rules (seed `seed_ltv_rules`: verified against the CBUAE rulebook 2026-09-30 and dated with `effective_from` / `effective_to`, so a purchase uses the caps in force on its date). Off-plan uses a lower LTV assumption.
 - **Current value** = purchase price × (index today / index at purchase) for the property's segment (mark-to-market via the hedonic index).
 - **Shock grid:** −0% to −50% in 5% steps. Also run **historical replay scenarios**: apply each area's actual 2008–2011 and 2014–2019 drawdowns.
 - **Outputs** (`ml_stress_grid`): count and share of properties with loan > shocked value, AED of negative equity, by area / zone / off-plan flag. Power BI what-if sliders pick the shock and LTV.

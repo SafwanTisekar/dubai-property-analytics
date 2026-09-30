@@ -85,7 +85,7 @@ All row counts below are **approximate and come from third-party profiles**. **P
 - `seed_procedure_map.csv`: procedure → category (market_sale, offplan_sale, mortgage, gift, inheritance, other) + `is_market_sale` flag
 - `seed_rooms_map.csv`: `rooms_en` → bedrooms (Studio = 0) + flags (penthouse, office, shop)
 - `seed_area.csv`: `area_id` → cleaned name, zone/cluster (e.g. Downtown/Business Bay, Marina/JBR, JVC/JVT, Palm, Emirates Hills/Meadows, Deira/Bur Dubai, Dubai South), lat/long centroid
-- `seed_ltv_rules.csv`: CBUAE mortgage LTV caps used in the stress test, e.g. expat first home ≤ AED 5M; off-plan cap. **Verify the current rules from CBUAE regulations before use** and cite the source. Created in Phase 2b (7 rules, `verified = false` on every row until the owner checks them)
+- `seed_ltv_rules.csv`: CBUAE mortgage LTV caps used in the stress test, e.g. expat first home ≤ AED 5M; off-plan cap. Created in Phase 2b; **verified by the owner 2026-09-30** against the CBUAE rulebook (Regulations Regarding Mortgage Loans, Art. 3(2), as amended by Board Resolution 31/2/2020, effective 2020-04-08) and extended with the pre-2020 regime (Circular No. 31/2013, to 2020-04-07): 14 rows, each with `effective_from` / `effective_to`, `source_citation` and `source_url`
 
 ## 7. Verified profile (Phase 1, 2026-09-30)
 

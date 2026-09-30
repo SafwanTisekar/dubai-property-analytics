@@ -174,11 +174,16 @@ seeds:
 
   - name: seed_ltv_rules
     description: >
-      CBUAE mortgage loan-to-value caps for the Phase 4 stress test (docs/05 §4). Values
-      follow the CBUAE Regulations Regarding Mortgage Loans (Notice 31/2013, as amended) as
-      commonly summarised; **verified = false until the owner checks each row against the
-      current CBUAE rulebook** and updates source_citation. The stress test is illustrative
-      and must say which LTVs it assumed.
+      CBUAE mortgage loan-to-value caps for the Phase 4 stress test (docs/05 §4), one row per
+      rule (borrower x property status x home number x value band) per regulatory period.
+      Current regime: CBUAE Regulations Regarding Mortgage Loans, Art. 3(2), as amended by
+      Board Resolution 31/2/2020 (effective 2020-04-08). Earlier regime: Circular No. 31/2013
+      (to 2020-04-07). Every row verified by the owner against the CBUAE rulebook
+      (2026-09-30). The stress test is illustrative and must say which LTVs it assumed.
+    tests:
+      - dbt_utils.expression_is_true:
+          arguments:
+            expression: "effective_from is null or effective_to is null or effective_from <= effective_to"
     columns:
       - name: rule_id
         tests: [unique, not_null]
@@ -186,11 +191,24 @@ seeds:
         description: Maximum loan / property value, as a decimal (0.80 = 80%).
         tests:
           - not_null
-          - dbt_expectations.expect_column_values_to_be_between:
+          - dbt_utils.expression_is_true:
               arguments:
-                min_value: 0
-                max_value: 1
+                expression: "> 0 and max_ltv <= 1"
+      - name: effective_from
+        description: First day the cap applies; NULL = open start (the 2013 start date is not recorded).
+      - name: effective_to
+        description: Last day the cap applies; NULL = still in force.
       - name: source_citation
         tests: [not_null]
+      - name: source_url
+        description: CBUAE rulebook page for the regulation.
+        tests: [not_null]
+      - name: secondary_source_url
+        description: Secondary summary used alongside the rulebook (pre-2020 rows).
       - name: verified
-        description: The owner has checked this row against the current CBUAE regulation.
+        description: The owner has checked this row against the CBUAE regulation (2026-09-30).
+        tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              arguments:
+                expression: "= true"

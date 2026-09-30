@@ -107,7 +107,11 @@ seeds:
         home_number: text
         value_band: text
         max_ltv: numeric
+        effective_from: date
+        effective_to: date
         source_citation: text
+        source_url: text
+        secondary_source_url: text
         verified: boolean
         note: text
     seed_phase1_reconciliation:
