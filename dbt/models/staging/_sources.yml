@@ -1,0 +1,25 @@
+version: 2
+
+sources:
+  - name: bronze
+    description: >
+      Raw DLD and FRED files loaded by `ingest/load_bronze.py` with COPY: every source column
+      as text, untouched, plus load metadata (docs/04 §1). Missing values are '' not NULL.
+    schema: bronze
+    tables:
+      - name: dld_transactions
+        description: Dubai Pulse bulk transactions export (47 columns), one row per transaction line.
+        columns:
+          - name: transaction_id
+            description: "`<group>-<procedure>-<year>-<seq>`. Unique within one snapshot (Phase 1)."
+          - name: _snapshot_date
+            description: Extract date parsed from the file name; drives C1 de-duplication.
+      - name: dld_rent_contracts
+        description: Ejari bulk export (41 columns), one row per contract line.
+        columns:
+          - name: contract_id
+            description: Contract number. Multi-unit contracts have one line per unit.
+      - name: rates_fedfunds
+        description: FRED FEDFUNDS, monthly effective federal funds rate in percent.
+      - name: rates_brent
+        description: FRED DCOILBRENTEU, daily Brent crude in USD per barrel ('' on non-trading days).

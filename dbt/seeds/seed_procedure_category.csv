@@ -1,0 +1,9 @@
+procedure_category,is_market_sale,description
+market_sale,true,"Arm's-length sale of a ready (existing) property: Sell, Delayed Sell, Sale On Payment Plan"
+offplan_sale,true,Arm's-length sale of an off-plan unit (Sell - Pre registration); off-plan vs ready is also carried by reg_type
+mortgage,false,"Bank financing on a property: registrations, modifications, transfers, portfolio and development mortgages, lease finance"
+lease_to_own,false,Lease-to-own and lease-development deals; one deal is registered twice (Sales leg and Mortgages leg) under the same procedure_id
+gift,false,Grants between parties (Grant and its pre-registration / delayed / development variants); not arm's-length prices
+inheritance,false,Inheritance transfers. No such procedure exists in the 2026-09 extract; kept so a future snapshot can map to it
+development,false,"Developer and land transfers: development registration, sell development, adding land by sell"
+other,false,Reserved for procedures that fit none of the above. Currently unused

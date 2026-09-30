@@ -5,6 +5,9 @@
 !/data/**/
 !/data/raw/**/README.txt
 
+# CI fixtures are committed (tests/fixtures/README.md); the loader's manifest export isn't.
+/tests/fixtures/manifest.json
+
 # --- Secrets ------------------------------------------------------------------
 .env
 .env.*

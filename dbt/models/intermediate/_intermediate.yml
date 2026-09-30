@@ -1,0 +1,291 @@
+version: 2
+
+# Flag columns carry `meta.dq_rule`: quality/dq_report.py reads them from the dbt manifest
+# and counts affected rows (and AED, via the model's `dq_amount_column`) per rule.
+
+models:
+  - name: int_transaction_deal_groups
+    description: >
+      C16 at transaction-line grain (all groups). Infers portfolio deals that repeat one deal
+      value on every unit line (the Phase 1 REPEATED_VALUE_GROUP rule) and gives each line a
+      deal_group_id and an AED value counted once per deal. Contiguous same-value batches of
+      similar-size units are flagged separately and not corrected.
+    meta:
+      dq_amount_column: actual_worth_aed
+    columns:
+      - name: transaction_id
+        tests: [unique, not_null]
+      - name: is_repeated_deal_value
+        description: >
+          C16. Line of an inferred portfolio deal: >= 2 lines with the same group, procedure,
+          date, value and ID-year, registered in one batch (ID span <= 2 x lines), whose unit
+          sizes differ by more than 10%.
+        meta: {dq_rule: C16}
+        tests: [not_null]
+      - name: deal_group_id
+        description: >
+          The lead line's transaction_id for a repeated-value deal; the line's own
+          transaction_id otherwise. count(distinct deal_group_id) counts deals.
+        tests: [not_null]
+      - name: deal_group_lines
+        description: Lines in the deal (1 unless is_repeated_deal_value).
+      - name: is_deal_group_lead
+        description: The deal's first line by DLD running number; carries the deal value once.
+      - name: actual_worth_once_aed
+        description: >
+          actual_worth_aed on the lead line, 0 on the other lines of a repeated-value deal.
+          Sum this column for AED totals.
+      - name: is_similar_size_batch
+        description: >
+          C16 (kept visible, not corrected). Same batch pattern but unit sizes within 10%:
+          most likely identical units at identical prices, so every line keeps its value.
+        meta: {dq_rule: C16}
+        tests: [not_null]
+      - name: batch_group_id
+        description: Lead transaction_id of a similar-size batch (NULL otherwise).
+
+  - name: int_market_sales
+    description: >
+      Ownership transfers: every Sales- and Gifts-group line with the price-quality flags
+      (C3-C6, C16-C19). Nothing is removed. is_market_sale picks arm's-length sales;
+      is_clean_market_sale also drops every flagged row and is the population for prices,
+      indices, yields and the AVM. Gifts, development transfers and the Sales leg of
+      lease-to-own deals stay for volume counts only.
+    meta:
+      dq_amount_column: actual_worth_once_aed
+    tests:
+      - dbt_utils.expression_is_true:
+          arguments:
+            expression: "not (is_market_sale and is_lease_to_own)"
+      - dbt_utils.expression_is_true:
+          arguments:
+            expression: "not is_market_sale or trans_group = 'Sales'"
+      - dbt_utils.expression_is_true:
+          arguments:
+            expression: "not is_clean_market_sale or (txn_date >= date '{{ var('analysis_start_date') }}' and price_per_sqm_aed > 0)"
+      - dbt_utils.expression_is_true:
+          arguments:
+            expression: "is_price_invalid = (is_price_below_floor or is_ppsqm_outlier)"
+    columns:
+      - name: transaction_id
+        tests: [unique, not_null]
+      - name: trans_group
+        tests:
+          - accepted_values:
+              arguments:
+                values: [Sales, Gifts]
+      - name: procedure_category
+        tests:
+          - accepted_values:
+              arguments:
+                values: [market_sale, offplan_sale, lease_to_own, development, gift, inheritance, other]
+      - name: is_market_sale
+        description: C3. Arm's-length sale per seed_procedure_map.
+        tests: [not_null]
+      - name: is_lease_to_own
+        description: C17. Sales leg of a lease-to-own deal; is_market_sale is false (volume only).
+        meta: {dq_rule: C17}
+      - name: is_date_invalid
+        description: C18. See stg_transactions.
+        meta: {dq_rule: C18}
+      - name: is_pre_2004
+        description: C18. Before the analysis window.
+        meta: {dq_rule: C18}
+      - name: price_per_sqm_aed
+        description: C6. actual_worth_aed / area_sqm, recomputed (AED per sq m).
+      - name: is_price_below_floor
+        description: C4. actual_worth below AED 50,000 (nominal or partial-share values).
+        meta: {dq_rule: C4}
+      - name: ppsqm_band_level
+        description: >
+          Which band applied: area_x_type (area x property type, n >= 20) or type (Dubai-wide
+          fallback for thin segments).
+      - name: is_ppsqm_outlier
+        description: C4. price_per_sqm outside the P0.5-P99.5 band of clean market sales.
+        meta: {dq_rule: C4}
+      - name: is_price_invalid
+        description: C4. Below the floor or outside the band.
+        meta: {dq_rule: C4}
+      - name: is_area_invalid
+        description: C5. Units outside 15-3,000 sq m, villas outside 15-10,000 sq m, land/buildings under 1 sq m, or no area.
+        meta: {dq_rule: C5}
+      - name: is_ppsqm_mismatch
+        description: C6. Recomputed price per sq m more than 5% off DLD's meter_sale_price.
+        meta: {dq_rule: C6}
+      - name: is_repeated_deal_value
+        description: C16. See int_transaction_deal_groups.
+        meta: {dq_rule: C16}
+      - name: is_similar_size_batch
+        description: C16. See int_transaction_deal_groups.
+        meta: {dq_rule: C16}
+      - name: actual_worth_once_aed
+        description: AED counted once per deal (C16). Sum this, not actual_worth_aed.
+      - name: is_clean_market_sale
+        description: >
+          The price population: is_market_sale, dated 2004+, and none of C4, C5, C6, C16
+          (repeated value) or C18.
+        tests: [not_null]
+
+  - name: int_mortgages
+    description: >
+      Financing: every Mortgages-group line (C10, C16-C18), analysed separately from prices.
+      mortgage_amount_aed is set only where actual_worth is a verified loan amount
+      (Mortgage Registration, Delayed Mortgage); every other procedure counts as volume only.
+    meta:
+      dq_amount_column: actual_worth_once_aed
+    tests:
+      - dbt_utils.expression_is_true:
+          arguments:
+            expression: "(mortgage_amount_aed is not null) = amount_is_loan"
+      - dbt_utils.expression_is_true:
+          arguments:
+            expression: "not amount_is_loan or procedure_id in (13, 190)"
+      - dbt_utils.expression_is_true:
+          arguments:
+            expression: "not (is_new_mortgage and is_portfolio_mortgage)"
+      - dbt_utils.expression_is_true:
+          arguments:
+            expression: "(portfolio_mortgage_value_once_aed is not null) = is_portfolio_mortgage"
+    columns:
+      - name: transaction_id
+        tests: [unique, not_null]
+      - name: trans_group
+        tests:
+          - accepted_values:
+              arguments:
+                values: [Mortgages]
+      - name: procedure_category
+        tests:
+          - accepted_values:
+              arguments:
+                values: [mortgage, lease_to_own]
+      - name: amount_is_loan
+        description: C10. True for Mortgage Registration and Delayed Mortgage only.
+        tests: [not_null]
+      - name: mortgage_amount_aed
+        description: C10. The loan amount (AED), as recorded on the line; NULL where amount_is_loan is false.
+      - name: mortgage_amount_once_aed
+        description: C10 + C16. Loan amount counted once per portfolio deal. Sum this for loan totals.
+      - name: is_new_mortgage
+        description: >
+          New individual (non-portfolio) mortgage: Mortgage Registration, Delayed Mortgage,
+          Mortgage Pre-Registration. The mortgage-share numerator (docs/01 §4).
+        tests: [not_null]
+      - name: is_portfolio_mortgage
+        description: >
+          New portfolio mortgage registration (one loan over several units). Not in mortgage
+          share; count per deal with count(distinct deal_group_id).
+        tests: [not_null]
+      - name: portfolio_mortgage_value_once_aed
+        description: >
+          Recorded value of a portfolio mortgage, once per deal (C16); NULL for other
+          procedures. Not a verified loan amount (C10).
+      - name: is_lease_to_own
+        description: C17. Financing leg of a lease-to-own deal.
+        meta: {dq_rule: C17}
+      - name: is_date_invalid
+        description: C18. Includes the 4 Hijri-dated Mortgage Registration rows.
+        meta: {dq_rule: C18}
+      - name: is_pre_2004
+        description: C18.
+        meta: {dq_rule: C18}
+      - name: is_repeated_deal_value
+        description: C16.
+        meta: {dq_rule: C16}
+      - name: is_similar_size_batch
+        description: C16.
+        meta: {dq_rule: C16}
+
+  - name: int_rent_contracts
+    description: >
+      Ejari contract lines (~10.5M) with the contract-level rent rules: C11 allocation,
+      C12 annualisation, C13 new vs renewal, C14 outliers, C18 dates, C20 non-market types,
+      C21 placeholder areas, C22 bedrooms. Nothing is removed. is_market_rent is the
+      population for market rents and yields: new, single-line, market property type,
+      inside the band, with usable dates. Never exposed to Power BI in detail.
+    meta:
+      dq_amount_column: annual_rent_alloc_aed
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns: [contract_id, line_number]
+      - dbt_utils.expression_is_true:
+          arguments:
+            expression: "is_multi_unit = (line_count > 1)"
+      - dbt_utils.expression_is_true:
+          arguments:
+            expression: "rent_per_sqm_aed is null or (not is_multi_unit and not is_area_placeholder)"
+      - dbt_utils.expression_is_true:
+          arguments:
+            expression: "not is_market_rent or (is_new and not is_multi_unit and not is_non_market_property_type and not is_rent_outlier)"
+    columns:
+      - name: contract_id
+        tests: [not_null]
+      - name: line_number
+        tests: [not_null]
+      - name: line_count
+        description: C11. Lines in the contract, counted (not no_of_prop).
+        tests: [not_null]
+      - name: is_multi_unit
+        description: C11. The contract has more than one line; its amount is a whole-contract total.
+        meta: {dq_rule: C11}
+      - name: contract_reg_type
+        description: C13. New or Renew. Market rent uses New (renewals lag the market).
+        tests:
+          - accepted_values:
+              arguments:
+                values: [New, Renew]
+      - name: is_new
+        description: C13.
+      - name: is_date_invalid
+        description: C18. Start date unparseable or more than a year after the extract (up to year 2205).
+        meta: {dq_rule: C18}
+      - name: is_pre_2004
+        description: C18. Starts before 2004.
+        meta: {dq_rule: C18}
+      - name: is_end_date_implausible
+        description: C18. End date missing, before the start, or more than 10 years after it (up to year 5013).
+        meta: {dq_rule: C18}
+      - name: annual_amount_aed
+        description: As published; the contract total repeated on every line. Never sum it.
+      - name: is_amount_inconsistent
+        description: Lines of one contract carry different annual amounts (0 in Phase 1). Makes C11 ambiguous.
+        meta: {dq_rule: C11}
+      - name: annual_rent_contract_aed
+        description: C12. Contract annual rent (annual_amount, else contract_amount x 365 / days).
+      - name: annual_rent_alloc_aed
+        description: >
+          C11. annual_rent_contract_aed / line_count. Sums to exactly one contract amount per
+          contract, so it is the only rent column safe to SUM.
+        tests: [not_null]
+      - name: is_non_market_property_type
+        description: C20. Virtual Unit, Labor Camps or Room in labor Camp / Labor Camp. Not market rents.
+        meta: {dq_rule: C20}
+      - name: bedrooms
+        description: C22. Studio = 0.
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              arguments:
+                min_value: 0
+                max_value: 15
+                row_condition: "bedrooms is not null"
+      - name: area_sqm
+        description: C21. actual_area when above 1 sq m; NULL for blank / 0 / 1 placeholders.
+      - name: is_area_placeholder
+        description: C21. Blank, 0 or 1 sq m area. No rent per sq m.
+        meta: {dq_rule: C21}
+      - name: rent_per_sqm_aed
+        description: Annual rent per sq m, single-line contracts with a real area only.
+      - name: is_rent_below_floor
+        description: C14. Allocated annual rent under AED 1,000.
+        meta: {dq_rule: C14}
+      - name: rent_band_level
+        description: area_x_subtype (n >= 20) or subtype (Dubai-wide fallback).
+      - name: is_rent_outlier
+        description: >
+          C14. Below the floor, or outside the P0.5-P99.5 band of rent per sq m (annual rent
+          where there is no usable area) by area x Ejari sub-type.
+        meta: {dq_rule: C14}
+      - name: is_market_rent
+        description: The market-rent population (see model description).
+        tests: [not_null]

@@ -1,0 +1,18 @@
+ejari_property_sub_type_en,bedrooms,room_class
+Studio,0,studio
+1bed room+Hall,1,bedrooms
+2 bed rooms+hall,2,bedrooms
+2 bed rooms+hall+Maids Room,2,bedrooms
+3 bed rooms+hall,3,bedrooms
+4 bed rooms+hall,4,bedrooms
+5 bed rooms+hall,5,bedrooms
+6 bed rooms+hall,6,bedrooms
+7 bed rooms+hall,7,bedrooms
+8 bed rooms+hall,8,bedrooms
+9 bed rooms+hall,9,bedrooms
+10 bed rooms+hall,10,bedrooms
+11 bed rooms+hall,11,bedrooms
+15 bed room+hall,15,bedrooms
+Penthouse,,penthouse
+Duplex,,duplex
+Room,,room

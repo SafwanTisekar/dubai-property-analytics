@@ -1,0 +1,26 @@
+dataset,metric,trans_group,expected_value,note
+transactions,bronze_rows,,1788150,Gate: the figures below are only checked when bronze holds exactly this snapshot
+transactions,naive_total_bn,Gifts,398.9,phase1_evidence §2b: sum of actual_worth over every line (AED bn)
+transactions,naive_total_bn,Mortgages,2724.5,
+transactions,naive_total_bn,Sales,3770.4,
+transactions,overstated_bn,Gifts,1.5,phase1_findings §2b: naive sum minus value counted once per repeated-value group (AED bn)
+transactions,overstated_bn,Mortgages,130.9,
+transactions,overstated_bn,Sales,8.0,
+transactions,repeated_groups,Gifts,199,Repeated-value groups (REPEATED_VALUE_GROUP in quality/investigate.py)
+transactions,repeated_groups,Mortgages,2014,
+transactions,repeated_groups,Sales,2276,
+transactions,repeated_lines,Gifts,546,
+transactions,repeated_lines,Mortgages,10795,
+transactions,repeated_lines,Sales,5940,
+transactions,similar_size_groups,Gifts,1563,"Contiguous same-value groups with sizes within 10% (flagged, not corrected)"
+transactions,similar_size_groups,Mortgages,2943,
+transactions,similar_size_groups,Sales,17724,
+transactions,similar_size_lines,Gifts,3734,
+transactions,similar_size_lines,Mortgages,7466,
+transactions,similar_size_lines,Sales,42458,
+rents,bronze_rows,,10538926,Gate: the figures below are only checked when bronze holds exactly this snapshot
+rents,contracts,,8795059,phase1_findings §3
+rents,multi_line_contracts,,248173,
+rents,multi_line_lines,,1992040,
+rents,naive_total_bn,,4490.0,Sum of annual_amount over every line (AED bn)
+rents,once_per_contract_bn,,856.5,Sum of annual_amount counted once per contract (AED bn)

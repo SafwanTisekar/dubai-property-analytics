@@ -63,7 +63,7 @@ flowchart LR
 | Modelling | scikit-learn, **LightGBM**, **statsmodels** (hedonic OLS, SARIMAX), **SHAP**, Optuna | Standard AVM / econometrics toolkit |
 | Notebooks | Jupyter in VS Code | EDA and explainability only |
 | Quality | dbt tests, `dbt_utils`, `dbt_expectations`, pytest, ruff, pre-commit | |
-| CI | GitHub Actions with a `postgres:18` service container | Lint + pytest + `dbt build` on `data/sample` |
+| CI | GitHub Actions with a `postgres:18` service container | Lint + pytest + `dbt build` on the committed fixtures in `tests/fixtures/` (~2k real DLD lines per table, CC BY 4.0) |
 | BI | Power BI Desktop (PBIP) in Parallels → Power BI Service | PostgreSQL connector, import mode |
 | Website | Static HTML/CSS/JS on **GitHub Pages** | Free |
 
@@ -80,14 +80,14 @@ dubai-property-analytics/
 ├── .gitignore
 ├── .pre-commit-config.yaml
 ├── .github/workflows/
-│   ├── ci.yml                  # ruff, pytest, dbt build on sample (postgres service container)
+│   ├── ci.yml                  # ruff, pytest, dbt build on tests/fixtures (postgres service container)
 │   └── pages.yml               # deploy website/ to GitHub Pages
 ├── sql/
 │   ├── 00_create_database.sql  # database (UTF8), roles: dpa_owner, pbi_reader
 │   └── 01_schemas_grants.sql   # bronze, silver, gold, ml, rpt + grants (pbi_reader: SELECT on rpt only)
 ├── data/                       # gitignored
 │   ├── raw/dld/<dataset>/  raw/cbuae/
-│   └── sample/                 # small stratified CSV samples for dev/CI
+│   └── sample/                 # 2% stratified CSV sample for local dev
 ├── src/dubai_property/
 │   ├── config.py               # paths, split dates, thresholds
 │   ├── db.py                   # connection helpers (psycopg, SQLAlchemy engine, connectorx URI)
@@ -95,10 +95,12 @@ dubai-property-analytics/
 │   │   ├── load_bronze.py      # CSV → bronze via COPY; manifest + row-count log
 │   │   ├── download_dld_increment.py  # stub for v1 (docs/04 Decisions)
 │   │   ├── download_rates.py
-│   │   └── sample.py           # stratified sample → data/sample (make sample)
+│   │   ├── sample.py           # stratified sample → data/sample (make sample)
+│   │   └── fixtures.py         # ~2k-line CI fixtures → tests/fixtures (make fixtures)
 │   ├── quality/
 │   │   ├── profile.py          # column profiling → reports/profile_*.md
 │   │   ├── investigate.py      # Phase 1 investigations → reports/phase1_evidence.md
+│   │   ├── dq_report.py        # silver rows per step / per rule → reports/dq_report.md
 │   │   └── reconcile.py        # file vs bronze vs gold counts/AED totals
 │   ├── features/
 │   │   ├── feature_list.py     # ALLOW-LIST of AVM features
@@ -135,6 +137,7 @@ dubai-property-analytics/
 ├── reports/                    # figures, model cards, dq_report.md
 ├── website/
 └── tests/
+    └── fixtures/               # committed CI extracts of the DLD/FRED files (README: attribution)
 ```
 
 ## 6. Environment setup (macOS)
@@ -175,7 +178,7 @@ At ~1.6M transactions (+1M rent lines), Postgres is comfortably fast if you do t
 - **Materialisations:** staging = `view`, intermediate = `table`, marts = `table`, reporting = `view`.
 - **Server settings** (`postgresql.conf`, see §6 for its location; for a 16 GB Mac): `shared_buffers = 2GB`, `work_mem = 128MB`, `maintenance_work_mem = 1GB`, `effective_cache_size = 8GB`, `max_wal_size = 4GB`. Restart after changing `shared_buffers`; the others take effect on reload.
   - **Applied 2026-09-30:** `max_wal_size = 4GB`, via `alter system set max_wal_size = '4GB'; select pg_reload_conf();` as the superuser. It is written to `postgresql.auto.conf` and takes effect on reload, with no restart. Why: with the 1 GB default, the Phase 1 rent load hit "checkpoints are occurring too frequently (9 seconds apart)", and one 483 MB file took 91 s instead of ~12 s (reports/phase1_findings.md §0). Check with `show max_wal_size;`.
-  - **Not yet applied:** `shared_buffers`, `work_mem`, `maintenance_work_mem`, `effective_cache_size` are still at their defaults. The loaders and profilers raise `work_mem` / `maintenance_work_mem` per session where they need it.
+  - **Applied 2026-09-30 (before Phase 2):** `shared_buffers = 2GB`, `work_mem = 128MB`, `maintenance_work_mem = 1GB`, `effective_cache_size = 8GB`, via `alter system set …` as the superuser, then `brew services restart postgresql@18` (`shared_buffers` needs a restart). All four are in `postgresql.auto.conf`; `select name, setting, unit, pending_restart from pg_settings where name in (…)` shows them with `pending_restart = f`, and `show` returns 2GB / 128MB / 1GB / 8GB. Previous values were the defaults (128MB / 4MB / 64MB / 4GB). The loaders and profilers still raise `work_mem` / `maintenance_work_mem` per session where they need more.
 - Pull data into Python with `connectorx` (fast) and write results back with `COPY`.
 - Target: full rebuild under 20 min. Record actual timings in docs/08.
 

@@ -39,7 +39,7 @@ This project acts as that team. It builds a governed data platform over the full
 | Median price per sq m | Median of `price_per_sqm` over clean market sales |
 | Price index | Hedonic time-dummy index, base = 100 at Jan 2019 (see docs/05) |
 | YoY price growth | Index this month ÷ index 12 months earlier − 1 |
-| Mortgage share | Mortgage registrations ÷ (mortgage registrations + market sales), by month |
+| Mortgage share | Individual new mortgages (`is_new_mortgage`: Mortgage Registration, Delayed Mortgage, Mortgage Pre-Registration) ÷ (individual new mortgages + market sales), by month. Portfolio mortgage registrations are excluded and reported separately (deals and AED, once per deal) |
 | Off-plan share | Off-plan market sales ÷ market sales (count and value) |
 | Gross rental yield | Median annual rent ÷ median sale price, for the same area × property sub-type × bedrooms × quarter |
 | AVM accuracy | Median absolute % error (MdAPE); hit rate within ±10% and ±20% |
@@ -75,4 +75,5 @@ This is the work UAE banks, developers, funds and regulators actually do: collat
 | 2026-09-29 | PostgreSQL 18 (local, Homebrew) + dbt, Power BI Service, GitHub Pages | Free, industry-standard RDBMS, no usage limits; replaces the earlier DuckDB choice |
 | 2026-09-30 | dbt-core 1.12 + dbt-postgres 1.11; `dbt_expectations` from the `metaplane` fork | 1.10 is deprecated; calogica's `dbt_expectations` is archived and metaplane maintains it with the same macro names |
 | 2026-09-30 | Database created with `C` collation (UTF-8 encoding) | Byte-order sorting is fast and identical on macOS and the Linux CI container, so tests don't depend on OS locale |
+| 2026-09-30 | Mortgage share counts individual new mortgages only; portfolio mortgages reported separately (docs/04 Decisions) | A portfolio loan covers several units, which would distort a per-purchase ratio |
 | 2026-09-30 | Trained model binaries go to gitignored `artifacts/models/`, not under `src/` | Keeps large binaries out of git without an ignore pattern that could hit the `dubai_property.models` package |

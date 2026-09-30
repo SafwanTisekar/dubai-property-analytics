@@ -469,13 +469,16 @@ def _source_prefix(root: Path) -> str:
     """How files under ``root`` are named in ``_source_file``: relative to data/, if possible.
 
     ``raw/dld/rents/x.csv`` vs ``sample/dld/rents/x.csv`` keeps a sample load and a full
-    load distinguishable in bronze.
+    load distinguishable in bronze. Roots elsewhere in the repo (the committed CI fixtures)
+    are named relative to the project root, e.g. ``tests/fixtures/dld/rents/x.csv``.
     """
     root = root.resolve()
-    try:
-        return root.relative_to(config.DATA_DIR.resolve()).as_posix() + "/"
-    except ValueError:
-        return root.as_posix() + "/"
+    for base in (config.DATA_DIR, config.PROJECT_ROOT):
+        try:
+            return root.relative_to(base.resolve()).as_posix() + "/"
+        except ValueError:
+            continue
+    return root.as_posix() + "/"
 
 
 def append_ingest_log(rows: Iterable[dict[str, object]], path: Path | None = None) -> None:
@@ -665,14 +668,18 @@ def load_dataset(conn: psycopg.Connection, dataset: Dataset, root: Path) -> list
 
 
 def reset_dataset(conn: psycopg.Connection, dataset: Dataset) -> None:
-    """Drop a bronze table and forget its manifest rows (for a clean reload)."""
-    conn.execute(sql.SQL("drop table if exists {}").format(_ident(SCHEMA, dataset.table)))
+    """Drop a bronze table and forget its manifest rows (for a clean reload).
+
+    CASCADE also drops the silver staging views built on the table; `make dbt` recreates
+    them. Without it a reset fails as soon as dbt has run once.
+    """
+    conn.execute(sql.SQL("drop table if exists {} cascade").format(_ident(SCHEMA, dataset.table)))
     conn.execute(
         sql.SQL("delete from {} where table_name = %s").format(_ident(SCHEMA, MANIFEST_TABLE)),
         [dataset.table],
     )
     conn.commit()
-    log.info("reset %s.%s", SCHEMA, dataset.table)
+    log.info("reset %s.%s (and dependent silver views)", SCHEMA, dataset.table)
 
 
 def run(root: Path, datasets: Sequence[Dataset], *, reset: bool = False) -> list[dict[str, object]]:

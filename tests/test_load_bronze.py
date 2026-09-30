@@ -96,6 +96,17 @@ def test_discover_ignores_non_csv(tmp_path):
     assert lb.discover_files(tmp_path / "missing") == []
 
 
+def test_source_prefix_names_data_and_repo_roots(tmp_path, monkeypatch):
+    # Under data/: relative to data/. Elsewhere in the repo (CI fixtures): relative to the
+    # project root, so _source_file never holds a machine-specific absolute path.
+    monkeypatch.setattr(config, "DATA_DIR", tmp_path / "data")
+    monkeypatch.setattr(config, "PROJECT_ROOT", tmp_path)
+    (tmp_path / "data" / "sample").mkdir(parents=True)
+    (tmp_path / "tests" / "fixtures").mkdir(parents=True)
+    assert lb._source_prefix(tmp_path / "data" / "sample") == "sample/"
+    assert lb._source_prefix(tmp_path / "tests" / "fixtures") == "tests/fixtures/"
+
+
 def test_every_dataset_targets_a_unique_bronze_table():
     tables = [d.table for d in config.DATASETS]
     assert len(tables) == len(set(tables))

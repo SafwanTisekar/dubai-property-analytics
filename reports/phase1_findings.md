@@ -157,7 +157,7 @@ No `dd-mm-yyyy` values exist, which answers the C1 question in docs/04: every no
 | `procedure_area` < 1 sq m | 280 | C5 flag |
 | `actual_worth` up to AED 13.8bn (portfolio/land); `procedure_area` up to 342M sq m | tail | C4/C5 flags plus §2b |
 | Rent `actual_area` blank or placeholder (0 or 1 sq m) | 1.55M lines | C14: no rent per sq m for these lines |
-| Transactions have 259 area IDs, rents 216, 266 in either table | none | `seed_area` must cover all 266 |
+| Transactions have 259 area IDs, rents 216, 266 in either table (**correction, Phase 2a:** 215 and 265 real IDs; the extra value is the blank `area_id` on 3 rent lines) | none | `seed_area` covers all 265 |
 
 ## 6. Figures for docs/02 §7
 
@@ -171,7 +171,7 @@ No `dd-mm-yyyy` values exist, which answers the C1 question in docs/04: every no
 | Rent contracts after de-duplication | 8,795,059 |
 | Σ sales value, 2025 | AED 681.2bn across all Sales-group procedures (Sell / Sell pre-reg / Delayed Sell: 665.9bn). Before the market-sale filter; the repeated-value overstatement is only AED 0.5bn |
 | Mortgage `actual_worth` | Loan amount (median LTV 0.795) for Mortgage Registration / Delayed Mortgage; mixed for pre-registration |
-| Distinct areas | 259 area IDs (transactions), 216 (rents), 266 combined |
+| Distinct areas | 259 area IDs (transactions), 216 (rents), 266 combined; 215 / 265 excluding the blank `area_id` (Phase 2a correction) |
 
 ## 7. Limitations
 

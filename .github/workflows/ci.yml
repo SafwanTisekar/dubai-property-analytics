@@ -65,3 +65,11 @@ jobs:
 
       - name: dbt deps + debug
         run: make dbt-deps dbt-debug
+
+      # Committed ~2k-line extracts of the real DLD files (tests/fixtures/README.md), loaded
+      # with the production loader, then the full dbt build and the DQ report on them.
+      - name: Load CI fixtures into bronze
+        run: make bronze BRONZE_ROOT=tests/fixtures
+
+      - name: dbt build (silver) + DQ report on the fixtures
+        run: make dbt

@@ -11,6 +11,26 @@ analysis-paths: ["analyses"]
 snapshot-paths: ["snapshots"]
 clean-targets: ["target", "dbt_packages"]
 
+# Business thresholds used by the cleaning rules (docs/04 §2). Kept here, not in the SQL,
+# so every rule reads its threshold from one place (CLAUDE.md: never hard-code).
+vars:
+  analysis_start_date: "2004-01-01"   # charter scope; earlier rows are flagged is_pre_2004
+  min_n: 20                           # min-n rule (CLAUDE.md), also used for outlier bands
+  band_low: 0.005                     # C4 / C14 outlier band: P0.5 ...
+  band_high: 0.995                    # ... to P99.5
+  price_floor_aed: 50000              # C4: a sale below AED 50k is not a real unit price
+  ppsqm_tolerance: 0.05               # C6: provided vs computed price per sq m
+  unit_area_min_sqm: 15               # C5: units 15-3,000 sq m ...
+  unit_area_max_sqm: 3000
+  villa_area_max_sqm: 10000           # ... villas up to 10,000 sq m
+  land_area_min_sqm: 1                # C5: land and buildings only need a real (>= 1 sq m) area
+  repeated_value_span_factor: 2       # C16: transaction_id sequence span <= 2 x lines ...
+  repeated_value_area_ratio: 1.10     # ... and unit sizes differ by more than 10%
+  rent_floor_aed: 1000                # C14: allocated annual rent below AED 1,000
+  rent_area_placeholder_sqm: 1        # C14: actual_area <= 1 sq m is a placeholder
+  rent_max_contract_days: 3653        # rent end_date_implausible: longer than 10 years
+  rent_max_days_after_snapshot: 366   # rent date_invalid: starts > 1 year after the extract
+
 # Layer -> schema + materialisation (docs/03 §3 and §7). Schema names are used verbatim
 # thanks to macros/generate_schema_name.sql (no "<target>_" prefix).
 models:
@@ -18,7 +38,7 @@ models:
     staging:        # typing, renaming, decoding: thin views over bronze
       +schema: silver
       +materialized: view
-    intermediate:   # cleaning rules C1-C15 as flags; heavy joins, so materialised
+    intermediate:   # cleaning rules C1-C22 as flags; heavy joins, so materialised
       +schema: silver
       +materialized: table
     marts:          # star schema facts, dimensions, aggregates (indexed via config)
@@ -31,3 +51,35 @@ models:
 seeds:
   dubai_property:
     +schema: silver
+    seed_area:
+      +column_types: {area_id: integer, area_name_en: text, zone: text}
+    seed_procedure_category:
+      +column_types: {procedure_category: text, is_market_sale: boolean, description: text}
+    seed_procedure_map:
+      +column_types:
+        trans_group: text
+        procedure_id: integer
+        procedure_name_en: text
+        procedure_category: text
+        is_market_sale: boolean
+        is_lease_to_own: boolean
+        is_new_mortgage: boolean
+        is_portfolio_mortgage: boolean
+        amount_is_loan: boolean
+        note: text
+    seed_rooms_map:
+      +column_types:
+        rooms_en: text
+        bedrooms: smallint
+        room_class: text
+        is_penthouse: boolean
+        is_commercial_unit: boolean
+    seed_rent_subtype_map:
+      +column_types: {ejari_property_sub_type_en: text, bedrooms: smallint, room_class: text}
+    seed_phase1_reconciliation:
+      +column_types:
+        dataset: text
+        metric: text
+        trans_group: text
+        expected_value: numeric
+        note: text

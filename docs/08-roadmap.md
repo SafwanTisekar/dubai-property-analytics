@@ -71,6 +71,20 @@ full data, and report timings.
 ```
 **Done when:** `dbt build` passes on full data, reconciliation holds, and the DQ report and dictionary are generated.
 
+Phase 2 is split. **2a = silver** (seeds, staging, intermediate, DQ report, CI fixtures); **2b = gold + rpt** (marts with indexes, rpt views, `seed_ltv_rules`, `docs/data-dictionary.md`).
+
+**2a checklist (silver)**
+- [x] Postgres server settings from docs/03 §7 applied and verified (2026-09-30)
+- [x] Seeds: `seed_procedure_map` (58 pairs) + `seed_procedure_category`, `seed_rooms_map`, `seed_rent_subtype_map`, `seed_area` (265 IDs), `seed_phase1_reconciliation`
+- [x] Staging (`stg_transactions`, `stg_rent_contracts`, `stg_rates`) and intermediate (`int_transaction_deal_groups`, `int_market_sales`, `int_mortgages`, `int_rent_contracts`) with YAML docs and tests; rules C1–C22 (docs/04 §2)
+- [x] `reports/dq_report.md` (`make dq`): rows per step, rows and AED per rule, population waterfalls, Phase 1 reconciliation
+- [x] Reconciliation: every Phase 1 AED total and count reproduced exactly on full data
+- [x] CI fixtures committed (`tests/fixtures/`, `make fixtures`); CI runs `make bronze BRONZE_ROOT=tests/fixtures && make dbt`
+- [ ] Owner: fill the 42 blank zones in `seed_area` (docs/04 §6 list)
+- [ ] 2b: gold marts, rpt views, `seed_ltv_rules`, data dictionary
+
+**2a timings** (full data, 16 GB M-series Mac, docs/03 §7 settings, 4 dbt threads): `dbt build` 4 min 38 s for 6 seeds, 7 models and 85 tests (`int_rent_contracts` 173 s, `int_market_sales` 32 s, `int_transaction_deal_groups` 12 s; slowest test 76 s, C11 per-contract sums). `make dq` 39 s. Fixture build in CI: under 5 s.
+
 ---
 
 ## Phase 3: EDA (2 days)
@@ -158,7 +172,7 @@ Lighthouse ≥ 90 via Playwright.
 |---|---|---|---|---|
 | 0 Setup | ✓ | 2026-09-30 | 2026-09-30 | Scaffold done: `make setup`, `make db` (idempotent), `uv run pytest` (12 passed incl. pbi_reader grant tests) and `dbt debug` pass locally on PG 18.6 / dbt 1.12.5. First push e360d92, CI green |
 | 1 Ingestion | ✓ | 2026-09-30 | 2026-09-30 | CI green on 00340f6. Bronze loaded and reconciled (15 files: 1,788,150 transactions, 10,538,926 rent lines, FRED Fed Funds + Brent); re-runs are a no-op. Profiles, `phase1_findings.md` and docs/02 §7 done. Deferred: DLD increment download (stub), EIBOR (manual CBUAE file not yet placed). Open: C11 option and CI sample data (docs/04 §6) |
-| 2 dbt | ☐ | | | |
+| 2 dbt | 2a ✓, 2b ☐ | 2026-09-30 | | 2a (silver) done 2026-09-30: `dbt build` PASS=98 on full data in 4 min 38 s and on the CI fixtures; Phase 1 figures reproduced exactly (reports/dq_report.md §4). 1,267,760 clean market sales, 3,601,613 market-rent lines. Open: 42 blank zones in `seed_area` |
 | 3 EDA | ☐ | | | |
 | 4 Models | ☐ | | | |
 | 5 Power BI | ☐ | | | |

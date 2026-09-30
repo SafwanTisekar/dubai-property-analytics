@@ -1,0 +1,112 @@
+version: 2
+
+seeds:
+  - name: seed_procedure_category
+    description: >
+      The procedure categories used by seed_procedure_map, with the market-sale flag each
+      implies. `inheritance` is kept although no procedure maps to it in the 2026-09 extract
+      (phase1_findings §1), so a future snapshot has a place to land.
+    columns:
+      - name: procedure_category
+        tests: [unique, not_null]
+      - name: is_market_sale
+        tests: [not_null]
+
+  - name: seed_procedure_map
+    description: >
+      C2: every (trans_group, procedure_id) pair in the DLD register (58 in the 2026-09
+      extract) -> category and flags. Keyed on the pair, not the name, because six
+      lease-to-own codes are registered under both Sales and Mortgages (phase1_findings §1).
+      A procedure missing from this seed fails the stg_transactions not_null test on
+      procedure_category, so a new DLD procedure can't slip through unmapped.
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns: [trans_group, procedure_id]
+      # A procedure's market-sale flag must agree with its category.
+      - dbt_utils.expression_is_true:
+          arguments:
+            expression: "is_market_sale = (procedure_category in ('market_sale', 'offplan_sale'))"
+      # C10: only completed-property mortgage registrations carry a verified loan amount.
+      - dbt_utils.expression_is_true:
+          arguments:
+            expression: "not amount_is_loan or (trans_group = 'Mortgages' and procedure_id in (13, 190))"
+      - dbt_utils.expression_is_true:
+          arguments:
+            expression: "is_lease_to_own = (procedure_category = 'lease_to_own')"
+      # A new mortgage is individual or portfolio, never both.
+      - dbt_utils.expression_is_true:
+          arguments:
+            expression: "not (is_new_mortgage and is_portfolio_mortgage)"
+    columns:
+      - name: trans_group
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [Sales, Mortgages, Gifts]
+      - name: procedure_id
+        tests: [not_null]
+      - name: procedure_category
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('seed_procedure_category')
+                field: procedure_category
+      - name: is_market_sale
+        description: Arm's-length sale; feeds prices, indices, yields and the AVM.
+      - name: is_lease_to_own
+        description: C17. Lease-to-own / lease-development deal, either leg.
+      - name: is_new_mortgage
+        description: >
+          A new individual (single-unit) bank mortgage: Mortgage Registration, Delayed Mortgage,
+          Mortgage Pre-Registration. The mortgage-share numerator. Portfolio registrations,
+          modifications, transfers, development and lease finance are excluded.
+      - name: is_portfolio_mortgage
+        description: >
+          A new portfolio mortgage registration (one loan over several units: procedures 43,
+          101, 60). Reported separately from mortgage share, counted once per deal (C16).
+      - name: amount_is_loan
+        description: C10. `actual_worth` is the loan amount (Mortgage Registration, Delayed Mortgage).
+
+  - name: seed_rooms_map
+    description: "C7: DLD `rooms_en` label -> bedrooms (Studio = 0) and unit-type flags."
+    columns:
+      - name: rooms_en
+        tests: [unique, not_null]
+      - name: bedrooms
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              arguments:
+                min_value: 0
+                max_value: 10
+
+  - name: seed_rent_subtype_map
+    description: "C22: Ejari residential sub-type label -> bedrooms (Studio = 0). Other sub-types have no bedrooms."
+    columns:
+      - name: ejari_property_sub_type_en
+        tests: [unique, not_null]
+
+  - name: seed_area
+    description: >
+      C8: every DLD area_id seen in transactions or rents (265 IDs; Phase 1's "266" counted
+      the blank area_id on 3 rent lines as a value) -> canonical name and zone. Zones group
+      areas into markets for the min-n roll-up. A blank zone means the assignment wasn't
+      certain; docs/04 lists those areas for the owner to fill in.
+    columns:
+      - name: area_id
+        tests: [unique, not_null]
+      - name: area_name_en
+        tests: [not_null]
+      - name: zone
+        description: Market zone for roll-ups. NULL = not assigned yet.
+
+  - name: seed_phase1_reconciliation
+    description: >
+      The Phase 1 figures (reports/phase1_findings.md, phase1_evidence.md) that silver must
+      reproduce. The reconciliation tests check them only when bronze holds exactly the
+      Phase 1 snapshot (the `bronze_rows` gate), so they are skipped on the CI fixtures.
+    columns:
+      - name: metric
+        tests: [not_null]

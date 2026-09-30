@@ -1,0 +1,154 @@
+version: 2
+
+# Flag columns carry `meta.dq_rule`: quality/dq_report.py reads them from the dbt manifest
+# and counts affected rows per rule into reports/dq_report.md (docs/04 §2).
+
+models:
+  - name: stg_transactions
+    description: >
+      DLD transaction lines, typed and decoded (view). C1 keeps the latest snapshot of each
+      transaction_id, the only step in silver that removes rows. C2, C7, C8 and C9 attach the
+      procedure, rooms and area seeds; C18 and C19 fix or flag dates and labels. Units: sq m
+      and AED. Arabic columns are dropped.
+    meta:
+      dq_amount_column: actual_worth_aed
+    tests:
+      # C7: every rooms label in the data is in seed_rooms_map.
+      - dbt_utils.expression_is_true:
+          arguments:
+            expression: "rooms_en is null or room_class is not null"
+      # C19: no Arabic label left in an _en column.
+      - dbt_utils.expression_is_true:
+          arguments:
+            expression: "property_usage !~ '[؀-ۿ]'"
+      - dbt_utils.expression_is_true:
+          arguments:
+            expression: "txn_date is null or txn_date between date '1900-01-01' and snapshot_date"
+      - dbt_utils.expression_is_true:
+          arguments:
+            expression: "is_date_invalid = (txn_date is null)"
+    columns:
+      - name: transaction_id
+        description: DLD transaction id `<group>-<procedure>-<year>-<seq>`. Primary key after C1.
+        tests: [unique, not_null]
+      - name: id_year
+        description: Year segment of transaction_id (application year; can precede txn_date).
+      - name: id_seq
+        description: DLD running number within id_year. C16 uses it to spot batch registrations.
+      - name: trans_group
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [Sales, Mortgages, Gifts]
+      - name: procedure_id
+        tests: [not_null]
+      - name: procedure_category
+        description: C2. From seed_procedure_map; NULL would mean a procedure the seed doesn't know.
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('seed_procedure_category')
+                field: procedure_category
+      - name: is_market_sale
+        description: C2/C3. Arm's-length sale (seed). Gifts, grants, development and lease-to-own are false.
+      - name: is_lease_to_own
+        description: C17. Either leg of a lease-to-own / lease-development deal.
+        meta: {dq_rule: C17}
+      - name: is_new_mortgage
+        description: New individual (non-portfolio) bank mortgage; the mortgage-share numerator.
+      - name: is_portfolio_mortgage
+        description: New portfolio mortgage registration (one loan over several units); reported separately.
+      - name: amount_is_loan
+        description: C10. actual_worth is the loan amount.
+      - name: txn_date
+        description: Registration date. NULL when is_date_invalid.
+      - name: instance_date_raw
+        description: The date as published, kept so invalid dates stay traceable.
+      - name: is_date_invalid
+        description: C18. Unparseable, a Hijri year (4 rows, 1416-1422 AH) or after the extract date.
+        meta: {dq_rule: C18}
+      - name: is_pre_2004
+        description: C18. Registered 1900-2003, before the charter's analysis window (flag, don't drop).
+        meta: {dq_rule: C18}
+      - name: property_usage
+        description: C19. Residential / Commercial / Other / ...; the swapped Arabic label is fixed to 'Other'.
+      - name: is_residential
+        description: C15 helper. property_usage = 'Residential'.
+      - name: reg_type
+        tests:
+          - accepted_values:
+              arguments:
+                values: [Existing Properties, Off-Plan Properties]
+      - name: is_offplan
+        description: Off-plan vs ready, a first-class dimension (CLAUDE.md).
+        tests: [not_null]
+      - name: area_id
+        description: C8. DLD area; joins seed_area.
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('seed_area')
+                field: area_id
+      - name: area_name
+        description: Canonical name from seed_area.
+      - name: area_name_source
+        description: Name as published in this snapshot (name drift is tested against the seed).
+      - name: zone
+        description: Market zone from seed_area (NULL where not assigned yet).
+      - name: has_project
+        description: C9. The line names a DLD project (26% don't). Names stay NULL here; gold labels them Unknown.
+      - name: bedrooms
+        description: C7. From seed_rooms_map; Studio = 0; NULL for offices, shops, penthouses, land.
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              arguments:
+                min_value: 0
+                max_value: 10
+                row_condition: "bedrooms is not null"
+      - name: area_sqm
+        description: procedure_area in sq m, as published.
+      - name: actual_worth_aed
+        description: >
+          AED value as published. Sales: price. Mortgage Registration / Delayed Mortgage: loan
+          amount (C10). Repeated on every line of a portfolio deal: see C16.
+
+  - name: stg_rent_contracts
+    description: >
+      Ejari contract lines, typed and decoded (view over ~10.5M rows). C1 keeps the latest
+      snapshot of each (contract_id, line_number). Contract-level rules live in
+      int_rent_contracts, which is the only model that should select from this view; its
+      tests are there too, so the de-duplication window over 10.5M rows isn't recomputed
+      for each test.
+    columns:
+      - name: contract_id
+        description: Ejari contract number.
+      - name: line_number
+        description: 1..n within a contract (clean in Phase 1).
+      - name: no_of_prop_source
+        description: Published property count. Unreliable (disagrees with the line count on 5,629 contracts).
+      - name: annual_amount_aed
+        description: Annualised contract value. The WHOLE contract's amount, repeated on every line.
+      - name: actual_area_sqm
+        description: Per-line area as published; blank / 0 / 1 are placeholders (C21).
+      - name: bedrooms
+        description: C22. From seed_rent_subtype_map; Studio = 0.
+
+  - name: stg_rates
+    description: >
+      Monthly rate drivers: Fed Funds (monthly, as a decimal) and Brent (monthly mean of
+      daily prices, USD). EIBOR is added when the CBUAE file is loaded.
+    columns:
+      - name: month
+        tests: [unique, not_null]
+      - name: fed_funds_rate
+        description: Effective federal funds rate as a decimal (0.0525 = 5.25%).
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              arguments:
+                min_value: 0
+                max_value: 0.25
+      - name: brent_usd
+        description: Mean Brent price over the month's trading days, USD per barrel.
