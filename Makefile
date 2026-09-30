@@ -28,7 +28,7 @@ BRONZE_ROOT ?= data/raw
 BRONZE_FLAGS ?=
 
 .PHONY: help setup db dbt-deps dbt-debug lint test \
-        download bronze reconcile profile sample fixtures dbt dq kpi dictionary unzoned train score update pipeline
+        download bronze reconcile profile sample fixtures dbt dq kpi dictionary unzoned pbi-ready train score update pipeline
 
 help:  ## List targets
 	@grep -hE '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | \
@@ -109,6 +109,31 @@ dictionary:  ## Models, columns, types, docs and tests -> docs/data-dictionary.m
 
 unzoned:  ## Worksheet of seed_area rows without a zone -> reports/unzoned_areas.md
 	$(PY).quality.unzoned_areas
+
+# --- Power BI connection (docs/03 §8) --------------------------------------------------
+# Postgres listens on localhost and the Mac's Parallels Shared-network address. That
+# address only exists while Parallels runs, so if Postgres started first (e.g. at login)
+# it isn't listening there: restart it once Parallels is up, then prove pbi_reader works.
+
+PBI_HOST ?= 10.211.55.2
+
+pbi-ready:  ## Restart Postgres, then check Power BI's login (pbi_reader @ PBI_HOST) works
+	@[ -n "$$PBI_READER_PASSWORD" ] || { echo "PBI_READER_PASSWORD is empty: set it in .env"; exit 1; }
+	@if ! ifconfig | grep -q "inet $(PBI_HOST) "; then \
+		echo "NOT READY: $(PBI_HOST) isn't on any interface. Start Parallels (the Windows VM) first, then run make pbi-ready again."; \
+		exit 1; fi
+	brew services restart postgresql@18
+	@for i in $$(seq 1 30); do pg_isready -q -h $(PBI_HOST) -p $(PG_PORT) && break; sleep 1; done; \
+	if ! pg_isready -q -h $(PBI_HOST) -p $(PG_PORT); then \
+		echo "NOT READY: Postgres isn't listening on $(PBI_HOST):$(PG_PORT). Start Parallels first, then run make pbi-ready again (check listen_addresses in postgresql.conf)."; \
+		exit 1; fi
+	@if n=$$(PGPASSWORD="$$PBI_READER_PASSWORD" psql -X -At -h $(PBI_HOST) -p $(PG_PORT) -U pbi_reader \
+			-d $(PG_DB) -c "select count(*) from rpt.report_info" 2>&1) && [ "$$n" = "1" ]; then \
+		echo "OK: Power BI can connect. Server $(PBI_HOST):$(PG_PORT), database $(PG_DB), user pbi_reader (password: PBI_READER_PASSWORD in .env)."; \
+	else \
+		echo "NOT READY: pbi_reader query failed: $$n"; \
+		echo "Check pg_hba.conf (host $(PG_DB) pbi_reader 10.211.55.0/24 scram-sha-256) and that make dbt has built rpt."; \
+		exit 1; fi
 
 # --- Stubs (implemented in later phases, see docs/08) ---------------------------------
 

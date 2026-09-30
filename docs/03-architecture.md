@@ -184,13 +184,40 @@ At ~1.6M transactions (+1M rent lines), Postgres is comfortably fast if you do t
 
 ## 8. Power BI on macOS: Parallels (decided) + connecting to Postgres
 
-Power BI Desktop runs in the owner's **Windows VM under Parallels Desktop**. Postgres and the pipeline run natively on macOS. Power BI connects to Postgres **over the Parallels virtual network**:
+Power BI Desktop runs in the owner's **Windows 11 VM under Parallels Desktop**. Postgres and the pipeline run natively on macOS. Power BI connects to Postgres **over the Parallels Shared network**. Set up and verified 2026-09-30.
 
-1. **Find the Mac's address as seen from Windows:** in the VM, run `ipconfig`. The *Default Gateway* of the Parallels adapter is the Mac, typically `10.211.55.2` on the Shared Network.
-2. **Let Postgres listen on that interface:** in `$(brew --prefix)/var/postgresql@18/postgresql.conf` set `listen_addresses = 'localhost,10.211.55.2'` (or `'*'`).
-3. **Allow the VM in `pg_hba.conf`:** `host  dubai_property  pbi_reader  10.211.55.0/24  scram-sha-256`. Restart with `brew services restart postgresql@18`. Allow incoming connections if the macOS firewall asks.
-4. **In Power BI Desktop:** Get Data → **PostgreSQL database** → Server `10.211.55.2:5432`, Database `dubai_property`, **Import** mode → Database credentials `pbi_reader`. If you get an SSL/encryption error on this local connection, untick *Encrypt connections* for this source in Data source settings.
-5. Parameterise **server** and **database** as Power BI parameters so they're changed in one place.
+| Setting | Value |
+|---|---|
+| VM network adapter | `net0`, type **Shared** (`prlctl list -i "Windows 11"`) |
+| Mac's address on that network | **10.211.55.2**, interface `bridge100` (newer macOS/Parallels name it `bridge100`, not `vnic0`; `bridge101` / 10.37.129.x is Host-Only and unused) |
+| Subnet | **10.211.55.0/24** |
+| Postgres | port 5432, SSL off, `password_encryption = scram-sha-256` |
+| Config files | `/opt/homebrew/var/postgresql@18/postgresql.conf`, `pg_hba.conf` (backups: `*.bak-2026-09-30`) |
+
+**Changes applied** (as the macOS superuser; not in the repo):
+
+```text
+# postgresql.conf (line 60)
+listen_addresses = 'localhost,10.211.55.2'	# + Parallels Shared network (docs/03 §8)
+
+# pg_hba.conf (appended after the local / loopback rules)
+host    dubai_property  pbi_reader      10.211.55.0/24          scram-sha-256
+```
+
+Only `pbi_reader` may connect from the VM subnet, only to `dubai_property`, only with a password; every other role or database from that subnet matches no rule and is rejected. Postgres doesn't listen on the Wi-Fi address at all. Verified: `pbi_reader` over 10.211.55.2 reads `rpt.report_info`; `dpa_owner` over 10.211.55.2 is refused (no pg_hba entry); a wrong password fails; `pbi_reader` reading `gold` is denied. The macOS firewall is off; if it is turned on, allow incoming connections for `postgres`.
+
+**Startup order: run `make pbi-ready` before refreshing.** 10.211.55.2 only exists while Parallels runs. If Postgres started first (e.g. at login via `brew services`), it logs a bind warning and listens on localhost only. `make pbi-ready`:
+1. checks 10.211.55.2 is on an interface, else prints `NOT READY: … Start Parallels (the Windows VM) first`;
+2. restarts `postgresql@18` and waits until it accepts connections on 10.211.55.2;
+3. runs `select count(*) from rpt.report_info` as `pbi_reader` over 10.211.55.2 and prints `OK: Power BI can connect. Server 10.211.55.2:5432, database dubai_property, user pbi_reader …`, or the error and what to check.
+
+`PBI_HOST` overrides the address (`make pbi-ready PBI_HOST=…`) if Parallels ever assigns a different subnet; then update `listen_addresses` and `pg_hba.conf` to match.
+
+**In Power BI Desktop** (the refresh routine is: start Parallels → `make pbi-ready` on the Mac → refresh):
+1. Get Data → **PostgreSQL database** → Server **`10.211.55.2:5432`**, Database **`dubai_property`**, Data connectivity mode **Import**.
+2. Credentials: **Database** → user **`pbi_reader`**, password = `PBI_READER_PASSWORD` in the project's `.env` (gitignored, never committed). Changing it: edit `.env`, run `make db`, then update the saved credential in Power BI (File → Options and settings → Data source settings).
+3. Server SSL is off, so if Power BI reports an encryption error, untick *Encrypt connections* for this source in Data source settings (traffic stays on the Mac's private virtual network).
+4. Select only `rpt.*` views (docs/06 §1). Parameterise server and database as `PgServer` / `PgDatabase` so they're changed in one place.
 
 Give the VM at least 8 GB RAM while refreshing. Save the PBIP project into the repo's `powerbi/` folder via the Parallels shared folder so it's committed from macOS.
 
