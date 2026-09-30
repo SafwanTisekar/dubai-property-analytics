@@ -178,7 +178,7 @@ seeds:
       rule (borrower x property status x home number x value band) per regulatory period.
       Current regime: CBUAE Regulations Regarding Mortgage Loans, Art. 3(2), as amended by
       Board Resolution 31/2/2020 (effective 2020-04-08). Earlier regime: Circular No. 31/2013
-      (to 2020-04-07). Every row verified by the owner against the CBUAE rulebook
+      (2013-10-28 to 2020-04-07). Every row verified by the owner against the CBUAE rulebook
       (2026-09-30). The stress test is illustrative and must say which LTVs it assumed.
     tests:
       - dbt_utils.expression_is_true:
@@ -195,7 +195,9 @@ seeds:
               arguments:
                 expression: "> 0 and max_ltv <= 1"
       - name: effective_from
-        description: First day the cap applies; NULL = open start (the 2013 start date is not recorded).
+        description: >
+          First day the cap applies. Pre-2020 rows use the Circular 31/2013 date (2013-10-28);
+          it came into force one month after Official Gazette publication, a date not verified.
       - name: effective_to
         description: Last day the cap applies; NULL = still in force.
       - name: source_citation
