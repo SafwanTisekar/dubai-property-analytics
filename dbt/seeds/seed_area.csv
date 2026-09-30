@@ -13,12 +13,12 @@ area_id,area_name_en,zone
 240,Port Saeed,Deira
 241,Al Qusais Old,"Qusais, Nahda, Twar & Muhaisnah"
 242,Al Ras,Deira
-243,Al-Safiyyah,
+243,Al-Safiyyah,Outer Dubai & Hatta
 244,Al Murqabat,Deira
 245,Al-Murar Qadeem,Deira
 246,Al-Murar Jadeed,Deira
 247,Al Khabeesi,Deira
-248,Um Ramool,
+248,Um Ramool,Industrial
 249,Al Muteena,Deira
 250,Al-Souq Al Kabeer (Deira),Deira
 251,Naif South,Deira
@@ -30,7 +30,7 @@ area_id,area_name_en,zone
 257,Al Khawaneej,"Mirdif, Mizhar, Warqa & Khawaneej"
 258,Muhaisna,"Qusais, Nahda, Twar & Muhaisnah"
 259,Al-Musalla (Deira),Deira
-262,Al-Zarouniyyah,
+262,Al-Zarouniyyah,Outer Dubai & Hatta
 263,Al-Nahdah,"Qusais, Nahda, Twar & Muhaisnah"
 264,Nad Al Hamar,"Mirdif, Mizhar, Warqa & Khawaneej"
 265,Al-Muhaisnah North,"Qusais, Nahda, Twar & Muhaisnah"
@@ -41,19 +41,19 @@ area_id,area_name_en,zone
 270,Al Safaa,"Jumeirah, Al Wasl & Umm Suqeim"
 271,Al Karama,Bur Dubai & Karama
 272,Al Baharna,Bur Dubai & Karama
-273,Al-Baloosh,
+273,Al-Baloosh,Outer Dubai & Hatta
 274,Shandagha East,Bur Dubai & Karama
 275,Shandagha West,Bur Dubai & Karama
 276,Al Bada,"Jumeirah, Al Wasl & Umm Suqeim"
 277,Al Qoaz,"Al Barsha, Al Quoz & Tecom"
 278,Mankhool,Bur Dubai & Karama
-279,Tawaa Al Sayegh,
-280,Zareeba Duviya,
-281,Al Asbaq,
+279,Tawaa Al Sayegh,Outer Dubai & Hatta
+280,Zareeba Duviya,Outer Dubai & Hatta
+281,Al Asbaq,Outer Dubai & Hatta
 282,Ras Al Khor,"Creek Harbour, Jaddaf & Festival City"
 283,Al Fahidi,Bur Dubai & Karama
 284,Jabal Ali,"Jebel Ali, Dubai South & Waterfront"
-285,Nad Al Shiba,
+285,Nad Al Shiba,"MBR City, Meydan & Dubai Hills"
 288,Al Marmoom,Outer Dubai & Hatta
 292,Al Barsha,"Al Barsha, Al Quoz & Tecom"
 294,Lehbab,Outer Dubai & Hatta
@@ -64,7 +64,7 @@ area_id,area_name_en,zone
 299,Al Warqa Fourth,"Mirdif, Mizhar, Warqa & Khawaneej"
 300,Al Rashidiya,"Mirdif, Mizhar, Warqa & Khawaneej"
 301,Al Nahda Second,"Qusais, Nahda, Twar & Muhaisnah"
-302,Tawi Al Muraqqab,
+302,Tawi Al Muraqqab,Outer Dubai & Hatta
 303,Um Suqaim First,"Jumeirah, Al Wasl & Umm Suqeim"
 304,Um Suqaim Second,"Jumeirah, Al Wasl & Umm Suqeim"
 305,AL QUSAIS,"Qusais, Nahda, Twar & Muhaisnah"
@@ -102,7 +102,7 @@ area_id,area_name_en,zone
 337,Nad Al Shiba Third,"MBR City, Meydan & Dubai Hills"
 338,Al Goze First,"Al Barsha, Al Quoz & Tecom"
 339,Al Mararr,Deira
-340,Ghadeer Al tair,
+340,Ghadeer Al tair,"MBR City, Meydan & Dubai Hills"
 341,Trade Center First,"DIFC, Trade Centre & Za'abeel"
 342,Ras Al Khor Industrial Third,Industrial
 343,Al Warsan First,"Silicon Oasis, International City & Academic City"
@@ -111,7 +111,7 @@ area_id,area_name_en,zone
 346,Al Hamriya Port,Deira
 347,Al Goze Third,"Al Barsha, Al Quoz & Tecom"
 348,Al Goze Fourth,"Al Barsha, Al Quoz & Tecom"
-349,Grayteesah,
+349,Grayteesah,Outer Dubai & Hatta
 350,Al Thanyah Fifth,"Marina, JBR & JLT"
 351,Al Thanyah Third,"Emirates Hills, Meadows & Greens"
 352,Al Thanayah Fourth,"Emirates Hills, Meadows & Greens"
@@ -140,13 +140,13 @@ area_id,area_name_en,zone
 376,Ras Al Khor Industrial First,Industrial
 377,Al-Nakhal,Deira
 378,Al Garhoud,Deira
-379,Al-Shumaal,
+379,Al-Shumaal,Outer Dubai & Hatta
 380,Al Mizhar,"Mirdif, Mizhar, Warqa & Khawaneej"
 382,Al Waheda,Deira
 383,Jumeirah,"Jumeirah, Al Wasl & Umm Suqeim"
 384,Bur Dubai,Bur Dubai & Karama
-385,Muashrah Al Bahraana,
-386,Al-Raulah,
+385,Muashrah Al Bahraana,Outer Dubai & Hatta
+386,Al-Raulah,"MBR City, Meydan & Dubai Hills"
 387,Al-Bastakiyah,Bur Dubai & Karama
 388,Oud Metha,Bur Dubai & Karama
 390,Burj Khalifa,Downtown & Business Bay
@@ -157,14 +157,14 @@ area_id,area_name_en,zone
 395,Jabal Ali Industrial First,Industrial
 396,Al Khawaneej First,"Mirdif, Mizhar, Warqa & Khawaneej"
 397,Al Khawaneej Second,"Mirdif, Mizhar, Warqa & Khawaneej"
-398,Al Aweer First,
-399,Al Aweer Second,
-400,Al Eyas,
-401,Wadi Al Amardi,
+398,Al Aweer First,Outer Dubai & Hatta
+399,Al Aweer Second,Outer Dubai & Hatta
+400,Al Eyas,Outer Dubai & Hatta
+401,Wadi Al Amardi,Outer Dubai & Hatta
 402,AL MIZHAR FOURTH,"Mirdif, Mizhar, Warqa & Khawaneej"
 403,Al Mizhar Third,"Mirdif, Mizhar, Warqa & Khawaneej"
 404,Mushrif,"Mirdif, Mizhar, Warqa & Khawaneej"
-405,Bukadra,
+405,Bukadra,"MBR City, Meydan & Dubai Hills"
 406,Nad Al Shiba Fourth,"MBR City, Meydan & Dubai Hills"
 409,Al Barshaa South Third,"JVC, JVT & Arjan"
 410,Palm Jumeirah,Palm & Islands
@@ -178,20 +178,20 @@ area_id,area_name_en,zone
 418,Naif North,Deira
 419,Sikkat Al Khail South,Deira
 420,Mushrif,"Mirdif, Mizhar, Warqa & Khawaneej"
-421,Al-Mustashfa West,
-423,Al-Aweer,
-424,Al-Qiyadah,
-425,Al-Dzahiyyah Al-Jadeedah,
-427,Nad Rashid,
+421,Al-Mustashfa West,Outer Dubai & Hatta
+423,Al-Aweer,Outer Dubai & Hatta
+424,Al-Qiyadah,Outer Dubai & Hatta
+425,Al-Dzahiyyah Al-Jadeedah,Outer Dubai & Hatta
+427,Nad Rashid,Outer Dubai & Hatta
 430,Dubai International Airport,Deira
-431,Al-Cornich,
+431,Al-Cornich,Outer Dubai & Hatta
 432,Palm Deira,Palm & Islands
-433,Al Thanyah Second,
+433,Al Thanyah Second,Outer Dubai & Hatta
 434,Wadi Al Safa 6,Dubailand
 435,Al Hebiah Fourth,Dubailand
 436,Festival City First,"Creek Harbour, Jaddaf & Festival City"
 437,Al Kheeran,"Creek Harbour, Jaddaf & Festival City"
-438,Al Ttay,
+438,Al Ttay,Outer Dubai & Hatta
 441,Al Barsha South Fourth,"JVC, JVT & Arjan"
 442,Al Barsha South Fifth,"JVC, JVT & Arjan"
 443,Al Thanyah First,"Al Barsha, Al Quoz & Tecom"
@@ -218,7 +218,7 @@ area_id,area_name_en,zone
 470,Al Faga'A,Outer Dubai & Hatta
 471,Al Rowaiyah Third,"Silicon Oasis, International City & Academic City"
 472,Jabal Ali Second,"Jebel Ali, Dubai South & Waterfront"
-473,AL Athbah,
+473,AL Athbah,Outer Dubai & Hatta
 474,OUD AL MUTEENA,"Mirdif, Mizhar, Warqa & Khawaneej"
 475,Muhaisanah Fifth,"Qusais, Nahda, Twar & Muhaisnah"
 476,Jabal Ali Third,"Jebel Ali, Dubai South & Waterfront"
@@ -230,34 +230,34 @@ area_id,area_name_en,zone
 482,Hadaeq Sheikh Mohammed Bin Rashid,"MBR City, Meydan & Dubai Hills"
 483,Warsan Fourth,"Silicon Oasis, International City & Academic City"
 484,Nadd Hessa,"Silicon Oasis, International City & Academic City"
-485,Me'Aisem First,
-486,Me'Aisem Second,
+485,Me'Aisem First,Dubailand
+486,Me'Aisem Second,Dubailand
 489,Lehbab First,Outer Dubai & Hatta
 492,Al Rowaiyah First,"Silicon Oasis, International City & Academic City"
 493,Al Rowaiyah Second,"Silicon Oasis, International City & Academic City"
 494,Umm Addamin,Outer Dubai & Hatta
 496,Le Hemaira,Outer Dubai & Hatta
 497,Lehbab Second,Outer Dubai & Hatta
-499,Al Maha,
-500,Um Esalay,
-501,Remah,
+499,Al Maha,Outer Dubai & Hatta
+500,Um Esalay,Outer Dubai & Hatta
+501,Remah,Outer Dubai & Hatta
 502,Madinat Hind 1,Dubailand
 503,Madinat Hind 2,Dubailand
 504,Madinat Hind 3,Dubailand
 505,Madinat Hind 4,Dubailand
-506,Al Yelayiss 1,
+506,Al Yelayiss 1,Dubailand
 507,Al Yelayiss 2,Dubailand
-508,Al Yelayiss 3,
-509,Al Yelayiss 4,
-510,Al Yelayiss 5,
-513,Madinat Latifa,
-514,Ghadeer Barashy,
-515,Saih Aldahal,
-518,Mugatrah,
+508,Al Yelayiss 3,Outer Dubai & Hatta
+509,Al Yelayiss 4,Outer Dubai & Hatta
+510,Al Yelayiss 5,Dubailand
+513,Madinat Latifa,Outer Dubai & Hatta
+514,Ghadeer Barashy,Outer Dubai & Hatta
+515,Saih Aldahal,Outer Dubai & Hatta
+518,Mugatrah,Outer Dubai & Hatta
 519,Al Layan1,Outer Dubai & Hatta
 522,Hessyan First,"Jebel Ali, Dubai South & Waterfront"
 523,Al Hebiah Third,Dubailand
-524,Muragab,
+524,Muragab,Outer Dubai & Hatta
 525,Hatta,Outer Dubai & Hatta
 526,Business Bay,Downtown & Business Bay
 527,Island 2,Palm & Islands

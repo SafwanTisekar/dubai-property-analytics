@@ -92,8 +92,8 @@ seeds:
     description: >
       C8: every DLD area_id seen in transactions or rents (265 IDs; Phase 1's "266" counted
       the blank area_id on 3 rent lines as a value) -> canonical name and zone. Zones group
-      areas into markets for the min-n roll-up. A blank zone means the assignment wasn't
-      certain; docs/04 lists those areas for the owner to fill in.
+      areas into markets for the min-n roll-up. Every area has a zone; `make unzoned`
+      (reports/unzoned_areas.md) lists any that don't, e.g. a new area in a later snapshot.
     columns:
       - name: area_id
         tests: [unique, not_null]
