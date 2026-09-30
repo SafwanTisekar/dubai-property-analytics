@@ -93,10 +93,12 @@ dubai-property-analytics/
 │   ├── db.py                   # connection helpers (psycopg, SQLAlchemy engine, connectorx URI)
 │   ├── ingest/
 │   │   ├── load_bronze.py      # CSV → bronze via COPY; manifest + row-count log
-│   │   ├── download_dld_increment.py
-│   │   └── download_rates.py
+│   │   ├── download_dld_increment.py  # stub for v1 (docs/04 Decisions)
+│   │   ├── download_rates.py
+│   │   └── sample.py           # stratified sample → data/sample (make sample)
 │   ├── quality/
 │   │   ├── profile.py          # column profiling → reports/profile_*.md
+│   │   ├── investigate.py      # Phase 1 investigations → reports/phase1_evidence.md
 │   │   └── reconcile.py        # file vs bronze vs gold counts/AED totals
 │   ├── features/
 │   │   ├── feature_list.py     # ALLOW-LIST of AVM features
@@ -171,7 +173,7 @@ At ~1.6M transactions (+1M rent lines), Postgres is comfortably fast if you do t
 - **Load with COPY**, never row-by-row `INSERT`. Load bronze with indexes absent, then `ANALYZE`.
 - **Indexes in gold** via dbt `indexes` config: `fct_transaction(txn_date)`, `(area_key)`, `(is_market_sale, txn_date)`; the same pattern for rents.
 - **Materialisations:** staging = `view`, intermediate = `table`, marts = `table`, reporting = `view`.
-- **Server settings** (`postgresql.conf`, see §6 for its location; for a 16 GB Mac): `shared_buffers = 2GB`, `work_mem = 128MB`, `maintenance_work_mem = 1GB`, `effective_cache_size = 8GB`. Restart after changing.
+- **Server settings** (`postgresql.conf`, see §6 for its location; for a 16 GB Mac): `shared_buffers = 2GB`, `work_mem = 128MB`, `maintenance_work_mem = 1GB`, `effective_cache_size = 8GB`, `max_wal_size = 4GB` (the 1 GB default caused back-to-back checkpoints during the rent load, see reports/phase1_findings.md §0). Restart after changing.
 - Pull data into Python with `connectorx` (fast) and write results back with `COPY`.
 - Target: full rebuild under 20 min. Record actual timings in docs/08.
 

@@ -5,16 +5,19 @@
 | Step | Script | Detail |
 |---|---|---|
 | Database setup | `make db` → `sql/00_create_database.sql`, `sql/01_schemas_grants.sql` | UTF-8 database `dubai_property`; roles `dpa_owner` (pipeline) and `pbi_reader` (read-only on `rpt`); schemas `bronze`, `silver`, `gold`, `ml`, `rpt` |
-| Bulk + incremental DLD files | `ingest/load_bronze.py` | For each CSV in `data/raw/dld/<dataset>/`: record SHA-256, size and snapshot date in `data/raw/manifest.json` (skip files already loaded); create the bronze table from the CSV header with **every column as `text`**; stream the file with psycopg `COPY … FROM STDIN (FORMAT csv, HEADER true)`; add metadata columns; `ANALYZE` |
-| DLD increments | `ingest/download_dld_increment.py` | Downloads date-windowed CSVs from DLD Open Data (monthly windows) into `data/raw/dld/<dataset>/`. Where automation isn't possible, you drop files there manually |
-| Rates / macro | `ingest/download_rates.py` | FRED (`FEDFUNDS`, `DCOILBRENTEU`) via the CSV endpoint; EIBOR from a CBUAE download in `data/raw/cbuae/`; loaded to `bronze.rates_*` the same way |
+| Bulk + incremental DLD files | `ingest/load_bronze.py` (`make bronze`) | For each CSV in a registered dataset folder (`config.DATASETS`): SHA-256 → skip if already in `bronze._load_manifest`; Python pre-pass (BOM, encoding, header, **record count with a CSV parser**); create the bronze table from the header with **every column as `text`**; stream the raw bytes with psycopg `COPY … FROM STDIN (FORMAT csv, HEADER true)`; commit only if COPY rows = parser records; `ANALYZE`; export `data/raw/manifest.json`. Then `quality/reconcile.py` re-checks live bronze counts per file |
+| DLD increments | `ingest/download_dld_increment.py` | **Deferred (stub) for v1**, see Decisions. Refresh by dropping a new bulk snapshot into `data/raw/dld/<dataset>/` |
+| Rates / macro | `ingest/download_rates.py` (`make download`) | FRED (`FEDFUNDS`, `DCOILBRENTEU`) via the CSV endpoint → dated snapshots in `data/raw/fred/<series>/`; EIBOR from CSVs placed in `data/raw/cbuae/` (skipped with a log message if none); loaded to `bronze.rates_fedfunds`, `rates_brent`, `rates_eibor` by `load_bronze` |
+| Profiling | `quality/profile.py`, `quality/investigate.py` (`make profile`) | SQL-only column profiles → `reports/profile_<table>.md`; Phase 1 investigations → `reports/phase1_evidence.md` |
+| Sample | `ingest/sample.py` (`make sample`) | 2% of deals/contracts per year × area stratum, whole groups, deterministic (`md5(key)` order) → `data/sample/`, loadable with `make bronze BRONZE_ROOT=data/sample` |
 
 **Bronze rules (load only, no transformation)**
-- Tables: `bronze.dld_transactions`, `bronze.dld_rent_contracts`, `bronze.dld_projects`, … Column names are snake_cased from the header; values untouched (`text`).
+- Tables: `bronze.dld_transactions`, `bronze.dld_rent_contracts`, `bronze.dld_projects`, … Column names are snake_cased from the header; values untouched (`text`). DLD quotes every field, so missing values arrive as `''`, not `NULL`: staging applies `nullif(col, '')`.
 - Encoding: the database is UTF-8. Detect and strip a UTF-8 BOM; if a file isn't UTF-8, convert it on the fly and log that.
-- Metadata: `_source_file`, `_source` (bulk / increment / kaggle), `_snapshot_date`, `_ingested_at`, `_row_hash` (md5 of the raw line).
+- Metadata: `_source_file` (path relative to `data/`, e.g. `raw/dld/rents/…csv`), `_source` (bulk / increment / fred / cbuae), `_snapshot_date` (from the file name, else mtime), `_ingested_at`, `_row_hash` (md5 of the row's values, a stored generated column; see Decisions).
 - Append-only: re-loading the same file is a no-op (manifest check). New snapshots are appended, and de-duplication happens in silver (C1).
-- Log to `reports/ingest_log.csv`: file, rows_in_file, rows_loaded, seconds.
+- Log to `reports/ingest_log.csv`: file, status (loaded / skipped / disabled / failed), encoding, rows_in_file, rows_loaded, rows_match, inspect and COPY seconds, rows/s.
+- Schema drift (a new or missing column in a later snapshot) fails the load loudly; it is never altered silently.
 
 ## 2. Cleaning rules (dbt → silver)
 
@@ -94,3 +97,20 @@ erDiagram
 ## 5. Orchestration
 
 The `Makefile` runs the steps in order: `db (once) → download → bronze → dbt build (pre-ML) → train → score → dbt build --select tag:post_ml (incl. rpt views) → test`. Incremental runs use `make update`, which pulls the latest month and rebuilds.
+
+## 6. Decisions
+
+| Date | Decision | Why |
+|---|---|---|
+| 2026-09-30 | **Load manifest lives in `bronze._load_manifest`**, written in the same transaction as each file's COPY. `data/raw/manifest.json` is exported from it | A JSON file can't be atomic with the database: a crash between COPY and the JSON write would leave the file loaded but unrecorded (or the reverse). The JSON is kept for humans and diffs, as docs/03 specifies |
+| 2026-09-30 | **Raw bytes stream straight into COPY**; a separate Python `csv` pass counts records | Postgres's parser does the load, and Python's parser is an independent check. The file commits only if both agree. Faster than parsing rows in Python and re-serialising them |
+| 2026-09-30 | **Per-file metadata is set via temporary column DEFAULTs** inside the load transaction | COPY can only fill columns from the file. Defaults keep it a single pass: the alternatives are a temp table plus INSERT (writes 5.9 GB twice) or an UPDATE (rewrites every row) |
+| 2026-09-30 | **`_row_hash` = md5 of the row's values**, not of the raw line | It's computed by Postgres as a stored generated column during COPY, and it serves the same purpose (C1 de-duplication of identical rows across snapshots). NULL and `''` hash differently |
+| 2026-09-30 | **Table names follow docs/04** (`bronze.dld_transactions`, `bronze.dld_rent_contracts`, `bronze.rates_*`), mapped from folder names in `config.DATASETS` | Folder names (`rents/`) are short. Table names say what the data is |
+| 2026-09-30 | **`transactions_increment/` is disabled for v1**; `download_dld_increment.py` is a stub | The portal export has a 22-column schema whose IDs don't match the bulk `transaction_id`, and the bulk snapshot already covers it (to 2026-09-25). Revisit at the first monthly refresh |
+| 2026-09-30 | **EIBOR is a manual download**; the pipeline skips it when absent | CBUAE has no stable CSV endpoint. Fed Funds is the fallback rate driver (AED/USD peg) |
+| 2026-09-30 | **Seed keys: (trans_group, procedure_id)** | Six lease-to-own codes are registered under both Sales and Mortgages with different values (reports/phase1_findings.md §1) |
+| 2026-09-30 | **Mortgage `actual_worth` = loan amount** for Mortgage Registration / Delayed Mortgage (C10) | Median 0.795 of the same-day sale price, following the CBUAE LTV caps (phase1_findings §2) |
+| 2026-09-30 | **Repeated deal values are flagged, not split**: new flag `is_repeated_deal_value` (rule in `quality/investigate.py`); AED totals count each group's value once | The bulk file doesn't mark portfolio groups; a naive Σ overstates mortgages by AED 130.9bn (phase1_findings §2b) |
+| open | **C11 rent allocation**: recommended single-line contracts only for market rent / yields; multi-line contracts kept with `annual_amount / lines` and `is_multi_unit` | 100% of multi-line contracts repeat the full amount per line; a naive Σ is 5.24× (phase1_findings §3). To confirm in Phase 2 |
+| open | **CI data**: `data/sample/` is gitignored (CLAUDE.md: never commit `data/`), so CI tests use synthetic fixtures built in `tmp_path`. For Phase 2 `dbt build` in CI, either commit a small sample (a smaller fraction than the 2% dev sample, a few MB; CC BY 4.0 allows it with attribution) under a gitignore exception, or keep generating synthetic seed data | Needs the owner's call because it changes a CLAUDE.md rule |

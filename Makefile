@@ -20,12 +20,18 @@ PG_DB ?= dubai_property
 PSQL := psql -X -v ON_ERROR_STOP=1 -U $(PG_ADMIN_USER)
 DBT  := cd dbt && uv run dbt
 DBT_FLAGS := --profiles-dir .
+PY   := uv run python -m dubai_property
+
+# Where `make bronze` reads CSVs from. Use `make bronze BRONZE_ROOT=data/sample` (with
+# BRONZE_FLAGS=--reset) to work against the sample instead of the full data.
+BRONZE_ROOT ?= data/raw
+BRONZE_FLAGS ?=
 
 .PHONY: help setup db dbt-deps dbt-debug lint test \
-        download bronze dbt train score update sample pipeline
+        download bronze reconcile profile sample dbt train score update pipeline
 
 help:  ## List targets
-	@grep -E '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | \
+	@grep -hE '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | \
 		awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-10s\033[0m %s\n", $$1, $$2}'
 
 # --- Implemented ----------------------------------------------------------------------
@@ -59,16 +65,27 @@ test:  ## pytest + dbt test
 	uv run pytest
 	$(DBT) test $(DBT_FLAGS)
 
+# --- Phase 1: ingestion, bronze, profiling (docs/04 §1) --------------------------------
+
+download:  ## FRED rates -> data/raw/fred (EIBOR: files in data/raw/cbuae); DLD increments deferred
+	$(PY).ingest.download_rates
+	$(PY).ingest.download_dld_increment
+
+bronze:  ## CSVs -> bronze.* via COPY (manifest skips loaded files), then reconcile counts
+	$(PY).ingest.load_bronze --root $(BRONZE_ROOT) $(BRONZE_FLAGS)
+	$(MAKE) reconcile
+
+reconcile:  ## File record counts vs bronze row counts -> reports/bronze_reconciliation.md
+	$(PY).quality.reconcile
+
+profile:  ## Profile every bronze column + Phase 1 investigations -> reports/profile_*.md
+	$(PY).quality.profile
+	$(PY).quality.investigate
+
+sample:  ## 2% sample stratified by year x area (whole deals/contracts) -> data/sample
+	$(PY).ingest.sample
+
 # --- Stubs (implemented in later phases, see docs/08) ---------------------------------
-
-download:  ## [stub] DLD increments + rates -> data/raw (Phase 1)
-	@echo "download: not implemented yet (Phase 1, docs/08)"
-
-bronze:  ## [stub] raw CSVs -> bronze.* via COPY (Phase 1)
-	@echo "bronze: not implemented yet (Phase 1, docs/08)"
-
-sample:  ## [stub] 2% stratified CSV sample -> data/sample (Phase 1)
-	@echo "sample: not implemented yet (Phase 1, docs/08)"
 
 dbt:  ## [stub] dbt build -> silver, gold, rpt (pre-ML) (Phase 2)
 	@echo "dbt: not implemented yet (Phase 2, docs/08)"

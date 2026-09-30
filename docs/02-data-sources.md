@@ -87,16 +87,18 @@ All row counts below are **approximate and come from third-party profiles**. **P
 - `seed_area.csv`: `area_id` → cleaned name, zone/cluster (e.g. Downtown/Business Bay, Marina/JBR, JVC/JVT, Palm, Emirates Hills/Meadows, Deira/Bur Dubai, Dubai South), lat/long centroid
 - `seed_ltv_rules.csv`: CBUAE mortgage LTV caps used in the stress test, e.g. expat first home ≤ AED 5M; off-plan cap. **Verify the current rules from CBUAE regulations before use** and cite the source
 
-## 7. Verified profile (fill in during Phase 1)
+## 7. Verified profile (Phase 1, 2026-09-30)
+
+Source: `reports/phase1_findings.md` (interpretation), `reports/phase1_evidence.md` (queries, regenerate with `make profile`), `reports/bronze_reconciliation.md` (file vs bronze counts).
 
 | Item | Expected | Actual | Notes |
 |---|---|---|---|
-| Transactions rows (raw) | ~1.5–1.8M (DLD portal: 2 files × ~500 MB + 2026 file) | | |
-| Date range | 2004 → 2026 | | |
-| Sales / Mortgages / Gifts split | | | |
-| Off-plan share of sales (last 12 months) | | | |
-| Rent contract lines (raw) | 10M+ (4.4 GB, 11 files) | ~10.5M lines / 11 files | Bulk snapshot 2026-09-30, identical 41-column header in all 11 files. 10,538,937 physical lines including 11 headers. Parsed record count to be confirmed in Phase 1 (quoted fields may contain newlines) |
-| Rent contracts after multi-line de-duplication | | | |
-| Σ sales value, last full year (AED) | | | |
-| `actual_worth` meaning on mortgage rows | loan amount? | | |
-| Distinct areas | ~200+ | | |
+| Transactions rows (raw) | ~1.5–1.8M (DLD portal: 2 files × ~500 MB + 2026 file) | **1,788,150** | Dubai Pulse bulk snapshot 2026-09-29, 2 files (894,076 + 894,074), 47 columns, UTF-8, no BOM. Parser count = COPY count = bronze count. `transaction_id` is unique on every row |
+| Date range | 2004 → 2026 | **2004-01-05 → 2026-09-25** | Plus 18,212 earlier rows: 18,208 dated 1966–2003 and 4 Hijri dates (1416–1422 AH = 1995–2002). All `YYYY-MM-DD`; flag, don't drop |
+| Sales / Mortgages / Gifts split | | **1,368,630 / 352,805 / 66,715** (76.5% / 19.7% / 3.7%) | 58 group × procedure pairs, 52 procedure names. No inheritance procedure. Six lease-to-own codes appear in both Sales and Mortgages (one deal, two legs), so key the seed on (group, procedure_id) |
+| Off-plan share of sales (last 12 months) | | **68.2% of rows, 47.8% of value** | Sales group, 2025-09-26 → 2026-09-25, `reg_type_en = 'Off-Plan Properties'`, before the market-sale filter |
+| Rent contract lines (raw) | 10M+ (4.4 GB, 11 files) | **10,538,926** | Bulk snapshot 2026-09-30, identical 41-column header in all 11 files. 10,538,937 physical lines = records + 11 headers, so no quoted line breaks |
+| Rent contracts after multi-line de-duplication | | **8,795,059** | 8,546,886 single-line + 248,173 multi-line (1,992,040 lines). Every multi-line contract repeats the full amount on each line: a naive Σ `annual_amount` is 5.24× the true total |
+| Σ sales value, last full year (AED) | | **AED 681.2bn (2025)** | 214,529 Sales-group rows, before the market-sale filter; Sell / Sell pre-reg / Delayed Sell = 665.9bn |
+| `actual_worth` meaning on mortgage rows | loan amount? | **Loan amount** (completed-property mortgages) | Matched to a same-day sale of the same unit: median ratio 0.795 (102,516 pairs); 0.75 in 2014–19 and 0.80 from 2021, following the CBUAE LTV caps. Off-plan pre-registration is mixed (43% = price). Portfolio deals repeat one value on each unit line: +AED 130.9bn (4.8%) on a naive mortgage Σ |
+| Distinct areas | ~200+ | **259** (transactions), **216** (rents), **266** combined | `area_id`; `seed_area` must cover all 266 |
