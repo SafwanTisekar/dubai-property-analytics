@@ -38,18 +38,17 @@ def test_apartment_area_weighted_price_tracks_the_median():
     """Residential apartments: area-weighted within ±40% of the median, every year 2010+.
 
     Only meaningful on the full register (the CI fixtures have a handful of sales a year),
-    so it runs when the database holds more than 100k transaction lines.
+    so it runs when at least kpi.DIVERGENCE_MIN_LINES transaction lines are in scope.
     """
     try:
         with db.connect(connect_timeout=3) as conn:
             if not kpi.rpt_available(conn):
                 pytest.skip("rpt views not built yet (run make dbt)")
-            (lines,) = conn.execute("select count(*) from rpt.transactions").fetchone()
-            if lines < 100_000:
-                pytest.skip(f"only {lines} transaction lines: fixture or sample data")
             result = kpi.compute(conn)
     except (RuntimeError, psycopg.OperationalError) as exc:
         pytest.skip(f"database not reachable: {exc}")
+    if not kpi.divergence_applies(result.silver):
+        pytest.skip("fixture or sample data: too few sales for yearly apartment figures")
     assert kpi.apartment_divergence(result.silver) == []
 
 
@@ -110,3 +109,11 @@ def test_apartment_divergence_flags_years_outside_40_percent():
         "all": {"apt_median": 1, "apt_aw_value": 9, "apt_aw_area": 1},
     }
     assert [b[0] for b in kpi.apartment_divergence(silver)] == ["2011", "2012"]
+
+
+def test_divergence_check_only_applies_to_the_full_register():
+    bad_year = {"2011": {"apt_median": 100, "apt_aw_value": 50, "apt_aw_area": 1}}
+    small = {"all": {"_rows": kpi.DIVERGENCE_MIN_LINES - 1}, **bad_year}
+    full = {"all": {"_rows": kpi.DIVERGENCE_MIN_LINES}, **bad_year}
+    assert kpi.divergence_failures(small) == []
+    assert [b[0] for b in kpi.divergence_failures(full)] == ["2011"]

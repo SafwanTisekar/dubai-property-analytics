@@ -49,6 +49,10 @@ REPORT_PATH = config.REPORTS / "kpi_reconciliation.md"
 # Apartment sanity check: area-weighted vs median AED per sq m, every year from 2010.
 DIVERGENCE_FROM_YEAR = 2010
 DIVERGENCE_TOLERANCE = 0.40
+# It needs the full register: the CI fixtures and the 2% sample have a handful of
+# apartment sales a year, so their medians and ratios are noise. Below this many
+# transaction lines in scope the check is reported as not applicable, not failed.
+DIVERGENCE_MIN_LINES = 100_000
 
 # metric -> kind; the kind sets the tolerance (see ``tolerance``).
 METRICS: dict[str, str] = {
@@ -349,6 +353,18 @@ def apartment_divergence(
     return bad
 
 
+def divergence_applies(silver: Table) -> bool:
+    """True when the register is large enough for the apartment sanity check."""
+    return int(silver.get("all", {}).get("_rows") or 0) >= DIVERGENCE_MIN_LINES
+
+
+def divergence_failures(
+    silver: Table,
+) -> list[tuple[str, float | None, float | None, float | None]]:
+    """``apartment_divergence`` where the check applies; nothing on small data."""
+    return apartment_divergence(silver) if divergence_applies(silver) else []
+
+
 def fetch(conn: psycopg.Connection, sql: str, start: date, end: date) -> Table:
     """Run one source query; return ``{period: {metric: value}}``."""
     cur = conn.execute(sql, {"start": start, "end": end})
@@ -473,7 +489,8 @@ def render(result: Result) -> str:
     """The markdown report."""
     years = sorted(p for p in result.silver if len(p) == 4)
     months = sorted(p for p in result.silver if len(p) == 7)[-12:]
-    divergence = apartment_divergence(result.silver)
+    applies = divergence_applies(result.silver)
+    divergence = divergence_failures(result.silver)
     failed = len(result.mismatches) + len(divergence)
     status = "**All checks pass.**" if not failed else f"**{failed} failed check(s)**: see §4-5."
     checks = [
@@ -485,7 +502,7 @@ def render(result: Result) -> str:
         r = result.silver[p]
         median, aw = r.get("apt_median"), derive(r)["apt_aw_ppsqm"]
         ratio = aw / float(median) if aw is not None and median else None
-        checked = int(p) >= DIVERGENCE_FROM_YEAR
+        checked = applies and int(p) >= DIVERGENCE_FROM_YEAR
         ok = ratio is not None and abs(ratio - 1) <= DIVERGENCE_TOLERANCE
         apt_rows.append(
             (p, _aed(median), _aed(aw), _pct(ratio), ("pass" if ok else "FAIL") if checked else "")
@@ -558,6 +575,15 @@ def render(result: Result) -> str:
         f"{DIVERGENCE_FROM_YEAR}. A wider gap would mean plot- or building-sized areas are "
         "still leaking into the area-weighted sums (or a unit mix shift worth explaining).",
         "",
+        *(
+            []
+            if applies
+            else [
+                f"**Not applicable here**: fewer than {DIVERGENCE_MIN_LINES:,} transaction "
+                "lines in scope (fixture or sample data), so yearly apartment figures are noise.",
+                "",
+            ]
+        ),
         *md_table(
             [
                 "Year",
@@ -590,7 +616,7 @@ def run(path: Path = REPORT_PATH) -> Result:
         path,
         time.perf_counter() - t0,
         len(result.mismatches),
-        len(apartment_divergence(result.silver)),
+        len(divergence_failures(result.silver)),
     )
     return result
 
@@ -599,7 +625,7 @@ def main() -> int:
     """CLI entry point. Exits 1 if any KPI doesn't reconcile or the sanity check fails."""
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
     result = run()
-    return 1 if result.mismatches or apartment_divergence(result.silver) else 0
+    return 1 if result.mismatches or divergence_failures(result.silver) else 0
 
 
 if __name__ == "__main__":
