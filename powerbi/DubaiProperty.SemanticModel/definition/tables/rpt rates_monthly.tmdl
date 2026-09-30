@@ -8,11 +8,6 @@ table 'rpt rates_monthly'
 		summarizeBy: none
 		sourceColumn: Month
 
-		variation Variation
-			isDefault
-			relationship: f1cd9267-0d6a-4684-bff6-64afb2d7b824
-			defaultHierarchy: LocalDateTable_fb22c487-5638-40f4-b531-f6dbb00c5309.'Date Hierarchy'
-
 		annotation SummarizationSetBy = Automatic
 
 		annotation UnderlyingDateTimeDataType = Date

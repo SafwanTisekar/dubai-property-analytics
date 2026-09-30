@@ -33,11 +33,6 @@ table 'rpt dim_project'
 		summarizeBy: none
 		sourceColumn: First Transaction Date
 
-		variation Variation
-			isDefault
-			relationship: 814e6f5f-09c6-4bbf-9ba1-7cee4b2c5d41
-			defaultHierarchy: LocalDateTable_4fe95ccc-2a23-43ea-8c81-3ce58cf730de.'Date Hierarchy'
-
 		annotation SummarizationSetBy = Automatic
 
 		annotation UnderlyingDateTimeDataType = Date
@@ -48,11 +43,6 @@ table 'rpt dim_project'
 		lineageTag: d105c6b5-b6d6-4f66-bd44-a3179fa47f55
 		summarizeBy: none
 		sourceColumn: Last Transaction Date
-
-		variation Variation
-			isDefault
-			relationship: 2558d6ad-c047-4312-9b1f-a80a218f7f8a
-			defaultHierarchy: LocalDateTable_46449471-94ac-4ef1-9c2c-3030dd84eb4f.'Date Hierarchy'
 
 		annotation SummarizationSetBy = Automatic
 

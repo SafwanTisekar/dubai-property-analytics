@@ -8,11 +8,6 @@ table 'rpt rent_month'
 		summarizeBy: none
 		sourceColumn: Month
 
-		variation Variation
-			isDefault
-			relationship: 3dfa9059-c2bb-4997-89ee-e3c932b10b62
-			defaultHierarchy: LocalDateTable_d116b0d3-beab-467b-b790-c5e67de59385.'Date Hierarchy'
-
 		annotation SummarizationSetBy = Automatic
 
 		annotation UnderlyingDateTimeDataType = Date

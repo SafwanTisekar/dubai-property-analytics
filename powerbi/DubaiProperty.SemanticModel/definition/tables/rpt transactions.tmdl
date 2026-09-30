@@ -8,11 +8,6 @@ table 'rpt transactions'
 		summarizeBy: none
 		sourceColumn: Date
 
-		variation Variation
-			isDefault
-			relationship: ae444977-c45f-46a7-9d39-efeb5e097b0e
-			defaultHierarchy: LocalDateTable_ef695256-7607-44cc-bdf8-bcbbbc28ddb1.'Date Hierarchy'
-
 		annotation SummarizationSetBy = Automatic
 
 		annotation UnderlyingDateTimeDataType = Date

@@ -7,32 +7,22 @@ model Model
 		legacyRedirects
 		returnErrorValuesAsNull
 
-annotation __PBI_TimeIntelligenceEnabled = 1
+annotation __PBI_TimeIntelligenceEnabled = 0
 
 annotation PBI_QueryOrder = ["rpt area_month","rpt dim_area","rpt dim_date","rpt dim_procedure","rpt dim_project","rpt dim_property_type","rpt rates_monthly","rpt rent_month","rpt report_info","rpt transactions"]
 
 annotation PBI_ProTooling = ["DevMode"]
 
 ref table 'rpt area_month'
-ref table DateTableTemplate_cecefa02-91dc-477b-a825-670c646c4f50
 ref table 'rpt dim_area'
 ref table 'rpt dim_date'
-ref table LocalDateTable_18530596-ee47-4085-a2e5-5bb6847c1861
-ref table LocalDateTable_b336895b-ffe6-4521-9bd8-6dc13658bb56
-ref table LocalDateTable_57c981b5-afe9-44d4-b49d-ddbeb895c610
 ref table 'rpt dim_procedure'
 ref table 'rpt dim_project'
-ref table LocalDateTable_4fe95ccc-2a23-43ea-8c81-3ce58cf730de
-ref table LocalDateTable_46449471-94ac-4ef1-9c2c-3030dd84eb4f
 ref table 'rpt dim_property_type'
 ref table 'rpt rates_monthly'
-ref table LocalDateTable_fb22c487-5638-40f4-b531-f6dbb00c5309
 ref table 'rpt rent_month'
-ref table LocalDateTable_d116b0d3-beab-467b-b790-c5e67de59385
 ref table 'rpt report_info'
-ref table LocalDateTable_0c112256-fddc-41c1-bac6-3555b2646abb
 ref table 'rpt transactions'
-ref table LocalDateTable_ef695256-7607-44cc-bdf8-bcbbbc28ddb1
 
 ref cultureInfo en-US
 

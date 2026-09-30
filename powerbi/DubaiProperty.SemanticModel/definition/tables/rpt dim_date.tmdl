@@ -1,17 +1,14 @@
 table 'rpt dim_date'
 	lineageTag: 9a45b778-91af-4b3a-9af1-b4a3ef38d3a4
+	dataCategory: Time
 
 	column Date
 		dataType: dateTime
+		isKey
 		formatString: Long Date
 		lineageTag: 32cf914a-9b46-4370-a7fb-6c9cb0b58e62
 		summarizeBy: none
 		sourceColumn: Date
-
-		variation Variation
-			isDefault
-			relationship: dd254282-f02c-469e-83c0-0747547fed25
-			defaultHierarchy: LocalDateTable_18530596-ee47-4085-a2e5-5bb6847c1861.'Date Hierarchy'
 
 		annotation SummarizationSetBy = Automatic
 
@@ -67,11 +64,6 @@ table 'rpt dim_date'
 		summarizeBy: none
 		sourceColumn: Month Start
 
-		variation Variation
-			isDefault
-			relationship: ec8daabf-b941-4a4d-b1c2-c0978db29262
-			defaultHierarchy: LocalDateTable_b336895b-ffe6-4521-9bd8-6dc13658bb56.'Date Hierarchy'
-
 		annotation SummarizationSetBy = Automatic
 
 		annotation UnderlyingDateTimeDataType = Date
@@ -82,11 +74,6 @@ table 'rpt dim_date'
 		lineageTag: ecf4d3f0-f684-474d-9d08-95a4b1055e09
 		summarizeBy: none
 		sourceColumn: Quarter Start
-
-		variation Variation
-			isDefault
-			relationship: 1dee557e-8cd1-480b-abb4-730df4b5ab24
-			defaultHierarchy: LocalDateTable_57c981b5-afe9-44d4-b49d-ddbeb895c610.'Date Hierarchy'
 
 		annotation SummarizationSetBy = Automatic
 
