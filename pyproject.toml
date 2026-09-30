@@ -24,6 +24,7 @@ dependencies = [
     # Transformations (docs/04)
     "dbt-core~=1.12.0",
     "dbt-postgres~=1.11",
+    "matplotlib>=3.9",
 ]
 
 [dependency-groups]
@@ -32,6 +33,8 @@ dev = [
     "ruff>=0.8",
     "pre-commit>=4.0",
     "ipykernel>=6.29",
+    "nbclient>=0.10",
+    "nbformat>=5.10",
 ]
 
 [build-system]
@@ -55,7 +58,8 @@ convention = "google"
 
 [tool.ruff.lint.per-file-ignores]
 "tests/**" = ["D"]
-"notebooks/**" = ["D"]
+# Notebooks: chart titles and subtitles are long strings; wrapping them hurts reading.
+"notebooks/**" = ["D", "E501"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

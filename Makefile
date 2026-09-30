@@ -28,7 +28,7 @@ BRONZE_ROOT ?= data/raw
 BRONZE_FLAGS ?=
 
 .PHONY: help setup db dbt-deps dbt-debug lint test \
-        download bronze reconcile profile sample fixtures dbt dq kpi dictionary unzoned pbi-ready train score update pipeline
+        download bronze reconcile profile sample fixtures dbt dq kpi dictionary unzoned pbi-ready eda train score update pipeline
 
 help:  ## List targets
 	@grep -hE '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | \
@@ -134,6 +134,13 @@ pbi-ready:  ## Restart Postgres, then check Power BI's login (pbi_reader @ PBI_H
 		echo "NOT READY: pbi_reader query failed: $$n"; \
 		echo "Check pg_hba.conf (host $(PG_DB) pbi_reader 10.211.55.0/24 scram-sha-256) and that make dbt has built rpt."; \
 		exit 1; fi
+
+# --- Phase 3: exploratory analysis (docs/08) -----------------------------------------
+# Needs the gold tables and rpt views on the full data (make dbt). Notebooks only call
+# src/dubai_property/analysis; the run fails if an executed notebook is over 1 MB.
+
+eda:  ## Execute notebooks/0*.ipynb in place -> reports/figures/*.png (findings: reports/findings.md)
+	$(PY).analysis.run_notebooks
 
 # --- Stubs (implemented in later phases, see docs/08) ---------------------------------
 

@@ -75,6 +75,8 @@ jobs:
         run: make dbt
 
       # The first pytest run happens before gold exists, so these skip there. Re-run them
-      # now: pbi_reader reads rpt and nothing else, and every KPI reconciles silver -> rpt.
-      - name: rpt access + KPI reconciliation (after the build)
-        run: uv run pytest tests/test_rpt_access.py tests/test_kpi_reconciliation.py
+      # now: pbi_reader reads rpt and nothing else, every KPI reconciles silver -> rpt, and
+      # every Phase 3 analysis query runs on gold (the notebooks themselves are not run in
+      # CI: fixture numbers mean nothing).
+      - name: rpt access + KPI reconciliation + analysis queries (after the build)
+        run: uv run pytest tests/test_rpt_access.py tests/test_kpi_reconciliation.py tests/test_analysis.py
