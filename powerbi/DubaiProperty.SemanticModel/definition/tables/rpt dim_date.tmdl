@@ -1,0 +1,156 @@
+table 'rpt dim_date'
+	lineageTag: 9a45b778-91af-4b3a-9af1-b4a3ef38d3a4
+
+	column Date
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: 32cf914a-9b46-4370-a7fb-6c9cb0b58e62
+		summarizeBy: none
+		sourceColumn: Date
+
+		variation Variation
+			isDefault
+			relationship: dd254282-f02c-469e-83c0-0747547fed25
+			defaultHierarchy: LocalDateTable_18530596-ee47-4085-a2e5-5bb6847c1861.'Date Hierarchy'
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column Year
+		dataType: int64
+		formatString: 0
+		lineageTag: 9c59e194-8305-4298-b7f1-4acddd641764
+		summarizeBy: sum
+		sourceColumn: Year
+
+		annotation SummarizationSetBy = Automatic
+
+	column Quarter
+		dataType: int64
+		formatString: 0
+		lineageTag: eb74b34c-b5d9-4ce8-b827-35bbfa58a726
+		summarizeBy: sum
+		sourceColumn: Quarter
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Month Number'
+		dataType: int64
+		formatString: 0
+		lineageTag: 6a9d732d-aec8-46f5-a36a-3f3e0d8eedd5
+		summarizeBy: sum
+		sourceColumn: Month Number
+
+		annotation SummarizationSetBy = Automatic
+
+	column Month
+		dataType: string
+		lineageTag: 5c3da155-e948-42fa-96a2-50445d7a7ef3
+		summarizeBy: none
+		sourceColumn: Month
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Month Short'
+		dataType: string
+		lineageTag: f0b600c0-c82e-43a3-afcf-6ed39118b8a7
+		summarizeBy: none
+		sourceColumn: Month Short
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Month Start'
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: b76a615e-2584-450e-8b76-63f18eb93abd
+		summarizeBy: none
+		sourceColumn: Month Start
+
+		variation Variation
+			isDefault
+			relationship: ec8daabf-b941-4a4d-b1c2-c0978db29262
+			defaultHierarchy: LocalDateTable_b336895b-ffe6-4521-9bd8-6dc13658bb56.'Date Hierarchy'
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column 'Quarter Start'
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: ecf4d3f0-f684-474d-9d08-95a4b1055e09
+		summarizeBy: none
+		sourceColumn: Quarter Start
+
+		variation Variation
+			isDefault
+			relationship: 1dee557e-8cd1-480b-abb4-730df4b5ab24
+			defaultHierarchy: LocalDateTable_57c981b5-afe9-44d4-b49d-ddbeb895c610.'Date Hierarchy'
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column 'Year Month'
+		dataType: string
+		lineageTag: 28cabf50-522c-494c-9d7b-095d7466bde3
+		summarizeBy: none
+		sourceColumn: Year Month
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Year Quarter'
+		dataType: string
+		lineageTag: 44eb6e04-d7ea-46fd-a41f-38c19baf4fe1
+		summarizeBy: none
+		sourceColumn: Year Quarter
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Day of Week'
+		dataType: int64
+		formatString: 0
+		lineageTag: 9be6cc61-4c03-4472-8eda-58f64d2e27a7
+		summarizeBy: sum
+		sourceColumn: Day of Week
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Day Name'
+		dataType: string
+		lineageTag: 1088f929-4cf3-4b6d-bd74-e671a8bbe6e5
+		summarizeBy: none
+		sourceColumn: Day Name
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Is Month Start'
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: 9e638096-fd8e-436c-84f4-297810cca720
+		summarizeBy: none
+		sourceColumn: Is Month Start
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Is After Snapshot'
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: c0b4e811-cde8-4cff-ae26-8fc75486bb06
+		summarizeBy: none
+		sourceColumn: Is After Snapshot
+
+		annotation SummarizationSetBy = Automatic
+
+	partition 'rpt dim_date' = m
+		mode: import
+		source =
+				let
+				  Source = PostgreSQL.Database("10.211.55.2:5432", "dubai_property"),
+				  #"Navigation 1" = Source{[Schema = "rpt", Item = "dim_date"]}[Data]
+				in
+				  #"Navigation 1"
+
+	annotation PBI_ResultType = Table
+

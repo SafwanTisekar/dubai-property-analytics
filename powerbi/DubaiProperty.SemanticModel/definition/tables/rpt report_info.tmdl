@@ -1,0 +1,47 @@
+table 'rpt report_info'
+	lineageTag: 4ab7d772-3b66-4980-9a4c-68184470919c
+
+	column 'Data As Of'
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: 3b74d469-8f9f-4813-8572-6f6ffdd21190
+		summarizeBy: none
+		sourceColumn: Data As Of
+
+		variation Variation
+			isDefault
+			relationship: a412d9a8-cd3b-4c34-9a80-eaca986a18e0
+			defaultHierarchy: LocalDateTable_0c112256-fddc-41c1-bac6-3555b2646abb.'Date Hierarchy'
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column 'Min N'
+		dataType: int64
+		formatString: 0
+		lineageTag: b8d41461-aa5c-4162-ac1d-2ce9a9dea13b
+		summarizeBy: sum
+		sourceColumn: Min N
+
+		annotation SummarizationSetBy = Automatic
+
+	column Source
+		dataType: string
+		lineageTag: 8f00c41d-d1de-4925-b2d2-c3514ed1cffd
+		summarizeBy: none
+		sourceColumn: Source
+
+		annotation SummarizationSetBy = Automatic
+
+	partition 'rpt report_info' = m
+		mode: import
+		source =
+				let
+				  Source = PostgreSQL.Database("10.211.55.2:5432", "dubai_property"),
+				  #"Navigation 1" = Source{[Schema = "rpt", Item = "report_info"]}[Data]
+				in
+				  #"Navigation 1"
+
+	annotation PBI_ResultType = Table
+

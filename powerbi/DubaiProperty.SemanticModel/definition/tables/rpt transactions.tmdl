@@ -1,0 +1,276 @@
+table 'rpt transactions'
+	lineageTag: 7c51487e-2d5e-4350-8631-88a15b32eac9
+
+	column Date
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: f8359868-eaff-49e7-b4d1-47e6f6ae7ed4
+		summarizeBy: none
+		sourceColumn: Date
+
+		variation Variation
+			isDefault
+			relationship: ae444977-c45f-46a7-9d39-efeb5e097b0e
+			defaultHierarchy: LocalDateTable_ef695256-7607-44cc-bdf8-bcbbbc28ddb1.'Date Hierarchy'
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column 'Area Key'
+		dataType: int64
+		formatString: 0
+		lineageTag: e79fe1e4-9c5c-4946-a8b7-3b26ff612b50
+		summarizeBy: none
+		sourceColumn: Area Key
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Property Type Key'
+		dataType: int64
+		formatString: 0
+		lineageTag: 015a505f-5f73-4e14-8bc2-6408b4139055
+		summarizeBy: none
+		sourceColumn: Property Type Key
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Procedure Key'
+		dataType: int64
+		formatString: 0
+		lineageTag: 418dc690-4b85-4afd-8467-9437578e05c8
+		summarizeBy: none
+		sourceColumn: Procedure Key
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Project Key'
+		dataType: int64
+		formatString: 0
+		lineageTag: 1a707a78-dce0-4dc3-bf94-dfba1ad8166f
+		summarizeBy: none
+		sourceColumn: Project Key
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Transaction Group'
+		dataType: string
+		lineageTag: 3c68b5a0-628d-452e-9aec-0048ca05246c
+		summarizeBy: none
+		sourceColumn: Transaction Group
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Procedure Category'
+		dataType: string
+		lineageTag: ef8c213e-a15a-4ecd-9863-dae9d2c6074d
+		summarizeBy: none
+		sourceColumn: Procedure Category
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Is Market Sale'
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: fea25568-d056-4ccc-bf1e-bd9ea677dfd0
+		summarizeBy: none
+		sourceColumn: Is Market Sale
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Is Clean Market Sale'
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: 81a4e2c5-9a39-4a18-ab5e-f0ca3a8d9e5a
+		summarizeBy: none
+		sourceColumn: Is Clean Market Sale
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Has Quality Flag'
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: ae14c1b7-bed7-452e-ac06-b7bcf2cfad3d
+		summarizeBy: none
+		sourceColumn: Has Quality Flag
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Is New Mortgage'
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: c46f5a14-eaba-47b5-abda-ee2d3baff71c
+		summarizeBy: none
+		sourceColumn: Is New Mortgage
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Is Portfolio Mortgage'
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: 51e9830e-38eb-42cc-acf8-4e8c0c8000c6
+		summarizeBy: none
+		sourceColumn: Is Portfolio Mortgage
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Is Deal Lead'
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: 2f5ce13b-b09b-4a42-b34a-c5b8cc798548
+		summarizeBy: none
+		sourceColumn: Is Deal Lead
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Is Lease to Own'
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: 3acc9a7b-8c4d-4f32-ae0b-159fc96d961b
+		summarizeBy: none
+		sourceColumn: Is Lease to Own
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Is Off-Plan'
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: ad9e018a-0baa-4ccf-87a1-7a78c307dd67
+		summarizeBy: none
+		sourceColumn: Is Off-Plan
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Registration Type'
+		dataType: string
+		lineageTag: 013b5431-3e17-4fb2-b774-3d477eada521
+		summarizeBy: none
+		sourceColumn: Registration Type
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'DLD Property Usage'
+		dataType: string
+		lineageTag: f60cfc31-c186-48f8-b856-d833d0d350f9
+		summarizeBy: none
+		sourceColumn: DLD Property Usage
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'DLD Property Type'
+		dataType: string
+		lineageTag: 6f49b853-12c2-44b9-adf9-a1d48b0dd47c
+		summarizeBy: none
+		sourceColumn: DLD Property Type
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'DLD Property Sub-Type'
+		dataType: string
+		lineageTag: 8922cb66-b052-4324-9fa6-64d62d763602
+		summarizeBy: none
+		sourceColumn: DLD Property Sub-Type
+
+		annotation SummarizationSetBy = Automatic
+
+	column Rooms
+		dataType: string
+		lineageTag: 0f124899-32b8-4d74-8dc8-8823bb103ca6
+		summarizeBy: none
+		sourceColumn: Rooms
+
+		annotation SummarizationSetBy = Automatic
+
+	column Bedrooms
+		dataType: int64
+		formatString: 0
+		lineageTag: 96bd349b-edc7-46c9-8a9d-5f97d8350ce2
+		summarizeBy: sum
+		sourceColumn: Bedrooms
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Has Parking'
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: 353fbf7f-99ff-4b93-8759-c2f15a8e1272
+		summarizeBy: none
+		sourceColumn: Has Parking
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Area Above Class Cap'
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: 96ad77f3-23f8-415e-9a3f-e189f5b1ed4d
+		summarizeBy: none
+		sourceColumn: Area Above Class Cap
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Area Sq M'
+		dataType: double
+		lineageTag: 1bdee74c-302b-4192-9475-5300c4d3b1b5
+		summarizeBy: sum
+		sourceColumn: Area Sq M
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column 'Price AED'
+		dataType: int64
+		formatString: 0
+		lineageTag: d10a4f61-ec46-4852-aa2c-11d27a5a008f
+		summarizeBy: sum
+		sourceColumn: Price AED
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'AED Counted Once'
+		dataType: int64
+		formatString: 0
+		lineageTag: d1c90acf-5e75-4ec6-81e2-579557ab8159
+		summarizeBy: sum
+		sourceColumn: AED Counted Once
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Price per Sq M AED'
+		dataType: int64
+		formatString: 0
+		lineageTag: 25e62136-78e1-42f1-b949-3a3f13b76b3d
+		summarizeBy: sum
+		sourceColumn: Price per Sq M AED
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Loan Amount AED'
+		dataType: int64
+		formatString: 0
+		lineageTag: b3a74cf1-44b6-40c9-8b38-a9ca3cd05bfa
+		summarizeBy: sum
+		sourceColumn: Loan Amount AED
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Portfolio Mortgage Value AED'
+		dataType: int64
+		formatString: 0
+		lineageTag: d842a9ce-5f99-4300-8f37-84e13959ba35
+		summarizeBy: sum
+		sourceColumn: Portfolio Mortgage Value AED
+
+		annotation SummarizationSetBy = Automatic
+
+	partition 'rpt transactions' = m
+		mode: import
+		source =
+				let
+				  Source = PostgreSQL.Database("10.211.55.2:5432", "dubai_property"),
+				  #"Navigation 1" = Source{[Schema = "rpt", Item = "transactions"]}[Data]
+				in
+				  #"Navigation 1"
+
+	annotation PBI_ResultType = Table
+

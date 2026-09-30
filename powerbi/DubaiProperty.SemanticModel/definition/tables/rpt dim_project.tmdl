@@ -1,0 +1,80 @@
+table 'rpt dim_project'
+	lineageTag: 402769c9-2ed1-4ce2-9a14-aaf973d52893
+
+	column 'Project Key'
+		dataType: int64
+		formatString: 0
+		lineageTag: 1568d522-4286-4786-b2c5-f417bc65ec30
+		summarizeBy: none
+		sourceColumn: Project Key
+
+		annotation SummarizationSetBy = Automatic
+
+	column Project
+		dataType: string
+		lineageTag: d81e6a02-8775-448c-9e47-bb360711d919
+		summarizeBy: none
+		sourceColumn: Project
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Master Project'
+		dataType: string
+		lineageTag: e540c29c-14ca-4236-b3a5-a439f0601ef6
+		summarizeBy: none
+		sourceColumn: Master Project
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'First Transaction Date'
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: 2409227b-bffa-4456-aeaf-376c2536a895
+		summarizeBy: none
+		sourceColumn: First Transaction Date
+
+		variation Variation
+			isDefault
+			relationship: 814e6f5f-09c6-4bbf-9ba1-7cee4b2c5d41
+			defaultHierarchy: LocalDateTable_4fe95ccc-2a23-43ea-8c81-3ce58cf730de.'Date Hierarchy'
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column 'Last Transaction Date'
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: d105c6b5-b6d6-4f66-bd44-a3179fa47f55
+		summarizeBy: none
+		sourceColumn: Last Transaction Date
+
+		variation Variation
+			isDefault
+			relationship: 2558d6ad-c047-4312-9b1f-a80a218f7f8a
+			defaultHierarchy: LocalDateTable_46449471-94ac-4ef1-9c2c-3030dd84eb4f.'Date Hierarchy'
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column 'Transaction Lines'
+		dataType: int64
+		formatString: 0
+		lineageTag: 4e356ac6-51f1-4994-b2e7-a58dd7bd025b
+		summarizeBy: sum
+		sourceColumn: Transaction Lines
+
+		annotation SummarizationSetBy = Automatic
+
+	partition 'rpt dim_project' = m
+		mode: import
+		source =
+				let
+				  Source = PostgreSQL.Database("10.211.55.2:5432", "dubai_property"),
+				  #"Navigation 1" = Source{[Schema = "rpt", Item = "dim_project"]}[Data]
+				in
+				  #"Navigation 1"
+
+	annotation PBI_ResultType = Table
+

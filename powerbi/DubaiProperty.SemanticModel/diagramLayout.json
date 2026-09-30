@@ -1,0 +1,152 @@
+{
+  "version": "1.1.0",
+  "diagrams": [
+    {
+      "ordinal": 0,
+      "scrollPosition": {
+        "x": 466,
+        "y": 153
+      },
+      "nodes": [
+        {
+          "location": {
+            "x": 1080.66710027696,
+            "y": 573.99260439614
+          },
+          "nodeIndex": "rpt area_month",
+          "nodeLineageTag": "89f8f030-528e-4af8-b8ea-f28e611ecf47",
+          "size": {
+            "height": 300,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 830.03456189388453,
+            "y": 452.49823851286476
+          },
+          "nodeIndex": "rpt dim_area",
+          "nodeLineageTag": "a30f4d7e-f025-4fdc-ac13-79f79f3c376b",
+          "size": {
+            "height": 200,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 1350.66710027696,
+            "y": 290.51635030051381
+          },
+          "nodeIndex": "rpt dim_date",
+          "nodeLineageTag": "9a45b778-91af-4b3a-9af1-b4a3ef38d3a4",
+          "size": {
+            "height": 300,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 50,
+            "y": 89.00068354824424
+          },
+          "nodeIndex": "rpt dim_procedure",
+          "nodeLineageTag": "9de772e9-0dfb-44dc-ac63-c7105865ac09",
+          "size": {
+            "height": 300,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 69.599023172286252,
+            "y": 607.0327006010275
+          },
+          "nodeIndex": "rpt dim_project",
+          "nodeLineageTag": "402769c9-2ed1-4ce2-9a14-aaf973d52893",
+          "size": {
+            "height": 224,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 624.1280807355223,
+            "y": 153.25135075905376
+          },
+          "nodeIndex": "rpt dim_property_type",
+          "nodeLineageTag": "a8143a5a-4e0c-4cbe-b7a4-ffa19d3028aa",
+          "size": {
+            "height": 248,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 1634.66710027696,
+            "y": 316.51635030051381
+          },
+          "nodeIndex": "rpt rates_monthly",
+          "nodeLineageTag": "c5af0dab-b55b-4fc5-8707-b18af652f61b",
+          "size": {
+            "height": 248,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 911.10806553047507,
+            "y": -50
+          },
+          "nodeIndex": "rpt rent_month",
+          "nodeLineageTag": "61513f82-3b90-404d-bd1e-7f8c24764f74",
+          "size": {
+            "height": 300,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 1918.66710027696,
+            "y": 364.51635030051381
+          },
+          "nodeIndex": "rpt report_info",
+          "nodeLineageTag": "4ab7d772-3b66-4980-9a4c-68184470919c",
+          "size": {
+            "height": 152,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 337.04697797796985,
+            "y": 253.72593124659193
+          },
+          "nodeIndex": "rpt transactions",
+          "nodeLineageTag": "7c51487e-2d5e-4350-8631-88a15b32eac9",
+          "size": {
+            "height": 300,
+            "width": 234
+          },
+          "zIndex": 0
+        }
+      ],
+      "name": "All tables",
+      "zoomValue": 100,
+      "pinKeyFieldsToTop": false,
+      "showExtraHeaderInfo": false,
+      "hideKeyFieldsWhenCollapsed": false,
+      "tablesLocked": false
+    }
+  ],
+  "selectedDiagram": "All tables",
+  "defaultDiagram": "All tables"
+}

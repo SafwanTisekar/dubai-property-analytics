@@ -1,0 +1,81 @@
+relationship dd254282-f02c-469e-83c0-0747547fed25
+	joinOnDateBehavior: datePartOnly
+	fromColumn: 'rpt dim_date'.Date
+	toColumn: LocalDateTable_18530596-ee47-4085-a2e5-5bb6847c1861.Date
+
+relationship ec8daabf-b941-4a4d-b1c2-c0978db29262
+	joinOnDateBehavior: datePartOnly
+	fromColumn: 'rpt dim_date'.'Month Start'
+	toColumn: LocalDateTable_b336895b-ffe6-4521-9bd8-6dc13658bb56.Date
+
+relationship 1dee557e-8cd1-480b-abb4-730df4b5ab24
+	joinOnDateBehavior: datePartOnly
+	fromColumn: 'rpt dim_date'.'Quarter Start'
+	toColumn: LocalDateTable_57c981b5-afe9-44d4-b49d-ddbeb895c610.Date
+
+relationship 814e6f5f-09c6-4bbf-9ba1-7cee4b2c5d41
+	joinOnDateBehavior: datePartOnly
+	fromColumn: 'rpt dim_project'.'First Transaction Date'
+	toColumn: LocalDateTable_4fe95ccc-2a23-43ea-8c81-3ce58cf730de.Date
+
+relationship 2558d6ad-c047-4312-9b1f-a80a218f7f8a
+	joinOnDateBehavior: datePartOnly
+	fromColumn: 'rpt dim_project'.'Last Transaction Date'
+	toColumn: LocalDateTable_46449471-94ac-4ef1-9c2c-3030dd84eb4f.Date
+
+relationship f1cd9267-0d6a-4684-bff6-64afb2d7b824
+	joinOnDateBehavior: datePartOnly
+	fromColumn: 'rpt rates_monthly'.Month
+	toColumn: LocalDateTable_fb22c487-5638-40f4-b531-f6dbb00c5309.Date
+
+relationship 3dfa9059-c2bb-4997-89ee-e3c932b10b62
+	joinOnDateBehavior: datePartOnly
+	fromColumn: 'rpt rent_month'.Month
+	toColumn: LocalDateTable_d116b0d3-beab-467b-b790-c5e67de59385.Date
+
+relationship a412d9a8-cd3b-4c34-9a80-eaca986a18e0
+	joinOnDateBehavior: datePartOnly
+	fromColumn: 'rpt report_info'.'Data As Of'
+	toColumn: LocalDateTable_0c112256-fddc-41c1-bac6-3555b2646abb.Date
+
+relationship ae444977-c45f-46a7-9d39-efeb5e097b0e
+	joinOnDateBehavior: datePartOnly
+	fromColumn: 'rpt transactions'.Date
+	toColumn: LocalDateTable_ef695256-7607-44cc-bdf8-bcbbbc28ddb1.Date
+
+relationship AutoDetected_5164a132-4359-4166-8ada-33f3c0e4191b
+	fromColumn: 'rpt area_month'.'Area Key'
+	toColumn: 'rpt dim_area'.'Area Key'
+
+relationship AutoDetected_587c1c00-87be-44c6-a6ca-30ba88d70ddc
+	fromColumn: 'rpt rent_month'.'Area Key'
+	toColumn: 'rpt dim_area'.'Area Key'
+
+relationship AutoDetected_b19a5075-de11-4178-8bc6-37af50d299e0
+	fromColumn: 'rpt transactions'.'Area Key'
+	toColumn: 'rpt dim_area'.'Area Key'
+
+relationship AutoDetected_badf8f5f-65cc-4168-9a72-d92a9e5c1da4
+	fromColumn: 'rpt area_month'.'Property Type Key'
+	toColumn: 'rpt dim_property_type'.'Property Type Key'
+
+relationship AutoDetected_2cfe4753-b59a-4d95-bdcf-adbc15c079b8
+	fromColumn: 'rpt rent_month'.'Property Type Key'
+	toColumn: 'rpt dim_property_type'.'Property Type Key'
+
+relationship AutoDetected_1a1eaa34-63a8-4af8-98cd-4e06a7415c10
+	fromColumn: 'rpt transactions'.'Property Type Key'
+	toColumn: 'rpt dim_property_type'.'Property Type Key'
+
+relationship AutoDetected_84fbdd02-ce87-4c7c-bf2e-fb3c5c5de1ff
+	fromColumn: 'rpt transactions'.'Procedure Key'
+	toColumn: 'rpt dim_procedure'.'Procedure Key'
+
+relationship AutoDetected_92047c18-2d60-42d2-8221-d361aad1b98b
+	fromColumn: 'rpt transactions'.'Project Key'
+	toColumn: 'rpt dim_project'.'Project Key'
+
+relationship c63aa7fa-df2a-9a2e-35f1-22be81c07577
+	fromColumn: 'rpt area_month'.Month
+	toColumn: 'rpt dim_date'.Date
+

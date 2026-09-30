@@ -2,8 +2,13 @@ repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0
     hooks:
+      # Power BI Desktop writes the PBIP files (TMDL, report JSON) without a final newline
+      # and rewrites them on every save; "fixing" them would show every save as a change.
+      # Keep them byte-for-byte as Power BI writes them.
       - id: trailing-whitespace
+        exclude: ^powerbi/
       - id: end-of-file-fixer
+        exclude: ^powerbi/
       - id: check-yaml
       - id: check-toml
       - id: check-added-large-files

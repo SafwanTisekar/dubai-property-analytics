@@ -40,8 +40,11 @@ logs/
 .user.yml
 
 # --- Power BI (PBIP local/cache files) ----------------------------------------
-powerbi/**/.pbi/localSettings.json
-powerbi/**/.pbi/cache.abf
+# cache.abf is the imported data (tens of MB); localSettings.json is per-user.
+# The PBIP definition (TMDL, report JSON, .platform, editorSettings.json) is committed.
+**/.pbi/cache.abf
+**/.pbi/localSettings.json
+*.abf
 
 # --- OS / editors ---------------------------------------------------------------
 .DS_Store

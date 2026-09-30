@@ -1,0 +1,59 @@
+table 'rpt dim_area'
+	lineageTag: a30f4d7e-f025-4fdc-ac13-79f79f3c376b
+
+	column 'Area Key'
+		dataType: int64
+		formatString: 0
+		lineageTag: c6b6bf0a-3c58-4797-a03b-00fbfe32c3d3
+		summarizeBy: none
+		sourceColumn: Area Key
+
+		annotation SummarizationSetBy = Automatic
+
+	column Area
+		dataType: string
+		lineageTag: 852bbfa7-c573-49fd-981b-a49724a2e15f
+		summarizeBy: none
+		sourceColumn: Area
+
+		annotation SummarizationSetBy = Automatic
+
+	column Zone
+		dataType: string
+		lineageTag: 0805a762-13e0-4a63-82a5-07a5ef4dc51e
+		summarizeBy: none
+		sourceColumn: Zone
+
+		annotation SummarizationSetBy = Automatic
+
+	column Latitude
+		dataType: double
+		lineageTag: 0c0ad283-5eb8-4616-ab70-678c73453341
+		summarizeBy: sum
+		sourceColumn: Latitude
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column Longitude
+		dataType: double
+		lineageTag: 2b37e6bb-b04c-403c-b9f1-086cd4090ec4
+		summarizeBy: sum
+		sourceColumn: Longitude
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	partition 'rpt dim_area' = m
+		mode: import
+		source =
+				let
+				  Source = PostgreSQL.Database("10.211.55.2:5432", "dubai_property"),
+				  #"Navigation 1" = Source{[Schema = "rpt", Item = "dim_area"]}[Data]
+				in
+				  #"Navigation 1"
+
+	annotation PBI_ResultType = Table
+

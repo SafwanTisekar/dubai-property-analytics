@@ -1,0 +1,100 @@
+table 'rpt dim_procedure'
+	lineageTag: 9de772e9-0dfb-44dc-ac63-c7105865ac09
+
+	column 'Procedure Key'
+		dataType: int64
+		formatString: 0
+		lineageTag: ed5029e4-7d4e-4629-9ee2-c5626e00e27e
+		summarizeBy: none
+		sourceColumn: Procedure Key
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Transaction Group'
+		dataType: string
+		lineageTag: 6f35f1f1-75e2-42a3-93e5-58a756283f56
+		summarizeBy: none
+		sourceColumn: Transaction Group
+
+		annotation SummarizationSetBy = Automatic
+
+	column Procedure
+		dataType: string
+		lineageTag: 308e0fa2-26f1-4a52-ba5e-4a93b62910e5
+		summarizeBy: none
+		sourceColumn: Procedure
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Procedure Category'
+		dataType: string
+		lineageTag: a4953cb9-7ead-43e8-bddc-83fd485704f6
+		summarizeBy: none
+		sourceColumn: Procedure Category
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Procedure Category Description'
+		dataType: string
+		lineageTag: 3a9a5256-89b9-4cd0-a23a-a08d480390c5
+		summarizeBy: none
+		sourceColumn: Procedure Category Description
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Is Market Sale'
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: be9202ba-600f-4afa-8021-5f4cc0147094
+		summarizeBy: none
+		sourceColumn: Is Market Sale
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Is New Mortgage'
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: bc222d12-4b9b-4322-8f62-c55c10216a8d
+		summarizeBy: none
+		sourceColumn: Is New Mortgage
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Is Portfolio Mortgage'
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: b87927eb-58d3-47e9-9b96-ba1aff6a52c0
+		summarizeBy: none
+		sourceColumn: Is Portfolio Mortgage
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Is Lease to Own'
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: 00e15f7d-22ad-47b0-824b-fbdfada3b2ec
+		summarizeBy: none
+		sourceColumn: Is Lease to Own
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Amount Is Loan'
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: ee28301c-722a-485b-8fca-5d0bfc4cd905
+		summarizeBy: none
+		sourceColumn: Amount Is Loan
+
+		annotation SummarizationSetBy = Automatic
+
+	partition 'rpt dim_procedure' = m
+		mode: import
+		source =
+				let
+				  Source = PostgreSQL.Database("10.211.55.2:5432", "dubai_property"),
+				  #"Navigation 1" = Source{[Schema = "rpt", Item = "dim_procedure"]}[Data]
+				in
+				  #"Navigation 1"
+
+	annotation PBI_ResultType = Table
+
