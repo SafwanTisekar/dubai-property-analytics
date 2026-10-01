@@ -170,6 +170,10 @@ def test_card_wording_follows_the_numbers():
 
     tie = report_avm.villa_comparison(perf(0.0852))
     assert "tie" in tie and "100 villas" in tie
+    behind = report_avm.villa_comparison(perf(0.0866))  # the re-tuned model: 8.66% vs 8.51%
+    assert "comparables are slightly better than LightGBM" in behind and "a tie" not in behind
+    assert "comparables are better" in report_avm.villa_comparison(perf(0.095))
+    assert "slightly ahead" in report_avm.villa_comparison(perf(0.0840))
     assert "also beats" in report_avm.villa_comparison(perf(0.070))
     assert report_avm.villa_comparison(perf(0.07).filter(pl.col("model") != "comps")) is None
 

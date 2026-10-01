@@ -1,6 +1,6 @@
 # Data dictionary
 
-Generated 2026-10-01 15:54 UTC by `quality/data_dictionary.py` from the dbt manifest (descriptions, tests) and the database catalogue (columns, types). Regenerate with `make dictionary` (after `make dbt`). Rules C1-C22 are in docs/04 §2; the star schema in docs/04 §3. Bronze is raw text (docs/04 §1) and not listed.
+Generated 2026-10-01 16:36 UTC by `quality/data_dictionary.py` from the dbt manifest (descriptions, tests) and the database catalogue (columns, types). Regenerate with `make dictionary` (after `make dbt`). Rules C1-C22 are in docs/04 §2; the star schema in docs/04 §3. Bronze is raw text (docs/04 §1) and not listed.
 
 ## Silver: seeds, staging views and intermediate tables (typed, cleaned, flagged)
 

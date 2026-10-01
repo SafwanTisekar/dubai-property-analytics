@@ -128,7 +128,7 @@ CALCULATE ( SELECTEDVALUE ( stress_grid[Negative Equity Share] ),
     stress_grid[Shock Pct] = [Selected Shock] )
 ```
 
-The shock and LTV values are stored as integers (e.g. −20, 80) in both the parameter tables and `rpt.stress_grid` ("Shock Pct", "LTV Pct"), to avoid floating-point equality issues. Every stress visual carries the label "Illustrative, not a regulatory stress test". The historical replay rows have Scenario = "Replay: 2014-2020 drawdown" and no Shock Pct. The outlook fan chart reads `rpt.forecast` (Actual line, Forecast per Scenario, Lower/Upper 80 and 95 as error bands). `tests/test_kpi_reconciliation.py` reproduces every KPI in docs/01 §4 in SQL, and the Power BI cards must match before publishing.
+The shock and LTV values are stored as integers (e.g. −20, 80) in both the parameter tables and `rpt.stress_grid` ("Shock Pct", "LTV Pct"), to avoid floating-point equality issues. Every stress visual carries the label "Illustrative, not a regulatory stress test". The historical replay rows have no Shock Pct and come in two scenarios shown side by side: "Replay: 2014-2020, Dubai-wide" (−24% for every buyer, the lower range) and "Replay: 2014-2020, own series" (each buyer's zone × type or type drawdown; noisier zone series overstate the depth, so it is the upper range). The outlook fan chart reads `rpt.forecast` (Actual line, Forecast per Scenario, Lower/Upper 80 and 95 as error bands). `tests/test_kpi_reconciliation.py` reproduces every KPI in docs/01 §4 in SQL, and the Power BI cards must match before publishing.
 
 ## 4. Report pages
 

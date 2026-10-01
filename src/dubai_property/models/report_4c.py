@@ -188,18 +188,29 @@ def fig_stress_zones(grid: pl.DataFrame, snapshot: date, shock: int, ltv: int) -
     at = z.filter((pl.col("scenario") == "grid") & (pl.col("shock_pct") == shock)).select(
         "zone", "property_type_key", "purchases", s=pl.col("negative_equity_share")
     )
+    dw = z.filter(pl.col("scenario") == config.STRESS_REPLAY_DUBAI_NAME).select(
+        "zone", "property_type_key", w=pl.col("negative_equity_share")
+    )
     rp = z.filter(pl.col("scenario") == config.STRESS_REPLAY_NAME).select(
         "zone", "property_type_key", r=pl.col("negative_equity_share"),
         d=pl.col("applied_shock"),
     )  # fmt: skip
-    d = at.join(rp, on=["zone", "property_type_key"], how="left").sort("s")
+    d = (
+        at.join(rp, on=["zone", "property_type_key"], how="left")
+        .join(dw, on=["zone", "property_type_key"], how="left")
+        .sort("s")
+    )
     fig, ax = P.figure(size=(10, max(4.5, 0.32 * d.height + 2)))
-    margins(fig, left=0.40)
+    margins(fig, left=0.40, title_in=1.75)
     y = np.arange(d.height)
     colors = [TYPE_COLOR[k] for k in d["property_type_key"]]
     ax.barh(y, d["s"].to_numpy(), color=colors, height=0.6)
-    ax.scatter(d["r"].fill_null(np.nan).to_numpy(), y, marker="D", s=26, color=P.TEXT, zorder=3,
-               label="2014-2020 replay")  # fmt: skip
+    w_, r_ = d["w"].fill_null(np.nan).to_numpy(), d["r"].fill_null(np.nan).to_numpy()
+    ax.hlines(y, w_, r_, color=P.TEXT_2, lw=1, zorder=2)
+    ax.scatter(w_, y, marker="o", s=26, facecolor=P.SURFACE, edgecolor=P.TEXT, lw=1.2, zorder=3,
+               label="2014-2020 replay, Dubai-wide (lower)")  # fmt: skip
+    ax.scatter(r_, y, marker="D", s=26, color=P.TEXT, zorder=3,
+               label="2014-2020 replay, own series (upper)")  # fmt: skip
     labels = [f"{zn} · {'apt' if k == 101 else 'villa'} (n={n:,})"
               for zn, k, n in d.select("zone", "property_type_key", "purchases").iter_rows()]  # fmt: skip
     ax.set_yticks(y, labels, fontsize=8)
@@ -210,13 +221,16 @@ def fig_stress_zones(grid: pl.DataFrame, snapshot: date, shock: int, ltv: int) -
 
     handles = [Patch(color=P.BLUE, label=f"Apartments, {shock}% shock"),
                Patch(color=P.ORANGE, label=f"Villas, {shock}% shock"),
-               ax.get_legend_handles_labels()[0][0]]  # fmt: skip
-    ax.legend(handles=handles, loc="lower right", frameon=False, fontsize=8)
+               *ax.get_legend_handles_labels()[0][:2]]  # fmt: skip
+    ax.legend(handles=handles, loc="lower left", bbox_to_anchor=(0, 1.0), ncol=2, frameon=False,
+              fontsize=8)  # fmt: skip
     P.titled(
         fig,
         f"Negative equity by zone: ready buyers at {ltv}% LTV",
-        f"Bars: a {abs(shock)}% fall from today's value. Diamonds: the zone's own 2014-2020 "
-        "drawdown (type series where the zone wasn't published in 2014). Zones with n ≥ 20.",
+        f"Bars: a {abs(shock)}% fall from today's value. Line: a 2014-2020 replay, from the "
+        "Dubai-wide fall (circle) to the zone's own drawdown\n(diamond; type series where the zone "
+        "wasn't published in 2014), usually the upper end because noisy series overstate "
+        "drawdowns. Zones with n ≥ 20.",
     )
     footer(fig, snapshot, ILLUSTRATIVE)
     return P.save(fig, "stress_by_zone")
@@ -345,13 +359,21 @@ def stress_report(grid, replay, rules, diag, figs) -> str:
         return share(grid, property_type_key=key, is_offplan=offplan, scenario=scenario,
                      shock_pct=shock, ltv_basis=basis, ltv_pct=ltv if basis == "grid" else None)  # fmt: skip
 
-    def rp(key, offplan, ltv=80, basis="grid"):
+    def rp(key, offplan, ltv=80, basis="grid", scenario=config.STRESS_REPLAY_NAME):
         row = cell(grid, segment_level="type", property_type_key=key, is_offplan=offplan,
-                   scenario=config.STRESS_REPLAY_NAME, shock_pct=None, ltv_basis=basis,
+                   scenario=scenario, shock_pct=None, ltv_basis=basis,
                    ltv_pct=ltv if basis == "grid" else None)  # fmt: skip
         return row
 
+    def rpd(key, offplan, ltv=80, basis="grid"):
+        return rp(key, offplan, ltv, basis, config.STRESS_REPLAY_DUBAI_NAME)
+
+    def share_of(row):
+        return (row or {}).get("negative_equity_share")
+
     apt_rp, villa_rp = rp(101, False), rp(102, False)
+    apt_dw, villa_dw = rpd(101, False), rpd(102, False)
+    dubai_dd = (apt_dw or villa_dw or {}).get("applied_shock")
     counts = {(r["property_type_key"], r["is_offplan"]): r["len"] for r in diag["by_type_offplan"]}
     total = diag["scored_rows"]
     zone_share = next((r["len"] for r in diag["by_basis"] if r["index_basis"] == "zone"), 0)
@@ -387,12 +409,16 @@ def stress_report(grid, replay, rules, diag, figs) -> str:
         f"{pct(s(102, False, -30), 0, False)}). Recent buyers have little equity cushion beyond "
         "their deposit, so negative equity jumps once the fall exceeds 1 − LTV. "
         f"([chart]({rel(figs['heatmap'])}))",
-        f"3. **A repeat of 2014→2020** (each zone's own drawdown, average applied "
-        f"{pct(apt_rp['applied_shock'] if apt_rp else None, 0)} for ready apartments, "
-        f"{pct(villa_rp['applied_shock'] if villa_rp else None, 0)} for villas) would leave "
-        f"{pct(apt_rp['negative_equity_share'] if apt_rp else None, 0, False)} of ready apartment and "
-        f"{pct(villa_rp['negative_equity_share'] if villa_rp else None, 0, False)} of ready villa "
-        f"buyers at 80% LTV in negative equity. ([chart]({rel(figs['zones'])}))",
+        f"3. **A repeat of 2014→2020 would leave {pct(share_of(apt_dw), 0, False)} to "
+        f"{pct(share_of(apt_rp), 0, False)} of ready apartment buyers at 80% LTV in negative "
+        f"equity** (villas {pct(share_of(villa_dw), 0, False)} to {pct(share_of(villa_rp), 0, False)}). "
+        f"The lower figure applies the Dubai-wide fall ({pct(dubai_dd, 0)}) to everyone; the upper "
+        "one each buyer's own zone × type series (average applied "
+        f"{pct((apt_rp or {}).get('applied_shock'), 0)} for apartments, "
+        f"{pct((villa_rp or {}).get('applied_shock'), 0)} for villas). Zone series are noisier, and "
+        "a maximum drawdown measured on a noisy series overstates the true fall, so the "
+        "own-series figure is the **upper end of the range** (exceptions noted in the replay section). "
+        f"([chart]({rel(figs['zones'])}))",
         f"4. **Registered loans tell the same story.** {num(loans['matched_loans'], 0)} of "
         f"{num(loans['ready_purchases'], 0)} ready purchases ({pct(loans['match_rate'], 0, False)}, "
         f"a lower bound) are matched to their mortgage. Median LTV at purchase "
@@ -447,7 +473,7 @@ def stress_report(grid, replay, rules, diag, figs) -> str:
                 ],
                 [
                     "Historical replay",
-                    f"Each series' deepest fall from its running peak between {month(config.STRESS_REPLAY_START)} and {month(config.STRESS_REPLAY_END)}: the zone × type series if published from {month(config.STRESS_REPLAY_PEAK_BY)} or earlier, else the type series",
+                    f"Two depths of the 2014→2020 episode, each a series' deepest fall from its running peak between {month(config.STRESS_REPLAY_START)} and {month(config.STRESS_REPLAY_END)}: **Dubai-wide** ({pct(dubai_dd, 1)} for every buyer, the lower range) and **own series** (the buyer's zone × type series if published from {month(config.STRESS_REPLAY_PEAK_BY)} or earlier, else the type series; the upper range, as noisy series overstate drawdowns)",
                 ],
                 [
                     "Negative equity",
@@ -498,11 +524,17 @@ def stress_report(grid, replay, rules, diag, figs) -> str:
             f"**{TYPE_LABEL[key]}** ({num(n, 0)} ready purchases)",
             "",
             table(
-                ["LTV", *[f"{x}%" for x in SHOCKS_SHOWN], "Replay 2014→2020"],
+                [
+                    "LTV",
+                    *[f"{x}%" for x in SHOCKS_SHOWN],
+                    f"Replay, Dubai-wide ({pct(dubai_dd, 0)})",
+                    "Replay, own series (upper)",
+                ],  # fmt: skip
                 [
                     [
                         f"{ltv}%" + (" (worst case)" if ltv in config.STRESS_LTV_LABELS else ""),
                         *[pct(s(key, False, x, ltv), 1, False) for x in SHOCKS_SHOWN],
+                        pct(share_of(rpd(key, False, ltv)), 1, False),
                         pct((rp(key, False, ltv) or {}).get("negative_equity_share"), 1, False),
                     ]
                     for ltv in config.STRESS_LTV_GRID
@@ -511,6 +543,7 @@ def stress_report(grid, replay, rules, diag, figs) -> str:
                     [
                         "CBUAE cap",
                         *[pct(s(key, False, x, basis="cbuae_cap"), 1, False) for x in SHOCKS_SHOWN],
+                        pct(share_of(rpd(key, False, basis="cbuae_cap")), 1, False),
                         pct(
                             (rp(key, False, basis="cbuae_cap") or {}).get("negative_equity_share"),
                             1,
@@ -523,6 +556,7 @@ def stress_report(grid, replay, rules, diag, figs) -> str:
                             pct(s(key, False, x, basis="actual_loan"), 1, False)
                             for x in SHOCKS_SHOWN
                         ],
+                        pct(share_of(rpd(key, False, basis="actual_loan")), 1, False),
                         pct(
                             (rp(key, False, basis="actual_loan") or {}).get(
                                 "negative_equity_share"
@@ -585,10 +619,34 @@ def stress_report(grid, replay, rules, diag, figs) -> str:
             "lrrrl",
         ),
         "",
-        "Zone series move more than the type series (fewer sales per period, so more noise, and "
-        "local cycles), so their drawdowns are deeper and the replay applied to a zone's buyers is "
-        "harsher than the Dubai-wide −24%. A zone's deepest fall in the window can also start from "
-        "a later peak than June 2014 (Downtown peaked in 2016).",
+        "**Two replays bracket the episode.** The *Dubai-wide* replay applies the Dubai series' "
+        f"fall ({pct(dubai_dd, 1)}) to every buyer: the lower end of the range. The *own-series* "
+        "replay applies each buyer's zone × type drawdown (type where the zone isn't covered): "
+        "the upper end. Zone series move more than the type and Dubai series (fewer sales per "
+        "period, so more sampling noise, plus local cycles), and the maximum drawdown of a noisy "
+        "series overstates the true fall, because noise adds a spurious high before the peak and "
+        "a spurious low at the trough. A zone's deepest fall in the window can also start from a "
+        "later peak than June 2014 (Downtown peaked in 2016). Read the own-series figures as an "
+        "upper range, not a central estimate."
+        + (
+            " **Exception:** "
+            + "; ".join(
+                f"`{r['segment_id']}` fell {pct(r['drawdown'], 0)} ({month(r['peak_period'])} → "
+                f"{month(r['trough_period'])}), less than Dubai"
+                for r in replay.filter(
+                    pl.col("is_used")
+                    & (pl.col("segment_level") == "zone")
+                    & (pl.col("drawdown") > (dubai_dd or -1))
+                ).iter_rows(named=True)
+            )
+            + ": for those buyers the Dubai-wide replay is the harsher of the two."
+            if replay.filter(
+                pl.col("is_used")
+                & (pl.col("segment_level") == "zone")
+                & (pl.col("drawdown") > (dubai_dd or -1))
+            ).height
+            else ""
+        ),
         "",
         f"![Replay]({rel(figs['replay'])})",
         "",
@@ -609,8 +667,10 @@ def stress_report(grid, replay, rules, diag, figs) -> str:
             return r["negative_equity_share"][0] if r.height else None
 
         rep = g.filter(pl.col("scenario") == config.STRESS_REPLAY_NAME)
+        dw = g.filter(pl.col("scenario") == config.STRESS_REPLAY_DUBAI_NAME)
         rows.append([zone, "Apartments" if key == 101 else "Villas", g["purchases"][0], at(-10),
                      at(-20), at(-30),
+                     dw["negative_equity_share"][0] if dw.height else None,
                      rep["applied_shock"][0] if rep.height else None,
                      rep["negative_equity_share"][0] if rep.height else None])  # fmt: skip
     rows.sort(key=lambda r: -(r[4] or 0))
@@ -618,7 +678,17 @@ def stress_report(grid, replay, rules, diag, figs) -> str:
         "Ready buyers at 80% LTV, zones with ≥ 20 purchases (sorted by the −20% share):",
         "",
         table(
-            ["Zone", "Type", "Purchases", "−10%", "−20%", "−30%", "Replay shock", "Replay share"],
+            [
+                "Zone",
+                "Type",
+                "Purchases",
+                "−10%",
+                "−20%",
+                "−30%",
+                f"Replay, Dubai-wide ({pct(dubai_dd, 0)})",
+                "Own-series shock",
+                "Replay, own series (upper)",
+            ],  # fmt: skip
             [
                 [
                     r[0],
@@ -627,12 +697,13 @@ def stress_report(grid, replay, rules, diag, figs) -> str:
                     pct(r[3], 1, False),
                     pct(r[4], 1, False),
                     pct(r[5], 1, False),
-                    pct(r[6], 0),
-                    pct(r[7], 1, False),
+                    pct(r[6], 1, False),
+                    pct(r[7], 0),
+                    pct(r[8], 1, False),
                 ]
                 for r in rows
             ],  # fmt: skip
-            "llrrrrrr",
+            "llrrrrrrr",
         ),
         "",
         "Differences between zones at the same shock come from how far each zone's index has "

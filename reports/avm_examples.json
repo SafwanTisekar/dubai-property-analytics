@@ -8,274 +8,282 @@
    "key": "marina_2bed_ready",
    "title": "2-bed ready apartment, Dubai Marina",
    "kind": "accurate",
-   "transaction_id": "1-11-2025-38173",
-   "date": "2025-09-15",
+   "transaction_id": "1-11-2025-25835",
+   "date": "2025-06-20",
    "area": "Marsa Dubai",
    "zone": "Marina, JBR & JLT",
    "property_type": "apartment",
    "bedrooms": 2,
    "is_offplan": false,
-   "area_sqm": 123.7,
+   "area_sqm": 124.3,
    "price_aed": 2550000,
-   "avm_value_aed": 2551856,
-   "ape": 0.0007277000401632896,
-   "gap_pct": -0.0007271708778862074,
+   "avm_value_aed": 2540845,
+   "ape": 0.0035901665387465163,
+   "gap_pct": 0.003603102275973491,
    "reference_source": "comps_indexed",
-   "reference_ppsqm_aed": 19629.0,
-   "comps_6m_n": 644,
-   "calibration": -0.0070171569815295695,
+   "reference_ppsqm_aed": 20418.0,
+   "comps_6m_n": 765,
+   "bldg_rel_24m": -0.08889607684159806,
+   "bldg_n_24m": 33,
+   "calibration": -0.008407371642101032,
    "shap": {
-    "bias": 0.011033203987421816,
+    "bias": 0.011051625459201436,
     "top": [
      {
-      "feature": "ln_area",
-      "value": 4.817535864130423,
-      "shap": -0.038409947865490644
+      "feature": "bldg_rel_24m",
+      "value": -0.08889607684159806,
+      "shap": -0.02552281177830684
+     },
+     {
+      "feature": "proj_rel_12m",
+      "value": null,
+      "shap": -0.021816239113592678
      },
      {
       "feature": "nearest_metro",
       "value": "Jumeirah Lakes Towers",
-      "shap": -0.016767563959917405
+      "shap": -0.0206707858733601
+     },
+     {
+      "feature": "zt_n_12m",
+      "value": 12922.0,
+      "shap": 0.01598901055649633
      },
      {
       "feature": "bedrooms",
       "value": 2.0,
-      "shap": 0.014648963939676555
+      "shap": 0.01584952689299186
      },
      {
-      "feature": "zt_n_12m",
-      "value": 12376.0,
-      "shap": 0.012533367350643105
-     },
-     {
-      "feature": "proj_rel_12m",
-      "value": 0.054935641354148856,
-      "shap": 0.012214140562990966
-     },
-     {
-      "feature": "zt_rel_12m",
-      "value": 0.254519730390367,
-      "shap": 0.011674064261162551
+      "feature": "ln_area",
+      "value": 4.822697998516666,
+      "shap": -0.015005642786772466
      },
      {
       "feature": "area_key",
       "value": "330",
-      "shap": 0.011264207853840703
+      "shap": 0.011726143889971003
      },
      {
-      "feature": "bldg_rel_24m",
-      "value": 0.025329676798511613,
-      "shap": 0.01068739307271977
+      "feature": "idx_chg_12m",
+      "value": 0.1127431943573477,
+      "shap": 0.01055407288815644
      }
     ],
-    "other": 0.028151669838295083
+    "other": 0.027386313532639157
    }
   },
   {
    "key": "jvc_offplan_small",
    "title": "Off-plan studio or 1-bed, JVC",
    "kind": "accurate",
-   "transaction_id": "1-102-2025-69832",
-   "date": "2025-08-01",
+   "transaction_id": "1-102-2026-79811",
+   "date": "2026-09-15",
    "area": "Al Barsha South Fourth",
    "zone": "JVC, JVT & Arjan",
    "property_type": "apartment",
    "bedrooms": 1,
    "is_offplan": true,
-   "area_sqm": 69.1,
-   "price_aed": 1071982,
-   "avm_value_aed": 1014492,
-   "ape": 0.053629257727010896,
-   "gap_pct": 0.05666833866630783,
+   "area_sqm": 62.6,
+   "price_aed": 991000,
+   "avm_value_aed": 1010352,
+   "ape": 0.019527246507862066,
+   "gap_pct": -0.019153236536588736,
    "reference_source": "comps_indexed",
-   "reference_ppsqm_aed": 15463.0,
-   "comps_6m_n": 2965,
-   "calibration": -0.0070171569815295695,
+   "reference_ppsqm_aed": 15962.0,
+   "comps_6m_n": 1296,
+   "bldg_rel_24m": -0.024759078389426037,
+   "bldg_n_24m": 48,
+   "calibration": -0.008407371642101032,
    "shap": {
-    "bias": 0.011033203987421816,
+    "bias": 0.011051625459201436,
     "top": [
      {
       "feature": "ln_area",
-      "value": 4.2358441244958005,
-      "shap": 0.026680326367310752
+      "value": 4.136925009757219,
+      "shap": 0.04058926574397617
      },
      {
       "feature": "proj_rel_12m",
-      "value": -0.03271423114487426,
-      "shap": -0.020564376631870166
+      "value": -0.024759078389426037,
+      "shap": -0.01811084593056108
      },
      {
       "feature": "area_key",
       "value": "441",
-      "shap": -0.013219812993332084
-     },
-     {
-      "feature": "bedrooms",
-      "value": 1.0,
-      "shap": -0.010983072055303245
-     },
-     {
-      "feature": "is_offplan",
-      "value": "true",
-      "shap": -0.010098719432706082
+      "shap": -0.011814344208265796
      },
      {
       "feature": "master_project",
       "value": "Jumeirah Village Circle",
-      "shap": -0.010047177027508979
+      "shap": -0.010633640524312126
      },
      {
-      "feature": "bldg_rel_24m",
-      "value": -0.03271423114487426,
-      "shap": -0.008781148274898211
+      "feature": "zt_rel_12m",
+      "value": 0.06261068352518606,
+      "shap": 0.008509729974763432
      },
      {
       "feature": "fed_funds_prev",
-      "value": 0.0433,
-      "shap": -0.008301606958519843
+      "value": 0.0363,
+      "shap": -0.007441568333558767
+     },
+     {
+      "feature": "is_offplan",
+      "value": "true",
+      "shap": -0.007039843450238442
+     },
+     {
+      "feature": "zt_n_12m",
+      "value": 24989.0,
+      "shap": 0.006703508126120516
      }
     ],
-    "other": -0.0008506402146490805
+    "other": 0.007520053357440411
    }
   },
   {
    "key": "dubailand_villa",
    "title": "Villa in Dubailand's busiest villa area",
    "kind": "accurate",
-   "transaction_id": "1-11-2025-8705",
-   "date": "2025-03-05",
+   "transaction_id": "1-11-2025-45868",
+   "date": "2025-11-03",
    "area": "Al Yelayiss 1",
    "zone": "Dubailand",
    "property_type": "villa",
-   "bedrooms": 4,
+   "bedrooms": 3,
    "is_offplan": false,
-   "area_sqm": 297.0,
-   "price_aed": 4000000,
-   "avm_value_aed": 3653079,
-   "ape": 0.08673031505218194,
-   "gap_pct": 0.09496681701105358,
+   "area_sqm": 255.9,
+   "price_aed": 3300000,
+   "avm_value_aed": 3571860,
+   "ape": 0.0823819633695359,
+   "gap_pct": -0.07611172964585877,
    "reference_source": "comps_indexed",
-   "reference_ppsqm_aed": 12006.0,
-   "comps_6m_n": 78,
-   "calibration": -0.0070171569815295695,
+   "reference_ppsqm_aed": 13265.0,
+   "comps_6m_n": 95,
+   "bldg_rel_24m": null,
+   "bldg_n_24m": 0,
+   "calibration": -0.008407371642101032,
    "shap": {
-    "bias": 0.011033203987421816,
+    "bias": 0.011051625459201436,
     "top": [
      {
       "feature": "ln_area",
-      "value": 5.6937321388027,
-      "shap": -0.1333940261801379
+      "value": 5.544786743165743,
+      "shap": -0.08656133272555344
      },
      {
       "feature": "bedrooms",
-      "value": 4.0,
-      "shap": 0.08232669846528837
+      "value": 3.0,
+      "shap": 0.044185297703563796
      },
      {
       "feature": "bldg_rel_24m",
       "value": null,
-      "shap": 0.0215041289895797
-     },
-     {
-      "feature": "area_key",
-      "value": "506",
-      "shap": 0.01572608093293094
+      "shap": 0.0369188609657974
      },
      {
       "feature": "master_project",
       "value": "Al Aryam",
-      "shap": 0.01569709457518962
+      "shap": 0.03241142416190582
      },
      {
-      "feature": "zt_rel_12m",
-      "value": 0.18474991029530408,
-      "shap": 0.013993390394349116
+      "feature": "area_key",
+      "value": "506",
+      "shap": 0.018789834022937966
+     },
+     {
+      "feature": "proj_rel_12m",
+      "value": -0.02014416488596993,
+      "shap": -0.015700808176941295
      },
      {
       "feature": "zt_n_12m",
-      "value": 10821.0,
-      "shap": 0.010566199226475002
+      "value": 8778.0,
+      "shap": 0.007976243083651791
      },
      {
       "feature": "is_offplan",
       "value": "false",
-      "shap": 0.0066788351892369535
+      "shap": 0.007113378607959907
      }
     ],
-    "other": -0.012931803862628353
+    "other": 0.003124114934977766
    }
   },
   {
    "key": "large_miss",
    "title": "Large miss: Me'Aisem First",
    "kind": "miss",
-   "transaction_id": "1-102-2026-56228",
-   "date": "2026-06-24",
+   "transaction_id": "1-11-2025-7873",
+   "date": "2025-02-25",
    "area": "Me'Aisem First",
    "zone": "Dubailand",
    "property_type": "apartment",
    "bedrooms": 1,
-   "is_offplan": true,
-   "area_sqm": 70.4,
-   "price_aed": 1060000,
-   "avm_value_aed": 1403554,
-   "ape": 0.3241074913426377,
-   "gap_pct": -0.2447743053050735,
+   "is_offplan": false,
+   "area_sqm": 75.4,
+   "price_aed": 511000,
+   "avm_value_aed": 677704,
+   "ape": 0.3262300266864531,
+   "gap_pct": -0.24598298946792008,
    "reference_source": "comps_indexed",
-   "reference_ppsqm_aed": 13534.0,
-   "comps_6m_n": 619,
-   "calibration": -0.0070171569815295695,
+   "reference_ppsqm_aed": 11924.0,
+   "comps_6m_n": 225,
+   "bldg_rel_24m": -0.3568444611627193,
+   "bldg_n_24m": 105,
+   "calibration": -0.008407371642101032,
    "shap": {
-    "bias": 0.011033203987421816,
+    "bias": 0.011051625459201436,
     "top": [
      {
-      "feature": "proj_rel_12m",
-      "value": 0.5424004890509426,
-      "shap": 0.3558464086958254
-     },
-     {
-      "feature": "ln_area",
-      "value": 4.253624919869357,
-      "shap": 0.029546754420298433
-     },
-     {
       "feature": "bldg_rel_24m",
-      "value": 0.05665069562441083,
-      "shap": 0.024370846020622575
+      "value": -0.3568444611627193,
+      "shap": -0.10495334779831242
      },
      {
-      "feature": "bedrooms",
-      "value": 1.0,
-      "shap": -0.01563878811495421
+      "feature": "proj_rel_12m",
+      "value": -0.24566089274561698,
+      "shap": -0.10027426865710454
      },
      {
       "feature": "master_project",
       "value": "International Media Production Zone",
-      "shap": -0.012680304111441049
+      "shap": -0.04394245777445212
      },
      {
-      "feature": "zt_n_12m",
-      "value": 40571.0,
-      "shap": 0.008086902769857886
-     },
-     {
-      "feature": "zt_rel_12m",
-      "value": 0.1765838916042668,
-      "shap": 0.00788942534267716
+      "feature": "bedrooms",
+      "value": 1.0,
+      "shap": -0.02259871326295851
      },
      {
       "feature": "fed_funds_prev",
-      "value": 0.0363,
-      "shap": -0.006083970394504795
+      "value": 0.0433,
+      "shap": -0.016123390237568338
+     },
+     {
+      "feature": "area_key",
+      "value": "485",
+      "shap": -0.013748600756270938
+     },
+     {
+      "feature": "zt_rel_12m",
+      "value": 0.12789025974424462,
+      "shap": 0.006365457927488234
+     },
+     {
+      "feature": "cell_rel_3m",
+      "value": -0.0821590806948933,
+      "shap": -0.006276990016120013
      }
     ],
-    "other": -0.0073992378443041625
+    "other": 0.016132741732155356
    },
    "reasons": [
-    "The sale closed 24% below the AVM value. Against the reference price (AED 13,534/sq m) the sale was at AED 15,057/sq m (+11%) and the AVM at AED 19,937/sq m (+47%).",
-    "The price was +5% from its building's trailing median (AED 14,323/sq m): in line with its building, so the gap comes from how the model valued the unit, not from an unusual price for the building.",
-    "Largest model input: Project median, 12m (vs reference), +72% vs the reference price, which moved the value +0.356 log points (\u2248 +43%).",
-    "A project median pools every building, size and launch phase of the project, so pricier buildings in the same project can lift the value of a unit in a cheaper one."
+    "The sale closed 25% below the AVM value. Against the reference price (AED 11,924/sq m) the sale was at AED 6,777/sq m (-43%) and the AVM at AED 8,988/sq m (-25%).",
+    "The price was -19% from its building's trailing median (AED 8,345/sq m, 105 sales in 24 months): the difference is specific to the unit, not the building.",
+    "Largest model input: Building median, 24m (vs reference), -30% vs the reference price, which moved the value -0.105 log points (\u2248 -10%).",
+    "What the register doesn't record: floor, view, layout, condition, furnishing, or the circumstances of the sale (a distressed or related-party sale, a bundled payment plan). Any of these can move one unit's price by 25% or more."
    ]
   }
  ]

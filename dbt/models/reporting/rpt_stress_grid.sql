@@ -7,6 +7,9 @@
 -- exceeds the shocked current value. One row per segment x ready/off-plan x scenario x loan
 -- basis. "Shock Pct" and "LTV Pct" are integers for the Power BI what-if slicers (docs/06):
 -- Shock Pct is NULL on the replay rows, LTV Pct NULL on the CBUAE cap and actual-loan rows.
+-- Two replays of 2014-2020: each buyer's own series (zone x type where published from the
+-- 2014 peak, else type; noisier zone series overstate the depth: the upper range) and the
+-- Dubai-wide -24% for everyone (the lower range).
 -- Under min_n purchases the share, count and AED are blank. Off-plan is never pooled with
 -- ready: banks cap off-plan lending at 50% and most buyers pay the developer in
 -- instalments, so an assumed LTV on the full price overstates the bank's exposure.
@@ -27,7 +30,8 @@ select
     case when g.is_offplan then 'Off-Plan' else 'Ready' end as "Ready / Off-Plan",
     case g.scenario
         when 'grid' then 'Price shock'
-        when 'replay_2014_2020' then 'Replay: 2014-2020 drawdown'
+        when 'replay_2014_2020' then 'Replay: 2014-2020, own series'
+        when 'replay_2014_2020_dubai' then 'Replay: 2014-2020, Dubai-wide'
     end as "Scenario",
     g.shock_pct as "Shock Pct",
     round(g.applied_shock, 4) as "Applied Shock",

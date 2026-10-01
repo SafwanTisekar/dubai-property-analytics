@@ -323,6 +323,38 @@ def test_replay_rows_carry_each_segments_applied_drawdown(grid):
     assert rp["applied_shock"].is_between(-0.4, -0.2).all()
 
 
+def test_dubai_wide_replay_applies_one_drawdown_to_every_buyer():
+    book = random_book().with_columns(replay_shock_dubai=pl.lit(-0.236))
+    out = st.roll_up(st.stress_cells(st.loan_book(book)), min_n=1)
+    dw = out.filter(pl.col("scenario") == config.STRESS_REPLAY_DUBAI_NAME)
+    assert dw.height > 0 and dw["shock_pct"].null_count() == dw.height
+    assert dw["applied_shock"].to_numpy() == pytest.approx(-0.236)
+    # Same buyers as the grid; at the same depth it matches a grid shock of that size.
+    grid = st.roll_up(st.stress_cells(st.loan_book(book), shocks=(0,)), min_n=1)
+    assert (
+        dw.filter(pl.col("segment_level") == "dubai")["purchases"].sum()
+        == grid.filter((pl.col("segment_level") == "dubai") & (pl.col("scenario") == "grid"))[
+            "purchases"
+        ].sum()
+    )
+
+
+def test_dubai_wide_replay_comes_from_the_dubai_series():
+    rows = index_rows("dubai", "dubai", None, None, "month",
+                      {date(2014, 6, 1): 120.0, date(2020, 9, 1): 90.0})  # fmt: skip
+    rows += index_rows("apartment", "type", APT, None, "month",
+                       {date(2014, 6, 1): 100.0, date(2020, 9, 1): 70.0})  # fmt: skip
+    r = st.replay_drawdowns(
+        pl.DataFrame(rows).with_columns(pl.col("property_type_key").cast(pl.Int32))
+    )
+    sales = pl.DataFrame({"property_type_key": [APT], "zone": ["Any"]}).with_columns(
+        pl.col("property_type_key").cast(pl.Int32)
+    )
+    out = st.attach_replay(sales, r).row(0, named=True)
+    assert out["replay_shock_dubai"] == pytest.approx(-0.25)
+    assert out["replay_shock"] == pytest.approx(-0.30)
+
+
 # --- Written grid (skipped until make score has run) ----------------------------------------
 @pytest.fixture(scope="module")
 def conn():

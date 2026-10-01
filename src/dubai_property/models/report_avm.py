@@ -87,6 +87,11 @@ def load_gaps() -> np.ndarray:
     return cx.read_sql(db.connectorx_uri(), sql, return_type="polars")
 
 
+# The committed 4b result before the 2026-10-01 restore re-tuned the model from scratch
+# (docs/05 §8). A dated record, not a model output: the card compares today's numbers with it.
+REPRODUCIBILITY_PREVIOUS = {"date": "2026-10-01", "mdape": 0.0682, "hit10": 0.652}
+
+
 def pick(perf: pl.DataFrame, split: str, breakdown: str, model: str, segment: str = "all"):
     """One row of the performance table as a dict (or None)."""
     r = perf.filter(
@@ -426,8 +431,17 @@ def villa_comparison(perf: pl.DataFrame) -> str | None:
     )
     if lg["mdape"] < 0.97 * cp["mdape"]:
         return f"4. **Villas:** LightGBM also beats comparables {head}."
+    # Within 0.05 pp is a tie; otherwise say which side is ahead (owner, 2026-10-01: the
+    # re-tuned model's 8.66% vs 8.51% is comparables ahead, not a tie).
+    if abs(lg["mdape"] - cp["mdape"]) <= 0.0005:
+        verdict = "Villas are a tie on MdAPE"
+    elif lg["mdape"] > cp["mdape"]:
+        slightly = "slightly " if lg["mdape"] <= 1.03 * cp["mdape"] else ""
+        verdict = f"On villas, comparables are {slightly}better than LightGBM on MdAPE"
+    else:
+        verdict = "On villas, LightGBM is slightly ahead of comparables on MdAPE"
     return (
-        f"4. **Villas are a tie on MdAPE** ({head}). LightGBM's edge is in the tails, and its "
+        f"4. **{verdict}** ({head}). LightGBM's edge is in the tails, and its "
         f"{pct(own['mdape'], 1, sign=False)} on all villas includes "
         f"{own['n_scored'] - lg['n_scored']:,} villas with too few comparables to value. The "
         "likely reason: villa communities repeat a few layouts, so the cell median (area × "
@@ -619,6 +633,20 @@ def render(perf, imp, diag, summary, figs, examples, tuning=None) -> str:  # noq
         "registered after their application year (the Law 13/2008 backlog, findings F1.3), so "
         "their prices date from the 2006–08 boom. The index starts in 2011 for the same reason.",
     ]
+    now = pick(perf, "test", "overall", "lightgbm")
+    if now:
+        prev = REPRODUCIBILITY_PREVIOUS
+        lines += [
+            "",
+            f"**Reproducibility.** On {prev['date']} the model was re-tuned from scratch (a new "
+            f"{config.AVM_OPTUNA_TRIALS}-trial Optuna study) when the database was restored "
+            "(docs/05 §8): test MdAPE moved "
+            f"{pct(prev['mdape'], 2, sign=False)} → {pct(now['mdape'], 2, sign=False)} and the ±10% "
+            f"hit rate {pct(prev['hit10'], 1, sign=False)} → {pct(now['hit10'], 1, sign=False)}, so the "
+            "result is stable across tuning runs. The tuned parameters are committed "
+            "(`artifacts/avm/best_params.json`): a rebuild with the same features reuses them "
+            "and reproduces this model, up to small differences from LightGBM's multithreading.",
+        ]
     if abl:
         a, b = abl.get("2011_start"), abl.get("2010_start")
         if a and b:

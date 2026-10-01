@@ -26,8 +26,10 @@ Steps:
    The loan is held at its origination amount (no amortisation). Real balances are lower,
    so negative equity is overstated: conservative, and stated in the report.
 4. **Shocks.** shocked value = current value × (1 + shock) for shocks 0 to −50% in 5-point
-   steps, plus a historical replay: each series' 2014 → 2020 drawdown (Dubai −24%,
-   apartments −25%, villas −30%; zone series where they cover the 2014 peak).
+   steps, plus two historical replays of 2014 → 2020: each buyer's own series' drawdown
+   (zone × type where it covers the 2014 peak, else type: apartments −25%, villas −30%,
+   zones deeper) and the Dubai-wide −24% for everyone. Zone max-drawdowns come from noisier
+   series and overstate the depth, so the two bracket the episode (upper and lower range).
 5. **Negative equity**: loan > shocked value. Count, share and AED (Σ loan − value) per
    segment (Dubai / type / zone × type / area × type, each split ready vs off-plan).
    Min-n: segments with fewer than 20 purchases keep their count but no share or AED.
@@ -407,9 +409,11 @@ def replay_drawdowns(
 
 
 def attach_replay(sales: pl.DataFrame, replay: pl.DataFrame) -> pl.DataFrame:
-    """Add ``replay_shock`` and ``replay_basis`` to each sale.
+    """Add ``replay_shock``, ``replay_basis`` and ``replay_shock_dubai`` to each sale.
 
-    The shock is the zone × type series' drawdown where the replay uses it, else the type's.
+    ``replay_shock`` is the zone × type series' drawdown where the replay uses it, else the
+    type's; ``replay_shock_dubai`` is the Dubai series' drawdown for everyone (the
+    Dubai-wide replay, the lower end of the range).
     """
     used = replay.filter(pl.col("is_used"))
     zone = used.filter(pl.col("segment_level") == "zone").select(
@@ -421,7 +425,9 @@ def attach_replay(sales: pl.DataFrame, replay: pl.DataFrame) -> pl.DataFrame:
     out = sales.join(zone, on=["property_type_key", "zone"], how="left").join(
         typ, on="property_type_key", how="left"
     )
+    dubai = used.filter(pl.col("segment_level") == "dubai")["drawdown"]
     return out.with_columns(
+        replay_shock_dubai=pl.lit(dubai[0] if dubai.len() else None, dtype=pl.Float64),
         replay_shock=pl.coalesce("zone_dd", "type_dd"),
         replay_basis=pl.when(pl.col("zone_dd").is_not_null())
         .then(pl.lit("zone"))
@@ -443,6 +449,9 @@ def loan_book(
         *CELL,
         "current_value_aed",
         "replay_shock",
+        replay_shock_dubai=pl.col("replay_shock_dubai")
+        if "replay_shock_dubai" in sales.columns
+        else pl.lit(None, dtype=pl.Float64),
         zone_basis=(pl.col("index_basis") == "zone").cast(pl.Int64),
         price=pl.col("price_aed"),
         actual=pl.col("loan_aed"),
@@ -477,15 +486,19 @@ def stress_cells(
     book: pl.DataFrame,
     shocks: Sequence[int] = config.STRESS_SHOCKS,
     replay_name: str = config.STRESS_REPLAY_NAME,
+    replay_dubai_name: str = config.STRESS_REPLAY_DUBAI_NAME,
 ) -> pl.DataFrame:
     """Negative equity per finest cell × loan basis × scenario (additive measures only)."""
     scenarios: list[tuple[str, int | None, pl.Expr]] = [
         ("grid", s, pl.lit(s / 100)) for s in shocks
     ]
     scenarios.append((replay_name, None, pl.col("replay_shock")))
+    scenarios.append((replay_dubai_name, None, pl.col("replay_shock_dubai")))
     frames = []
     for name, shock_pct, shock in scenarios:
-        b = book if name == "grid" else book.filter(pl.col("replay_shock").is_not_null())
+        b = book if name == "grid" else book.filter(shock.is_not_null())
+        if b.is_empty():
+            continue
         shocked = pl.col("current_value_aed") * (1 + shock)
         ne = pl.col("loan") > shocked
         frames.append(

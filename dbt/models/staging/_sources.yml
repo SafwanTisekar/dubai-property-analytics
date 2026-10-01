@@ -63,7 +63,7 @@ sources:
         description: >
           Collateral stress test (illustrative): negative equity of the last 36 months' clean
           residential buyers per segment x off-plan flag x scenario (shock grid, 2014-2020
-          replay) x loan basis (assumed LTV grid, CBUAE cap, matched actual loan). Shares,
+          replay Dubai-wide and per own series) x loan basis (assumed LTV grid, CBUAE cap, matched actual loan). Shares,
           counts and AED NULL under min_n purchases. models/stress_test.py (make score).
       - name: stress_replay
         description: >

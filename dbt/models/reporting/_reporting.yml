@@ -185,7 +185,8 @@ models:
       rpt.stress_grid. Collateral stress test (illustrative, not a regulatory stress test):
       negative equity of the last 36 months' clean residential buyers, marked to market with
       the hedonic index, per segment (Dubai / type / zone / area) x ready or off-plan x
-      scenario (price shock 0 to -50%, or the 2014-2020 replay) x loan basis (assumed LTV
+      scenario (price shock 0 to -50%, or the 2014-2020 replay at two depths: Dubai-wide -24%, and each
+      buyer's own series as the upper range) x loan basis (assumed LTV
       50-85%, CBUAE cap, registered loan of matched purchases). Loans held at origination.
       Share, count and AED blank under min_n purchases.
     config:

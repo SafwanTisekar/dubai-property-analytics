@@ -2,7 +2,7 @@
 
 Phase 4c (docs/05 §4). **Illustrative, not a regulatory stress test.** It answers docs/01 Q7: if prices fell X%, what share of recent buyers would owe more than their home is worth, at typical loan-to-value ratios, and where? Every number below rests on stated assumptions (next section); none is a forecast of losses.
 
-- **Data:** clean residential market sales, Sep 2023 to Aug 2026 (36 complete months; Sep 2026 is partial and left out), marked to market with the hedonic index as of **Aug 2026**. Model `stress-mtm-v1`, run 2026-10-01 19:51.
+- **Data:** clean residential market sales, Sep 2023 to Aug 2026 (36 complete months; Sep 2026 is partial and left out), marked to market with the hedonic index as of **Aug 2026**. Model `stress-mtm-v1`, run 2026-10-01 20:34.
 - **Tables:** `ml.stress_grid`, `ml.stress_replay`; Power BI views `rpt.stress_grid`, `rpt.stress_replay` (Shock % and LTV % are integer keys for the what-if slicers).
 - **Regenerate:** `make score model-reports`. Code: `src/dubai_property/models/stress_test.py`; this report: `models/report_4c.py`.
 
@@ -10,7 +10,7 @@ Phase 4c (docs/05 §4). **Illustrative, not a regulatory stress test.** It answe
 
 1. **Almost no recent buyer is under water today.** With the index as of Aug 2026, a ready apartment bought in the window at 80% LTV is in negative equity in 0.0% of cases, a ready villa in 0.0%, and 0.1% of matched apartment loans: prices are above most purchase prices (median mark-to-market 1.053× the price paid).
 2. **A 20% fall is the threshold that matters.** At 80% LTV, a 10% fall puts 0.0% of ready apartment buyers under water, a 20% fall 22% and a 30% fall 73% (villas 0.0% / 20% / 64%). Recent buyers have little equity cushion beyond their deposit, so negative equity jumps once the fall exceeds 1 − LTV. ([chart](figures/stress_heatmap.png))
-3. **A repeat of 2014→2020** (each zone's own drawdown, average applied -34% for ready apartments, -31% for villas) would leave 80% of ready apartment and 64% of ready villa buyers at 80% LTV in negative equity. ([chart](figures/stress_by_zone.png))
+3. **A repeat of 2014→2020 would leave 43% to 80% of ready apartment buyers at 80% LTV in negative equity** (villas 34% to 64%). The lower figure applies the Dubai-wide fall (-24%) to everyone; the upper one each buyer's own zone × type series (average applied -34% for apartments, -31% for villas). Zone series are noisier, and a maximum drawdown measured on a noisy series overstates the true fall, so the own-series figure is the **upper end of the range** (exceptions noted in the replay section). ([chart](figures/stress_by_zone.png))
 4. **Registered loans tell the same story.** 48,235 of 130,972 ready purchases (37%, a lower bound) are matched to their mortgage. Median LTV at purchase 80%, today 74%; a 20% fall would put 23% of matched apartment loans and 14% of villa loans under water.
 5. **Off-plan is a separate risk.** 328,672 of the 459,644 purchases are off-plan. At the 50% off-plan cap, a 20% fall leaves 0.0% of off-plan apartment buyers under water and a 50% fall 30%; and most buyers pay the developer in instalments, so the exposure is the developer's and the buyer's more than a bank's.
 
@@ -25,7 +25,7 @@ Phase 4c (docs/05 §4). **Illustrative, not a regulatory stress test.** It answe
 | CBUAE cap reference | The cap in force on the sale date for an **expatriate's first home** (nationality and first/second home aren't in the register; the observed median loan/price since 2020 is 0.80, findings F2.4): ready 80% up to AED 5M, 70% above (75% / 65% before 2020-04-08); off-plan 50% |
 | Registered loan | Purchase mortgages matched to their sale on the same day and unit key (`int_purchase_mortgage_pairs`, Phase 3): ready sales only, a lower bound |
 | Shocks | 0 to −50% in 5-point steps, applied to today's value. −40% / −50% stand in for a 2008-size crash (hypothetical: the index starts in 2011) |
-| Historical replay | Each series' deepest fall from its running peak between Jan 2014 and Dec 2021: the zone × type series if published from Jun 2014 or earlier, else the type series |
+| Historical replay | Two depths of the 2014→2020 episode, each a series' deepest fall from its running peak between Jan 2014 and Dec 2021: **Dubai-wide** (-23.6% for every buyer, the lower range) and **own series** (the buyer's zone × type series if published from Jun 2014 or earlier, else the type series; the upper range, as noisy series overstate drawdowns) |
 | Negative equity | Loan > shocked value. AED = Σ (loan − value) over those buyers |
 | Min-n | Segments with fewer than 20 purchases keep their count but no share or AED |
 
@@ -47,27 +47,27 @@ Share of the window's ready buyers in negative equity, by assumed LTV and price 
 
 **Apartments** (113,364 ready purchases)
 
-| LTV | 0% | -10% | -20% | -30% | -40% | -50% | Replay 2014→2020 |
-| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| 50% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 22.4% | 0.0% |
-| 60% | 0.0% | 0.0% | 0.0% | 0.0% | 22.7% | 85.3% | 15.8% |
-| 70% | 0.0% | 0.0% | 0.0% | 23.2% | 79.8% | 99.7% | 55.5% |
-| 80% | 0.0% | 0.0% | 22.4% | 73.2% | 98.9% | 100.0% | 79.9% |
-| 85% (worst case) | 0.0% | 7.6% | 49.8% | 87.5% | 99.8% | 100.0% | 86.5% |
-| CBUAE cap | 0.0% | 0.0% | 21.7% | 71.2% | 98.3% | 100.0% | 79.2% |
-| Registered loan | 0.1% | 0.5% | 22.8% | 64.7% | 84.6% | 95.4% | 69.3% |
+| LTV | 0% | -10% | -20% | -30% | -40% | -50% | Replay, Dubai-wide (-24%) | Replay, own series (upper) |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| 50% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 22.4% | 0.0% | 0.0% |
+| 60% | 0.0% | 0.0% | 0.0% | 0.0% | 22.7% | 85.3% | 0.0% | 15.8% |
+| 70% | 0.0% | 0.0% | 0.0% | 23.2% | 79.8% | 99.7% | 1.9% | 55.5% |
+| 80% | 0.0% | 0.0% | 22.4% | 73.2% | 98.9% | 100.0% | 43.1% | 79.9% |
+| 85% (worst case) | 0.0% | 7.6% | 49.8% | 87.5% | 99.8% | 100.0% | 66.1% | 86.5% |
+| CBUAE cap | 0.0% | 0.0% | 21.7% | 71.2% | 98.3% | 100.0% | 41.6% | 79.2% |
+| Registered loan | 0.1% | 0.5% | 22.8% | 64.7% | 84.6% | 95.4% | 39.8% | 69.3% |
 
 **Villas / townhouses** (17,608 ready purchases)
 
-| LTV | 0% | -10% | -20% | -30% | -40% | -50% | Replay 2014→2020 |
-| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| 50% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 19.7% | 0.0% |
-| 60% | 0.0% | 0.0% | 0.0% | 0.0% | 19.7% | 74.4% | 0.0% |
-| 70% | 0.0% | 0.0% | 0.0% | 20.2% | 65.5% | 96.9% | 27.1% |
-| 80% | 0.0% | 0.0% | 19.7% | 63.7% | 92.6% | 100.0% | 64.3% |
-| 85% (worst case) | 0.0% | 5.8% | 44.5% | 83.0% | 99.1% | 100.0% | 86.5% |
-| CBUAE cap | 0.0% | 0.0% | 14.2% | 53.9% | 87.8% | 99.8% | 56.0% |
-| Registered loan | 0.1% | 0.4% | 13.6% | 53.0% | 80.4% | 92.8% | 56.7% |
+| LTV | 0% | -10% | -20% | -30% | -40% | -50% | Replay, Dubai-wide (-24%) | Replay, own series (upper) |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| 50% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 19.7% | 0.0% | 0.0% |
+| 60% | 0.0% | 0.0% | 0.0% | 0.0% | 19.7% | 74.4% | 0.0% | 0.0% |
+| 70% | 0.0% | 0.0% | 0.0% | 20.2% | 65.5% | 96.9% | 1.7% | 27.1% |
+| 80% | 0.0% | 0.0% | 19.7% | 63.7% | 92.6% | 100.0% | 34.1% | 64.3% |
+| 85% (worst case) | 0.0% | 5.8% | 44.5% | 83.0% | 99.1% | 100.0% | 56.8% | 86.5% |
+| CBUAE cap | 0.0% | 0.0% | 14.2% | 53.9% | 87.8% | 99.8% | 25.8% | 56.0% |
+| Registered loan | 0.1% | 0.4% | 13.6% | 53.0% | 80.4% | 92.8% | 27.8% | 56.7% |
 
 In AED: at a 20% fall and 80% LTV, ready buyers in negative equity would owe **AED 1.87bn** more than their homes' value, against AED 214.9bn of assumed loans (0.9%). Because the loan is held at origination, this is an upper bound for the same assumptions.
 
@@ -104,7 +104,7 @@ The one historical decline the index covers (it starts in 2011, so there is no 2
 | `villa-emirates-hills-meadows-greens` | Jan 2015 | Jul 2020 | -30.6% | yes |
 | `villa-mbr-city-meydan-dubai-hills` | – | – | – | no: published from Oct 2015, after the Jun 2014 peak: type used |
 
-Zone series move more than the type series (fewer sales per period, so more noise, and local cycles), so their drawdowns are deeper and the replay applied to a zone's buyers is harsher than the Dubai-wide −24%. A zone's deepest fall in the window can also start from a later peak than June 2014 (Downtown peaked in 2016).
+**Two replays bracket the episode.** The *Dubai-wide* replay applies the Dubai series' fall (-23.6%) to every buyer: the lower end of the range. The *own-series* replay applies each buyer's zone × type drawdown (type where the zone isn't covered): the upper end. Zone series move more than the type and Dubai series (fewer sales per period, so more sampling noise, plus local cycles), and the maximum drawdown of a noisy series overstates the true fall, because noise adds a spurious high before the peak and a spurious low at the trough. A zone's deepest fall in the window can also start from a later peak than June 2014 (Downtown peaked in 2016). Read the own-series figures as an upper range, not a central estimate. **Exception:** `apartment-mbr-city-meydan-dubai-hills` fell -17% (Oct 2015 → Jan 2018), less than Dubai: for those buyers the Dubai-wide replay is the harsher of the two.
 
 ![Replay](figures/stress_replay.png)
 
@@ -114,40 +114,40 @@ Zone series move more than the type series (fewer sales per period, so more nois
 
 Ready buyers at 80% LTV, zones with ≥ 20 purchases (sorted by the −20% share):
 
-| Zone | Type | Purchases | −10% | −20% | −30% | Replay shock | Replay share |
-| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| Dubailand | Apartments | 23,004 | 0.0% | 49.3% | 86.4% | -40% | 100.0% |
-| MBR City, Meydan & Dubai Hills | Villas | 1,098 | 0.0% | 37.3% | 58.0% | -30% | 67.6% |
-| Al Barsha, Al Quoz & Tecom | Apartments | 1,305 | 0.0% | 35.9% | 74.4% | -25% | 61.8% |
-| Industrial | Apartments | 562 | 0.0% | 31.7% | 68.1% | -25% | 49.5% |
-| Qusais, Nahda, Twar & Muhaisnah | Apartments | 132 | 0.0% | 25.0% | 68.2% | -25% | 51.5% |
-| JVC, JVT & Arjan | Apartments | 18,816 | 0.0% | 24.4% | 63.9% | -29% | 61.7% |
-| Dubailand | Villas | 9,663 | 0.0% | 23.8% | 67.3% | -31% | 67.3% |
-| Bur Dubai & Karama | Apartments | 610 | 0.0% | 23.6% | 68.2% | -25% | 50.7% |
-| Palm & Islands | Apartments | 2,689 | 1.5% | 21.9% | 58.2% | -41% | 100.0% |
-| Downtown & Business Bay | Apartments | 15,318 | 0.0% | 21.1% | 93.1% | -35% | 100.0% |
-| Jebel Ali, Dubai South & Waterfront | Apartments | 8,120 | 0.0% | 20.2% | 59.6% | -32% | 71.4% |
-| Deira | Villas | 285 | 0.0% | 18.9% | 75.8% | -30% | 75.8% |
-| Deira | Apartments | 23 | 0.0% | 17.4% | 65.2% | -25% | 47.8% |
-| Palm & Islands | Villas | 24 | 0.0% | 16.7% | 70.8% | -30% | 70.8% |
-| Marina, JBR & JLT | Villas | 42 | 0.0% | 16.7% | 54.8% | -30% | 54.8% |
-| Industrial | Villas | 60 | 0.0% | 16.7% | 61.7% | -30% | 61.7% |
-| Jebel Ali, Dubai South & Waterfront | Villas | 2,055 | 0.0% | 15.7% | 63.1% | -30% | 63.1% |
-| Qusais, Nahda, Twar & Muhaisnah | Villas | 167 | 0.0% | 15.6% | 73.1% | -30% | 73.1% |
-| Bur Dubai & Karama | Villas | 39 | 0.0% | 15.4% | 87.2% | -30% | 87.2% |
-| Mirdif, Mizhar, Warqa & Khawaneej | Apartments | 595 | 0.0% | 13.6% | 50.4% | -25% | 33.6% |
-| Marina, JBR & JLT | Apartments | 14,527 | 0.0% | 13.1% | 68.2% | -39% | 100.0% |
-| Al Barsha, Al Quoz & Tecom | Villas | 177 | 0.0% | 12.4% | 66.1% | -30% | 66.1% |
-| Mirdif, Mizhar, Warqa & Khawaneej | Villas | 483 | 0.0% | 12.4% | 66.3% | -30% | 66.3% |
-| JVC, JVT & Arjan | Villas | 1,532 | 0.0% | 12.0% | 59.8% | -30% | 59.8% |
-| Jumeirah, Al Wasl & Umm Suqeim | Villas | 557 | 0.0% | 11.1% | 64.3% | -30% | 64.3% |
-| Jumeirah, Al Wasl & Umm Suqeim | Apartments | 2,036 | 0.0% | 8.9% | 53.6% | -25% | 39.5% |
-| MBR City, Meydan & Dubai Hills | Apartments | 10,317 | 0.0% | 7.6% | 73.5% | -17% | 7.6% |
-| Emirates Hills, Meadows & Greens | Apartments | 1,836 | 0.0% | 6.8% | 58.8% | -38% | 97.1% |
-| DIFC, Trade Centre & Za'abeel | Apartments | 853 | 0.0% | 4.2% | 61.2% | -25% | 22.0% |
-| Silicon Oasis, International City & Academic City | Apartments | 7,196 | 0.0% | 2.0% | 57.8% | -44% | 97.2% |
-| Creek Harbour, Jaddaf & Festival City | Apartments | 5,425 | 0.0% | 0.0% | 72.2% | -38% | 100.0% |
-| Emirates Hills, Meadows & Greens | Villas | 1,414 | 0.0% | 0.0% | 43.5% | -31% | 43.5% |
+| Zone | Type | Purchases | −10% | −20% | −30% | Replay, Dubai-wide (-24%) | Own-series shock | Replay, own series (upper) |
+| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| Dubailand | Apartments | 23,004 | 0.0% | 49.3% | 86.4% | 70.3% | -40% | 100.0% |
+| MBR City, Meydan & Dubai Hills | Villas | 1,098 | 0.0% | 37.3% | 58.0% | 45.5% | -30% | 67.6% |
+| Al Barsha, Al Quoz & Tecom | Apartments | 1,305 | 0.0% | 35.9% | 74.4% | 55.1% | -25% | 61.8% |
+| Industrial | Apartments | 562 | 0.0% | 31.7% | 68.1% | 37.4% | -25% | 49.5% |
+| Qusais, Nahda, Twar & Muhaisnah | Apartments | 132 | 0.0% | 25.0% | 68.2% | 48.5% | -25% | 51.5% |
+| JVC, JVT & Arjan | Apartments | 18,816 | 0.0% | 24.4% | 63.9% | 38.5% | -29% | 61.7% |
+| Dubailand | Villas | 9,663 | 0.0% | 23.8% | 67.3% | 35.5% | -31% | 67.3% |
+| Bur Dubai & Karama | Apartments | 610 | 0.0% | 23.6% | 68.2% | 42.1% | -25% | 50.7% |
+| Palm & Islands | Apartments | 2,689 | 1.5% | 21.9% | 58.2% | 35.3% | -41% | 100.0% |
+| Downtown & Business Bay | Apartments | 15,318 | 0.0% | 21.1% | 93.1% | 46.4% | -35% | 100.0% |
+| Jebel Ali, Dubai South & Waterfront | Apartments | 8,120 | 0.0% | 20.2% | 59.6% | 48.1% | -32% | 71.4% |
+| Deira | Villas | 285 | 0.0% | 18.9% | 75.8% | 42.5% | -30% | 75.8% |
+| Deira | Apartments | 23 | 0.0% | 17.4% | 65.2% | 43.5% | -25% | 47.8% |
+| Palm & Islands | Villas | 24 | 0.0% | 16.7% | 70.8% | 29.2% | -30% | 70.8% |
+| Marina, JBR & JLT | Villas | 42 | 0.0% | 16.7% | 54.8% | 31.0% | -30% | 54.8% |
+| Industrial | Villas | 60 | 0.0% | 16.7% | 61.7% | 31.7% | -30% | 61.7% |
+| Jebel Ali, Dubai South & Waterfront | Villas | 2,055 | 0.0% | 15.7% | 63.1% | 32.4% | -30% | 63.1% |
+| Qusais, Nahda, Twar & Muhaisnah | Villas | 167 | 0.0% | 15.6% | 73.1% | 44.3% | -30% | 73.1% |
+| Bur Dubai & Karama | Villas | 39 | 0.0% | 15.4% | 87.2% | 38.5% | -30% | 87.2% |
+| Mirdif, Mizhar, Warqa & Khawaneej | Apartments | 595 | 0.0% | 13.6% | 50.4% | 28.9% | -25% | 33.6% |
+| Marina, JBR & JLT | Apartments | 14,527 | 0.0% | 13.1% | 68.2% | 37.4% | -39% | 100.0% |
+| Al Barsha, Al Quoz & Tecom | Villas | 177 | 0.0% | 12.4% | 66.1% | 32.8% | -30% | 66.1% |
+| Mirdif, Mizhar, Warqa & Khawaneej | Villas | 483 | 0.0% | 12.4% | 66.3% | 31.5% | -30% | 66.3% |
+| JVC, JVT & Arjan | Villas | 1,532 | 0.0% | 12.0% | 59.8% | 26.7% | -30% | 59.8% |
+| Jumeirah, Al Wasl & Umm Suqeim | Villas | 557 | 0.0% | 11.1% | 64.3% | 29.8% | -30% | 64.3% |
+| Jumeirah, Al Wasl & Umm Suqeim | Apartments | 2,036 | 0.0% | 8.9% | 53.6% | 32.6% | -25% | 39.5% |
+| MBR City, Meydan & Dubai Hills | Apartments | 10,317 | 0.0% | 7.6% | 73.5% | 18.2% | -17% | 7.6% |
+| Emirates Hills, Meadows & Greens | Apartments | 1,836 | 0.0% | 6.8% | 58.8% | 40.6% | -38% | 97.1% |
+| DIFC, Trade Centre & Za'abeel | Apartments | 853 | 0.0% | 4.2% | 61.2% | 16.4% | -25% | 22.0% |
+| Silicon Oasis, International City & Academic City | Apartments | 7,196 | 0.0% | 2.0% | 57.8% | 21.6% | -44% | 97.2% |
+| Creek Harbour, Jaddaf & Festival City | Apartments | 5,425 | 0.0% | 0.0% | 72.2% | 30.9% | -38% | 100.0% |
+| Emirates Hills, Meadows & Greens | Villas | 1,414 | 0.0% | 0.0% | 43.5% | 26.2% | -31% | 43.5% |
 
 Differences between zones at the same shock come from how far each zone's index has moved since its buyers bought: a zone whose prices rose after the purchases has a bigger cushion. Area-level rows (min-n applied) are in `rpt.stress_grid` for the Power BI map.
 

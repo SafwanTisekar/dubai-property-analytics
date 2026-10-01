@@ -14,7 +14,13 @@
 !.env.example
 
 # --- Trained model binaries (large, reproducible via `make train`) ------------
-/artifacts/
+# Everything under artifacts/ is ignored except the AVM's tuned parameters (7 KB): with
+# them a rebuild skips the 20-trial Optuna study and reproduces the published model
+# (owner, 2026-10-01). A directory can't be re-included once ignored, hence /* patterns.
+/artifacts/*
+!/artifacts/avm/
+/artifacts/avm/*
+!/artifacts/avm/best_params.json
 
 # --- Outputs of runs against a scratch / fixture database (db.reports_dir) -----
 # Only the main database (config.MAIN_DB) writes the committed reports/*.md and figures.

@@ -251,6 +251,10 @@ STRESS_REPLAY_START = date(2014, 1, 1)
 STRESS_REPLAY_END = date(2021, 12, 1)
 STRESS_REPLAY_PEAK_BY = date(2014, 6, 1)
 STRESS_REPLAY_NAME = "replay_2014_2020"
+# The same episode at the Dubai-wide depth (the Dubai series' drawdown, -24%, for every
+# buyer), shown beside the zone-level replay (owner, 2026-10-01): zone max-drawdowns come
+# from noisier series and overstate the depth, so the zone replay is an upper range.
+STRESS_REPLAY_DUBAI_NAME = "replay_2014_2020_dubai"
 STRESS_MODEL_VERSION = "stress-mtm-v1"
 
 # --- Market forecast (docs/05 §5, Phase 4c) ---------------------------------------------
