@@ -484,7 +484,9 @@ def _source_prefix(root: Path) -> str:
 def append_ingest_log(rows: Iterable[dict[str, object]], path: Path | None = None) -> None:
     """Append rows to ``reports/ingest_log.csv``, writing the header on first use."""
     # Off the main database the log goes to the scratch reports folder (db.reports_dir).
-    path = path or db.reports_dir() / config.INGEST_LOG.name
+    # On the main database config.INGEST_LOG is used as is, so tests can redirect it.
+    if path is None:
+        path = config.INGEST_LOG if db.is_main_db() else db.reports_dir() / config.INGEST_LOG.name
     rows = list(rows)
     if not rows:
         return

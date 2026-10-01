@@ -1,6 +1,6 @@
 # Data dictionary
 
-Generated 2026-10-01 09:40 UTC by `quality/data_dictionary.py` from the dbt manifest (descriptions, tests) and the database catalogue (columns, types). Regenerate with `make dictionary` (after `make dbt`). Rules C1-C22 are in docs/04 §2; the star schema in docs/04 §3. Bronze is raw text (docs/04 §1) and not listed.
+Generated 2026-10-01 14:15 UTC by `quality/data_dictionary.py` from the dbt manifest (descriptions, tests) and the database catalogue (columns, types). Regenerate with `make dictionary` (after `make dbt`). Rules C1-C22 are in docs/04 §2; the star schema in docs/04 §3. Bronze is raw text (docs/04 §1) and not listed.
 
 ## Silver: seeds, staging views and intermediate tables (typed, cleaned, flagged)
 
@@ -834,11 +834,14 @@ Every DLD transaction line (Sales, Gifts, Mortgages; 1.79M) with dimension keys 
 | Object | Type | Description |
 |---|---|---|
 | [`rpt.area_month`](#rptarea_month) | view | rpt.area_month. Monthly sales and financing aggregate. |
+| [`rpt.avm_performance`](#rptavm_performance) | view | rpt.avm_performance. AVM accuracy (MdAPE, hit rates, MAPE, R², coverage) per model, split, breakdown and segment; segments with fewer than min_n valued sales left out. |
+| [`rpt.avm_score`](#rptavm_score) | view | rpt.avm_score. AVM value, error and gap per clean residential market sale. The review flag marks \|gap\| > 25% on out-of-sample valuations (2024+) as a statistical anomaly for collateral review, not an accusation; training rows (2011-2023) are not flagged because their gaps are in-sample. Transaction ID only on flagged rows. |
 | [`rpt.dim_area`](#rptdim_area) | view | rpt.dim_area. Areas with zone and centroid. |
 | [`rpt.dim_date`](#rptdim_date) | view | rpt.dim_date. Calendar; mark as the date table on "Date". |
 | [`rpt.dim_procedure`](#rptdim_procedure) | view | rpt.dim_procedure. DLD procedures and categories. |
 | [`rpt.dim_project`](#rptdim_project) | view | rpt.dim_project. DLD projects (no developer yet). |
 | [`rpt.dim_property_type`](#rptdim_property_type) | view | rpt.dim_property_type. Conformed usage group x property class. |
+| [`rpt.feature_importance`](#rptfeature_importance) | view | rpt.feature_importance. AVM feature importance (mean \|SHAP\|, split gain), ranked. |
 | [`rpt.price_index`](#rptprice_index) | view | rpt.price_index. Hedonic price index per segment (Dubai, apartments, villas, zones passing min-n) and period, Jan 2019 = 100, with YoY, volatility and drawdown. |
 | [`rpt.rates_monthly`](#rptrates_monthly) | view | rpt.rates_monthly. Fed Funds, Brent and (later) EIBOR by month. |
 | [`rpt.rent_month`](#rptrent_month) | view | rpt.rent_month. Monthly rent aggregate; the only rent table in Power BI. |
@@ -874,6 +877,59 @@ rpt.area_month. Monthly sales and financing aggregate.
 | `Portfolio Mortgage Deals` | bigint |  |  |
 | `Portfolio Mortgage Lines` | bigint |  |  |
 | `Portfolio Mortgage Value AED` | bigint |  |  |
+
+<a id="rptavm_performance"></a>
+### `rpt.avm_performance`
+
+dbt model `rpt_avm_performance`.
+
+rpt.avm_performance. AVM accuracy (MdAPE, hit rates, MAPE, R², coverage) per model, split, breakdown and segment; segments with fewer than min_n valued sales left out.
+
+| Column | Type | Description | Tests |
+|---|---|---|---|
+| `Model` | text |  |  |
+| `Model Name` | text |  |  |
+| `Is Champion` | boolean |  |  |
+| `Split` | text |  |  |
+| `Breakdown` | text |  |  |
+| `Segment` | text |  |  |
+| `Sales in Segment` | integer |  |  |
+| `Sales Valued` | integer |  |  |
+| `Coverage` | numeric |  |  |
+| `MdAPE` | numeric |  |  |
+| `Hit Rate 10 Pct` | numeric |  |  |
+| `Hit Rate 20 Pct` | numeric |  |  |
+| `MAPE` | numeric |  |  |
+| `R2 Log Price` | numeric |  |  |
+| `Model Version` | text |  |  |
+
+<a id="rptavm_score"></a>
+### `rpt.avm_score`
+
+dbt model `rpt_avm_score`.
+
+rpt.avm_score. AVM value, error and gap per clean residential market sale. The review flag marks |gap| > 25% on out-of-sample valuations (2024+) as a statistical anomaly for collateral review, not an accusation; training rows (2011-2023) are not flagged because their gaps are in-sample. Transaction ID only on flagged rows.
+
+| Column | Type | Description | Tests |
+|---|---|---|---|
+| `Date` | date |  |  |
+| `Area Key` | integer |  |  |
+| `Property Type Key` | integer |  |  |
+| `Bedrooms` | smallint |  |  |
+| `Is Off-Plan` | boolean |  |  |
+| `Area Sq M` | numeric |  |  |
+| `Model Set` | text |  |  |
+| `Is Out of Sample` | boolean |  |  |
+| `Price AED` | bigint |  |  |
+| `AVM Value AED` | bigint |  |  |
+| `AVM Value per Sq M AED` | bigint |  |  |
+| `Comparable Sales Value AED` | bigint |  |  |
+| `Absolute Error Pct` | numeric |  |  |
+| `Gap Pct` | numeric |  |  |
+| `Review Flag` | text |  |  |
+| `Transaction ID` | text |  |  |
+| `Model` | text |  |  |
+| `Model Version` | text |  |  |
 
 <a id="rptdim_area"></a>
 ### `rpt.dim_area`
@@ -966,6 +1022,22 @@ rpt.dim_property_type. Conformed usage group x property class.
 | `Property Class Order` | integer |  |  |
 | `Property Type` | text |  |  |
 | `Property Class Description` | text |  |  |
+
+<a id="rptfeature_importance"></a>
+### `rpt.feature_importance`
+
+dbt model `rpt_feature_importance`.
+
+rpt.feature_importance. AVM feature importance (mean |SHAP|, split gain), ranked.
+
+| Column | Type | Description | Tests |
+|---|---|---|---|
+| `Feature` | text |  |  |
+| `Feature Group` | text |  |  |
+| `Mean Abs SHAP` | numeric |  |  |
+| `Split Gain` | numeric |  |  |
+| `Rank` | integer |  |  |
+| `Model Version` | text |  |  |
 
 <a id="rptprice_index"></a>
 ### `rpt.price_index`

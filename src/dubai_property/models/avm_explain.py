@@ -56,6 +56,45 @@ PROFILES = [
     },
 ]
 
+# Plain names for model features (cards, charts, worked examples).
+FEATURE_LABEL = {
+    "proj_rel_12m": "Project median, 12m (vs reference)",
+    "bldg_rel_24m": "Building median, 24m (vs reference)",
+    "master_project": "Master project",
+    "ln_area": "Size (ln sq m)",
+    "area_key": "DLD area",
+    "nearest_metro": "Nearest metro",
+    "cell_rel_3m": "Comparable cell median, 3m",
+    "cell_rel_6m": "Comparable cell median, 6m",
+    "cell_rel_12m": "Comparable cell median, 12m",
+    "idx_chg_12m": "Index change, 12m",
+    "idx_chg_3m": "Index change, 3m",
+    "fed_funds_prev": "Fed Funds rate, previous month",
+    "bedrooms": "Bedrooms",
+    "zt_rel_12m": "Zone median, 12m",
+    "zt_n_12m": "Zone sales, 12m",
+    "at_rel_12m": "Area median, 12m",
+    "at_rel_3m": "Area median, 3m",
+    "comps_idx_rel": "Index-adjusted comparables",
+    "is_offplan": "Off-plan",
+    "property_type_key": "Property type",
+    "ref_source": "Reference price source",
+    "proj_n_12m": "Project sales, 12m",
+    "bldg_n_24m": "Building sales, 24m",
+    "cell_n_3m": "Comparable cell sales, 3m",
+    "cell_n_6m": "Comparable cell sales, 6m",
+    "cell_n_12m": "Comparable cell sales, 12m",
+    "at_n_3m": "Area sales, 3m",
+    "at_n_12m": "Area sales, 12m",
+    "comps_idx_n": "Index-adjusted comparables, count",
+}
+
+
+def label(feature: str) -> str:
+    """Readable feature name."""
+    return FEATURE_LABEL.get(feature, feature.replace("_", " "))
+
+
 SELECTION_RULE = (
     "Test-period sales (2025 onwards) only. Accurate examples: among sales of the profile "
     "valued within 10% (APE < 10%), the sale whose AVM value is closest to the median AVM "
@@ -169,34 +208,89 @@ def _plain(v: object) -> object:
     return v if isinstance(v, int | float | bool) else str(v)
 
 
-def miss_reasons(row: dict, contrib: dict) -> list[str]:
-    """Plain-language reasons the data gives for a large miss (no speculation beyond it)."""
-    reasons = []
-    gap = row["gap_pct"]
+def _feature(ex: dict, feature: str) -> object:
+    """A feature value of an example: stored directly, else from its SHAP breakdown."""
+    if ex.get(feature) is not None:
+        return ex[feature]
+    return next((t["value"] for t in ex["shap"]["top"] if t["feature"] == feature), None)
+
+
+def describe(feature: str, value: object) -> str:
+    """A feature value in words (relative medians as a % of the reference price)."""
+    if value is None:
+        return "missing"
+    if isinstance(value, float):
+        if "_rel_" in feature:
+            return f"{np.expm1(value):+.0%} vs the reference price"
+        if feature.startswith("idx_chg"):
+            return f"{np.expm1(value):+.1%}"
+        if feature == "ln_area":
+            return f"{np.exp(value):,.0f} sq m"
+        if feature == "fed_funds_prev":
+            return f"{value:.2%}"
+        if value.is_integer():
+            return f"{value:,.0f}"
+        return f"{value:,.0f}" if abs(value) >= 100 else f"{value:.3g}"
+    return f"{value:,}" if isinstance(value, int) else str(value)
+
+
+def miss_reasons(ex: dict) -> list[str]:
+    """Plain-language reasons the data gives for a large miss (no speculation beyond it).
+
+    Works from a worked example's stored numbers (price, AVM value, reference price,
+    comparables, the building median and the SHAP breakdown), so it states only what
+    those numbers show: where the sale and the AVM sit against the reference, whether the
+    price was in line with the building's own trailing median, and which input moved the
+    value most.
+    """
+    gap = ex["gap_pct"]
     side = "above" if gap > 0 else "below"
-    reasons.append(
-        f"The sale closed {abs(gap):.0%} {side} the AVM value: the AVM read this unit as "
-        f"a typical {row['bedrooms']}-bed in {row['area_name']}."
-    )
-    if row.get("cell_n_6m", 0) < config.AVM_COMPS_MIN_N:
+    ref = ex["reference_ppsqm_aed"]
+    sale = ex["price_aed"] / ex["area_sqm"]
+    value = ex["avm_value_aed"] / ex["area_sqm"]
+    reasons = [
+        f"The sale closed {abs(gap):.0%} {side} the AVM value. Against the reference price "
+        f"(AED {ref:,.0f}/sq m) the sale was at AED {sale:,.0f}/sq m ({sale / ref - 1:+.0%}) "
+        f"and the AVM at AED {value:,.0f}/sq m ({value / ref - 1:+.0%})."
+    ]
+    if ex["comps_6m_n"] < config.AVM_COMPS_MIN_N:
         reasons.append(
-            f"Thin comparables: {row.get('cell_n_6m', 0)} sales of the same type, bedrooms "
-            "and off-plan status in this area in the previous 6 months."
+            f"Thin comparables: {ex['comps_6m_n']} sales of the same type, bedrooms and "
+            "off-plan status in this area in the previous 6 months."
         )
-    if row.get("bldg_n_24m"):
+    biggest = ex["shap"]["top"][0]
+    bldg = _feature(ex, "bldg_rel_24m")
+    in_line = False
+    if isinstance(bldg, float):
+        bldg_ppsqm = ref * float(np.exp(bldg))
+        diff = sale / bldg_ppsqm - 1
+        n = ex.get("bldg_n_24m")
+        count = f", {n:,} sales in 24 months" if n else ""
+        in_line = abs(diff) <= 0.10
+        verdict = (
+            "in line with its building, so the gap comes from how the model valued the unit, "
+            "not from an unusual price for the building"
+            if in_line
+            else "the difference is specific to the unit, not the building"
+        )
         reasons.append(
-            f"Its building had {row['bldg_n_24m']} sales in the previous 24 months; this "
-            "price is far from that building's trailing median, so the difference is "
-            "specific to the unit, not the building."
+            f"The price was {diff:+.0%} from its building's trailing median (AED "
+            f"{bldg_ppsqm:,.0f}/sq m{count}): {verdict}."
         )
     reasons.append(
-        "What the register doesn't record: floor, view, layout, condition, furnishing, or "
-        "the circumstances of the sale (a distressed or related-party sale, a bundled "
-        "payment plan). Any of these can move one unit's price by 25% or more."
+        f"Largest model input: {label(biggest['feature'])}, "
+        f"{describe(biggest['feature'], biggest['value'])}, which moved the value "
+        f"{biggest['shap']:+.3f} log points (≈ {np.expm1(biggest['shap']):+.0%})."
     )
-    biggest = contrib["top"][0]
-    reasons.append(
-        f"Largest single model input: {biggest['feature']} = {biggest['value']} "
-        f"({biggest['shap']:+.3f} log points)."
-    )
+    if in_line and biggest["feature"].startswith("proj_"):
+        reasons.append(
+            "A project median pools every building, size and launch phase of the project, so "
+            "pricier buildings in the same project can lift the value of a unit in a cheaper one."
+        )
+    else:
+        reasons.append(
+            "What the register doesn't record: floor, view, layout, condition, furnishing, or "
+            "the circumstances of the sale (a distressed or related-party sale, a bundled "
+            "payment plan). Any of these can move one unit's price by 25% or more."
+        )
     return reasons

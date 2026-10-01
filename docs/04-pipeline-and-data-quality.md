@@ -91,7 +91,11 @@ erDiagram
 | `ml.fct_price_index` (Phase 4a) | Segment × published period | 2,432 | Written by `models/hedonic_index.py` (COPY). segment_id / level / property_type_key / zone, frequency, period_start, n_obs (≥ 20), log_coef, index_value (Jan 2019 = 100), index_3m, mom, yoy, vol_12m, running_peak, drawdown, episode_id, is_partial_period, model_version. 18 segments: Dubai, apartments, villas + 15 zone × type |
 | `ml.agg_yield_quarter` (Phase 4a) | Quarter × area or zone × property type × bedrooms | 5,919 | Written by `models/yields.py` (COPY). n_rent, n_sale (both ≥ 20), median_annual_rent_aed, median_price_aed, gross_yield, is_outside_sanity, areas_rolled_up (zone rows), is_partial_period, model_version |
 | `rpt.price_index`, `rpt.yield_quarter` | Views over the two ml tables | | dbt tag `post_ml` (built by `make score`), filtered to the model version in dbt vars |
-| Phase 4b/4c (`post_ml`) | | | `ml_avm_performance`, `ml_feature_importance`, `ml_stress_grid`, `ml_forecast`; AVM columns on `fct_transaction` |
+| `ml.avm_score` (Phase 4b) | Clean residential market sale since 2011 (champion model) | 904,551 | Written by `models/avm.py` (COPY). model_version, scored_at, model, transaction_id, txn_date, area_key, property_type_key, bedrooms, is_offplan, area_sqm, model_set (train 480,489 / validation 148,360 / test 275,702), actual_price_aed, predicted_value_aed, predicted_ppsqm_aed, abs_pct_error, gap_pct, is_review (NULL on train rows: out of sample only; 12,813 validation + 18,710 test flagged), comps_value_aed (baseline, for comparison) |
+| `ml.avm_performance` (Phase 4b) | Model × split × breakdown × segment | 436 | Four models (LightGBM, comparables, index-adjusted comparables, rolling hedonic OLS) on validation and test: overall, by reg type, property type, price band (predicted and actual), top 20 areas, month, plus `_common` subsets every model can value. n_total, n_scored, coverage, mdape, hit10, hit20, mape, r2_log_price, is_champion; segments below min-n left out |
+| `ml.feature_importance` (Phase 4b) | LightGBM feature | 35 | feature, feature_group, mean_abs_shap (TreeSHAP on 20,000 seeded test sales), gain, rank |
+| `rpt.avm_score`, `rpt.avm_performance`, `rpt.feature_importance` | Views over the three ml tables | | dbt tag `post_ml` (`make score`), filtered to `avm_model_version`; dbt tests on keys and ranges; `tests/test_avm_model.py` checks every model and one champion |
+| Phase 4c (`post_ml`) | | | `ml_stress_grid`, `ml_forecast` |
 
 **Area-weighted AED per sq m is per property class.** Σ AED / Σ sq m across classes mixes land, buildings and units, so the sums sit on the property-type key and Power BI computes the ratio within a class. The headline KPI (`reports/kpi_reconciliation.md`) is residential apartments + villas / townhouses; a pytest checks that for residential apartments it stays within ±40% of the median in every year from 2010.
 
@@ -115,7 +119,7 @@ erDiagram
 
 ## 5. Orchestration
 
-The `Makefile` runs the steps in order: `db (once) → download → bronze → dbt build (pre-ML: make dbt excludes tag:post_ml) → train (models write ml.* with COPY) → score (dbt build --select tag:post_ml: the rpt views over ml.*) → test`; `make model-reports` writes `reports/price_index.md` and `reports/yields.md`. Incremental runs use `make update`, which pulls the latest month and rebuilds.
+The `Makefile` runs the steps in order: `db (once) → download → bronze → dbt build (pre-ML: make dbt excludes tag:post_ml) → train (models write ml.* with COPY) → score (dbt build --select tag:post_ml: the rpt views over ml.*) → test`; `make model-reports` writes `reports/price_index.md`, `reports/yields.md` and the AVM model card `reports/avm_model_card.md` (with `reports/avm_examples.json` for the website). Incremental runs use `make update`, which pulls the latest month and rebuilds.
 
 ## 6. Decisions
 

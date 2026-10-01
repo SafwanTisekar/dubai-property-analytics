@@ -97,23 +97,27 @@ def apply_style() -> None:
 
 
 # --- Number formats -----------------------------------------------------------------
-def fmt_aed(value: float, prefix: bool = True) -> str:
-    """Format AED compactly: 1.2bn, 350m, 18,500 (``AED`` prefix unless disabled)."""
+def fmt_aed(value: float, prefix: bool = True, decimals: int = 0) -> str:
+    """Format AED compactly: 1.2bn, 350m, 18,500 (``AED`` prefix unless disabled).
+
+    ``decimals`` applies to millions: 0 gives "1m"; 2 gives "1.06m", for charts whose
+    values all sit between 1m and 2m.
+    """
     if value is None or (isinstance(value, float) and np.isnan(value)):
         return ""
     a = abs(value)
     if a >= 1e9:
         text = f"{value / 1e9:,.1f}".removesuffix(".0") + "bn"
     elif a >= 1e6:
-        text = f"{value / 1e6:,.0f}m"
+        text = f"{value / 1e6:,.{decimals}f}m"
     else:
         text = f"{value:,.0f}"
     return f"AED {text}" if prefix else text
 
 
-def aed_axis(ax, axis: str = "y", prefix: bool = False) -> None:
+def aed_axis(ax, axis: str = "y", prefix: bool = False, decimals: int = 0) -> None:
     """Format an axis in compact AED (the axis label carries the unit by default)."""
-    fmt = FuncFormatter(lambda v, _pos: fmt_aed(v, prefix=prefix))
+    fmt = FuncFormatter(lambda v, _pos: fmt_aed(v, prefix=prefix, decimals=decimals))
     (ax.yaxis if axis == "y" else ax.xaxis).set_major_formatter(fmt)
 
 

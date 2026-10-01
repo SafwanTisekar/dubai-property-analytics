@@ -2,7 +2,7 @@
 
 Phase 4a (docs/05 §2). Like-for-like residential price index for Dubai, apartments, villas and the zones with enough sales, validated against DLD's official index.
 
-- **Data:** clean market sales to the snapshot date, **25 Sep 2026** (`Sep 2026`* is a partial month). Model `hedonic-rtd-v1`, fitted 2026-10-01 13:37.
+- **Data:** clean market sales to the snapshot date, **25 Sep 2026** (`Sep 2026`* is a partial month). Model `hedonic-rtd-v1`, fitted 2026-10-01 15:52.
 - **Tables:** `ml.fct_price_index` (published periods only), `rpt.price_index` (Power BI).
 - **Regenerate:** `make train score model-reports`. Code: `src/dubai_property/models/hedonic_index.py`; this report: `models/report_4a.py`.
 

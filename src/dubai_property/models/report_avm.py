@@ -23,10 +23,12 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
 import numpy as np  # noqa: E402
 import polars as pl  # noqa: E402
+from matplotlib.ticker import MultipleLocator  # noqa: E402
 
 from dubai_property import config, db  # noqa: E402
 from dubai_property.analysis import plotting as P  # noqa: E402
-from dubai_property.models import avm  # noqa: E402
+from dubai_property.models import avm, avm_explain  # noqa: E402
+from dubai_property.models.avm_explain import label  # noqa: E402
 from dubai_property.models.report_4a import pct, table, to_date  # noqa: E402
 
 log = logging.getLogger(__name__)
@@ -48,34 +50,6 @@ COLOR = {
     "hedonic_ols": P.MUTED,
 }
 ORDER = ["lightgbm", "comps_indexed", "comps", "hedonic_ols"]
-FEATURE_LABEL = {
-    "proj_rel_12m": "Project median, 12m (vs reference)",
-    "bldg_rel_24m": "Building median, 24m (vs reference)",
-    "master_project": "Master project",
-    "ln_area": "Size (ln sq m)",
-    "area_key": "DLD area",
-    "nearest_metro": "Nearest metro",
-    "cell_rel_3m": "Comparable cell median, 3m",
-    "cell_rel_6m": "Comparable cell median, 6m",
-    "cell_rel_12m": "Comparable cell median, 12m",
-    "idx_chg_12m": "Index change, 12m",
-    "idx_chg_3m": "Index change, 3m",
-    "fed_funds_prev": "Fed Funds rate, previous month",
-    "bedrooms": "Bedrooms",
-    "zt_rel_12m": "Zone median, 12m",
-    "zt_n_12m": "Zone sales, 12m",
-    "at_rel_12m": "Area median, 12m",
-    "at_rel_3m": "Area median, 3m",
-    "comps_idx_rel": "Index-adjusted comparables",
-    "is_offplan": "Off-plan",
-    "property_type_key": "Property type",
-    "ref_source": "Reference price source",
-}
-
-
-def label(feature: str) -> str:
-    """Readable feature name."""
-    return FEATURE_LABEL.get(feature, feature.replace("_", " "))
 
 
 # --- Data -----------------------------------------------------------------------------
@@ -141,8 +115,7 @@ def fig_by_month(perf: pl.DataFrame, snapshot: date) -> Path:
     ax.set_ylim(bottom=0)
     ax.set_ylabel("Median absolute % error (MdAPE)")
     ax.grid(False, axis="x")
-    ax.legend(loc="upper left", ncol=4)
-    fig.subplots_adjust(right=0.80)
+    fig.subplots_adjust(right=0.80)  # lines are labelled at their ends: no legend
     P.titled(
         fig,
         "AVM error by month, out-of-time test period",
@@ -187,11 +160,13 @@ def fig_segments(perf: pl.DataFrame, snapshot: date) -> Path:
         ax.barh(y + (k - 1.5) * h, vals, height=h * 0.9, color=COLOR[model], label=NAME[model])
     ax.set_yticks(y, [r[2] for r in rows])
     ax.invert_yaxis()
+    ax.xaxis.set_major_locator(MultipleLocator(0.02))  # whole-percent ticks
     P.pct_axis(ax, axis="x")
     ax.grid(True, axis="x")
     ax.grid(False, axis="y")
     ax.set_xlabel("Median absolute % error (MdAPE), test 2025+")
-    ax.legend(loc="lower right")
+    ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.1), ncol=4, frameon=False)
+    fig.subplots_adjust(left=0.2, bottom=0.2)
     P.titled(
         fig,
         "AVM error by segment",
@@ -220,6 +195,7 @@ def fig_importance(imp: pl.DataFrame, snapshot: date, top: int = 15) -> Path:
         "What drives the AVM",
         f"Top {top} features by mean absolute SHAP value, on a sample of test-period sales.",
     )
+    fig.subplots_adjust(left=0.3)  # room for the feature names
     P.add_source(fig, snapshot, partial=False)
     return P.save(fig, "avm_shap_importance")
 
@@ -290,7 +266,7 @@ def fig_dependence(sample: pl.DataFrame, snapshot: date) -> Path:
         "How the AVM uses size, bedrooms, location and off-plan status",
         "SHAP values: the feature's push on the log price relative to the as-of reference price.",
     )
-    fig.subplots_adjust(hspace=0.45, wspace=0.35, bottom=0.1)
+    fig.subplots_adjust(hspace=0.45, wspace=0.35, bottom=0.1, left=0.14)
     P.add_source(fig, snapshot, partial=False)
     return P.save(fig, "avm_shap_dependence")
 
@@ -300,7 +276,14 @@ def fig_example(ex: dict, snapshot: date) -> Path:
     shap = ex["shap"]
     ref_value = ex["reference_ppsqm_aed"] * ex["area_sqm"]
     steps = [("Bias (average adjustment)", shap["bias"])]
-    steps += [(f"{label(c['feature'])} = {c['value']}", c["shap"]) for c in shap["top"]]
+
+    def value_text(c: dict) -> str:
+        # The DLD area enters as a key; the example carries its name.
+        if c["feature"] == "area_key":
+            return ex["area"]
+        return avm_explain.describe(c["feature"], c["value"])
+
+    steps += [(f"{label(c['feature'])}: {value_text(c)}", c["shap"]) for c in shap["top"]]
     steps += [("Other features", shap["other"]), ("Median calibration", ex["calibration"])]
     fig, ax = P.figure(size=(10, 6.0))
     level = np.log(ref_value)
@@ -318,22 +301,23 @@ def fig_example(ex: dict, snapshot: date) -> Path:
     ax.barh(y, np.exp(level), color=P.BLUE, height=0.6)
     names.append("AVM value")
     ax.axvline(ex["price_aed"], color=P.TEXT, lw=1.2, ls="--")
-    ax.annotate(f"Sale price {P.fmt_aed(ex['price_aed'])}", (ex["price_aed"], y + 0.6),
+    ax.annotate(f"Sale price {P.fmt_aed(ex['price_aed'], decimals=2)}", (ex["price_aed"], y + 0.6),
                 fontsize=8.5, color=P.TEXT, ha="center")  # fmt: skip
     ax.set_yticks(range(len(names)), names, fontsize=8.5)
     ax.invert_yaxis()
     ax.grid(True, axis="x")
     ax.grid(False, axis="y")
-    P.aed_axis(ax, axis="x")
+    P.aed_axis(ax, axis="x", decimals=2)
     lo = min(ref_value, ex["price_aed"], np.exp(level)) * 0.8
-    ax.set_xlim(left=lo)
+    hi = max(ax.get_xlim()[1], ex["price_aed"]) * 1.06  # room for the sale-price label
+    ax.set_xlim(lo, hi)
     ax.set_xlabel("AED (x-axis starts above zero: the bars show the steps)")
     flag = "  Large miss." if ex["kind"] == "miss" else ""
     P.titled(
         fig,
-        f"{ex['title']}: valued at {P.fmt_aed(ex['avm_value_aed'])}",
+        f"{ex['title']}: valued at {P.fmt_aed(ex['avm_value_aed'], decimals=2)}",
         f"{ex['bedrooms']}-bed, {ex['area_sqm']:.0f} sq m, sold {ex['date']} for "
-        f"{P.fmt_aed(ex['price_aed'])} (error {ex['ape']:.1%}).{flag} Orange steps lower the "
+        f"{P.fmt_aed(ex['price_aed'], decimals=2)} (error {ex['ape']:.1%}).{flag} Orange steps lower the "
         "value, blue raise it.",
     )
     fig.subplots_adjust(left=0.36)
@@ -404,8 +388,83 @@ def segment_table(perf: pl.DataFrame, breakdown: str, segments: Sequence[str]) -
     return table(head, rows, "l" + "r" * len(ORDER))
 
 
-def render(perf, imp, diag, summary, figs, examples) -> str:  # noqa: C901
-    """The model card (markdown)."""
+def comps_comparison(base: dict, idx: dict) -> str:
+    """Summary point on index-adjusted vs plain comparables (test, each on its own coverage).
+
+    The wording follows the numbers: "did not beat" only when the index-adjusted MdAPE is
+    not lower. The reason given is the one the decomposition in docs/05 §8 supports.
+    """
+    b, i = pct(base["mdape"], 2, sign=False), pct(idx["mdape"], 2, sign=False)
+    if idx["mdape"] < base["mdape"]:
+        return (
+            f"3. **Index-adjusting the comparables helps:** MdAPE {i} against {b} for six "
+            "months of raw comparables."
+        )
+    return (
+        f"3. **Index-adjusted comparables did not beat plain comparables** (MdAPE {i} vs {b}). "
+        "The adjustment does its job: it removes the lag bias of a 12-month window (raw "
+        "12-month comparables under-value by a median ~3%, adjusted ones by ~0.5%). The likely "
+        "reason it still loses is that six months of raw comparables carry only ~2% of drift, "
+        "small next to the ~10% unit-to-unit spread, while the extra six older months bring in "
+        "sales less like today's that no index can align; and at the 2026 turn the zone-level "
+        "real-time index misjudged how individual cells moved. It edged ahead in rising 2025 "
+        "and fell behind in 2026 (figures from the 2026-10-01 decomposition in docs/05 §8)."
+    )
+
+
+def villa_comparison(perf: pl.DataFrame) -> str | None:
+    """Summary point on villas: LightGBM vs comparables on the villas both can value (test)."""
+    lg = pick(perf, "test", "property_type_common", "lightgbm", "villa")
+    cp = pick(perf, "test", "property_type_common", "comps", "villa")
+    own = pick(perf, "test", "property_type", "lightgbm", "villa")
+    if not (lg and cp and own):
+        return None
+    head = (
+        f"on the {lg['n_scored']:,} test villas both can value, MdAPE "
+        f"{pct(lg['mdape'], 2, sign=False)} LightGBM vs {pct(cp['mdape'], 2, sign=False)} "
+        f"comparables; ±20%: {pct(lg['hit20'], 1, sign=False)} vs {pct(cp['hit20'], 1, sign=False)}"
+    )
+    if lg["mdape"] < 0.97 * cp["mdape"]:
+        return f"4. **Villas:** LightGBM also beats comparables {head}."
+    return (
+        f"4. **Villas are a tie on MdAPE** ({head}). LightGBM's edge is in the tails, and its "
+        f"{pct(own['mdape'], 1, sign=False)} on all villas includes "
+        f"{own['n_scored'] - lg['n_scored']:,} villas with too few comparables to value. The "
+        "likely reason: villa communities repeat a few layouts, so the cell median (area × "
+        "bedrooms × off-plan) is already a close match, and villas are about one in eight "
+        "training sales, so the shared model's splits are shaped mostly by apartments."
+    )
+
+
+def tuning_summary(trials: Sequence[dict]) -> dict | None:
+    """Spread of the Optuna validation MdAPE across trials (None if tuning didn't run)."""
+    done = [t for t in trials if t.get("value") is not None]
+    if not done:
+        return None
+    best = min(done, key=lambda t: t["value"])
+    return {
+        "n": len(done),
+        "min": best["value"],
+        "max": max(t["value"] for t in done),
+        "best_trial": best["number"] + 1,  # 1-based, as train.log counts them
+    }
+
+
+def tuning_sentence(ts: dict | None) -> str:
+    """One sentence on how much tuning mattered (empty without a study)."""
+    if ts is None:
+        return ""
+    return (
+        f"**Tuning was flat:** across {ts['n']} Optuna trials the validation MdAPE stayed between "
+        f"{pct(ts['min'], 1, sign=False)} and {pct(ts['max'], 1, sign=False)} (best: trial "
+        f"{ts['best_trial']}). The flat results suggest the remaining error likely comes from what "
+        "the register doesn't record (view, floor, finish), rather than from tuning; it is also "
+        f"why {ts['n']} trials rather than 50 were enough (docs/05 §8)."
+    )
+
+
+def render(perf, imp, diag, summary, figs, examples, tuning=None) -> str:  # noqa: C901
+    """The model card (markdown). ``tuning``: ``tuning_summary`` of the Optuna study."""
     snap = to_date(diag["snapshot"])
     champ = diag["champion"]
     t = {m: pick(perf, "test", "overall", m) for m in ORDER}
@@ -458,14 +517,14 @@ def render(perf, imp, diag, summary, figs, examples) -> str:  # noqa: C901
             f"MdAPE {pct(lgc['mdape'], 1, sign=False)} LightGBM vs {pct(basec['mdape'], 1, sign=False)} "
             f"comparables vs {pct(idxc['mdape'], 1, sign=False)} index-adjusted. Coverage: LightGBM "
             f"{pct(lg['coverage'], 1, sign=False)}, comparables {pct(base['coverage'], 1, sign=False)}.",
-            "3. **Index-adjusting the comparables doesn't help.** Twelve months of comparables "
-            "moved to today by the real-time index value sales no better than six months of raw "
-            "comparables: in the cell's own recent sales the market move is small next to "
-            "unit-to-unit dispersion, and the longer window brings in more of that dispersion.",
+            comps_comparison(base, idx),
         ]
+    villa = villa_comparison(perf)
+    if villa:
+        lines.append(villa)
     if worst and best:
         lines.append(
-            f"4. **Accuracy by month** ranges from {pct(best['mdape'], 1, sign=False)} "
+            f"5. **Accuracy by month** ranges from {pct(best['mdape'], 1, sign=False)} "
             f"({best['segment']}) to {pct(worst['mdape'], 1, sign=False)} ({worst['segment']}); "
             "see the table below for the 2026 slowdown months. "
             f"([chart]({rel(figs['month'])}))"
@@ -473,19 +532,19 @@ def render(perf, imp, diag, summary, figs, examples) -> str:  # noqa: C901
     if imp.height:
         top3 = ", ".join(label(f) for f in imp.sort("rank").head(3)["feature"])
         lines.append(
-            f"5. **What drives it:** {top3}. The model mostly asks *where in the market this "
+            f"6. **What drives it:** {top3}. The model mostly asks *where in the market this "
             f"unit's project and building trade* relative to the comparables. ([chart]({rel(figs['importance'])}))"
         )
     if tst:
         lines.append(
-            f"6. **Review flags:** {tst['review']:,} of {tst['n']:,} test-period sales "
+            f"7. **Review flags:** {tst['review']:,} of {tst['n']:,} test-period sales "
             f"({tst['review'] / tst['n']:.1%}) sit more than 25% from the AVM "
             f"({tst['review_above']:,} above, {tst['review'] - tst['review_above']:,} below). "
             "Statistical anomalies for a collateral review, not accusations. "
             f"([chart]({rel(figs['gaps'])}))"
         )
     lines += [
-        "7. **No sign of leakage:** test MdAPE and hit rates are within the range of "
+        "8. **No sign of leakage:** test MdAPE and hit rates are within the range of "
         "production AVMs, far from the alarm thresholds (MdAPE < "
         f"{config.LEAKAGE_MDAPE_FLOOR:.0%} or ±10% > {config.LEAKAGE_HIT10_CEILING:.0%}), and a "
         "pytest proves no feature of a month-M sale changes when every sale from M on is rewritten.",
@@ -645,6 +704,7 @@ def render(perf, imp, diag, summary, figs, examples) -> str:  # noqa: C901
             "ll",
         ),  # fmt: skip
         "",
+        *([tuning_sentence(tuning), ""] if tuning else []),
         f"**Champion: {NAME[champ]}**, chosen on the 2024 validation MdAPE (common subset), never on test:",
         "",
         table(HEADER, [metric_row(v[m], NAME[m]) for m in ORDER], ALIGN),
@@ -724,7 +784,7 @@ def render(perf, imp, diag, summary, figs, examples) -> str:  # noqa: C901
         "price relative to the reference price (0.05 ≈ +5%).",
         "",
         table(
-            ["Rank", "Feature", "Group", "Mean |SHAP|", "Split gain"],
+            ["Rank", "Feature", "Group", "Mean abs. SHAP", "Split gain"],
             [
                 [
                     r["rank"],
@@ -749,9 +809,10 @@ def render(perf, imp, diag, summary, figs, examples) -> str:  # noqa: C901
         "",
     ]
     for ex in examples:
-        kind = "Large miss" if ex["kind"] == "miss" else "Example"
+        # A miss's title already says "Large miss: <area>" (avm_explain.pick_examples).
+        heading = ex["title"] if ex["kind"] == "miss" else f"Example: {ex['title']}"
         lines += [
-            f"### {kind}: {ex['title']}",
+            f"### {heading}",
             "",
             f"{ex['bedrooms']}-bed {ex['property_type']}, {ex['area_sqm']:.0f} sq m, "
             f"{'off-plan' if ex['is_offplan'] else 'ready'}, {ex['area']} ({ex['zone']}), sold "
@@ -822,6 +883,11 @@ def main(argv: Sequence[str] | None = None) -> int:
     imp = pl.DataFrame(diag["importance"]) if diag.get("importance") else pl.DataFrame()
     sample = pl.read_parquet(art / "shap_sample.parquet")
     examples = diag.get("examples", [])
+    # Reasons are re-derived from each example's stored numbers, so a wording fix in
+    # avm_explain.miss_reasons reaches the card and the website without re-training.
+    for ex in examples:
+        if ex["kind"] == "miss":
+            ex["reasons"] = avm_explain.miss_reasons(ex)
     figs = {
         "month": fig_by_month(perf, snap),
         "segments": fig_segments(perf, snap),
@@ -844,9 +910,14 @@ def main(argv: Sequence[str] | None = None) -> int:
             default=str,
             indent=1,
         )
+        + "\n"  # end-of-file-fixer (pre-commit) expects a final newline
     )
     card = out / CARD
-    card.write_text(render(perf, imp, diag, load_score_summary(), figs, examples))
+    study_path = art / "best_params.json"
+    trials = json.loads(study_path.read_text()).get("trials", []) if study_path.exists() else []
+    card.write_text(
+        render(perf, imp, diag, load_score_summary(), figs, examples, tuning_summary(trials))
+    )
     log.info("wrote %s and %s", card.relative_to(config.PROJECT_ROOT), EXAMPLES)
     return 0
 

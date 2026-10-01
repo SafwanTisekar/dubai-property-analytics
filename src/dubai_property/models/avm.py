@@ -648,11 +648,13 @@ def explain(
             "reference_source": row["ref_source"],
             "reference_ppsqm_aed": round(float(np.exp(row["ref_ln"])), 0),
             "comps_6m_n": row["cell_n_6m"],
+            "bldg_rel_24m": row["bldg_rel_24m"],
+            "bldg_n_24m": row["bldg_n_24m"],
             "calibration": calibration,
             "shap": contrib,
         }
         if ex["kind"] == "miss":
-            item["reasons"] = avm_explain.miss_reasons(row, contrib)
+            item["reasons"] = avm_explain.miss_reasons(item)
         examples.append(item)
     log.info("worked examples: %s", [e["key"] for e in examples])
     return {

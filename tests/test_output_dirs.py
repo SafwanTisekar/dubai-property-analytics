@@ -77,3 +77,12 @@ def test_odd_database_names_make_safe_folder_names(scratch_db, monkeypatch):
     monkeypatch.setenv("PG_DB", "scratch db/../x")
     assert db.reports_dir().parent == config.REPORTS / config.SCRATCH_DIRNAME
     assert "/" not in db.reports_dir().name
+
+
+def test_ingest_log_on_the_main_db_follows_config(monkeypatch, tmp_path):
+    # Tests redirect config.INGEST_LOG; only its folder was being swapped, which leaked a
+    # reports/log.csv into the repo on every pytest run.
+    monkeypatch.setenv("PG_DB", config.MAIN_DB)
+    monkeypatch.setattr(config, "INGEST_LOG", tmp_path / "log.csv")
+    load_bronze.append_ingest_log([{"dataset": "probe", "status": "skipped"}])
+    assert (tmp_path / "log.csv").exists()

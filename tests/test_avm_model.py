@@ -128,6 +128,80 @@ def test_worked_examples_follow_the_published_rule():
     assert "median APE" in avm_explain.SELECTION_RULE
 
 
+def test_tuning_summary_reports_the_spread_and_the_best_trial():
+    from dubai_property.models import report_avm
+
+    trials = [
+        {"number": 0, "value": 0.0715},
+        {"number": 1, "value": 0.0733},
+        {"number": 2, "value": 0.0704},
+        {"number": 3, "value": None},  # a failed trial doesn't count
+    ]
+    ts = report_avm.tuning_summary(trials)
+    assert ts == {"n": 3, "min": 0.0704, "max": 0.0733, "best_trial": 3}
+    sentence = report_avm.tuning_sentence(ts)
+    assert "7.0% and 7.3%" in sentence and "likely" in sentence
+    # Defaults run (--trials 0): no study, no sentence.
+    assert report_avm.tuning_summary([]) is None
+    assert report_avm.tuning_sentence(None) == ""
+
+
+def test_card_wording_follows_the_numbers():
+    from dubai_property.models import report_avm
+
+    base = {"mdape": 0.099}
+    assert "did not beat" in report_avm.comps_comparison(base, {"mdape": 0.101})
+    assert "did not beat" in report_avm.comps_comparison(base, {"mdape": 0.099})
+    assert "helps" in report_avm.comps_comparison(base, {"mdape": 0.095})
+
+    def perf(lg_common: float) -> pl.DataFrame:
+        rows = [
+            ("property_type_common", "lightgbm", 1000, lg_common),
+            ("property_type_common", "comps", 1000, 0.085),
+            ("property_type", "lightgbm", 1100, 0.087),
+        ]
+        return pl.DataFrame(
+            [
+                {"split": "test", "breakdown": b, "model": m, "segment": "villa",
+                 "n_scored": n, "mdape": md, "hit20": 0.85}
+                for b, m, n, md in rows
+            ]
+        )  # fmt: skip
+
+    tie = report_avm.villa_comparison(perf(0.0852))
+    assert "tie" in tie and "100 villas" in tie
+    assert "also beats" in report_avm.villa_comparison(perf(0.070))
+    assert report_avm.villa_comparison(perf(0.07).filter(pl.col("model") != "comps")) is None
+
+
+def test_miss_reasons_state_what_the_numbers_show():
+    # Sale at AED 15,000/sq m vs a 10,000 reference; AVM at 20,000. The building trades at
+    # 14,500 (ln 1.45 above the reference) and the project median drove the value up.
+    ex = {
+        "gap_pct": -0.25,
+        "price_aed": 1_500_000,
+        "avm_value_aed": 2_000_000,
+        "area_sqm": 100.0,
+        "reference_ppsqm_aed": 10_000.0,
+        "comps_6m_n": 50,
+        "shap": {"top": [{"feature": "proj_rel_12m", "value": 0.5, "shap": 0.35},
+                         {"feature": "bldg_rel_24m", "value": float(np.log(1.45)), "shap": 0.02}]},
+    }  # fmt: skip
+    reasons = avm_explain.miss_reasons(ex)
+    assert "+50%" in reasons[0] and "+100%" in reasons[0]  # sale and AVM vs the reference
+    assert "+3% from its building" in reasons[1] and "in line with its building" in reasons[1]
+    assert "Project median, 12m" in reasons[2] and "+65% vs the reference price" in reasons[2]
+    assert "project median pools" in reasons[3]
+    assert not any("Thin comparables" in r for r in reasons)
+
+    # A price far from its building's median is unit-specific; thin comps are reported.
+    ex.update(bldg_rel_24m=float(np.log(2.0)), bldg_n_24m=1664, comps_6m_n=3)
+    reasons = avm_explain.miss_reasons(ex)
+    assert any("Thin comparables: 3 sales" in r for r in reasons)
+    assert any("1,664 sales" in r and "specific to the unit" in r for r in reasons)
+    assert "register doesn't record" in reasons[-1]
+
+
 def test_features_and_categoricals_are_disjoint_and_complete():
     from dubai_property.features import build
 

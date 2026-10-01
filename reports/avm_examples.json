@@ -1,0 +1,282 @@
+{
+ "model_version": "avm-lgbm-v1",
+ "data_as_of": "2026-09-25",
+ "selection_rule": "Test-period sales (2025 onwards) only. Accurate examples: among sales of the profile valued within 10% (APE < 10%), the sale whose AVM value is closest to the median AVM value of those sales (ties: lowest transaction id), so a typical unit of the profile. Profiles: a 2-bed ready apartment in Dubai Marina (DLD area Marsa Dubai); an off-plan studio or 1-bed in JVC (DLD area Al Barsha South Fourth); a villa in the Dubailand area with the most test-period villa sales. Large miss: among test sales in the 20 areas with most test sales that the AVM missed by more than 25%, the one with the median APE (ties: lowest transaction id).",
+ "attribution": "Dubai Land Department, CC BY 4.0",
+ "examples": [
+  {
+   "key": "marina_2bed_ready",
+   "title": "2-bed ready apartment, Dubai Marina",
+   "kind": "accurate",
+   "transaction_id": "1-11-2025-38173",
+   "date": "2025-09-15",
+   "area": "Marsa Dubai",
+   "zone": "Marina, JBR & JLT",
+   "property_type": "apartment",
+   "bedrooms": 2,
+   "is_offplan": false,
+   "area_sqm": 123.7,
+   "price_aed": 2550000,
+   "avm_value_aed": 2551856,
+   "ape": 0.0007277000401632896,
+   "gap_pct": -0.0007271708778862074,
+   "reference_source": "comps_indexed",
+   "reference_ppsqm_aed": 19629.0,
+   "comps_6m_n": 644,
+   "calibration": -0.0070171569815295695,
+   "shap": {
+    "bias": 0.011033203987421816,
+    "top": [
+     {
+      "feature": "ln_area",
+      "value": 4.817535864130423,
+      "shap": -0.038409947865490644
+     },
+     {
+      "feature": "nearest_metro",
+      "value": "Jumeirah Lakes Towers",
+      "shap": -0.016767563959917405
+     },
+     {
+      "feature": "bedrooms",
+      "value": 2.0,
+      "shap": 0.014648963939676555
+     },
+     {
+      "feature": "zt_n_12m",
+      "value": 12376.0,
+      "shap": 0.012533367350643105
+     },
+     {
+      "feature": "proj_rel_12m",
+      "value": 0.054935641354148856,
+      "shap": 0.012214140562990966
+     },
+     {
+      "feature": "zt_rel_12m",
+      "value": 0.254519730390367,
+      "shap": 0.011674064261162551
+     },
+     {
+      "feature": "area_key",
+      "value": "330",
+      "shap": 0.011264207853840703
+     },
+     {
+      "feature": "bldg_rel_24m",
+      "value": 0.025329676798511613,
+      "shap": 0.01068739307271977
+     }
+    ],
+    "other": 0.028151669838295083
+   }
+  },
+  {
+   "key": "jvc_offplan_small",
+   "title": "Off-plan studio or 1-bed, JVC",
+   "kind": "accurate",
+   "transaction_id": "1-102-2025-69832",
+   "date": "2025-08-01",
+   "area": "Al Barsha South Fourth",
+   "zone": "JVC, JVT & Arjan",
+   "property_type": "apartment",
+   "bedrooms": 1,
+   "is_offplan": true,
+   "area_sqm": 69.1,
+   "price_aed": 1071982,
+   "avm_value_aed": 1014492,
+   "ape": 0.053629257727010896,
+   "gap_pct": 0.05666833866630783,
+   "reference_source": "comps_indexed",
+   "reference_ppsqm_aed": 15463.0,
+   "comps_6m_n": 2965,
+   "calibration": -0.0070171569815295695,
+   "shap": {
+    "bias": 0.011033203987421816,
+    "top": [
+     {
+      "feature": "ln_area",
+      "value": 4.2358441244958005,
+      "shap": 0.026680326367310752
+     },
+     {
+      "feature": "proj_rel_12m",
+      "value": -0.03271423114487426,
+      "shap": -0.020564376631870166
+     },
+     {
+      "feature": "area_key",
+      "value": "441",
+      "shap": -0.013219812993332084
+     },
+     {
+      "feature": "bedrooms",
+      "value": 1.0,
+      "shap": -0.010983072055303245
+     },
+     {
+      "feature": "is_offplan",
+      "value": "true",
+      "shap": -0.010098719432706082
+     },
+     {
+      "feature": "master_project",
+      "value": "Jumeirah Village Circle",
+      "shap": -0.010047177027508979
+     },
+     {
+      "feature": "bldg_rel_24m",
+      "value": -0.03271423114487426,
+      "shap": -0.008781148274898211
+     },
+     {
+      "feature": "fed_funds_prev",
+      "value": 0.0433,
+      "shap": -0.008301606958519843
+     }
+    ],
+    "other": -0.0008506402146490805
+   }
+  },
+  {
+   "key": "dubailand_villa",
+   "title": "Villa in Dubailand's busiest villa area",
+   "kind": "accurate",
+   "transaction_id": "1-11-2025-8705",
+   "date": "2025-03-05",
+   "area": "Al Yelayiss 1",
+   "zone": "Dubailand",
+   "property_type": "villa",
+   "bedrooms": 4,
+   "is_offplan": false,
+   "area_sqm": 297.0,
+   "price_aed": 4000000,
+   "avm_value_aed": 3653079,
+   "ape": 0.08673031505218194,
+   "gap_pct": 0.09496681701105358,
+   "reference_source": "comps_indexed",
+   "reference_ppsqm_aed": 12006.0,
+   "comps_6m_n": 78,
+   "calibration": -0.0070171569815295695,
+   "shap": {
+    "bias": 0.011033203987421816,
+    "top": [
+     {
+      "feature": "ln_area",
+      "value": 5.6937321388027,
+      "shap": -0.1333940261801379
+     },
+     {
+      "feature": "bedrooms",
+      "value": 4.0,
+      "shap": 0.08232669846528837
+     },
+     {
+      "feature": "bldg_rel_24m",
+      "value": null,
+      "shap": 0.0215041289895797
+     },
+     {
+      "feature": "area_key",
+      "value": "506",
+      "shap": 0.01572608093293094
+     },
+     {
+      "feature": "master_project",
+      "value": "Al Aryam",
+      "shap": 0.01569709457518962
+     },
+     {
+      "feature": "zt_rel_12m",
+      "value": 0.18474991029530408,
+      "shap": 0.013993390394349116
+     },
+     {
+      "feature": "zt_n_12m",
+      "value": 10821.0,
+      "shap": 0.010566199226475002
+     },
+     {
+      "feature": "is_offplan",
+      "value": "false",
+      "shap": 0.0066788351892369535
+     }
+    ],
+    "other": -0.012931803862628353
+   }
+  },
+  {
+   "key": "large_miss",
+   "title": "Large miss: Me'Aisem First",
+   "kind": "miss",
+   "transaction_id": "1-102-2026-56228",
+   "date": "2026-06-24",
+   "area": "Me'Aisem First",
+   "zone": "Dubailand",
+   "property_type": "apartment",
+   "bedrooms": 1,
+   "is_offplan": true,
+   "area_sqm": 70.4,
+   "price_aed": 1060000,
+   "avm_value_aed": 1403554,
+   "ape": 0.3241074913426377,
+   "gap_pct": -0.2447743053050735,
+   "reference_source": "comps_indexed",
+   "reference_ppsqm_aed": 13534.0,
+   "comps_6m_n": 619,
+   "calibration": -0.0070171569815295695,
+   "shap": {
+    "bias": 0.011033203987421816,
+    "top": [
+     {
+      "feature": "proj_rel_12m",
+      "value": 0.5424004890509426,
+      "shap": 0.3558464086958254
+     },
+     {
+      "feature": "ln_area",
+      "value": 4.253624919869357,
+      "shap": 0.029546754420298433
+     },
+     {
+      "feature": "bldg_rel_24m",
+      "value": 0.05665069562441083,
+      "shap": 0.024370846020622575
+     },
+     {
+      "feature": "bedrooms",
+      "value": 1.0,
+      "shap": -0.01563878811495421
+     },
+     {
+      "feature": "master_project",
+      "value": "International Media Production Zone",
+      "shap": -0.012680304111441049
+     },
+     {
+      "feature": "zt_n_12m",
+      "value": 40571.0,
+      "shap": 0.008086902769857886
+     },
+     {
+      "feature": "zt_rel_12m",
+      "value": 0.1765838916042668,
+      "shap": 0.00788942534267716
+     },
+     {
+      "feature": "fed_funds_prev",
+      "value": 0.0363,
+      "shap": -0.006083970394504795
+     }
+    ],
+    "other": -0.0073992378443041625
+   },
+   "reasons": [
+    "The sale closed 24% below the AVM value. Against the reference price (AED 13,534/sq m) the sale was at AED 15,057/sq m (+11%) and the AVM at AED 19,937/sq m (+47%).",
+    "The price was +5% from its building's trailing median (AED 14,323/sq m): in line with its building, so the gap comes from how the model valued the unit, not from an unusual price for the building.",
+    "Largest model input: Project median, 12m (vs reference), +72% vs the reference price, which moved the value +0.356 log points (\u2248 +43%).",
+    "A project median pools every building, size and launch phase of the project, so pricier buildings in the same project can lift the value of a unit in a cheaper one."
+   ]
+  }
+ ]
+}

@@ -181,6 +181,19 @@ Phase 4a replaced the Q3 and Q4 previews above with models; the full write-ups a
 - Function: `models.hedonic_index.add_metrics` / `find_episodes` on `ml.fct_price_index`
 - Caveat: **the latest months of a rolling-window index revise as new data arrives.** The most recent periods come from the last 36-month window, which is re-estimated at every refresh, and late registrations still arrive for recent months. Villa months are also thin (as few as 61 sales), so the size of the fall may change; treat it as provisional until a few more months are in.
 
+## Phase 4b: AVM (see the model card)
+
+- **Automated valuation model:** [`avm_model_card.md`](avm_model_card.md). LightGBM on clean residential sales, fitted 2011–2023, tuned on 2024, tested out of time on 275,702 sales from January 2025 to September 2026: **MdAPE 6.8%, 65.2% within ±10%, 88.2% within ±20%**, against 9.9% / 50.3% / 76.1% for six months of comparable sales. No leakage alarm; a pytest proves no feature looks ahead. 6.8% of test sales sit more than 25% from their AVM value (review flags, statistical anomalies only). Worked examples for the website: [`avm_examples.json`](avm_examples.json).
+
+**F4b.1 Moving older comparables forward with the index removes their lag but doesn't beat six fresh months.** Twelve months of a cell's sales, each moved to the valuation date by the real-time index, value 2025–26 sales at MdAPE 10.1% against 9.9% for six months of raw comparables. The adjustment works: raw 12-month comparables under-value by a median 3.3%, adjusted ones by 0.5%. But six months of drift is only ~2%, small next to the ~10% spread between units, and the older sales are less like today's. Indexing edged ahead in rising 2025 (10.20% vs 10.28%) and fell behind at the 2026 turn (10.19% vs 9.66%).
+- Table: [avm_model_card.md](avm_model_card.md#results-on-the-test-set-2025-01-to-the-snapshot); decomposition in docs/05 §8
+- Function: `features.asof_market.indexed_comps`, `features.build.build_features`
+- Caveat: a likely reason, not a proof. The adjustment uses the zone × type index, and no cell-level index was tested.
+
+**F4b.2 For villas, comparables are as good as the model on the median.** On the 20,527 test villas both can value, MdAPE is 8.52% for LightGBM and 8.51% for comparables. LightGBM's edge is in the tails (±20%: 85.2% vs 81.5%) and in covering 1,283 villas with too few comparables. Villa communities repeat a few layouts, so a cell median is already a close match.
+- Table: [avm_model_card.md](avm_model_card.md#by-segment-mdape--10-hit-rate)
+- Caveat: villas are the bedroom-known subset (F3.1) and about one in eight training sales.
+
 ## Limitations and what's out of Phase 3
 
 - **Q9 (developer concentration, HHI)** is deferred. It needs developer names from the DLD projects file, which isn't loaded (docs/08 Phase 0).

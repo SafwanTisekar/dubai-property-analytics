@@ -163,7 +163,7 @@ Write fct_price_index and agg_yield_quarter with the min-n rule.
 - [x] `rpt.price_index`, `rpt.yield_quarter` (tag `post_ml`, `make score`) with dbt tests (base = 100, n ≥ min-n, yield ∈ [0, 1], unique keys); pbi_reader reads them (`tests/test_rpt_access.py`)
 - [x] `reports/price_index.md`, `reports/yields.md`, 8 figures (`make model-reports`), pointer in `reports/findings.md`; docs/02, 04, 05 (§8 decisions), 06 updated
 - [x] Tests: `tests/test_hedonic_index.py` (synthetic market: recovery vs median bias, drifting off-plan premium, min-n, frequency fallback, noise gate, metrics, episodes, DLD alignment; DB checks), `tests/test_yields.py`, config ↔ dbt vars. CI sequence reproduced on a scratch database (fixtures incl. the synthetic DLD index file → `make dbt` → `make train score` → post-build pytest: 48 passed, 1 expected skip)
-- [ ] CI green on the pushed commit (owner pushes)
+- [x] CI green on the pushed commit (owner confirmed, 2026-10-01)
 
 **4a timings** (full data, 16 GB M-series Mac): `make train` ~37 s (index 32 s incl. 18 segments × 14 windows + robustness and validation; yields 4–6 s, all medians in Postgres), `make score` ~3 s, `make model-reports` ~5 s. `make dbt` unchanged apart from the new staging view (10 min 43 s this run, with model runs competing for the database; 7 min 43 s before).
 
@@ -174,14 +174,20 @@ and avm_lgbm.py per docs/05 §1. Evaluate on the out-of-time test set by segment
 vs baseline), run SHAP, and write reports/avm_model_card.md. Stop and investigate if results look too good
 (see CLAUDE.md).
 ```
-**4b status (WIP, 2026-10-01): code, tests and rpt views built; full-data training not yet run to the end.**
-- Done: scratch-DB guard (`db.reports_dir` / `figures_dir` / `artifacts_dir`, `tests/test_output_dirs.py`); `hedonic_index` refactor (full re-fit reproduces all 2,432 index points exactly); `features/` (real-time index vintages, as-of comparables, relative target) with the no-look-ahead proof (`tests/test_avm_features.py`); `models/split.py`, `avm.py`, `avm_eval.py`, `avm_explain.py`, `report_avm.py`; `rpt.avm_score`, `rpt.avm_performance`, `rpt.feature_importance` with dbt tests; Makefile, CI, docs/03, docs/06, docs/05 §8. The CI sequence on a scratch DB with the fixtures is green, and no committed report changed. macOS needs `brew install libomp` for LightGBM.
-- Untuned probe on full data (test 2025+): LightGBM MdAPE 7.7%, ±10% 60.8%; comparables 9.9% / 49.7%; index-adjusted comparables 10.1%; rolling OLS 12.3%.
-- Resume:
-  1. `uv run python -m dubai_property.models.avm --trials 20` (saves `artifacts/avm/best_params.json`, reused by later `make train`).
-  2. `make score model-reports`, then check the model card's claims against the numbers.
-  3. Fill in docs/04 §3 (ml.avm_* rows and counts), the docs/05 §1 "as built" section, this checklist with timings, and a pointer in reports/findings.md; run `make dictionary`.
-  4. `make lint test`, then commit.
+**4b checklist**
+- [x] Scratch-DB guard: reports, figures, artifacts and the data dictionary go to `reports/scratch/<db>/` / `artifacts/scratch/<db>/` when `PG_DB` isn't `dubai_property` (`db.reports_dir`, `tests/test_output_dirs.py`); `hedonic_index` refactor (a full re-fit reproduces all 2,432 index points exactly)
+- [x] `features/`: real-time index vintages (43,177 points), as-of comparables (month-granular: months < M only), relative target; **no-look-ahead pytest** (`tests/test_avm_features.py`: rewriting every sale from month M on leaves month M's features unchanged; a power check shows they move when M−1 changes)
+- [x] `models/split.py` (history 2010 / train 2011–2023 / validation 2024 / test 2025+; 23,519 / 480,489 / 148,360 / 275,702 sales), `avm.py` (comparables, index-adjusted comparables, rolling hedonic OLS, LightGBM + Optuna 20 trials), `avm_eval.py`, `avm_explain.py`
+- [x] Full-data training (owner ran it): **test MdAPE 6.82%, ±10% 65.2%, ±20% 88.2%** vs comparables 9.90% / 50.3% / 76.1%, index-adjusted comparables 10.13%, rolling OLS 12.33%; head to head on 271,974 sales 6.75% vs 9.90%. **No leakage alarm** (thresholds MdAPE < 3%, ±10% > 90%). 2010-start ablation 7.57% vs 7.55%
+- [x] Honest negatives explained (docs/05 §8, findings F4b.1–2): index-adjusted comparables lose to plain ones (decomposition: indexing removes the 12-month lag bias but six fresh months carry little drift); villas tie comparables on MdAPE (8.52% vs 8.51%), LightGBM ahead on ±20%; Optuna flat (7.04–7.33% validation MdAPE across 20 trials)
+- [x] `ml.avm_score` (904,551), `ml.avm_performance` (436), `ml.feature_importance` (35) via COPY; `rpt.avm_score`, `rpt.avm_performance`, `rpt.feature_importance` (tag `post_ml`) with dbt tests; `make score` PASS=38
+- [x] `reports/avm_model_card.md` (summary, split, features, models, results by segment / band / area / month, SHAP, worked examples incl. one large miss chosen by a published rule, review flags, limitations), `reports/avm_examples.json` for the website, 9 figures (`make model-reports`); pointer and findings F4b.1–2 in `reports/findings.md`; docs/03, 04, 05 (§1 as built, §8), 06 updated; `make dictionary`
+- [x] Card claims checked against `artifacts/avm/train.log` and `ml.*`. Large-miss reasons are now derived from the example's own numbers (`avm_explain.miss_reasons`): the earlier text said the price was far from its building's median, when it was within 5% of it and the project median drove the miss
+- [x] Tests: `tests/test_avm_model.py` (metrics, bands, coverage and common subset, min-n, leakage alarm, review flag, example rule, tuning summary, card wording follows the numbers, miss reasons; DB checks on ml.avm_*), `tests/test_avm_features.py`; `make lint test` green
+- [x] Fixed a scratch-guard regression from the WIP commit: `append_ingest_log` dropped a test's redirected `config.INGEST_LOG` folder, so every pytest run left `reports/log.csv` in the repo (`tests/test_output_dirs.py`)
+- [ ] CI green on the pushed commit (owner pushes)
+
+**4b timings** (full data, 16 GB M-series Mac, `make train` AVM step, 1,974 s ≈ 33 min): real-time index vintages 161 s, features 5 s, Optuna 20 trials 1,247 s (10–126 s per trial), final LightGBM fits 172 s, 2010 ablation 185 s, SHAP and worked examples 174 s. With the saved study reused (`artifacts/avm/best_params.json`, same feature signature), `make train` skips tuning (~12 min). `make score` 5 s, `make model-reports` 7 s. macOS needs `brew install libomp` for LightGBM.
 
 **4c: Stress test + forecast**
 ```
@@ -242,7 +248,7 @@ Lighthouse ≥ 90 via Playwright.
 | 1 Ingestion | ✓ | 2026-09-30 | 2026-09-30 | CI green on 00340f6. Bronze loaded and reconciled (15 files: 1,788,150 transactions, 10,538,926 rent lines, FRED Fed Funds + Brent); re-runs are a no-op. Profiles, `phase1_findings.md` and docs/02 §7 done. Deferred: DLD increment download (stub), EIBOR (manual CBUAE file not yet placed). Open: C11 option and CI sample data (docs/04 §6) |
 | 2 dbt | ✓ | 2026-09-30 | 2a, 2b: 2026-09-30 | 2a (silver) done 2026-09-30, CI green on 92b6191: `dbt build` PASS=98 on full data in 4 min 38 s and on the CI fixtures; Phase 1 figures reproduced exactly (reports/dq_report.md §4). 1,267,760 clean market sales, 3,601,613 market-rent lines. All 265 areas zoned. 2b (gold + rpt) done 2026-09-30: `make dbt` 7 min 43 s on full data, 229 dbt nodes pass, gold = silver exactly, `reports/kpi_reconciliation.md` 0 mismatches and the apartment sanity check passes, 10 rpt views (1.77M transaction rows + 392k rent-month cells), data snapshot 2026-09-25. CI green on 5076e27 ([run](https://github.com/SafwanTisekar/dubai-property-analytics/actions/runs/36736326132)) |
 | 3 EDA | ✓ | 2026-09-30 | 2026-09-30 | `make eda` runs the three notebooks in ~20 s on full data. Headlines: 211,007 market sales / AED 668.3bn in 2025; Jan–Aug 2026 −19% on 2025 (ready −37%, off-plan −7%), no sign of registration lag; the 2009 spike is a backlog (93.5% of 2009 off-plan registrations applied for earlier); 28–48% of 2025 ready purchases bank-financed (matched lower bound 27.9%); LTV norm 75% → 80%; 2023 apartment prices +1.2% raw vs +14.5% like-for-like. Register totals match DLD's published 2023–25 figures within ~1% on value. Revised the same day after owner review (mortgage KPI, villa area basis, 2026 momentum). `make dbt` 242 nodes pass. CI green on 831502c ([run](https://github.com/SafwanTisekar/dubai-property-analytics/actions/runs/36759956450)). Q9 deferred |
-| 4 Models | ◐ | 2026-10-01 | 4a: 2026-10-01 | 4a (hedonic index + yields) done: rolling-window hedonic index from 2011, 18 segments, validates vs DLD at 0.93 / 0.92 / 0.91 (timing-aligned YoY); yields 5,919 cells. Owner decisions 2026-10-01: rolling windows, 2011 start, aligned validation headline (docs/05 §8). 4b, 4c to do |
+| 4 Models | ◐ | 2026-10-01 | 4a, 4b: 2026-10-01 | 4a (hedonic index + yields) done, CI green: rolling-window hedonic index from 2011, 18 segments, validates vs DLD at 0.93 / 0.92 / 0.91 (timing-aligned YoY); yields 5,919 cells. Owner decisions 2026-10-01: rolling windows, 2011 start, aligned validation headline (docs/05 §8). 4b (AVM) done: LightGBM test MdAPE 6.8%, ±10% 65.2% vs comparables 9.9% / 50.3%, no leakage alarm, 904,551 sales scored; model card `reports/avm_model_card.md`. 4c to do |
 | 5 Power BI | ☐ | | | |
 | 6 Website | ☐ | | | |
 | 7 Launch | ☐ | | | |
