@@ -136,7 +136,7 @@ An episode runs from a running peak until the index regains it, and counts if th
 | Villas | Dec 2025 | 243.5 | Jul 2026 | 216.4 | -11.1% | 7 | not yet | ongoing |
 
 - The 2014–2019 correction and the 2020 COVID dip are **one episode**: prices hadn't regained the mid-2014 peak when COVID hit, so the trough is in 2020 and recovery only came with the 2021–22 boom.
-- 2008–2011 is outside the published index (it starts in 2011; see *Why 2011*). The stress test's historical replay of 2008–11 drawdowns (docs/05 §4) therefore can't use this index; Phase 4c uses the 2014–20 episode.
+- 2008–2011 is outside the published index (it starts in 2011; see *Why 2011*). The stress test's historical replay of 2008–11 drawdowns (docs/05 §4) therefore can't use this index: Phase 4c uses the shock grid plus a replay of the 2014→2020 episode instead (docs/05 §4). A 2008–10 index from on-time registrations only is logged as a stretch idea (docs/05 §6).
 
 Zones (all episodes found, of which cycles rather than short dips, and the deepest):
 
@@ -228,6 +228,7 @@ Growth = first to last common month (2012-01 to 2024-05).
 
 - **Timing and boom years.** The largest gaps are in 2012, 2014, 2017, 2022, 2023, 2024: turning points and booms, where a 12-month average still lags a monthly index and the exact window DLD uses matters most. Ours turns first; DLD's trailing figure follows a few months later.
 - **Cumulative growth (2012-01 to 2024-05):** Dubai (all residential) +86.6% vs DLD +65.6%; Apartments +80.6% vs DLD +82.6%; Villas +113.2% vs DLD +70.5%. Small YoY gaps add up over 12 years, so levels are not comparable even when growth rates track.
+- **Dubai overall overshoots DLD's "all": +86.6% vs +65.6%** over 2012-01 to 2024-05, a gap of 21 points, even though our apartment series matches DLD's flats (+80.6% vs +82.6%). Ours sits between its own apartment and villa series (+80.6% to +113.2%), as a blend of the two should; DLD's "all" is below both its flat and villa series (+82.6%, +70.5%), which no fixed-weight blend of the two can do. **Likely cause: how DLD weights apartments and villas in "all"** (shifting weights, or a separately estimated basket whose apartment / villa mix changes over time), plus our villa series running above DLD's. Not tuned away: our Dubai index is one regression over both types, weighted by sales, and is published as such.
 - **Villas.** Our villa index uses bedroom-known villas only; DLD's villa basket (and whether it includes plot-sized villa areas) is unknown. Villa months also have far fewer sales (as few as 61, against 877+ for apartments), so the villa series is the noisiest of the three.
 - **Off-plan.** Our index includes off-plan sales with an off-plan control that the windows let drift; if DLD weights or treats off-plan differently, the off-plan-led booms are where the two would differ most.
 - **Month-to-month noise.** MoM correlations are low: our index is unsmoothed (a monthly hedonic estimate with sampling noise), DLD's is smooth. Use YoY or the 3-month average for month-level reading.

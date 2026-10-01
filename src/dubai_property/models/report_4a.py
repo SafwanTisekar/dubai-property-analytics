@@ -582,6 +582,32 @@ def price_report(index: pl.DataFrame, diag: dict, raw: pl.DataFrame, raw_year: p
         f"{LABEL[seg]} {pct(v['metrics']['ours_growth'])} vs DLD {pct(v['metrics']['dld_growth'])}"
         for seg, v in val.items()
     )
+    # Dubai overall vs DLD "all": is either series a blend of its own apartment / villa ones?
+    g = {seg: v["metrics"] for seg, v in val.items()}
+    dubai_overshoot_txt = ""
+    if {"dubai", "apartment", "villa"} <= g.keys():
+        ours = {k: g[k]["ours_growth"] for k in g}
+        dld = {k: g[k]["dld_growth"] for k in g}
+        lo_d, hi_d = sorted((dld["apartment"], dld["villa"]))
+        lo_o, hi_o = sorted((ours["apartment"], ours["villa"]))
+        dld_inside = lo_d <= dld["dubai"] <= hi_d
+        ours_inside = lo_o <= ours["dubai"] <= hi_o
+        dubai_overshoot_txt = (
+            f'- **Dubai overall overshoots DLD\'s "all": {pct(ours["dubai"])} vs '
+            f"{pct(dld['dubai'])}** over 2012-01 to 2024-05, a gap of "
+            f"{100 * (ours['dubai'] - dld['dubai']):.0f} points, even though our apartment "
+            f"series matches DLD's flats ({pct(ours['apartment'])} vs {pct(dld['apartment'])}). "
+            f"Ours {'sits' if ours_inside else 'does not sit'} between its own apartment and "
+            f"villa series ({pct(lo_o)} to {pct(hi_o)}), as a blend of the two should; DLD's "
+            f'"all" {"sits between" if dld_inside else "is below both"} its flat and villa '
+            f"series ({pct(dld['apartment'])}, {pct(dld['villa'])})"
+            + ("" if dld_inside else ", which no fixed-weight blend of the two can do")
+            + '. **Likely cause: how DLD weights apartments and villas in "all"** (shifting '
+            "weights, or a separately estimated basket whose apartment / villa mix changes "
+            "over time), plus our villa series running above DLD's. Not tuned away: our "
+            "Dubai index is one regression over both types, weighted by sales, and is "
+            "published as such."
+        )
     if main_ep:
         ep_txt = (
             f"2. **One long down-cycle.** The ≥10% rule finds the main Dubai episode from a "
@@ -778,7 +804,9 @@ def price_report(index: pl.DataFrame, diag: dict, raw: pl.DataFrame, raw_year: p
         "only came with the 2021–22 boom.",
         "- 2008–2011 is outside the published index (it starts in 2011; see *Why 2011*). The "
         "stress test's historical replay of 2008–11 drawdowns (docs/05 §4) therefore can't "
-        "use this index; Phase 4c uses the 2014–20 episode.",
+        "use this index: Phase 4c uses the shock grid plus a replay of the 2014→2020 episode "
+        "instead (docs/05 §4). A 2008–10 index from on-time registrations only is logged as a "
+        "stretch idea (docs/05 §6).",
         "",
         "Zones (all episodes found, of which cycles rather than short dips, and the deepest):",
         "",
@@ -873,6 +901,7 @@ def price_report(index: pl.DataFrame, diag: dict, raw: pl.DataFrame, raw_year: p
         "Ours turns first; DLD's trailing figure follows a few months later.",
         f"- **Cumulative growth (2012-01 to 2024-05):** {growth_txt}. Small YoY gaps add up "
         "over 12 years, so levels are not comparable even when growth rates track.",
+        dubai_overshoot_txt,
         "- **Villas.** Our villa index uses bedroom-known villas only; DLD's villa basket (and "
         "whether it includes plot-sized villa areas) is unknown. Villa months also have far "
         f"fewer sales (as few as {num(series(index, 'villa')['n_obs'].min(), 0)}, against "

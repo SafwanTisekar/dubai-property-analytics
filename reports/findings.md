@@ -171,6 +171,16 @@ Phase 4a replaced the Q3 and Q4 previews above with models; the full write-ups a
 - **Hedonic price index:** [`price_index.md`](price_index.md). Rolling-window time-dummy index from January 2011 for Dubai, apartments, villas and 15 zone × type segments, Jan 2019 = 100; validated against DLD's official index (timing-aligned YoY correlation 0.93 / 0.92 / 0.91); 2014→2020 is one drawdown episode; the raw median misreads growth both ways (2022 +30% raw vs +13% like for like, 2023 +1% vs +17%).
 - **Gross rental yields:** [`yields.md`](yields.md). New single-line rents vs ready sale prices by area / zone × type × bedrooms × quarter with min-n on both sides: apartments 7.2%, villas 5.2% (Q3 2025–Q2 2026); yields fell from 2016–19 to a 2021 low and partly recovered. It supersedes the Q4 preview.
 
+**F4a.1 The off-plan premium is not a constant: it rose from ~6% to ~38%.** In the rolling-window hedonic fits for apartments, the off-plan coefficient (per sq m, against a ready unit with the same area, bedrooms and size) is **+0.06 log points in the 2011–13 window, +0.06 to +0.08 through 2015–17, then climbs to +0.24 (2018–20), +0.29 (2019–21) and +0.32 (2023–25)**, i.e. a premium of about +6% → +38%. One pooled 2011–2026 fit would apply a single +0.27 (+30%) to every year; that is why the published index uses rolling windows (owner decision, 2026-10-01).
+- Chart: [price_index_robustness.png](figures/price_index_robustness.png) (right panel); table in [price_index.md](price_index.md#robustness-rolling-windows-vs-one-pooled-fit)
+- Function: `models.hedonic_index.rolling_window_index` (window coefficients in `artifacts/hedonic_index/diagnostics.json`)
+- Caveat: a premium per sq m, not per unit, and only for what the data controls (area, bedrooms, size, parking). New off-plan stock also differs in quality and amenities the data doesn't record, so the coefficient carries those too. A trial run that started in 2008 found +0.29 for 2008–10, but those years are dominated by backlog registrations (F1.3) and are not in the published index.
+
+**F4a.2 Villa prices fell 11% from their December 2025 peak to July 2026.** The villa index (bedroom-known villas, monthly) peaked at 243.5 in December 2025 and fell to 216.4 in July 2026, a −11.1% drawdown, the first ≥ 10% villa episode since 2015–20. It stood at 223.6 in September 2026 (−8% from the peak; partial month). Apartments and Dubai overall are flat on a year earlier (+0.1%, +0.8%). This fits the 2026 slowdown led by ready homes (F1.5).
+- Chart: [price_index_levels.png](figures/price_index_levels.png); episodes table in [price_index.md](price_index.md#peak-to-trough-episodes)
+- Function: `models.hedonic_index.add_metrics` / `find_episodes` on `ml.fct_price_index`
+- Caveat: **the latest months of a rolling-window index revise as new data arrives.** The most recent periods come from the last 36-month window, which is re-estimated at every refresh, and late registrations still arrive for recent months. Villa months are also thin (as few as 61 sales), so the size of the fall may change; treat it as provisional until a few more months are in.
+
 ## Limitations and what's out of Phase 3
 
 - **Q9 (developer concentration, HHI)** is deferred. It needs developer names from the DLD projects file, which isn't loaded (docs/08 Phase 0).
