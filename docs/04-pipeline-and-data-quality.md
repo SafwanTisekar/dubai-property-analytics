@@ -88,7 +88,10 @@ erDiagram
 | `dim_procedure` | (trans_group, procedure_id) | 58 | procedure_key (stable, in the seed), category, is_market_sale, is_new_mortgage, is_portfolio_mortgage |
 | `dim_project` | DLD project | 3,421 (incl. Unknown) | project_name, master_project (most frequent), first/last txn date. No developer until the DLD projects file is loaded |
 | `rpt.*` views | One per table Power BI needs | see docs/08 | Title Case names, AED rounded to whole dirhams (bigint), no `_ar`, no individual C-flags, no text ids, medians only where n ≥ 20. The **only** objects Power BI reads |
-| Phase 4 (`post_ml`) | | | `fct_price_index`, `agg_yield_quarter`, `ml_avm_performance`, `ml_feature_importance`, `ml_stress_grid`, `ml_forecast`; AVM columns on `fct_transaction` |
+| `ml.fct_price_index` (Phase 4a) | Segment × published period | 2,432 | Written by `models/hedonic_index.py` (COPY). segment_id / level / property_type_key / zone, frequency, period_start, n_obs (≥ 20), log_coef, index_value (Jan 2019 = 100), index_3m, mom, yoy, vol_12m, running_peak, drawdown, episode_id, is_partial_period, model_version. 18 segments: Dubai, apartments, villas + 15 zone × type |
+| `ml.agg_yield_quarter` (Phase 4a) | Quarter × area or zone × property type × bedrooms | 5,919 | Written by `models/yields.py` (COPY). n_rent, n_sale (both ≥ 20), median_annual_rent_aed, median_price_aed, gross_yield, is_outside_sanity, areas_rolled_up (zone rows), is_partial_period, model_version |
+| `rpt.price_index`, `rpt.yield_quarter` | Views over the two ml tables | | dbt tag `post_ml` (built by `make score`), filtered to the model version in dbt vars |
+| Phase 4b/4c (`post_ml`) | | | `ml_avm_performance`, `ml_feature_importance`, `ml_stress_grid`, `ml_forecast`; AVM columns on `fct_transaction` |
 
 **Area-weighted AED per sq m is per property class.** Σ AED / Σ sq m across classes mixes land, buildings and units, so the sums sit on the property-type key and Power BI computes the ratio within a class. The headline KPI (`reports/kpi_reconciliation.md`) is residential apartments + villas / townhouses; a pytest checks that for residential apartments it stays within ±40% of the median in every year from 2010.
 
@@ -106,13 +109,13 @@ erDiagram
 | rpt access (pytest) | `tests/test_rpt_access.py`: rpt holds exactly the Power BI views; pbi_reader reads all of them and nothing in any other schema; Title Case names only |
 | Volume anomalies | Monthly sales per area within ±5σ of the rolling mean (warn, not fail) |
 | Rent de-duplication | Σ annual rent after allocation ≤ raw Σ; allocations sum to each contract's amount; line numbers 1..n (`dbt/tests/rules/c11_*`) |
-| Yield sanity | Gross yields between 2% and 15% for segments with n ≥ 20 (warn) |
-| Model outputs | avm_value > 0; stress shares ∈ [0, 1] |
+| Yield sanity | Gross yields between 2% and 15% for segments with n ≥ 20: logged warning, `is_outside_sanity` flag (`models/yields.py`); the dbt test only enforces [0, 1] |
+| Model outputs | Price index: base period = 100 in every segment (`dbt/tests/models/price_index_base_period_is_100.sql`), n ≥ min_n, drawdown ≤ 0, unique segment × period; yields: n ≥ min_n on both sides, yield ∈ [0, 1] (rpt YAML + `tests/test_hedonic_index.py`, `tests/test_yields.py`). Later: avm_value > 0; stress shares ∈ [0, 1] |
 | Leakage (pytest) | AVM features use only data available at transaction time (docs/05) |
 
 ## 5. Orchestration
 
-The `Makefile` runs the steps in order: `db (once) → download → bronze → dbt build (pre-ML) → train → score → dbt build --select tag:post_ml (incl. rpt views) → test`. Incremental runs use `make update`, which pulls the latest month and rebuilds.
+The `Makefile` runs the steps in order: `db (once) → download → bronze → dbt build (pre-ML: make dbt excludes tag:post_ml) → train (models write ml.* with COPY) → score (dbt build --select tag:post_ml: the rpt views over ml.*) → test`; `make model-reports` writes `reports/price_index.md` and `reports/yields.md`. Incremental runs use `make update`, which pulls the latest month and rebuilds.
 
 ## 6. Decisions
 

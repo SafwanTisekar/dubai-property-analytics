@@ -152,3 +152,43 @@ models:
                 max_value: 0.25
       - name: brent_usd
         description: Mean Brent price over the month's trading days, USD per barrel.
+
+  - name: stg_dld_price_index
+    description: >
+      DLD's official Residential Sale Index in long form (month x segment x frequency).
+      Validation only: the hedonic index is compared with it on growth rates (docs/05 §2).
+      index_ratio is 1.000 at the base period (Jan 2012 for the monthly series);
+      typical_price_aed is DLD's AED price level of a typical unit. The DLD file ends in
+      May 2024 although it was loaded in 2026.
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns: [segment, frequency, month_start]
+    columns:
+      - name: month_start
+        description: First day of the month; quarterly values on the quarter's last month, yearly on December.
+        tests: [not_null]
+      - name: segment
+        description: all, flat or villa (DLD's labels).
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [all, flat, villa]
+      - name: frequency
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [monthly, quarterly, yearly]
+      - name: index_ratio
+        description: DLD index as a ratio to the base period (not x100).
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              arguments:
+                min_value: 0.1
+                max_value: 10
+      - name: index_2012_100
+        description: index_ratio x 100 (base 2012 = 100), for charts.
+      - name: typical_price_aed
+        description: DLD's "price index", an AED price level of a typical unit (not used for validation).

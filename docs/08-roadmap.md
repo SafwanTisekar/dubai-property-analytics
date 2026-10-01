@@ -152,6 +152,21 @@ Implement hedonic_index.py and yields.py per docs/05 §2–3. Validate the index
 Residential Price Index (I'll place it in data/raw/dld/price_index/) and write reports/price_index.md.
 Write fct_price_index and agg_yield_quarter with the min-n rule.
 ```
+
+**4a checklist**
+- [x] DLD "Residential Properties Sale Index" (data.dubai) profiled and loaded (`make bronze BRONZE_FLAGS="--dataset price_index"`, owner-approved; 159 rows, only `bronze.dld_price_index` added, 16/16 files reconcile), `stg_dld_price_index` (long form, base-month test), README.txt note. Its data ends in **May 2024** (the 2026-09-01 stamp is the load time)
+- [x] `models/hedonic_index.py`: time-dummy hedonic regression on clean residential sales (villas: bedroom-known only), **rolling-window (36 months, step 12) chained index** from **Jan 2011** (owner decisions after the material robustness gap and the 2009–10 backlog finding, docs/05 §8). 18 segments published (Dubai, apartments, villas monthly; 15 zone × type, 8 monthly + 7 quarterly), Jan 2019 = 100, min-n per period, noise gate; YoY, MoM, 3-month mean, 12-month volatility, drawdown, episodes → `ml.fct_price_index` (2,432 rows, COPY)
+- [x] Robustness: pooled vs rolling windows (material: up to −11% level, +11 pp YoY on apartments; off-plan premium +6% → +38%), reported in `reports/price_index.md`
+- [x] Validation vs DLD (2012–2024-05): timing-aligned YoY r **0.93 Dubai, 0.92 apartments, 0.91 villas** (target ≥ 0.9 met); raw month-for-month 0.72 / 0.70 / 0.68, ours leads by ~6 months; divergences explained; mix-shift chart and table
+- [x] Episodes as found: one 2014→2020 Dubai episode (−24%, recovered Nov 2022) plus a 2011 dip; villas fell 11% from their Dec 2025 peak to Jul 2026 (episode ongoing, −8% in Sep 2026)
+- [x] `models/yields.py`: new single-line rents (C11) vs clean ready sales, area × type × bedrooms × quarter, zone roll-up with recomputed medians, n ≥ 20 both sides → `ml.agg_yield_quarter` (5,919 cells; 8 outside 2–15%, flagged). Apartments 7.2% / villas 5.2% gross (Q3 2025–Q2 2026)
+- [x] `rpt.price_index`, `rpt.yield_quarter` (tag `post_ml`, `make score`) with dbt tests (base = 100, n ≥ min-n, yield ∈ [0, 1], unique keys); pbi_reader reads them (`tests/test_rpt_access.py`)
+- [x] `reports/price_index.md`, `reports/yields.md`, 8 figures (`make model-reports`), pointer in `reports/findings.md`; docs/02, 04, 05 (§8 decisions), 06 updated
+- [x] Tests: `tests/test_hedonic_index.py` (synthetic market: recovery vs median bias, drifting off-plan premium, min-n, frequency fallback, noise gate, metrics, episodes, DLD alignment; DB checks), `tests/test_yields.py`, config ↔ dbt vars. CI sequence reproduced on a scratch database (fixtures incl. the synthetic DLD index file → `make dbt` → `make train score` → post-build pytest: 48 passed, 1 expected skip)
+- [ ] CI green on the pushed commit (owner pushes)
+
+**4a timings** (full data, 16 GB M-series Mac): `make train` ~37 s (index 32 s incl. 18 segments × 14 windows + robustness and validation; yields 4–6 s, all medians in Postgres), `make score` ~3 s, `make model-reports` ~5 s. `make dbt` unchanged apart from the new staging view (10 min 43 s this run, with model runs competing for the database; 7 min 43 s before).
+
 **4b: AVM**
 ```
 Implement features (as-of lag features, no look-ahead, with a pytest proving it), split.py, avm_baseline.py
@@ -218,7 +233,7 @@ Lighthouse ≥ 90 via Playwright.
 | 1 Ingestion | ✓ | 2026-09-30 | 2026-09-30 | CI green on 00340f6. Bronze loaded and reconciled (15 files: 1,788,150 transactions, 10,538,926 rent lines, FRED Fed Funds + Brent); re-runs are a no-op. Profiles, `phase1_findings.md` and docs/02 §7 done. Deferred: DLD increment download (stub), EIBOR (manual CBUAE file not yet placed). Open: C11 option and CI sample data (docs/04 §6) |
 | 2 dbt | ✓ | 2026-09-30 | 2a, 2b: 2026-09-30 | 2a (silver) done 2026-09-30, CI green on 92b6191: `dbt build` PASS=98 on full data in 4 min 38 s and on the CI fixtures; Phase 1 figures reproduced exactly (reports/dq_report.md §4). 1,267,760 clean market sales, 3,601,613 market-rent lines. All 265 areas zoned. 2b (gold + rpt) done 2026-09-30: `make dbt` 7 min 43 s on full data, 229 dbt nodes pass, gold = silver exactly, `reports/kpi_reconciliation.md` 0 mismatches and the apartment sanity check passes, 10 rpt views (1.77M transaction rows + 392k rent-month cells), data snapshot 2026-09-25. CI green on 5076e27 ([run](https://github.com/SafwanTisekar/dubai-property-analytics/actions/runs/36736326132)) |
 | 3 EDA | ✓ | 2026-09-30 | 2026-09-30 | `make eda` runs the three notebooks in ~20 s on full data. Headlines: 211,007 market sales / AED 668.3bn in 2025; Jan–Aug 2026 −19% on 2025 (ready −37%, off-plan −7%), no sign of registration lag; the 2009 spike is a backlog (93.5% of 2009 off-plan registrations applied for earlier); 28–48% of 2025 ready purchases bank-financed (matched lower bound 27.9%); LTV norm 75% → 80%; 2023 apartment prices +1.2% raw vs +14.5% like-for-like. Register totals match DLD's published 2023–25 figures within ~1% on value. Revised the same day after owner review (mortgage KPI, villa area basis, 2026 momentum). `make dbt` 242 nodes pass. CI green on 831502c ([run](https://github.com/SafwanTisekar/dubai-property-analytics/actions/runs/36759956450)). Q9 deferred |
-| 4 Models | ☐ | | | |
+| 4 Models | ◐ | 2026-10-01 | 4a: 2026-10-01 | 4a (hedonic index + yields) done: rolling-window hedonic index from 2011, 18 segments, validates vs DLD at 0.93 / 0.92 / 0.91 (timing-aligned YoY); yields 5,919 cells. Owner decisions 2026-10-01: rolling windows, 2011 start, aligned validation headline (docs/05 §8). 4b, 4c to do |
 | 5 Power BI | ☐ | | | |
 | 6 Website | ☐ | | | |
 | 7 Launch | ☐ | | | |

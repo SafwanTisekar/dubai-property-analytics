@@ -28,3 +28,60 @@ models:
     description: rpt.rates_monthly. Fed Funds, Brent and (later) EIBOR by month.
   - name: rpt_report_info
     description: rpt.report_info. One row with the data-as-of date, min-n and attribution.
+
+  # Phase 4 (tag post_ml): views over the ml.* tables, built by make score after make train.
+  - name: rpt_price_index
+    description: >
+      rpt.price_index. Hedonic price index per segment (Dubai, apartments, villas, zones
+      passing min-n) and period, Jan 2019 = 100, with YoY, volatility and drawdown.
+    config:
+      tags: [post_ml]
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns: ['"Segment Key"', '"Period Start"']
+    columns:
+      - name: '"Segment Key"'
+        tests: [not_null]
+      - name: '"Period Start"'
+        tests: [not_null]
+      - name: '"Sales"'
+        description: Sales in the period; never below min_n (unpublished periods are absent).
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              arguments:
+                min_value: "{{ var('min_n') }}"
+      - name: '"Index Value"'
+        tests: [not_null]
+      - name: '"Drawdown"'
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              arguments:
+                min_value: -1
+                max_value: 0
+  - name: rpt_yield_quarter
+    description: >
+      rpt.yield_quarter. Gross yields by area / zone x property type x bedrooms x quarter,
+      with both sample sizes; published cells only.
+    config:
+      tags: [post_ml]
+    columns:
+      - name: '"Rent Contracts"'
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              arguments:
+                min_value: "{{ var('min_n') }}"
+      - name: '"Sales"'
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              arguments:
+                min_value: "{{ var('min_n') }}"
+      - name: '"Gross Yield"'
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_between:
+              arguments:
+                min_value: 0
+                max_value: 1
+      - name: '"Zone"'
+        tests: [not_null]

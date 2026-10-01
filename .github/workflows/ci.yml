@@ -74,9 +74,17 @@ jobs:
       - name: dbt build (silver, gold, rpt) + DQ report, KPI check, dictionary on the fixtures
         run: make dbt
 
+      # Phase 4 on the fixtures: the models run end to end and write ml.*, and the post_ml
+      # rpt views build over them. ~2k lines leave almost every segment under min-n, so the
+      # tables are mostly empty; this proves the plumbing, not the numbers.
+      - name: Models (make train) + post_ml views (make score) on the fixtures
+        run: make train score
+
       # The first pytest run happens before gold exists, so these skip there. Re-run them
-      # now: pbi_reader reads rpt and nothing else, every KPI reconciles silver -> rpt, and
+      # now: pbi_reader reads rpt and nothing else, every KPI reconciles silver -> rpt,
       # every Phase 3 analysis query runs on gold (the notebooks themselves are not run in
-      # CI: fixture numbers mean nothing).
-      - name: rpt access + KPI reconciliation + analysis queries (after the build)
-        run: uv run pytest tests/test_rpt_access.py tests/test_kpi_reconciliation.py tests/test_analysis.py
+      # CI: fixture numbers mean nothing), and the ml tables keep the publishing rules.
+      - name: rpt access + KPI reconciliation + analysis queries + model outputs (after the build)
+        run: >-
+          uv run pytest tests/test_rpt_access.py tests/test_kpi_reconciliation.py
+          tests/test_analysis.py tests/test_hedonic_index.py tests/test_yields.py

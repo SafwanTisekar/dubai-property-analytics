@@ -1,6 +1,6 @@
 # Data dictionary
 
-Generated 2026-09-30 20:30 UTC by `quality/data_dictionary.py` from the dbt manifest (descriptions, tests) and the database catalogue (columns, types). Regenerate with `make dictionary` (after `make dbt`). Rules C1-C22 are in docs/04 §2; the star schema in docs/04 §3. Bronze is raw text (docs/04 §1) and not listed.
+Generated 2026-10-01 09:40 UTC by `quality/data_dictionary.py` from the dbt manifest (descriptions, tests) and the database catalogue (columns, types). Regenerate with `make dictionary` (after `make dbt`). Rules C1-C22 are in docs/04 §2; the star schema in docs/04 §3. Bronze is raw text (docs/04 §1) and not listed.
 
 ## Silver: seeds, staging views and intermediate tables (typed, cleaned, flagged)
 
@@ -23,6 +23,7 @@ Generated 2026-09-30 20:30 UTC by `quality/data_dictionary.py` from the dbt mani
 | [`silver.int_purchase_mortgage_pairs`](#silverint_purchase_mortgage_pairs) | table | Purchase mortgages: a Mortgage Registration (Delayed Mortgage) and a Sell (Delayed Sell) of the same unit on the same day, keyed on date, area, building, project, sq m, rooms, type and sub-type, unique on both sides, inferred portfolio lines (C16) excluded. One row per pair. The numerator of the purchase-mortgage share of ready sales (docs/01 §4) and the source of observed LTVs. A lower bound: loans registered on another day or keyed differently don't match. |
 | [`silver.int_rent_contracts`](#silverint_rent_contracts) | table | Ejari contract lines (~10.5M) with the contract-level rent rules: C11 allocation, C12 annualisation, C13 new vs renewal, C14 outliers, C18 dates, C20 non-market types, C21 placeholder areas, C22 bedrooms. Nothing is removed. is_market_rent is the population for market rents and yields: new, single-line, market property type, inside the band, with usable dates. Never exposed to Power BI in detail. |
 | [`silver.int_transaction_deal_groups`](#silverint_transaction_deal_groups) | table | C16 at transaction-line grain (all groups). Infers portfolio deals that repeat one deal value on every unit line (the Phase 1 REPEATED_VALUE_GROUP rule) and gives each line a deal_group_id and an AED value counted once per deal. Contiguous same-value batches of similar-size units are flagged separately and not corrected. |
+| [`silver.stg_dld_price_index`](#silverstg_dld_price_index) | view | DLD's official Residential Sale Index in long form (month x segment x frequency). Validation only: the hedonic index is compared with it on growth rates (docs/05 §2). index_ratio is 1.000 at the base period (Jan 2012 for the monthly series); typical_price_aed is DLD's AED price level of a typical unit. The DLD file ends in May 2024 although it was loaded in 2026. |
 | [`silver.stg_rates`](#silverstg_rates) | view | Monthly rate drivers: Fed Funds (monthly, as a decimal) and Brent (monthly mean of daily prices, USD). EIBOR is added when the CBUAE file is loaded. |
 | [`silver.stg_rent_contracts`](#silverstg_rent_contracts) | view | Ejari contract lines, typed and decoded (view over ~10.5M rows). C1 keeps the latest snapshot of each (contract_id, line_number). Contract-level rules live in int_rent_contracts, which is the only model that should select from this view; its tests are there too, so the de-duplication window over 10.5M rows isn't recomputed for each test. |
 | [`silver.stg_transactions`](#silverstg_transactions) | view | DLD transaction lines, typed and decoded (view). C1 keeps the latest snapshot of each transaction_id, the only step in silver that removes rows. C2, C7, C8 and C9 attach the procedure, rooms and area seeds; C18 and C19 fix or flag dates and labels. Units: sq m and AED. Arabic columns are dropped. |
@@ -408,6 +409,22 @@ C16 at transaction-line grain (all groups). Infers portfolio deals that repeat o
 | `is_similar_size_batch` | boolean | C16 (kept visible, not corrected). Same batch pattern but unit sizes within 10%: most likely identical units at identical prices, so every line keeps its value. | not_null |
 | `batch_group_id` | text | Lead transaction_id of a similar-size batch (NULL otherwise). |  |
 | `batch_group_lines` | bigint |  |  |
+
+<a id="silverstg_dld_price_index"></a>
+### `silver.stg_dld_price_index`
+
+DLD's official Residential Sale Index in long form (month x segment x frequency). Validation only: the hedonic index is compared with it on growth rates (docs/05 §2). index_ratio is 1.000 at the base period (Jan 2012 for the monthly series); typical_price_aed is DLD's AED price level of a typical unit. The DLD file ends in May 2024 although it was loaded in 2026.
+
+| Column | Type | Description | Tests |
+|---|---|---|---|
+| `month_start` | date | First day of the month; quarterly values on the quarter's last month, yearly on December. | not_null |
+| `segment` | text | all, flat or villa (DLD's labels). | accepted_values, not_null |
+| `frequency` | text |  | accepted_values, not_null |
+| `index_ratio` | numeric | DLD index as a ratio to the base period (not x100). | between |
+| `index_2012_100` | numeric | index_ratio x 100 (base 2012 = 100), for charts. |  |
+| `typical_price_aed` | numeric | DLD's "price index", an AED price level of a typical unit (not used for validation). |  |
+| `load_timestamp` | timestamp without time zone |  |  |
+| `snapshot_date` | date |  |  |
 
 <a id="silverstg_rates"></a>
 ### `silver.stg_rates`
@@ -822,10 +839,12 @@ Every DLD transaction line (Sales, Gifts, Mortgages; 1.79M) with dimension keys 
 | [`rpt.dim_procedure`](#rptdim_procedure) | view | rpt.dim_procedure. DLD procedures and categories. |
 | [`rpt.dim_project`](#rptdim_project) | view | rpt.dim_project. DLD projects (no developer yet). |
 | [`rpt.dim_property_type`](#rptdim_property_type) | view | rpt.dim_property_type. Conformed usage group x property class. |
+| [`rpt.price_index`](#rptprice_index) | view | rpt.price_index. Hedonic price index per segment (Dubai, apartments, villas, zones passing min-n) and period, Jan 2019 = 100, with YoY, volatility and drawdown. |
 | [`rpt.rates_monthly`](#rptrates_monthly) | view | rpt.rates_monthly. Fed Funds, Brent and (later) EIBOR by month. |
 | [`rpt.rent_month`](#rptrent_month) | view | rpt.rent_month. Monthly rent aggregate; the only rent table in Power BI. |
 | [`rpt.report_info`](#rptreport_info) | view | rpt.report_info. One row with the data-as-of date, min-n and attribution. |
 | [`rpt.transactions`](#rpttransactions) | view | rpt.transactions. Transaction lines in the reporting scope, without text ids or the individual quality flags. Sum "AED Counted Once" for values. |
+| [`rpt.yield_quarter`](#rptyield_quarter) | view | rpt.yield_quarter. Gross yields by area / zone x property type x bedrooms x quarter, with both sample sizes; published cells only. |
 
 <a id="rptarea_month"></a>
 ### `rpt.area_month`
@@ -948,6 +967,34 @@ rpt.dim_property_type. Conformed usage group x property class.
 | `Property Type` | text |  |  |
 | `Property Class Description` | text |  |  |
 
+<a id="rptprice_index"></a>
+### `rpt.price_index`
+
+dbt model `rpt_price_index`.
+
+rpt.price_index. Hedonic price index per segment (Dubai, apartments, villas, zones passing min-n) and period, Jan 2019 = 100, with YoY, volatility and drawdown.
+
+| Column | Type | Description | Tests |
+|---|---|---|---|
+| `Segment Key` | text |  |  |
+| `Segment` | text |  |  |
+| `Segment Level` | text |  |  |
+| `Property Type Key` | integer |  |  |
+| `Zone` | text |  |  |
+| `Frequency` | text |  |  |
+| `Period Start` | date |  |  |
+| `Sales` | integer |  |  |
+| `Index Value` | numeric |  |  |
+| `Index 3M Average` | numeric |  |  |
+| `Change on Previous Period` | numeric |  |  |
+| `YoY Change` | numeric |  |  |
+| `Volatility 12M` | numeric |  |  |
+| `Running Peak` | numeric |  |  |
+| `Drawdown` | numeric |  |  |
+| `Drawdown Episode` | integer |  |  |
+| `Is Partial Period` | boolean |  |  |
+| `Model Version` | text |  |  |
+
 <a id="rptrates_monthly"></a>
 ### `rpt.rates_monthly`
 
@@ -1045,3 +1092,27 @@ rpt.transactions. Transaction lines in the reporting scope, without text ids or 
 | `Loan Amount AED` | bigint |  |  |
 | `Portfolio Mortgage Value AED` | bigint |  |  |
 | `Purchase LTV` | numeric |  |  |
+
+<a id="rptyield_quarter"></a>
+### `rpt.yield_quarter`
+
+dbt model `rpt_yield_quarter`.
+
+rpt.yield_quarter. Gross yields by area / zone x property type x bedrooms x quarter, with both sample sizes; published cells only.
+
+| Column | Type | Description | Tests |
+|---|---|---|---|
+| `Quarter Start` | date |  |  |
+| `Geo Level` | text |  |  |
+| `Zone` | text |  |  |
+| `Area Key` | integer |  |  |
+| `Property Type Key` | integer |  |  |
+| `Bedrooms` | integer |  |  |
+| `Rent Contracts` | integer |  |  |
+| `Sales` | integer |  |  |
+| `Median Annual Rent AED` | bigint |  |  |
+| `Median Price AED` | bigint |  |  |
+| `Gross Yield` | numeric |  |  |
+| `Is Outside Sanity Band` | boolean |  |  |
+| `Areas Rolled Up` | integer |  |  |
+| `Is Partial Period` | boolean |  |  |

@@ -95,6 +95,16 @@ DATASETS: tuple[Dataset, ...] = (
             "overlapped by the bulk snapshot, so skipped for v1 (docs/04 Decisions)"
         ),
     ),
+    Dataset(
+        "price_index",
+        "dld/price_index",
+        "dld_price_index",
+        "bulk",
+        note=(
+            "DLD Residential Sale Index (data.dubai): wide, one row per month, all / flat / "
+            "villa. Used only to validate the hedonic index (docs/05 §2)"
+        ),
+    ),
     Dataset("projects", "dld/projects", "dld_projects", "bulk", note="optional for v1"),
     Dataset("buildings", "dld/buildings", "dld_buildings", "bulk", note="optional for v1"),
     Dataset("units", "dld/units", "dld_units", "bulk", note="optional for v1"),
@@ -140,6 +150,44 @@ RESIDENTIAL_APARTMENT_KEY = 101
 # Hedonic price index base (docs/01 §4): Jan 2019 = 100.
 INDEX_BASE_MONTH = date(2019, 1, 1)
 INDEX_BASE_VALUE = 100.0
+
+# --- Hedonic price index (docs/05 §2, decisions in §8) --------------------------------
+# Every index starts in Jan 2011 (owner, 2026-10-01). In 2009-10, 30-50% of clean sales were
+# registered after their application year (the Law 13/2008 backlog), so their prices date
+# from the earlier boom and the index showed a rise through the 2009 crash. DLD's own index
+# starts in 2011-03.
+HEDONIC_START = date(2011, 1, 1)
+# A segment is published monthly if this share of its months pass min-n, else quarterly if
+# this share of its quarters pass, else not at all.
+PERIOD_COVERAGE_MIN = 0.90
+# Noise gate: a segment whose period-on-period log changes have a standard deviation above
+# this is dominated by sampling noise (its base period, and so every level, is unreliable)
+# and isn't published. Set on 2026-10-01 after the first full run: every segment was <= 0.09
+# except JVC villas (quarterly, 0.16, one 69% quarter-on-quarter jump).
+NOISE_MAX_SD = 0.10
+# Peak-to-trough episodes: a fall of at least 10% from the running peak. Smaller dips are
+# within the noise of a monthly hedonic index.
+EPISODE_MIN_DRAWDOWN = 0.10
+# Published method (owner, 2026-10-01): rolling-window time dummy (RTD), 36-month windows
+# stepped 12 months, chained on the overlapping periods. One pooled fit over the whole span
+# is kept as the robustness comparison; a gap above these limits is called "material".
+RTD_WINDOW_MONTHS = 36
+RTD_STEP_MONTHS = 12
+RTD_MATERIAL_LEVEL_GAP = 0.05
+RTD_MATERIAL_YOY_GAP = 0.03
+# DLD's monthly index behaves like a trailing 12-month average (ours leads it by ~6
+# months), so validation also compares our index averaged over the same 12 months.
+DLD_ALIGN_MONTHS = 12
+# DLD's official index (validation only): monthly ratio, Jan 2012 = 1.000.
+DLD_INDEX_BASE_MONTH = date(2012, 1, 1)
+HEDONIC_MODEL_VERSION = "hedonic-rtd-v1"
+
+# --- Rental yields (docs/05 §3) --------------------------------------------------------
+# docs/04 §4 "yield sanity": a gross yield outside 2-15% for a segment with n >= 20 is a
+# warning sign (a bedroom label or a price that doesn't match the rent's unit).
+YIELD_SANITY = (0.02, 0.15)
+YIELD_START = date(2010, 1, 1)
+YIELD_MODEL_VERSION = "yield-gross-v1"
 
 # --- AVM leakage alarms (CLAUDE.md) ---------------------------------------------------
 # Real-world AVMs rarely beat ~5-8% MdAPE. Results better than this mean: investigate.

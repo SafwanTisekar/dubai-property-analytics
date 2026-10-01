@@ -22,10 +22,12 @@ EXPECTED_VIEWS = {
     "dim_procedure",
     "dim_project",
     "dim_property_type",
+    "price_index",
     "rates_monthly",
     "rent_month",
     "report_info",
     "transactions",
+    "yield_quarter",
 }
 
 

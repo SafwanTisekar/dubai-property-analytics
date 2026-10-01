@@ -23,3 +23,28 @@ sources:
         description: FRED FEDFUNDS, monthly effective federal funds rate in percent.
       - name: rates_brent
         description: FRED DCOILBRENTEU, daily Brent crude in USD per barrel ('' on non-trading days).
+      - name: dld_price_index
+        description: >
+          DLD Residential Sale Index (data.dubai), wide: one row per month with all / flat /
+          villa x monthly / quarterly / yearly x index / price_index columns. Validation
+          only. Empty cells are unquoted, so they load as NULL rather than ''.
+        columns:
+          - name: first_date_of_month
+            description: Month the values refer to (quarterly on the quarter's last month).
+
+  # Phase 4 model outputs. Written by Python with COPY (make train), not by dbt, so the rpt
+  # views over them are tagged post_ml and built by make score once the tables exist.
+  - name: ml
+    description: Model outputs written by src/dubai_property/models/* (make train).
+    schema: ml
+    tags: [post_ml]
+    tables:
+      - name: fct_price_index
+        description: >
+          Hedonic price index (rolling-window time dummy, chained), one row per segment x
+          published period (n >= min_n). models/hedonic_index.py.
+      - name: agg_yield_quarter
+        description: >
+          Gross yields (median new rent / median ready price) by area or zone x property
+          type x bedrooms x quarter, published cells only (n >= min_n on both sides).
+          models/yields.py.

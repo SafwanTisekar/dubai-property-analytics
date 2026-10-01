@@ -23,9 +23,7 @@ from dubai_property import config
 from dubai_property.analysis.common import apply_min_n, query
 
 HOMES = list(config.RESIDENTIAL_HOMES_KEYS)
-# docs/04 §4 "yield sanity": gross yields outside 2-15% for a segment with n >= 20 are a
-# warning sign (a bedroom label or a price that doesn't match the rent's unit), not a result.
-YIELD_SANITY = (0.02, 0.15)
+YIELD_SANITY = config.YIELD_SANITY  # docs/04 §4; shared with models/yields.py
 
 PPSQM_BY_YEAR_SQL = """
 with med as (

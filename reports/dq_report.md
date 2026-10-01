@@ -1,6 +1,6 @@
 # Data-quality report: silver
 
-Generated 2026-09-30 18:29 UTC by `quality/dq_report.py` from database `dubai_property`. Regenerate with `make dq` (after `make dbt`). The rules are in docs/04 §2.
+Generated 2026-10-01 09:36 UTC by `quality/dq_report.py` from database `dubai_property`. Regenerate with `make dq` (after `make dbt`). The rules are in docs/04 §2.
 
 ## 1. Rows in and out per step
 

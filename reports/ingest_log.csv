@@ -31,3 +31,4 @@ logged_at,dataset,table,file,status,encoding,had_bom,size_mb,rows_in_file,rows_l
 2026-09-30T11:53:56Z,transactions_increment,bronze.dld_transactions_increment,raw/dld/transactions_increment/transactions-2026-09-29.csv,disabled,,,,,,,,,,"DLD portal export (22-column schema, IDs don't match the bulk file). Fully overlapped by the bulk snapshot, so skipped for v1 (docs/04 Decisions)"
 2026-09-30T11:53:56Z,fedfunds,bronze.rates_fedfunds,raw/fred/fedfunds/FEDFUNDS_2026-09-30.csv,skipped,,,0.0,866,866,True,,,,sha256 already in bronze._load_manifest
 2026-09-30T11:53:56Z,brent,bronze.rates_brent,raw/fred/dcoilbrenteu/DCOILBRENTEU_2026-09-30.csv,skipped,,,0.2,10265,10265,True,,,,sha256 already in bronze._load_manifest
+2026-10-01T09:00:04Z,price_index,bronze.dld_price_index,raw/dld/price_index/residential_sale_index_2026-09-01_18-28-58_0001.csv,loaded,UTF8,False,0.0,159,159,True,0.0,0.1,2343,

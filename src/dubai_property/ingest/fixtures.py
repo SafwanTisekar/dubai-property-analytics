@@ -25,6 +25,11 @@ to *exercise every rule*, so a small file still tests the tricky cases:
 The files keep the DLD shape (every field quoted, same header), so CI loads them with the
 normal loader: ``make bronze BRONZE_ROOT=tests/fixtures``.
 
+The DLD Residential Sale Index fixture is the exception: it is **synthetic** (owner,
+2026-10-01). The file comes from data.dubai, whose licence for it hasn't been confirmed as
+CC BY 4.0, so no DLD value is committed. ``write_price_index_fixture`` generates 36 months
+with the real header and blank pattern, which is all the dbt staging model needs.
+
 Usage::
 
     uv run python -m dubai_property.ingest.fixtures
@@ -34,6 +39,7 @@ from __future__ import annotations
 
 import csv
 import logging
+import math
 import sys
 import time
 from collections.abc import Sequence
@@ -53,6 +59,25 @@ RAW_PREFIX = "raw/%"  # only rows loaded from data/raw are eligible
 PER_YEAR_TXN_GROUPS = 75  # candidate groups per year, 2004-2026
 PER_YEAR_RENT_CONTRACTS = 90  # single-line contracts per start year
 BRENT_FROM = date(2018, 1, 1)  # Brent is daily; ~2k rows from here on
+
+# Synthetic DLD index fixture: the real 20-column header, 2018-01 to 2020-12.
+PRICE_INDEX_SEGMENTS = ("all", "flat", "villa")
+PRICE_INDEX_FREQS = ("monthly", "quarterly", "yearly")
+
+
+def _segment_columns(segment: str) -> list[str]:
+    return [f"{segment}_{f}_{k}" for f in PRICE_INDEX_FREQS for k in ("index", "price_index")]
+
+
+# The DLD column order: all_*, the date, flat_*, villa_*, then the load stamp.
+PRICE_INDEX_HEADER = [
+    *_segment_columns("all"),
+    "first_date_of_month",
+    *_segment_columns("flat"),
+    *_segment_columns("villa"),
+    "load_timestamp",
+]
+PRICE_INDEX_FIXTURE_NAME = "residential_sale_index_fixture_2026-10-01.csv"
 
 # Candidate groups (the C16 key) with the attributes the selection needs. Temp table.
 TXN_GROUPS_SQL = """
@@ -282,6 +307,40 @@ def copy_rates(raw_root: Path, root: Path) -> list[tuple[Path, int]]:
     return out
 
 
+def write_price_index_fixture(root: Path) -> tuple[Path, int]:
+    """Write the synthetic DLD index fixture (36 months, no real DLD values).
+
+    Same header and blank pattern as the DLD file: monthly values on every row, quarterly
+    values on the quarter's last month, yearly values on December; every present value is
+    quoted and every blank is an unquoted empty field. The values are a smooth made-up path
+    (ratio near 1.1-1.3), deterministic so the file never changes between rebuilds.
+    """
+    d = config.DATASETS_BY_NAME["price_index"]
+    folder = root / d.subdir
+    folder.mkdir(parents=True, exist_ok=True)
+    for old in folder.glob("*.csv"):
+        old.unlink()
+    path = folder / PRICE_INDEX_FIXTURE_NAME
+    base_price = {"all": 1_000_000, "flat": 950_000, "villa": 1_700_000}
+    lines = [",".join(f'"{h}"' for h in PRICE_INDEX_HEADER)]
+    for i in range(36):
+        year, month = 2018 + i // 12, i % 12 + 1
+        row: dict[str, str] = {
+            "first_date_of_month": f"{year}-{month:02d}-01",
+            "load_timestamp": "2026-10-01 00:00:00.000",
+        }
+        for k, seg in enumerate(PRICE_INDEX_SEGMENTS):
+            ratio = 1.2 + 0.05 * math.sin((i + 4 * k) / 6) - 0.002 * i
+            for freq in PRICE_INDEX_FREQS:
+                has = freq == "monthly" or (freq == "quarterly" and month % 3 == 0) or month == 12
+                row[f"{seg}_{freq}_index"] = f"{ratio:.3f}" if has else ""
+                price = f"{ratio * base_price[seg]:.3f}" if has else ""
+                row[f"{seg}_{freq}_price_index"] = price
+        lines.append(",".join(f'"{row[h]}"' if row[h] else "" for h in PRICE_INDEX_HEADER))
+    path.write_text("\n".join(lines) + "\n")
+    return path, 36
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     """CLI entry point."""
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
@@ -299,6 +358,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         conn.rollback()  # temp tables only
     for path, rows in copy_rates(config.DATA_RAW, FIXTURES_ROOT):
         log.info("%s: %d rows", path.relative_to(config.PROJECT_ROOT), rows)
+    path, rows = write_price_index_fixture(FIXTURES_ROOT)
+    log.info("%s: %d rows (synthetic)", path.relative_to(config.PROJECT_ROOT), rows)
     log.info("fixtures written in %.0fs", time.perf_counter() - t0)
     return 0
 

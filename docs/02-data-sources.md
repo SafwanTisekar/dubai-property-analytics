@@ -68,7 +68,7 @@ All row counts below are **approximate and come from third-party profiles**. **P
 | Valuations | Official valuation records. A useful comparison for the AVM |
 | Developers / Brokers | Developer names and registration details, for concentration analysis |
 | Lookups (areas, transaction groups, procedures) | Code → name mappings |
-| **DLD Residential Price Index** (published separately) | External benchmark to validate the hedonic index built in this project |
+| **DLD Residential Price Index** (published separately) | External benchmark to validate the hedonic index built in this project. **Loaded 2026-10-01:** "Residential Properties Sale Index" from data.dubai (issued by DLD) in `data/raw/dld/price_index/` → `bronze.dld_price_index` (159 rows) → `silver.stg_dld_price_index` (long form). Wide file: one row per month 2011-03 → **2024-05** (the 2026-09-01 stamp is the load time), all / flat / villa × monthly / quarterly / yearly × `_index` (ratio, Jan 2012 = 1.000) and `_price_index` (AED level of a typical unit). CI uses a synthetic 36-row fixture (licence not confirmed as CC BY 4.0) |
 
 ## 5. Rates and economy data
 

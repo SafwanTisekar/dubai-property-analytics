@@ -6,19 +6,23 @@ Three access paths, each used for what it does best (docs/03 §4):
 * ``get_engine()``: SQLAlchemy engine, for pandas/Polars ``read_sql`` and ad-hoc SQL.
 * ``connectorx_uri()``: URI for connectorx, the fastest way to pull a model-sized
   result set into Polars/pandas.
+* ``copy_frame()``: write a model result back with ``COPY`` (never row-by-row inserts).
 
 Credentials come only from environment variables (loaded from `.env`), never code.
 """
 
 from __future__ import annotations
 
+import io
 import os
 from dataclasses import dataclass
 from functools import lru_cache
 from urllib.parse import quote
 
+import polars as pl
 import psycopg
 from dotenv import load_dotenv
+from psycopg import sql
 from psycopg.conninfo import make_conninfo
 from sqlalchemy import Engine, create_engine
 
@@ -107,3 +111,34 @@ def get_engine() -> Engine:
 def connectorx_uri() -> str:
     """Return the connectorx URI for the configured database."""
     return PgSettings.from_env().connectorx_uri()
+
+
+def copy_frame(conn: psycopg.Connection, df: pl.DataFrame, schema: str, table: str) -> int:
+    """Append a Polars frame to an existing table with ``COPY ... FROM STDIN`` (CSV).
+
+    Columns are matched by name, so the frame may list them in any order and the table may
+    have extra columns with defaults. Nulls are written as unquoted empty fields, which
+    COPY reads as NULL. The caller owns the transaction (commit or roll back).
+
+    Args:
+        conn: Open psycopg connection.
+        df: Rows to write; column names must exist in the table.
+        schema: Target schema (e.g. ``ml``).
+        table: Target table.
+
+    Returns:
+        The number of rows COPY reported, which the caller should log.
+    """
+    if df.is_empty():
+        return 0
+    buffer = io.BytesIO()
+    df.write_csv(buffer, include_header=False, null_value="", date_format="%Y-%m-%d")
+    stmt = sql.SQL("copy {}.{} ({}) from stdin (format csv)").format(
+        sql.Identifier(schema),
+        sql.Identifier(table),
+        sql.SQL(", ").join(sql.Identifier(c) for c in df.columns),
+    )
+    with conn.cursor() as cur:
+        with cur.copy(stmt) as copy:
+            copy.write(buffer.getvalue())
+        return cur.rowcount

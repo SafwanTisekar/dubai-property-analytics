@@ -28,7 +28,8 @@ BRONZE_ROOT ?= data/raw
 BRONZE_FLAGS ?=
 
 .PHONY: help setup db dbt-deps dbt-debug lint test \
-        download bronze reconcile profile sample fixtures dbt dq kpi dictionary unzoned pbi-ready eda train score update pipeline
+        download bronze reconcile profile sample fixtures dbt dq kpi dictionary unzoned pbi-ready eda \
+        train score model-reports update pipeline
 
 help:  ## List targets
 	@grep -hE '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | \
@@ -91,11 +92,12 @@ fixtures:  ## Rebuild the committed CI fixtures (~2k lines per table) -> tests/f
 # --- Phase 2: dbt silver, gold and rpt (docs/04 §2-4) -----------------------------------
 # CI runs the same targets on the fixtures: make bronze BRONZE_ROOT=tests/fixtures && make dbt
 
-dbt:  ## dbt build (seeds, silver, gold, rpt, tests), then DQ report, KPI check, dictionary
+dbt:  ## dbt build (seeds, silver, gold, rpt, tests; not the post_ml views), then DQ report, KPI check, dictionary
 	@# Seeds are tiny: reload them from scratch so an added seed column never needs a manual
 	@# --full-refresh (dependent staging views are dropped and rebuilt by the build).
+	@# post_ml views read ml.* tables that only exist after make train: make score builds them.
 	$(DBT) seed --full-refresh $(DBT_FLAGS)
-	$(DBT) build $(DBT_FLAGS)
+	$(DBT) build --exclude tag:post_ml $(DBT_FLAGS)
 	$(MAKE) dq kpi dictionary
 
 dq:  ## Rows per step and per rule, Phase 1 reconciliation -> reports/dq_report.md
@@ -142,13 +144,22 @@ pbi-ready:  ## Restart Postgres, then check Power BI's login (pbi_reader @ PBI_H
 eda:  ## Execute notebooks/0*.ipynb in place -> reports/figures/*.png (findings: reports/findings.md)
 	$(PY).analysis.run_notebooks
 
+# --- Phase 4: models (docs/05) ----------------------------------------------------------
+# train fits the models and writes ml.* with COPY; score builds the rpt views over them
+# (dbt tag post_ml). 4a: hedonic price index and gross yields. AVM, stress test and
+# forecast join in 4b/4c.
+
+train:  ## Fit the models (4a: hedonic index, yields) and write ml.* via COPY
+	$(PY).models.hedonic_index
+	$(PY).models.yields
+
+score:  ## dbt build --select tag:post_ml (rpt views over ml.* + their tests)
+	$(DBT) build --select tag:post_ml $(DBT_FLAGS)
+
+model-reports:  ## Model reports from ml.* -> reports/price_index.md, reports/yields.md, figures
+	$(PY).models.report_4a
+
 # --- Stubs (implemented in later phases, see docs/08) ---------------------------------
-
-train:  ## [stub] AVM, hedonic index, yields, stress test, forecast (Phase 4)
-	@echo "train: not implemented yet (Phase 4, docs/08)"
-
-score:  ## [stub] write ml.* tables, then dbt build --select tag:post_ml (Phase 4)
-	@echo "score: not implemented yet (Phase 4, docs/08)"
 
 update:  ## [stub] incremental monthly refresh end to end (Phases 1-4)
 	@echo "update: not implemented yet (Phases 1-4, docs/08)"

@@ -41,6 +41,11 @@ vars:
   # for forecasts. Facts outside the scope stay in gold but not in the aggregates or rpt.
   dim_date_start: "2004-01-01"
   dim_date_end: "2027-12-31"
+  # Phase 4 model outputs (ml.*, written by make train). rpt shows one model version; these
+  # match config.HEDONIC_MODEL_VERSION / YIELD_MODEL_VERSION (tests/test_config.py).
+  hedonic_model_version: "hedonic-rtd-v1"
+  yield_model_version: "yield-gross-v1"
+  index_base_month: "2019-01-01"      # hedonic index = 100 (Q1 2019 for quarterly series)
 
 # Layer -> schema + materialisation (docs/03 §3 and §7). Schema names are used verbatim
 # thanks to macros/generate_schema_name.sql (no "<target>_" prefix).
