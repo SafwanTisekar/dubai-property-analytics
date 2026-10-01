@@ -1,0 +1,19 @@
+/// What-if: price shock in whole percent, 0 to -50 in steps of 5 (integers, so equality with Stress Grid[Shock Pct] is exact).
+table 'Price Shock %'
+	lineageTag: 14e77b8f-7e2e-5051-a807-b822e8d51393
+
+	column 'Price Shock %'
+		formatString: 0
+		lineageTag: 90f8a8f3-8c4d-5bb7-9c49-f9a7f9a3c127
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Price Shock %]
+
+		annotation SummarizationSetBy = User
+
+	partition 'Price Shock %' = calculated
+		mode: import
+		source =
+				SELECTCOLUMNS ( GENERATESERIES ( -50, 0, 5 ), "Price Shock %", [Value] )
+
+	annotation PBI_Id = 436dfb295084517f91174b8a60f77dc8

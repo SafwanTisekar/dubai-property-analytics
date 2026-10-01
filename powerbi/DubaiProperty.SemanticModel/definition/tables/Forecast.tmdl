@@ -1,0 +1,130 @@
+/// Index and volume: actuals + 12-month SARIMAX forecast per rate scenario (rpt.forecast).
+table Forecast
+	lineageTag: 61b687be-4e5e-5e9c-b7d7-87938f5bced1
+
+	column Target
+		dataType: string
+		lineageTag: 499257cb-0c3e-5ddc-8d38-36f8b4ff5474
+		summarizeBy: none
+		sourceColumn: Target
+
+		annotation SummarizationSetBy = User
+
+	column Segment
+		dataType: string
+		lineageTag: 5aa64176-2bd9-59dd-8eb5-637679b26b5f
+		summarizeBy: none
+		sourceColumn: Segment
+
+		annotation SummarizationSetBy = User
+
+	column Month
+		dataType: dateTime
+		formatString: mmm yyyy
+		lineageTag: c11a63b3-d9b4-5129-a595-e0c601f08d46
+		summarizeBy: none
+		sourceColumn: Month
+
+		annotation SummarizationSetBy = User
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column Scenario
+		dataType: string
+		lineageTag: 2c39e3ea-54c4-5d04-b4a0-80a61c093705
+		summarizeBy: none
+		sourceColumn: Scenario
+
+		annotation SummarizationSetBy = User
+
+	column 'Is Forecast'
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: adf3de46-35a6-57d6-ad20-54152144c9d9
+		summarizeBy: none
+		sourceColumn: Is Forecast
+
+		annotation SummarizationSetBy = User
+
+	column Actual
+		dataType: double
+		formatString: #,0.0
+		lineageTag: 11083ced-84b0-56fe-8514-c2759f9a0835
+		summarizeBy: none
+		sourceColumn: Actual
+
+		annotation SummarizationSetBy = User
+
+	column Forecast
+		dataType: double
+		formatString: #,0.0
+		lineageTag: 39dddfc8-684f-51cf-a9c2-8b1d22f2a88c
+		summarizeBy: none
+		sourceColumn: Forecast
+
+		annotation SummarizationSetBy = User
+
+	column 'Lower 80'
+		dataType: double
+		formatString: #,0.0
+		lineageTag: 39821fe8-e9a1-5138-800d-b5a417ad9824
+		summarizeBy: none
+		sourceColumn: Lower 80
+
+		annotation SummarizationSetBy = User
+
+	column 'Upper 80'
+		dataType: double
+		formatString: #,0.0
+		lineageTag: 740a5c07-b000-54d9-95f4-f324f13ddca4
+		summarizeBy: none
+		sourceColumn: Upper 80
+
+		annotation SummarizationSetBy = User
+
+	column 'Lower 95'
+		dataType: double
+		formatString: #,0.0
+		lineageTag: 42579195-aa58-51f3-ae3d-c0b52c5b0839
+		summarizeBy: none
+		sourceColumn: Lower 95
+
+		annotation SummarizationSetBy = User
+
+	column 'Upper 95'
+		dataType: double
+		formatString: #,0.0
+		lineageTag: 5cfd7bdb-2327-56de-85c4-c79ee7d8f568
+		summarizeBy: none
+		sourceColumn: Upper 95
+
+		annotation SummarizationSetBy = User
+
+	column 'Fed Funds Rate Path'
+		dataType: double
+		formatString: 0.0%
+		lineageTag: 3ce98149-bf41-56fe-8050-10c9de523b5b
+		summarizeBy: none
+		sourceColumn: Fed Funds Rate Path
+
+		annotation SummarizationSetBy = User
+
+	column 'Model Version'
+		dataType: string
+		isHidden
+		lineageTag: 2cf6d101-c186-526f-a033-8911b9665118
+		summarizeBy: none
+		sourceColumn: Model Version
+
+		annotation SummarizationSetBy = User
+
+	partition Forecast = m
+		mode: import
+		source =
+				let
+				  Source = PostgreSQL.Database(PgServer, PgDatabase),
+				  #"Navigation 1" = Source{[Schema = "rpt", Item = "forecast"]}[Data]
+				in
+				  #"Navigation 1"
+
+	annotation PBI_ResultType = Table

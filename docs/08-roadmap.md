@@ -10,7 +10,7 @@ Work one phase at a time. Start each phase in a fresh Claude Code session (or `/
 - [x] PostgreSQL 18 installed via Homebrew (2026-09-29)
 - [x] Postgres service running (`brew services start postgresql@18`), `psql` on PATH, pgAdmin or DBeaver installed (docs/03 §6). PG 18.6 + DBeaver 26.2.1 (2026-09-30)
 - [x] Work account on own domain (Zoho Mail) signs in to Power BI Service
-- [x] Power BI Pro trial started 2026-09-29 (expiry recorded below). See docs/03 §9
+- [x] Power BI Pro trial started 2026-09-29 (expiry: see the Phase 5 to-do and the Publishing record below). See docs/03 §9
 - [x] Admin access confirmed (admin takeover via DNS TXT if the tenant is unmanaged) and **Publish to web** enabled
 - [x] Throwaway report published to web and rendering in a private browser window (tested 2026-09-29)
 - [x] Download the DLD bulk files manually if needed (Dubai Pulse `dld_transactions-open`, `dld_rent_contracts-open`, projects, buildings, units, lookups) into `data/raw/dld/<dataset>/`. Done 2026-09-30: transactions (2 files, 1,788,150 rows) and rents (11 files, ~10.5M lines). **Deferred:** projects, buildings, units and lookups are optional for v1 and not downloaded yet
@@ -96,7 +96,7 @@ Phase 2 is split. **2a = silver** (seeds, staging, intermediate, DQ report, CI f
 - [x] `docs/data-dictionary.md` (`make dictionary`), docs/04 §3 and Decisions updated
 - [x] CI green on 5076e27 ([run 36736326132](https://github.com/SafwanTisekar/dubai-property-analytics/actions/runs/36736326132)): fixtures through `make dbt`, then rpt access + KPI reconciliation. The first 2b push (1bd2800) failed: `make kpi` ran the apartment sanity check on the ~2k-line fixtures; the check now applies only from 100k transaction lines
 - [x] `seed_ltv_rules` verified by the owner against the CBUAE rulebook (2026-09-30/10-01): current caps from 2020-04-08 (Board Resolution 31/2/2020), pre-2020 regime from Circular 31/2013 (2013-10-28 to 2020-04-07; gazette date not verified), with no-overlap and range tests. CI green on fa05bd2 ([run 36773158323](https://github.com/SafwanTisekar/dubai-property-analytics/actions/runs/36773158323))
-- [ ] Phase 5: centroids in `seed_area`, DAX rewritten against rpt column names
+- [x] Phase 5: centroids in `seed_area` (OpenStreetMap), DAX rewritten against rpt column names (see Phase 5 below)
 
 **2b timings and rpt row counts**: full data, 16 GB M-series Mac, 4 dbt threads, final build (per-class C21 caps and the data snapshot date). `make dbt` **7 min 43 s** wall time: `dbt build` 6 min 37 s for 10 seeds, 16 tables, 13 views and 190 tests (gold: `fct_rent_contract` ~50 s, `fct_transaction` ~12 s, `agg_rent_month` ~8 s, `agg_area_month` ~2 s; the slowest step is still silver `int_rent_contracts`, ~140 s), then `make dq` ~45 s, `make kpi` 15 s, `make dictionary` < 1 s. Gold on disk: `fct_rent_contract` 2.6 GB, `fct_transaction` 0.6 GB. Fixture build in CI: seconds.
 
@@ -205,7 +205,7 @@ reports/stress_test.md, then score.py to write all ml.* tables and build the pos
 - [x] Tests: `tests/test_stress_test.py` (cap by date / band / status, zone → type fallback, quarterly periods, partial period never "now", replay, shares, monotonicity, 0 shock, min-n, off-plan split; DB invariants), `tests/test_forecast.py` (no look-ahead with power check, vintage chain, intervals contain the point, scenarios equal up to the lag, scoring, constant drift, volume end to end; DB checks). Fixture sequence run on the scratch DB (`make ... PG_DB=dubai_property_scratch`): post_ml PASS=70, empty-but-valid 4c tables
 - [x] **Incident (docs/05 §8):** the first fixture run hit the main database (`PG_DB=x make` doesn't override `.env`); restored from `data/raw` with owner approval (reports identical to the committed ones apart from timestamps; index 2,432 rows exactly; AVM re-tuned, test MdAPE 6.83% vs 6.82%). `load_bronze` now refuses non-`data/raw` roots and un-flagged `--reset` on the main database (`ALLOW_MAIN_RESET=1`)
 - [x] AVM model card regenerated after the restore (owner approved): test MdAPE 6.83%, ±10% 65.0% (first run 6.82% / 65.2%), villas: comparables slightly better on MdAPE (8.51% vs 8.66%); reproducibility line in the card; `artifacts/avm/best_params.json` committed (whitelisted) so a restore reuses the tuned parameters
-- [ ] CI green on the pushed commit (owner pushes)
+- [x] CI green on the pushed commit (owner confirmed, 2026-10-01)
 
 **4c timings** (full data, 16 GB M-series Mac): forecast 108 s on first run (real-time vintages for three segments × 24 origins 76 s, then cached; 6 series × 24 origins of SARIMAX ~30 s), 26 s with cached vintages; stress test 2 s; `make score` ~10 s (stress + 70 post_ml dbt nodes); `report_4c` ~3 s. Restore: bronze from `data/raw` 3 min 35 s, `make dbt` 8 min 10 s, `make train` 34 min (AVM with 20 Optuna trials ~32 min).
 
@@ -229,6 +229,24 @@ values). Also expose area centroids from seed_area in rpt.dim_area for the map.
 Then, in Power BI Desktop (Parallels), connect to PostgreSQL as pbi_reader (import mode), build the six pages per docs/06 §4–5, save as PBIP, publish, and create the Publish-to-web embed code.
 
 **Done when:** the cards match `kpi_reconciliation.md`, every visual is under 1 s, and the embed URL is recorded below.
+
+**Phase 5 checklist (preparation, Claude Code)**
+- [x] rpt review against docs/06 §4's six pages; gaps fixed in dbt: `rpt.dld_price_index` (DLD's official index rebased to Jan 2019 = 100), shared slicer dimensions `rpt.dim_bedrooms` / `rpt.dim_ready_offplan` with `"Bedrooms Key"` / `"Ready / Off-Plan"` on the facts, `"Project Key"` on `rpt.avm_score`, `"Map Attribution"` on `rpt.report_info`. 22 rpt views; `pbi_reader` reads all of them and nothing else (`tests/test_rpt_access.py`)
+- [x] Area centroids: `make centroids` (OpenStreetMap Nominatim, names only, descriptive User-Agent, cached in `data/raw/osm/`) → `seed_area` latitude / longitude / `centroid_source`; 194 of 265 areas, **97.7% of 2023+ market sales**; misses listed in `reports/area_centroids.md`; credit "© OpenStreetMap contributors (ODbL)" in the report footer and on the website (owner, 2026-10-01)
+- [x] Size budget (docs/06 §1): `rpt.avm_score` trimmed to out-of-sample rows (owner decision) and 4 columns; `"Price AED"` dropped from `rpt.transactions`
+- [x] Semantic model rewritten as TMDL (checkpoint: local tag `pbip-checkpoint-phase2b`; `git checkout pbip-checkpoint-phase2b -- powerbi/` restores the old model): 22 imported tables with friendly names, `PgServer` / `PgDatabase` parameters, 23 named relationships, model outputs disconnected and bridged with TREATAS, what-if tables (`Price Shock %` 0 to −50 step 5, `LTV %` 50/60/70/80/85, `Replay Depth`, `Forecast Scenario`), every measure in `_Measures` with display folders and descriptions; `powerbi/measures.dax` review copy (`make pbi-measures`); `tests/test_powerbi_model.py`
+- [x] Card checklist: `reports/kpi_reconciliation.md` §7 (`quality/pbi_cards.py`, regenerated by `make kpi` and `make score`)
+- [x] **Gate (owner, 2026-10-02):** Desktop opens the PBIP and refreshes. One defect found: Excel-style scaling commas in the AED bn format (`#,0.0,,,"bn"`) rendered literally ("AED 3.6,,,Tbn"); every AED measure is now `"AED "#,0` with card display units set to Billions, and `tests/test_powerbi_model.py` rejects scaling commas
+- [x] `powerbi/theme.json` (the figures' colour-blind-validated palette, text contrast 19.2:1 / 7.7:1) and `powerbi/BUILD.md` (setup incl. enabling the Azure Maps visual, layout grid, six pages with fields, positions, interactions, insight titles and alt text, pre-publish checks)
+- [ ] **Owner to-do: record the Power BI Pro trial expiry** (Power BI Service → profile icon → trial days remaining) in the Publishing record below. A 60-day trial started 2026-09-29 would end around 2026-11-28; confirm the real date
+- [ ] Owner: fill the 71 unlocated areas in `seed_area.csv` (`centroid_source = manual`) if they matter for the map; Al Warsan First and Zaabeel First are the largest
+
+**Phase 5 checklist (owner, Power BI Desktop)**
+- [ ] Build the six pages per `powerbi/BUILD.md`
+- [ ] Every card matches `reports/kpi_reconciliation.md` §7
+- [ ] Performance Analyzer: every visual under 1 s
+- [ ] Model size checked with VertiPaq Analyzer and recorded in docs/06 §1
+- [ ] Published, Publish-to-web embed URL recorded below
 
 ---
 
@@ -263,7 +281,7 @@ Lighthouse ≥ 90 via Playwright.
 | 2 dbt | ✓ | 2026-09-30 | 2a, 2b: 2026-09-30 | 2a (silver) done 2026-09-30, CI green on 92b6191: `dbt build` PASS=98 on full data in 4 min 38 s and on the CI fixtures; Phase 1 figures reproduced exactly (reports/dq_report.md §4). 1,267,760 clean market sales, 3,601,613 market-rent lines. All 265 areas zoned. 2b (gold + rpt) done 2026-09-30: `make dbt` 7 min 43 s on full data, 229 dbt nodes pass, gold = silver exactly, `reports/kpi_reconciliation.md` 0 mismatches and the apartment sanity check passes, 10 rpt views (1.77M transaction rows + 392k rent-month cells), data snapshot 2026-09-25. CI green on 5076e27 ([run](https://github.com/SafwanTisekar/dubai-property-analytics/actions/runs/36736326132)) |
 | 3 EDA | ✓ | 2026-09-30 | 2026-09-30 | `make eda` runs the three notebooks in ~20 s on full data. Headlines: 211,007 market sales / AED 668.3bn in 2025; Jan–Aug 2026 −19% on 2025 (ready −37%, off-plan −7%), no sign of registration lag; the 2009 spike is a backlog (93.5% of 2009 off-plan registrations applied for earlier); 28–48% of 2025 ready purchases bank-financed (matched lower bound 27.9%); LTV norm 75% → 80%; 2023 apartment prices +1.2% raw vs +14.5% like-for-like. Register totals match DLD's published 2023–25 figures within ~1% on value. Revised the same day after owner review (mortgage KPI, villa area basis, 2026 momentum). `make dbt` 242 nodes pass. CI green on 831502c ([run](https://github.com/SafwanTisekar/dubai-property-analytics/actions/runs/36759956450)). Q9 deferred |
 | 4 Models | ✓ | 2026-10-01 | 4a, 4b, 4c: 2026-10-01 | 4a (hedonic index + yields) done, CI green: rolling-window hedonic index from 2011, 18 segments, validates vs DLD at 0.93 / 0.92 / 0.91 (timing-aligned YoY); yields 5,919 cells. Owner decisions 2026-10-01: rolling windows, 2011 start, aligned validation headline (docs/05 §8). 4b (AVM) done: LightGBM test MdAPE 6.8%, ±10% 65.2% vs comparables 9.9% / 50.3%, no leakage alarm, 904,551 sales scored; model card `reports/avm_model_card.md`. 4c (stress test + forecast) done 2026-10-01: at 80% LTV a 20% fall puts 22% of recent ready apartment buyers in negative equity; SARIMAX beats naive on the index (11/12) but not on volume (1/12); main DB restored after a fixture-run incident, bronze guard added |
-| 5 Power BI | ☐ | | | |
+| 5 Power BI | ◐ | 2026-10-01 | | Preparation done 2026-10-02: rpt gaps closed (22 views), OSM centroids (97.7% of 2023+ sales located), TMDL model with 102 measures and what-if tables, card checklist (`kpi_reconciliation.md` §7), theme and `powerbi/BUILD.md`; Desktop opens and refreshes. Next (owner): build the pages, tick the cards, publish |
 | 6 Website | ☐ | | | |
 | 7 Launch | ☐ | | | |
 
@@ -272,6 +290,6 @@ Lighthouse ≥ 90 via Playwright.
 | Power BI tenant/account | |
 | Publish-to-web URL | |
 | Published on | |
-| Licence/trial expires | Pro trial started 2026-09-29; expiry: _check under profile icon → trial days remaining_ |
+| Licence/trial expires | Pro trial started 2026-09-29; expiry: **TO DO (owner)**, see the Phase 5 to-do |
 | Website URL | |
 | Data as of | |

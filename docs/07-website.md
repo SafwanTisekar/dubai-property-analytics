@@ -61,4 +61,4 @@ A fast, professional, single-project site that a recruiter can understand in 30 
 - [ ] Model card summary table (Gini/KS/AUC for baseline, Model A, Model B)
 - [ ] Limitations section (right-censoring, `last_pymnt_d` timing proxy, US data, simplified LGD/EAD)
 - [ ] Links: GitHub repo, PBIX download, LinkedIn, CV
-- [ ] Attribution: "Data: Dubai Land Department, CC BY 4.0"; disclaimer: independent project, not affiliated with DLD; not investment or lending advice
+- [ ] Attribution: "Data: Dubai Land Department, CC BY 4.0", and "Area locations © OpenStreetMap contributors (ODbL)" in the credits (the report's map uses OSM centroids, Phase 5); disclaimer: independent project, not affiliated with DLD; not investment or lending advice

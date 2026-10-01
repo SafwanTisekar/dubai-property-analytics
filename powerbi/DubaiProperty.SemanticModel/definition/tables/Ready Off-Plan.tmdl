@@ -1,0 +1,33 @@
+/// Ready / Off-Plan slicer shared by every fact (rpt.dim_ready_offplan).
+table 'Ready Off-Plan'
+	lineageTag: 382607a5-0a95-56ec-b897-7d88b834b925
+
+	column 'Ready / Off-Plan'
+		dataType: string
+		lineageTag: c04b1f38-c0f1-5239-ac3c-ba0aaf248860
+		summarizeBy: none
+		sourceColumn: Ready / Off-Plan
+		sortByColumn: 'Ready / Off-Plan Order'
+
+		annotation SummarizationSetBy = User
+
+	column 'Ready / Off-Plan Order'
+		dataType: int64
+		isHidden
+		formatString: #,0
+		lineageTag: c7b3b6b6-231d-51e2-b8e3-c8d5a3e737d3
+		summarizeBy: none
+		sourceColumn: Ready / Off-Plan Order
+
+		annotation SummarizationSetBy = User
+
+	partition 'Ready Off-Plan' = m
+		mode: import
+		source =
+				let
+				  Source = PostgreSQL.Database(PgServer, PgDatabase),
+				  #"Navigation 1" = Source{[Schema = "rpt", Item = "dim_ready_offplan"]}[Data]
+				in
+				  #"Navigation 1"
+
+	annotation PBI_ResultType = Table

@@ -1,0 +1,37 @@
+/// Rate scenario for the outlook: Fed Funds (EIBOR proxy) flat, +100bp or -100bp.
+table 'Forecast Scenario'
+	lineageTag: 4113e8e7-9dac-5745-97b8-7a3b093d62ae
+
+	column Scenario
+		lineageTag: e739972e-5d83-5e9c-a66b-0b72ff71deda
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Scenario]
+		sortByColumn: 'Scenario Order'
+
+		annotation SummarizationSetBy = User
+
+	column 'Scenario Order'
+		isHidden
+		formatString: 0
+		lineageTag: 6b8d3862-48c9-5681-a076-20a449087d48
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Scenario Order]
+
+		annotation SummarizationSetBy = User
+
+	partition 'Forecast Scenario' = calculated
+		mode: import
+		source =
+				DATATABLE (
+					"Scenario", STRING,
+					"Scenario Order", INTEGER,
+					{
+						{ "Rates flat", 1 },
+						{ "Rates +100bp", 2 },
+						{ "Rates -100bp", 3 }
+					}
+				)
+
+	annotation PBI_Id = 0bfb10a355f15360b1d73da0fe08d697

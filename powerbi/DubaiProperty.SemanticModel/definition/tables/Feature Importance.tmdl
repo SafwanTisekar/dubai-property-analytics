@@ -1,0 +1,66 @@
+/// Mean |SHAP| per AVM feature (rpt.feature_importance).
+table 'Feature Importance'
+	lineageTag: 683e0df9-ea42-5847-ade4-bf2579815190
+
+	column Feature
+		dataType: string
+		lineageTag: 0c570cc5-1c89-52aa-93d1-6fcf370bf21f
+		summarizeBy: none
+		sourceColumn: Feature
+
+		annotation SummarizationSetBy = User
+
+	column 'Feature Group'
+		dataType: string
+		lineageTag: df12baa3-80d6-5fa1-a198-b59c5303ea08
+		summarizeBy: none
+		sourceColumn: Feature Group
+
+		annotation SummarizationSetBy = User
+
+	column 'Mean Abs SHAP'
+		dataType: double
+		formatString: #,0.0000
+		lineageTag: 69e52a82-acc0-5f4b-8624-1681e8a1bfd5
+		summarizeBy: none
+		sourceColumn: Mean Abs SHAP
+
+		annotation SummarizationSetBy = User
+
+	column 'Split Gain'
+		dataType: double
+		formatString: #,0.0000
+		lineageTag: 09d1d291-6e7c-51a5-8a56-a85ccc591f21
+		summarizeBy: none
+		sourceColumn: Split Gain
+
+		annotation SummarizationSetBy = User
+
+	column Rank
+		dataType: int64
+		formatString: 0
+		lineageTag: e6589402-0a26-5715-9ada-79654e89f8eb
+		summarizeBy: none
+		sourceColumn: Rank
+
+		annotation SummarizationSetBy = User
+
+	column 'Model Version'
+		dataType: string
+		isHidden
+		lineageTag: c4bfb2ec-98ca-5338-8000-9d944e8eac47
+		summarizeBy: none
+		sourceColumn: Model Version
+
+		annotation SummarizationSetBy = User
+
+	partition 'Feature Importance' = m
+		mode: import
+		source =
+				let
+				  Source = PostgreSQL.Database(PgServer, PgDatabase),
+				  #"Navigation 1" = Source{[Schema = "rpt", Item = "feature_importance"]}[Data]
+				in
+				  #"Navigation 1"
+
+	annotation PBI_ResultType = Table

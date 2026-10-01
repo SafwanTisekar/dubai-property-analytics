@@ -1,0 +1,58 @@
+/// DLD areas with zone and OpenStreetMap centroid (rpt.dim_area).
+table Area
+	lineageTag: 7f993081-2c05-5a7c-8bd7-663909dc26c3
+
+	column 'Area Key'
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: a8ffae33-a8fb-5f82-b81f-1886c856c83b
+		summarizeBy: none
+		sourceColumn: Area Key
+
+		annotation SummarizationSetBy = User
+
+	column Area
+		dataType: string
+		lineageTag: 506cc1ef-997c-5537-a59b-c3b50f797606
+		summarizeBy: none
+		sourceColumn: Area
+
+		annotation SummarizationSetBy = User
+
+	column Zone
+		dataType: string
+		lineageTag: d442b653-66f1-5196-b69c-895db73ebe84
+		summarizeBy: none
+		sourceColumn: Zone
+
+		annotation SummarizationSetBy = User
+
+	column Latitude
+		dataType: double
+		dataCategory: Latitude
+		lineageTag: 5ef7e028-531a-5dfa-9209-f7662470e539
+		summarizeBy: none
+		sourceColumn: Latitude
+
+		annotation SummarizationSetBy = User
+
+	column Longitude
+		dataType: double
+		dataCategory: Longitude
+		lineageTag: f29c0634-0c9d-539b-b2b1-e0eedfc18517
+		summarizeBy: none
+		sourceColumn: Longitude
+
+		annotation SummarizationSetBy = User
+
+	partition Area = m
+		mode: import
+		source =
+				let
+				  Source = PostgreSQL.Database(PgServer, PgDatabase),
+				  #"Navigation 1" = Source{[Schema = "rpt", Item = "dim_area"]}[Data]
+				in
+				  #"Navigation 1"
+
+	annotation PBI_ResultType = Table

@@ -1,0 +1,38 @@
+/// What-if: assumed loan-to-value in whole percent. Only the five values the stress grid holds (not a step-5 range); 85 = UAE national first-home cap, the worst case.
+table 'LTV %'
+	lineageTag: 61e499a9-4056-5889-b984-b610d79559a8
+
+	column 'LTV %'
+		formatString: 0
+		lineageTag: 06fdb9bc-7092-5aee-9684-90e501bbd887
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [LTV %]
+
+		annotation SummarizationSetBy = User
+
+	column 'LTV Label'
+		lineageTag: 43ccec47-b4d9-55b3-84cf-ed62e75a5500
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [LTV Label]
+		sortByColumn: 'LTV %'
+
+		annotation SummarizationSetBy = User
+
+	partition 'LTV %' = calculated
+		mode: import
+		source =
+				DATATABLE (
+					"LTV %", INTEGER,
+					"LTV Label", STRING,
+					{
+						{ 50, "50%" },
+						{ 60, "60%" },
+						{ 70, "70%" },
+						{ 80, "80%" },
+						{ 85, "85% UAE national first home cap (worst case)" }
+					}
+				)
+
+	annotation PBI_Id = 7412dacbafed5874ba909127497b5692

@@ -28,8 +28,8 @@ BRONZE_ROOT ?= data/raw
 BRONZE_FLAGS ?=
 
 .PHONY: help setup db dbt-deps dbt-debug lint test \
-        download bronze reconcile profile sample fixtures dbt dq kpi dictionary unzoned pbi-ready eda \
-        train score model-reports update pipeline
+        download bronze reconcile profile sample fixtures dbt dq kpi dictionary unzoned centroids \
+        pbi-ready pbi-measures eda train score model-reports update pipeline
 
 help:  ## List targets
 	@grep -hE '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | \
@@ -112,6 +112,9 @@ dictionary:  ## Models, columns, types, docs and tests -> docs/data-dictionary.m
 unzoned:  ## Worksheet of seed_area rows without a zone -> reports/unzoned_areas.md
 	$(PY).quality.unzoned_areas
 
+centroids:  ## Area centroids from OpenStreetMap Nominatim (cached) -> seed_area.csv, reports/area_centroids.md
+	$(PY).ingest.geocode_areas
+
 # --- Power BI connection (docs/03 §8) --------------------------------------------------
 # Postgres listens on localhost and the Mac's Parallels Shared-network address. That
 # address only exists while Parallels runs, so if Postgres started first (e.g. at login)
@@ -137,6 +140,9 @@ pbi-ready:  ## Restart Postgres, then check Power BI's login (pbi_reader @ PBI_H
 		echo "Check pg_hba.conf (host $(PG_DB) pbi_reader 10.211.55.0/24 scram-sha-256) and that make dbt has built rpt."; \
 		exit 1; fi
 
+pbi-measures:  ## Export the semantic model's measures (TMDL) -> powerbi/measures.dax, a review copy
+	$(PY).powerbi.tmdl
+
 # --- Phase 3: exploratory analysis (docs/08) -----------------------------------------
 # Needs the gold tables and rpt views on the full data (make dbt). Notebooks only call
 # src/dubai_property/analysis; the run fails if an executed notebook is over 1 MB.
@@ -161,8 +167,9 @@ train:  ## Fit the models (hedonic index, yields, AVM, forecast) and write ml.* 
 	$(PY).models.avm $(if $(AVM_TRIALS),--trials $(AVM_TRIALS))
 	$(PY).models.forecast
 
-score:  ## Stress test -> ml.stress_*, check every ml.* table, then dbt build --select tag:post_ml
+score:  ## Stress test -> ml.stress_*, check every ml.* table, dbt build --select tag:post_ml, then the KPI / card checklist
 	$(PY).models.score
+	$(MAKE) kpi
 
 model-reports:  ## Model reports from ml.* -> reports/price_index.md, yields.md, avm_model_card.md, stress_test.md, forecast.md, figures
 	$(PY).models.report_4a

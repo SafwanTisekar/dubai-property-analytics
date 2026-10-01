@@ -1,6 +1,7 @@
 model Model
 	culture: en-US
 	defaultPowerBIDataSourceVersion: powerBI_V3
+	discourageImplicitMeasures
 	sourceQueryCulture: en-US
 	valueFilterBehavior: independent
 	dataAccessOptions
@@ -9,20 +10,36 @@ model Model
 
 annotation __PBI_TimeIntelligenceEnabled = 0
 
-annotation PBI_QueryOrder = ["rpt area_month","rpt dim_area","rpt dim_date","rpt dim_procedure","rpt dim_project","rpt dim_property_type","rpt rates_monthly","rpt rent_month","rpt report_info","rpt transactions"]
+annotation PBI_QueryOrder = ["Transactions", "Area Month", "Rent Month", "Rates Monthly", "Date", "Area", "Property Type", "Procedure", "Project", "Bedrooms", "Ready Off-Plan", "Price Index", "DLD Price Index", "Yield Quarter", "AVM Score", "AVM Performance", "Feature Importance", "Stress Grid", "Stress Replay", "Forecast", "Forecast Backtest", "Report Info", "PgServer", "PgDatabase"]
 
 annotation PBI_ProTooling = ["DevMode"]
 
-ref table 'rpt area_month'
-ref table 'rpt dim_area'
-ref table 'rpt dim_date'
-ref table 'rpt dim_procedure'
-ref table 'rpt dim_project'
-ref table 'rpt dim_property_type'
-ref table 'rpt rates_monthly'
-ref table 'rpt rent_month'
-ref table 'rpt report_info'
-ref table 'rpt transactions'
+ref table Transactions
+ref table 'Area Month'
+ref table 'Rent Month'
+ref table 'Rates Monthly'
+ref table Date
+ref table Area
+ref table 'Property Type'
+ref table Procedure
+ref table Project
+ref table Bedrooms
+ref table 'Ready Off-Plan'
+ref table 'Price Index'
+ref table 'DLD Price Index'
+ref table 'Yield Quarter'
+ref table 'AVM Score'
+ref table 'AVM Performance'
+ref table 'Feature Importance'
+ref table 'Stress Grid'
+ref table 'Stress Replay'
+ref table Forecast
+ref table 'Forecast Backtest'
+ref table 'Report Info'
+ref table 'Price Shock %'
+ref table 'LTV %'
+ref table 'Replay Depth'
+ref table 'Forecast Scenario'
+ref table _Measures
 
 ref cultureInfo en-US
-

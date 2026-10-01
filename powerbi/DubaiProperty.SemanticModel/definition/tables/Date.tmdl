@@ -1,143 +1,145 @@
-table 'rpt dim_date'
-	lineageTag: 9a45b778-91af-4b3a-9af1-b4a3ef38d3a4
+/// Calendar, day grain (rpt.dim_date). The model's date table.
+table Date
 	dataCategory: Time
+	lineageTag: 6c2a6869-83b3-5532-90cb-35093cd1648a
 
 	column Date
 		dataType: dateTime
 		isKey
-		formatString: Long Date
-		lineageTag: 32cf914a-9b46-4370-a7fb-6c9cb0b58e62
+		formatString: yyyy-mm-dd
+		lineageTag: 90294f01-3830-5d2c-ab99-81f3f8e3bf3e
 		summarizeBy: none
 		sourceColumn: Date
 
-		annotation SummarizationSetBy = Automatic
+		annotation SummarizationSetBy = User
 
 		annotation UnderlyingDateTimeDataType = Date
 
 	column Year
 		dataType: int64
 		formatString: 0
-		lineageTag: 9c59e194-8305-4298-b7f1-4acddd641764
-		summarizeBy: sum
+		lineageTag: 751ebebf-7c6f-55fc-93ac-31103b0298b6
+		summarizeBy: none
 		sourceColumn: Year
 
-		annotation SummarizationSetBy = Automatic
+		annotation SummarizationSetBy = User
 
 	column Quarter
 		dataType: int64
 		formatString: 0
-		lineageTag: eb74b34c-b5d9-4ce8-b827-35bbfa58a726
-		summarizeBy: sum
+		lineageTag: e6671a54-1dda-58ec-af4e-690b69ce39dd
+		summarizeBy: none
 		sourceColumn: Quarter
 
-		annotation SummarizationSetBy = Automatic
+		annotation SummarizationSetBy = User
 
 	column 'Month Number'
 		dataType: int64
 		formatString: 0
-		lineageTag: 6a9d732d-aec8-46f5-a36a-3f3e0d8eedd5
-		summarizeBy: sum
+		lineageTag: 755c1bb0-0b0b-5c37-8f98-6b65f1cfe0d6
+		summarizeBy: none
 		sourceColumn: Month Number
 
-		annotation SummarizationSetBy = Automatic
+		annotation SummarizationSetBy = User
 
 	column Month
 		dataType: string
-		lineageTag: 5c3da155-e948-42fa-96a2-50445d7a7ef3
+		lineageTag: 75cecc2b-5988-58d1-918e-31a374df4022
 		summarizeBy: none
 		sourceColumn: Month
+		sortByColumn: 'Month Number'
 
-		annotation SummarizationSetBy = Automatic
+		annotation SummarizationSetBy = User
 
 	column 'Month Short'
 		dataType: string
-		lineageTag: f0b600c0-c82e-43a3-afcf-6ed39118b8a7
+		lineageTag: 248988aa-8370-5ef9-b394-a54b4a5adb01
 		summarizeBy: none
 		sourceColumn: Month Short
+		sortByColumn: 'Month Number'
 
-		annotation SummarizationSetBy = Automatic
+		annotation SummarizationSetBy = User
 
 	column 'Month Start'
 		dataType: dateTime
-		formatString: Long Date
-		lineageTag: b76a615e-2584-450e-8b76-63f18eb93abd
+		formatString: mmm yyyy
+		lineageTag: e759b723-1169-534d-a4fe-8b46ef706ede
 		summarizeBy: none
 		sourceColumn: Month Start
 
-		annotation SummarizationSetBy = Automatic
+		annotation SummarizationSetBy = User
 
 		annotation UnderlyingDateTimeDataType = Date
 
 	column 'Quarter Start'
 		dataType: dateTime
-		formatString: Long Date
-		lineageTag: ecf4d3f0-f684-474d-9d08-95a4b1055e09
+		formatString: mmm yyyy
+		lineageTag: 42ba1fd5-bfb4-54cc-a8bc-ee3c38831a5c
 		summarizeBy: none
 		sourceColumn: Quarter Start
 
-		annotation SummarizationSetBy = Automatic
+		annotation SummarizationSetBy = User
 
 		annotation UnderlyingDateTimeDataType = Date
 
 	column 'Year Month'
 		dataType: string
-		lineageTag: 28cabf50-522c-494c-9d7b-095d7466bde3
+		lineageTag: 4e23a18c-c526-5c62-8b2a-0065a99a3f48
 		summarizeBy: none
 		sourceColumn: Year Month
 
-		annotation SummarizationSetBy = Automatic
+		annotation SummarizationSetBy = User
 
 	column 'Year Quarter'
 		dataType: string
-		lineageTag: 44eb6e04-d7ea-46fd-a41f-38c19baf4fe1
+		lineageTag: 9cb3f583-e240-50b3-973e-d71b23f4492a
 		summarizeBy: none
 		sourceColumn: Year Quarter
 
-		annotation SummarizationSetBy = Automatic
+		annotation SummarizationSetBy = User
 
 	column 'Day of Week'
 		dataType: int64
 		formatString: 0
-		lineageTag: 9be6cc61-4c03-4472-8eda-58f64d2e27a7
-		summarizeBy: sum
+		lineageTag: 9356c186-68cf-5632-99cd-c38bad15e4e8
+		summarizeBy: none
 		sourceColumn: Day of Week
 
-		annotation SummarizationSetBy = Automatic
+		annotation SummarizationSetBy = User
 
 	column 'Day Name'
 		dataType: string
-		lineageTag: 1088f929-4cf3-4b6d-bd74-e671a8bbe6e5
+		lineageTag: 6316022a-4c51-5985-9038-ac3301b8fe79
 		summarizeBy: none
 		sourceColumn: Day Name
 
-		annotation SummarizationSetBy = Automatic
+		annotation SummarizationSetBy = User
 
 	column 'Is Month Start'
 		dataType: boolean
 		formatString: """TRUE"";""TRUE"";""FALSE"""
-		lineageTag: 9e638096-fd8e-436c-84f4-297810cca720
+		lineageTag: 2f481ace-9029-5cd8-9428-16b203a8a011
 		summarizeBy: none
 		sourceColumn: Is Month Start
 
-		annotation SummarizationSetBy = Automatic
+		annotation SummarizationSetBy = User
 
 	column 'Is After Snapshot'
 		dataType: boolean
 		formatString: """TRUE"";""TRUE"";""FALSE"""
-		lineageTag: c0b4e811-cde8-4cff-ae26-8fc75486bb06
+		lineageTag: 942f1f05-c540-5c94-9d1c-4232f815db28
 		summarizeBy: none
 		sourceColumn: Is After Snapshot
 
-		annotation SummarizationSetBy = Automatic
+		annotation SummarizationSetBy = User
 
-	partition 'rpt dim_date' = m
+	partition Date = m
 		mode: import
 		source =
 				let
-				  Source = PostgreSQL.Database("10.211.55.2:5432", "dubai_property"),
+				  Source = PostgreSQL.Database(PgServer, PgDatabase),
 				  #"Navigation 1" = Source{[Schema = "rpt", Item = "dim_date"]}[Data]
 				in
 				  #"Navigation 1"
 
 	annotation PBI_ResultType = Table
-

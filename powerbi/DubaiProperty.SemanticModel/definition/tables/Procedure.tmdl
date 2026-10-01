@@ -1,100 +1,101 @@
-table 'rpt dim_procedure'
-	lineageTag: 9de772e9-0dfb-44dc-ac63-c7105865ac09
+/// DLD procedures and categories (rpt.dim_procedure).
+table Procedure
+	lineageTag: db125cd8-b2bb-55d2-92fe-24814ddcebd9
 
 	column 'Procedure Key'
 		dataType: int64
+		isHidden
 		formatString: 0
-		lineageTag: ed5029e4-7d4e-4629-9ee2-c5626e00e27e
+		lineageTag: 23ceaf1f-3e7b-531f-a893-78af6c3ed1b0
 		summarizeBy: none
 		sourceColumn: Procedure Key
 
-		annotation SummarizationSetBy = Automatic
+		annotation SummarizationSetBy = User
 
 	column 'Transaction Group'
 		dataType: string
-		lineageTag: 6f35f1f1-75e2-42a3-93e5-58a756283f56
+		lineageTag: 7f6c6478-b05c-53b6-a241-caa8d658df8b
 		summarizeBy: none
 		sourceColumn: Transaction Group
 
-		annotation SummarizationSetBy = Automatic
+		annotation SummarizationSetBy = User
 
 	column Procedure
 		dataType: string
-		lineageTag: 308e0fa2-26f1-4a52-ba5e-4a93b62910e5
+		lineageTag: 525e1ea7-dc07-542b-8666-e0c232571a9e
 		summarizeBy: none
 		sourceColumn: Procedure
 
-		annotation SummarizationSetBy = Automatic
+		annotation SummarizationSetBy = User
 
 	column 'Procedure Category'
 		dataType: string
-		lineageTag: a4953cb9-7ead-43e8-bddc-83fd485704f6
+		lineageTag: 2b5895a9-8993-55fc-a4e6-e16c1bc17dc5
 		summarizeBy: none
 		sourceColumn: Procedure Category
 
-		annotation SummarizationSetBy = Automatic
+		annotation SummarizationSetBy = User
 
 	column 'Procedure Category Description'
 		dataType: string
-		lineageTag: 3a9a5256-89b9-4cd0-a23a-a08d480390c5
+		lineageTag: 8109e53d-9af9-5ba4-9dac-e4d31fb91728
 		summarizeBy: none
 		sourceColumn: Procedure Category Description
 
-		annotation SummarizationSetBy = Automatic
+		annotation SummarizationSetBy = User
 
 	column 'Is Market Sale'
 		dataType: boolean
 		formatString: """TRUE"";""TRUE"";""FALSE"""
-		lineageTag: be9202ba-600f-4afa-8021-5f4cc0147094
+		lineageTag: 269c78c7-c104-547c-9ba2-a179b7d5b7d7
 		summarizeBy: none
 		sourceColumn: Is Market Sale
 
-		annotation SummarizationSetBy = Automatic
+		annotation SummarizationSetBy = User
 
 	column 'Is New Mortgage'
 		dataType: boolean
 		formatString: """TRUE"";""TRUE"";""FALSE"""
-		lineageTag: bc222d12-4b9b-4322-8f62-c55c10216a8d
+		lineageTag: 0abc9926-a3c3-5eb2-9a91-58654c8eb27a
 		summarizeBy: none
 		sourceColumn: Is New Mortgage
 
-		annotation SummarizationSetBy = Automatic
+		annotation SummarizationSetBy = User
 
 	column 'Is Portfolio Mortgage'
 		dataType: boolean
 		formatString: """TRUE"";""TRUE"";""FALSE"""
-		lineageTag: b87927eb-58d3-47e9-9b96-ba1aff6a52c0
+		lineageTag: d4d9dc75-66be-5c34-a44c-152557bbb14b
 		summarizeBy: none
 		sourceColumn: Is Portfolio Mortgage
 
-		annotation SummarizationSetBy = Automatic
+		annotation SummarizationSetBy = User
 
 	column 'Is Lease to Own'
 		dataType: boolean
 		formatString: """TRUE"";""TRUE"";""FALSE"""
-		lineageTag: 00e15f7d-22ad-47b0-824b-fbdfada3b2ec
+		lineageTag: 2ad43f5f-e5f6-5816-b360-604a822f918f
 		summarizeBy: none
 		sourceColumn: Is Lease to Own
 
-		annotation SummarizationSetBy = Automatic
+		annotation SummarizationSetBy = User
 
 	column 'Amount Is Loan'
 		dataType: boolean
 		formatString: """TRUE"";""TRUE"";""FALSE"""
-		lineageTag: ee28301c-722a-485b-8fca-5d0bfc4cd905
+		lineageTag: f2fa76ca-17d3-5445-a668-d0eaf0e7e88c
 		summarizeBy: none
 		sourceColumn: Amount Is Loan
 
-		annotation SummarizationSetBy = Automatic
+		annotation SummarizationSetBy = User
 
-	partition 'rpt dim_procedure' = m
+	partition Procedure = m
 		mode: import
 		source =
 				let
-				  Source = PostgreSQL.Database("10.211.55.2:5432", "dubai_property"),
+				  Source = PostgreSQL.Database(PgServer, PgDatabase),
 				  #"Navigation 1" = Source{[Schema = "rpt", Item = "dim_procedure"]}[Data]
 				in
 				  #"Navigation 1"
 
 	annotation PBI_ResultType = Table
-

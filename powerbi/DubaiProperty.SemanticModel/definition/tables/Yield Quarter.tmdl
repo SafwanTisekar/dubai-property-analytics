@@ -1,0 +1,142 @@
+/// Gross rental yields per area/zone x type x bedrooms x quarter (rpt.yield_quarter). Disconnected.
+table 'Yield Quarter'
+	lineageTag: 9a6abd3e-4d41-59ef-bbb9-01276943010d
+
+	column 'Quarter Start'
+		dataType: dateTime
+		formatString: mmm yyyy
+		lineageTag: 2d3a8d22-950a-5512-bfd1-a042f94e5139
+		summarizeBy: none
+		sourceColumn: Quarter Start
+
+		annotation SummarizationSetBy = User
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column 'Geo Level'
+		dataType: string
+		lineageTag: 27527fa8-ae67-5daa-a9c0-a1dc898b1406
+		summarizeBy: none
+		sourceColumn: Geo Level
+
+		annotation SummarizationSetBy = User
+
+	column Zone
+		dataType: string
+		lineageTag: 4003316b-5a32-5e5f-bcb5-b70f3ad20838
+		summarizeBy: none
+		sourceColumn: Zone
+
+		annotation SummarizationSetBy = User
+
+	column 'Area Key'
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 15273fc8-cf1a-5870-b9a9-4af6f305d248
+		summarizeBy: none
+		sourceColumn: Area Key
+
+		annotation SummarizationSetBy = User
+
+	column 'Property Type Key'
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 61ac8a09-30b6-5a82-954a-03e888451615
+		summarizeBy: none
+		sourceColumn: Property Type Key
+
+		annotation SummarizationSetBy = User
+
+	column Bedrooms
+		dataType: int64
+		formatString: 0
+		lineageTag: 1e1e7fbb-e018-59ee-ab75-1222d75fc978
+		summarizeBy: none
+		sourceColumn: Bedrooms
+
+		annotation SummarizationSetBy = User
+
+	column 'Rent Contracts'
+		dataType: int64
+		formatString: #,0
+		lineageTag: 80768add-1734-53d2-ae36-f5f4c90422b0
+		summarizeBy: sum
+		sourceColumn: Rent Contracts
+
+		annotation SummarizationSetBy = User
+
+	column Sales
+		dataType: int64
+		formatString: #,0
+		lineageTag: 895e6429-70fa-5ebf-ac8d-7d711eea9510
+		summarizeBy: sum
+		sourceColumn: Sales
+
+		annotation SummarizationSetBy = User
+
+	column 'Median Annual Rent AED'
+		dataType: int64
+		formatString: """AED ""#,0"
+		lineageTag: 5ecb18b1-a56b-51ee-98c9-6f8d269e7d23
+		summarizeBy: none
+		sourceColumn: Median Annual Rent AED
+
+		annotation SummarizationSetBy = User
+
+	column 'Median Price AED'
+		dataType: int64
+		formatString: """AED ""#,0"
+		lineageTag: 713b364f-cc5c-5975-b49a-f1c7a8396407
+		summarizeBy: none
+		sourceColumn: Median Price AED
+
+		annotation SummarizationSetBy = User
+
+	column 'Gross Yield'
+		dataType: double
+		formatString: 0.0%
+		lineageTag: 3b8fc1ad-506a-5285-8661-bfbe6addc4d3
+		summarizeBy: none
+		sourceColumn: Gross Yield
+
+		annotation SummarizationSetBy = User
+
+	column 'Is Outside Sanity Band'
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: d3780338-bd47-53ad-9a30-ea187a6f8750
+		summarizeBy: none
+		sourceColumn: Is Outside Sanity Band
+
+		annotation SummarizationSetBy = User
+
+	column 'Areas Rolled Up'
+		dataType: int64
+		formatString: #,0
+		lineageTag: 8f224c34-cd69-5d0f-90a5-0ed1be7e5b19
+		summarizeBy: sum
+		sourceColumn: Areas Rolled Up
+
+		annotation SummarizationSetBy = User
+
+	column 'Is Partial Period'
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: 5b4c1ef5-80d1-5234-a644-a1144cdf4d05
+		summarizeBy: none
+		sourceColumn: Is Partial Period
+
+		annotation SummarizationSetBy = User
+
+	partition 'Yield Quarter' = m
+		mode: import
+		source =
+				let
+				  Source = PostgreSQL.Database(PgServer, PgDatabase),
+				  #"Navigation 1" = Source{[Schema = "rpt", Item = "yield_quarter"]}[Data]
+				in
+				  #"Navigation 1"
+
+	annotation PBI_ResultType = Table

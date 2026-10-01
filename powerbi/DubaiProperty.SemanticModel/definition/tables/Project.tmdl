@@ -1,70 +1,71 @@
-table 'rpt dim_project'
-	lineageTag: 402769c9-2ed1-4ce2-9a14-aaf973d52893
+/// DLD projects and master projects (rpt.dim_project). No developer names yet.
+table Project
+	lineageTag: babcc83f-d672-534c-8539-bf3c544e6920
 
 	column 'Project Key'
 		dataType: int64
+		isHidden
 		formatString: 0
-		lineageTag: 1568d522-4286-4786-b2c5-f417bc65ec30
+		lineageTag: 38e2ed7b-d797-57ed-9ccf-cbdce5381e50
 		summarizeBy: none
 		sourceColumn: Project Key
 
-		annotation SummarizationSetBy = Automatic
+		annotation SummarizationSetBy = User
 
 	column Project
 		dataType: string
-		lineageTag: d81e6a02-8775-448c-9e47-bb360711d919
+		lineageTag: f84890a6-af90-5a2a-a0f4-2aa4f8c8c259
 		summarizeBy: none
 		sourceColumn: Project
 
-		annotation SummarizationSetBy = Automatic
+		annotation SummarizationSetBy = User
 
 	column 'Master Project'
 		dataType: string
-		lineageTag: e540c29c-14ca-4236-b3a5-a439f0601ef6
+		lineageTag: 8783da6d-956e-544e-a72d-22283f60129e
 		summarizeBy: none
 		sourceColumn: Master Project
 
-		annotation SummarizationSetBy = Automatic
+		annotation SummarizationSetBy = User
 
 	column 'First Transaction Date'
 		dataType: dateTime
-		formatString: Long Date
-		lineageTag: 2409227b-bffa-4456-aeaf-376c2536a895
+		formatString: yyyy-mm-dd
+		lineageTag: 42d82bab-63f5-5129-aa19-0ce4971d10ea
 		summarizeBy: none
 		sourceColumn: First Transaction Date
 
-		annotation SummarizationSetBy = Automatic
+		annotation SummarizationSetBy = User
 
 		annotation UnderlyingDateTimeDataType = Date
 
 	column 'Last Transaction Date'
 		dataType: dateTime
-		formatString: Long Date
-		lineageTag: d105c6b5-b6d6-4f66-bd44-a3179fa47f55
+		formatString: yyyy-mm-dd
+		lineageTag: 29a5296b-2171-57cb-89df-b3b4ec4ff62d
 		summarizeBy: none
 		sourceColumn: Last Transaction Date
 
-		annotation SummarizationSetBy = Automatic
+		annotation SummarizationSetBy = User
 
 		annotation UnderlyingDateTimeDataType = Date
 
 	column 'Transaction Lines'
 		dataType: int64
-		formatString: 0
-		lineageTag: 4e356ac6-51f1-4994-b2e7-a58dd7bd025b
+		formatString: #,0
+		lineageTag: 2404a424-a9cb-5c28-bb20-4e7800b393a2
 		summarizeBy: sum
 		sourceColumn: Transaction Lines
 
-		annotation SummarizationSetBy = Automatic
+		annotation SummarizationSetBy = User
 
-	partition 'rpt dim_project' = m
+	partition Project = m
 		mode: import
 		source =
 				let
-				  Source = PostgreSQL.Database("10.211.55.2:5432", "dubai_property"),
+				  Source = PostgreSQL.Database(PgServer, PgDatabase),
 				  #"Navigation 1" = Source{[Schema = "rpt", Item = "dim_project"]}[Data]
 				in
 				  #"Navigation 1"
 
 	annotation PBI_ResultType = Table
-

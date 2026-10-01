@@ -1,0 +1,46 @@
+/// Toggle for the 2014-2020 replay: the Dubai-wide fall for everyone (lower range) or each buyer's own zone x type series (upper range).
+table 'Replay Depth'
+	lineageTag: 9ce96ef5-d3e3-565c-af97-c00c6f3e8b63
+
+	column 'Replay Depth'
+		lineageTag: b393c43f-6458-5f88-8ff2-7a098fbb43ba
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Replay Depth]
+		sortByColumn: 'Replay Depth Order'
+
+		annotation SummarizationSetBy = User
+
+	column Scenario
+		isHidden
+		lineageTag: 633bac99-6245-5d0c-afa0-def81ca53b0a
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Scenario]
+
+		annotation SummarizationSetBy = User
+
+	column 'Replay Depth Order'
+		isHidden
+		formatString: 0
+		lineageTag: 3aa131c0-478d-5d32-890b-546598dcb3e2
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Replay Depth Order]
+
+		annotation SummarizationSetBy = User
+
+	partition 'Replay Depth' = calculated
+		mode: import
+		source =
+				DATATABLE (
+					"Replay Depth", STRING,
+					"Scenario", STRING,
+					"Replay Depth Order", INTEGER,
+					{
+						{ "Dubai-wide (lower range)", "Replay: 2014-2020, Dubai-wide", 1 },
+						{ "Own series (upper range)", "Replay: 2014-2020, own series", 2 }
+					}
+				)
+
+	annotation PBI_Id = 96635c6a15ed54748fd9a192d6648abc

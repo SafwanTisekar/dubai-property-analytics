@@ -1,0 +1,1070 @@
+/// Every measure of the report, in display folders by page topic (docs/06 §2). Business logic lives in dbt; these only aggregate the rpt views.
+table _Measures
+	lineageTag: 14f4c052-914f-5d16-b760-b994704495e8
+
+	/// Min-n rule (CLAUDE.md): no median, yield or index point from fewer than this many observations.
+	measure 'Min N' = MAX ( 'Report Info'[Min N] )
+		formatString: 0
+		displayFolder: Report
+		lineageTag: f637bfd5-731c-54d1-b769-4e058f6ba33a
+
+	/// Header text: the data snapshot date (latest transaction date).
+	measure 'Data As Of Label' = "Data as of " & FORMAT ( MAX ( 'Report Info'[Data As Of] ), "d mmm yyyy" )
+		displayFolder: Report
+		lineageTag: 2853055f-a19f-510e-bb22-33973b8c909a
+
+	/// Footer text: the licence attributions (DLD CC BY 4.0; OpenStreetMap ODbL for the map).
+	measure 'Footer Attribution' = "Source: " & MAX ( 'Report Info'[Source] ) & "  ·  " & MAX ( 'Report Info'[Map Attribution] )
+		displayFolder: Report
+		lineageTag: 3eee1890-b50c-5698-994e-6ffe5d52bbed
+
+	/// The Year slicer as text for titles: one year, or 'all years'.
+	measure 'Selected Year Label' = IF ( HASONEVALUE ( 'Date'[Year] ), FORMAT ( VALUES ( 'Date'[Year] ), "0" ), "all years" )
+		displayFolder: Report
+		lineageTag: 1402b05e-e264-5a7c-90a2-15150d560de3
+
+	/// Label required on every stress visual (docs/06 §3).
+	measure 'Stress Disclaimer' = "Illustrative, not a regulatory stress test. Assumed LTVs; loans held at origination (no amortisation)."
+		displayFolder: Report
+		lineageTag: fe83e813-1f4e-5190-b4d6-f07d974f991c
+
+	/// Arm's-length market sales (is_market_sale; every market sale, quality flags only exclude rows from price statistics). From Area Month, which reconciles to Transactions.
+	measure 'Market Sales' = SUM ( 'Area Month'[Market Sales] )
+		formatString: #,0
+		displayFolder: Market
+		lineageTag: e8664477-a996-52fb-a380-b87cf8c5ffea
+
+	/// Market sales value, AED counted once per deal (C16).
+	measure 'Market Sales Value' = SUM ( 'Area Month'[Market Sales Value AED] )
+		formatString: """AED ""#,0"
+		displayFolder: Market
+		lineageTag: 60b09570-6bf1-5e1d-b815-0e6a51772f68
+
+	/// Market sales value in the same period a year earlier.
+	measure 'Market Sales Value PY' = CALCULATE ( [Market Sales Value], SAMEPERIODLASTYEAR ( 'Date'[Date] ) )
+		formatString: """AED ""#,0"
+		displayFolder: Market
+		lineageTag: 721d5633-7a8b-5678-9e0c-90030d77b11a
+
+	/// Change in market sales value on the same period a year earlier.
+	measure 'Market Sales Value YoY %' =
+			VAR _cy = [Market Sales Value]
+			VAR _py = [Market Sales Value PY]
+			RETURN
+				IF ( NOT ISBLANK ( _py ), DIVIDE ( _cy - _py, _py ) )
+		formatString: +0.0%;-0.0%;0.0%
+		displayFolder: Market
+		lineageTag: c49bb9c9-c7b8-5c0a-8c45-5a934b359f15
+
+	/// Change in the number of market sales on the same period a year earlier.
+	measure 'Market Sales YoY %' =
+			VAR _cy = [Market Sales]
+			VAR _py = CALCULATE ( [Market Sales], SAMEPERIODLASTYEAR ( 'Date'[Date] ) )
+			RETURN
+				IF ( NOT ISBLANK ( _py ), DIVIDE ( _cy - _py, _py ) )
+		formatString: +0.0%;-0.0%;0.0%
+		displayFolder: Market
+		lineageTag: 894cf584-219a-50f0-a1cf-b31d03cc858f
+
+	/// Clean market sales: the population for price statistics (no quality flag).
+	measure 'Clean Sales' = SUM ( 'Area Month'[Clean Sales] )
+		formatString: #,0
+		displayFolder: Market
+		lineageTag: 5b037bb5-a349-5be9-a86e-b5e4f3098bd4
+
+	/// Median AED per sq m over clean market sales, blank under min-n. A median of lines, so it is computed on Transactions (cell medians can't be combined).
+	measure 'Median Price per Sq M' =
+			VAR _n = CALCULATE ( COUNTROWS ( 'Transactions' ), KEEPFILTERS ( 'Transactions'[Is Clean Market Sale] = TRUE () ) )
+			RETURN
+				IF (
+					_n >= [Min N],
+					CALCULATE (
+						MEDIAN ( 'Transactions'[Price per Sq M AED] ),
+						KEEPFILTERS ( 'Transactions'[Is Clean Market Sale] = TRUE () )
+					)
+				)
+		formatString: """AED ""#,0"
+		displayFolder: Market
+		lineageTag: 342239cf-d073-502b-b9f0-3b1f72f9867e
+
+	/// Σ AED / Σ sq m over clean sales of residential apartments and villas / townhouses within the class area cap (docs/01 §4). Only meaningful within these classes.
+	measure 'Area-Weighted Price per Sq M (Homes)' =
+			CALCULATE (
+				DIVIDE ( SUM ( 'Area Month'[Clean Sales Value AED] ), SUM ( 'Area Month'[Clean Sales Area Sq M] ) ),
+				KEEPFILTERS ( 'Area Month'[Property Type Key] IN { 101, 102 } )
+			)
+		formatString: """AED ""#,0"
+		displayFolder: Market
+		lineageTag: 2d4e583a-8a7b-5518-aae6-a77bb14e2a32
+
+	/// Off-plan market sales (reg_type).
+	measure 'Off-Plan Sales' = CALCULATE ( [Market Sales], KEEPFILTERS ( 'Area Month'[Is Off-Plan] = TRUE () ) )
+		formatString: #,0
+		displayFolder: Market
+		lineageTag: 3654d5b8-2385-573f-9576-859db933e280
+
+	/// Off-plan share of market sales by count.
+	measure 'Off-Plan Share (Count)' = DIVIDE ( [Off-Plan Sales], [Market Sales] )
+		formatString: 0.0%
+		displayFolder: Market
+		lineageTag: 12c89a3f-87f3-5ed2-9492-5477be67def2
+
+	/// Off-plan share of market sales value.
+	measure 'Off-Plan Share (Value)' = DIVIDE ( CALCULATE ( [Market Sales Value], KEEPFILTERS ( 'Area Month'[Is Off-Plan] = TRUE () ) ), [Market Sales Value] )
+		formatString: 0.0%
+		displayFolder: Market
+		lineageTag: 52249209-66a3-529d-bf1a-17d2a7c91c66
+
+	/// Ready (not off-plan) market sales: the denominator of the purchase-mortgage share.
+	measure 'Ready Market Sales' = CALCULATE ( [Market Sales], KEEPFILTERS ( 'Area Month'[Is Off-Plan] = FALSE () ) )
+		formatString: #,0
+		displayFolder: Financing
+		lineageTag: f70f6540-e7da-5c87-a8eb-a71386824545
+
+	/// Ready market sales matched to a same-day purchase mortgage of the same unit (a lower bound on bank financing).
+	measure 'Purchase Mortgages' = SUM ( 'Area Month'[Purchase Mortgages] )
+		formatString: #,0
+		displayFolder: Financing
+		lineageTag: a2dca5ab-3ba6-58b4-9ba8-ef4d67fa0117
+
+	/// Headline (docs/01 §4): matched purchase mortgages / ready market sales. A lower bound.
+	measure 'Purchase Mortgage Share' = DIVIDE ( [Purchase Mortgages], [Ready Market Sales] )
+		formatString: 0.0%
+		displayFolder: Financing
+		lineageTag: b560ebd4-8958-5f04-9578-8ea516021074
+
+	/// Ready market sales with no matched purchase mortgage at registration (not 'cash': some are financed later or not matched).
+	measure 'Ready Sales Not Bank-Financed' = [Ready Market Sales] - [Purchase Mortgages]
+		formatString: #,0
+		displayFolder: Financing
+		lineageTag: 4c358762-b0e2-512a-94f9-86c45d6db4dd
+
+	/// Individual new mortgages, incl. refinancing and off-plan pre-registration; portfolio mortgages excluded.
+	measure 'New Mortgages' = SUM ( 'Area Month'[New Mortgages] )
+		formatString: #,0
+		displayFolder: Financing
+		lineageTag: 167e8d16-dc7a-5e7b-a419-2549cc101a15
+
+	/// Secondary indicator: new mortgages per 100 market sales.
+	measure 'New Mortgages per 100 Sales' = DIVIDE ( [New Mortgages], [Market Sales] ) * 100
+		formatString: #,0.0
+		displayFolder: Financing
+		lineageTag: d3b4d329-8f75-59ad-aeba-4437c3a345dc
+
+	/// Loan amount of individual new mortgages.
+	measure 'New Mortgage Loans' = SUM ( 'Area Month'[New Mortgage Loans AED] )
+		formatString: """AED ""#,0"
+		displayFolder: Financing
+		lineageTag: feb36ad5-693a-54e4-9bca-616a9d9020ba
+
+	/// Portfolio (bulk) mortgage registrations, counted once per deal; reported separately.
+	measure 'Portfolio Mortgage Deals' = SUM ( 'Area Month'[Portfolio Mortgage Deals] )
+		formatString: #,0
+		displayFolder: Financing
+		lineageTag: 88123085-de63-571f-b568-b68883190acc
+
+	/// Portfolio mortgage value, once per deal.
+	measure 'Portfolio Mortgage Value' = SUM ( 'Area Month'[Portfolio Mortgage Value AED] )
+		formatString: """AED ""#,0"
+		displayFolder: Financing
+		lineageTag: 2574cb6c-5bb0-5362-bb40-ae468068b73b
+
+	/// Median loan / price of matched purchase mortgages (observed LTV).
+	measure 'Median Purchase LTV' = MEDIAN ( 'Transactions'[Purchase LTV] )
+		formatString: 0.0%
+		displayFolder: Financing
+		lineageTag: c0417bc7-496b-5310-a004-c293eef1a0c5
+
+	/// Effective Fed Funds rate, monthly average (decimal).
+	measure 'Fed Funds Rate' = AVERAGE ( 'Rates Monthly'[Fed Funds Rate] )
+		formatString: 0.00%
+		displayFolder: Rates
+		lineageTag: d94f789c-3253-5ff6-9fa0-6dec0bf0d936
+
+	/// EIBOR 3 months. Blank until a CBUAE file is loaded (docs/08 Phase 1).
+	measure 'EIBOR 3M' = AVERAGE ( 'Rates Monthly'[EIBOR 3M] )
+		formatString: 0.00%
+		displayFolder: Rates
+		lineageTag: 913ec2e4-20af-5c80-996d-21bd84d7e639
+
+	/// EIBOR 3M where loaded, else the Fed Funds rate as its proxy (the AED is pegged to the USD).
+	measure 'Reference Rate' =
+			VAR _eibor = [EIBOR 3M]
+			RETURN
+				IF ( NOT ISBLANK ( _eibor ), _eibor, [Fed Funds Rate] )
+		formatString: 0.00%
+		displayFolder: Rates
+		lineageTag: 1d91c911-4e01-5f86-80c6-754dde7a7c74
+
+	/// Names the series [Reference Rate] shows, for the visual title.
+	measure 'Reference Rate Label' =
+			IF (
+				ISBLANK ( CALCULATE ( [EIBOR 3M], REMOVEFILTERS ( 'Date' ) ) ),
+				"Fed Funds rate (EIBOR proxy: the AED is pegged to the USD)",
+				"EIBOR 3M"
+			)
+		displayFolder: Rates
+		lineageTag: 1a4b4edd-6dd1-5c96-92cc-685d13339ff5
+
+	/// The index segment chosen on the Price Index segment slicer; Dubai when none.
+	measure 'Selected Index Segment' = SELECTEDVALUE ( 'Price Index'[Segment], "Dubai (all residential)" )
+		displayFolder: Prices
+		lineageTag: 948ab306-d9ef-5671-b764-77b9c3b0fda5
+
+	/// Hedonic index (Jan 2019 = 100) of the selected segment, on the Date axis (the table is disconnected; TREATAS maps dates to periods).
+	measure 'Index Value' =
+			VAR _seg = [Selected Index Segment]
+			RETURN
+				CALCULATE (
+					SUM ( 'Price Index'[Index Value] ),
+					'Price Index'[Segment] = _seg,
+					TREATAS ( VALUES ( 'Date'[Date] ), 'Price Index'[Period Start] )
+				)
+		formatString: 0.0
+		displayFolder: Prices
+		lineageTag: 14c037ce-55c7-5ecb-aa19-4ca7cb8b339f
+
+	/// The selected segment's latest complete (non-partial) period on or before the end of the date selection.
+	measure 'Index Latest Complete Period' =
+			VAR _seg = [Selected Index Segment]
+			RETURN
+				CALCULATE (
+					MAX ( 'Price Index'[Period Start] ),
+					'Price Index'[Segment] = _seg,
+					'Price Index'[Is Partial Period] = FALSE (),
+					TREATAS ( VALUES ( 'Date'[Date] ), 'Price Index'[Period Start] )
+				)
+		formatString: mmm yyyy
+		displayFolder: Prices
+		lineageTag: 1be9a159-6df7-5286-a269-5f1af6b5e178
+
+	/// Card: index level at the latest complete period.
+	measure 'Index Value (Latest Complete)' =
+			VAR _seg = [Selected Index Segment]
+			VAR _p = [Index Latest Complete Period]
+			RETURN
+				CALCULATE ( SUM ( 'Price Index'[Index Value] ), 'Price Index'[Segment] = _seg, 'Price Index'[Period Start] = _p )
+		formatString: 0.0
+		displayFolder: Prices
+		lineageTag: 8b039bfb-ddb5-514d-ac48-ee51d2d59a39
+
+	/// Card and line: like-for-like price change on a year earlier at the latest complete period in the selection.
+	measure 'Index YoY' =
+			VAR _seg = [Selected Index Segment]
+			VAR _p = [Index Latest Complete Period]
+			RETURN
+				CALCULATE ( SUM ( 'Price Index'[YoY Change] ), 'Price Index'[Segment] = _seg, 'Price Index'[Period Start] = _p )
+		formatString: +0.0%;-0.0%;0.0%
+		displayFolder: Prices
+		lineageTag: 2749679f-4dd4-51e3-ada0-565f7f167525
+
+	/// Card: fall from the running peak at the latest complete period (0 = at a peak).
+	measure 'Drawdown from Peak' =
+			VAR _seg = [Selected Index Segment]
+			VAR _p = [Index Latest Complete Period]
+			RETURN
+				CALCULATE ( SUM ( 'Price Index'[Drawdown] ), 'Price Index'[Segment] = _seg, 'Price Index'[Period Start] = _p )
+		formatString: 0.0%
+		displayFolder: Prices
+		lineageTag: c1e27e37-39f7-59d7-89fe-531a5d1641ff
+
+	/// Line: drawdown from the running peak per period, for the drawdown chart.
+	measure 'Index Drawdown' =
+			VAR _seg = [Selected Index Segment]
+			RETURN
+				CALCULATE (
+					SUM ( 'Price Index'[Drawdown] ),
+					'Price Index'[Segment] = _seg,
+					TREATAS ( VALUES ( 'Date'[Date] ), 'Price Index'[Period Start] )
+				)
+		formatString: 0.0%
+		displayFolder: Prices
+		lineageTag: f5b1fd34-72f6-5855-a925-0bc20bf5a86b
+
+	/// Deepest fall from a running peak in the date selection (all history when no Year is selected).
+	measure 'Max Drawdown' =
+			VAR _seg = [Selected Index Segment]
+			RETURN
+				CALCULATE (
+					MIN ( 'Price Index'[Drawdown] ),
+					'Price Index'[Segment] = _seg,
+					TREATAS ( VALUES ( 'Date'[Date] ), 'Price Index'[Period Start] )
+				)
+		formatString: 0.0%
+		displayFolder: Prices
+		lineageTag: 13a642f3-e249-58ac-a09a-2a859637e285
+
+	/// DLD's official index, rebased to Jan 2019 = 100, for the selected segment (ends May 2024; leads/lags: reports/price_index.md).
+	measure 'DLD Index Value' =
+			CALCULATE (
+				SUM ( 'DLD Price Index'[DLD Index Value] ),
+				TREATAS ( { [Selected Index Segment] }, 'DLD Price Index'[Segment] ),
+				TREATAS ( VALUES ( 'Date'[Date] ), 'DLD Price Index'[Period Start] )
+			)
+		formatString: 0.0
+		displayFolder: Prices
+		lineageTag: 3f02b9a8-e558-5968-96b8-42a67757a775
+
+	/// Hedonic apartment index (Jan 2019 = 100) for the mix-shift chart.
+	measure 'Index Value (Apartments)' =
+			CALCULATE (
+				SUM ( 'Price Index'[Index Value] ),
+				'Price Index'[Segment] = "Apartments",
+				TREATAS ( VALUES ( 'Date'[Date] ), 'Price Index'[Period Start] )
+			)
+		formatString: 0.0
+		displayFolder: Prices
+		lineageTag: 636cef2c-808b-5822-ae30-9fee0f620882
+
+	/// Raw median AED per sq m of clean residential apartment sales, blank under min-n: what a median shows before mix adjustment.
+	measure 'Raw Median Price per Sq M (Apartments)' = CALCULATE ( [Median Price per Sq M], KEEPFILTERS ( 'Transactions'[Property Type Key] = 101 ) )
+		formatString: """AED ""#,0"
+		displayFolder: Prices
+		lineageTag: 751dda38-d7d5-5e7e-9f5a-300277fa9f5a
+
+	/// Raw apartment median rebased to Jan 2019 = 100 (the index base month, config.INDEX_BASE_MONTH), so it sits on the hedonic index's axis: the gap is the mix shift.
+	measure 'Raw Median Rebased (Apartments)' =
+			VAR _base =
+				CALCULATE (
+					[Raw Median Price per Sq M (Apartments)],
+					REMOVEFILTERS ( 'Date' ),
+					'Date'[Month Start] = DATE ( 2019, 1, 1 )
+				)
+			RETURN
+				DIVIDE ( [Raw Median Price per Sq M (Apartments)], _base ) * 100
+		formatString: 0.0
+		displayFolder: Prices
+		lineageTag: 5b1cf497-53ef-5ef9-b5e7-41974f0d2a66
+
+	/// Headline gross yield: sales-weighted mean of zone x type x bedroom cells over the last four complete quarters (reports/yields.md). Follows the Zone, Property Type and Bedrooms slicers; ignores Year.
+	measure 'Gross Yield (Latest 4 Quarters)' =
+			VAR _lastQ =
+				CALCULATE (
+					MAX ( 'Yield Quarter'[Quarter Start] ),
+					REMOVEFILTERS ( 'Yield Quarter' ),
+					'Yield Quarter'[Is Partial Period] = FALSE ()
+				)
+			VAR _cells =
+				CALCULATETABLE (
+					'Yield Quarter',
+					'Yield Quarter'[Geo Level] = "Zone",
+					'Yield Quarter'[Is Partial Period] = FALSE (),
+					'Yield Quarter'[Quarter Start] > EDATE ( _lastQ, -12 ),
+					'Yield Quarter'[Quarter Start] <= _lastQ,
+					TREATAS ( VALUES ( 'Area'[Zone] ), 'Yield Quarter'[Zone] ),
+					TREATAS ( VALUES ( 'Property Type'[Property Type Key] ), 'Yield Quarter'[Property Type Key] ),
+					TREATAS ( VALUES ( 'Bedrooms'[Bedrooms Key] ), 'Yield Quarter'[Bedrooms] )
+				)
+			RETURN
+				DIVIDE ( SUMX ( _cells, 'Yield Quarter'[Gross Yield] * 'Yield Quarter'[Sales] ), SUMX ( _cells, 'Yield Quarter'[Sales] ) )
+		formatString: 0.0%
+		displayFolder: Yields
+		lineageTag: e54d1298-2ca0-5df8-889e-5ebdd4d2cb68
+
+	/// Area-level cells (n >= min-n on both sides) for the map; most areas only reach min-n at zone level, so many are blank.
+	measure 'Gross Yield by Area (Latest 4 Quarters)' =
+			VAR _lastQ =
+				CALCULATE (
+					MAX ( 'Yield Quarter'[Quarter Start] ),
+					REMOVEFILTERS ( 'Yield Quarter' ),
+					'Yield Quarter'[Is Partial Period] = FALSE ()
+				)
+			VAR _cells =
+				CALCULATETABLE (
+					'Yield Quarter',
+					'Yield Quarter'[Geo Level] = "Area",
+					'Yield Quarter'[Is Partial Period] = FALSE (),
+					'Yield Quarter'[Quarter Start] > EDATE ( _lastQ, -12 ),
+					'Yield Quarter'[Quarter Start] <= _lastQ,
+					TREATAS ( VALUES ( 'Area'[Area Key] ), 'Yield Quarter'[Area Key] ),
+					TREATAS ( VALUES ( 'Property Type'[Property Type Key] ), 'Yield Quarter'[Property Type Key] ),
+					TREATAS ( VALUES ( 'Bedrooms'[Bedrooms Key] ), 'Yield Quarter'[Bedrooms] )
+				)
+			RETURN
+				DIVIDE ( SUMX ( _cells, 'Yield Quarter'[Gross Yield] * 'Yield Quarter'[Sales] ), SUMX ( _cells, 'Yield Quarter'[Sales] ) )
+		formatString: 0.0%
+		displayFolder: Yields
+		lineageTag: 8278653b-9fee-5fed-b800-832cade3a85d
+
+	/// Trend: sales-weighted zone-cell yield per quarter on the Date axis (complete quarters only).
+	measure 'Gross Yield by Quarter' =
+			CALCULATE (
+				DIVIDE (
+					SUMX ( 'Yield Quarter', 'Yield Quarter'[Gross Yield] * 'Yield Quarter'[Sales] ),
+					SUM ( 'Yield Quarter'[Sales] )
+				),
+				'Yield Quarter'[Geo Level] = "Zone",
+				'Yield Quarter'[Is Partial Period] = FALSE (),
+				TREATAS ( VALUES ( 'Date'[Date] ), 'Yield Quarter'[Quarter Start] ),
+				TREATAS ( VALUES ( 'Area'[Zone] ), 'Yield Quarter'[Zone] ),
+				TREATAS ( VALUES ( 'Property Type'[Property Type Key] ), 'Yield Quarter'[Property Type Key] ),
+				TREATAS ( VALUES ( 'Bedrooms'[Bedrooms Key] ), 'Yield Quarter'[Bedrooms] )
+			)
+		formatString: 0.0%
+		displayFolder: Yields
+		lineageTag: 1c48abe2-66d9-5228-82e9-a64e9ba35e55
+
+	/// For the yield vs growth scatter: the zone x type index's change over the 3 years to its latest complete period. Needs one zone and one property type in context.
+	measure 'Index Growth 3Y (Zone)' =
+			VAR _zone = SELECTEDVALUE ( 'Area'[Zone] )
+			VAR _type = SELECTEDVALUE ( 'Property Type'[Property Type Key] )
+			VAR _rows =
+				CALCULATETABLE (
+					'Price Index',
+					REMOVEFILTERS ( 'Price Index' ),
+					'Price Index'[Segment Level] = "Zone",
+					'Price Index'[Zone] = _zone,
+					'Price Index'[Property Type Key] = _type
+				)
+			VAR _last = MAXX ( FILTER ( _rows, 'Price Index'[Is Partial Period] = FALSE () ), 'Price Index'[Period Start] )
+			VAR _now = MAXX ( FILTER ( _rows, 'Price Index'[Period Start] = _last ), 'Price Index'[Index Value] )
+			VAR _then = MAXX ( FILTER ( _rows, 'Price Index'[Period Start] = EDATE ( _last, -36 ) ), 'Price Index'[Index Value] )
+			RETURN
+				IF ( NOT ISBLANK ( _then ), DIVIDE ( _now, _then ) - 1 )
+		formatString: +0.0%;-0.0%;0.0%
+		displayFolder: Yields
+		lineageTag: f0552d4e-33a2-5aab-a21d-548be32f7391
+
+	/// New comparable rent contracts (the default market rent; renewals lag the market).
+	measure 'New Market Rents' = SUM ( 'Rent Month'[Market Rent Contracts] )
+		formatString: #,0
+		displayFolder: Yields
+		lineageTag: 078fc928-7e2d-5bce-a823-bb9be4aaf053
+
+	/// Σ annual rent / Σ sq m over new comparable contracts of residential apartments and villas with a plausible area (C21 caps). Rule C11 is applied upstream.
+	measure 'Area-Weighted New Rent per Sq M (Homes)' =
+			CALCULATE (
+				DIVIDE ( SUM ( 'Rent Month'[Comparable Rent with Area AED] ), SUM ( 'Rent Month'[Comparable Area Sq M] ) ),
+				KEEPFILTERS ( 'Rent Month'[Is New Contract] = TRUE () ),
+				KEEPFILTERS ( 'Rent Month'[Property Type Key] IN { 101, 102 } )
+			)
+		formatString: """AED ""#,0"
+		displayFolder: Yields
+		lineageTag: 20e85efc-cf54-51df-a0e5-e84555f5f41e
+
+	/// Area-weighted annual rent per sq m of new comparable contracts in context (any property type in the filter; compare within one class).
+	measure 'New Rent per Sq M' =
+			CALCULATE (
+				DIVIDE ( SUM ( 'Rent Month'[Comparable Rent with Area AED] ), SUM ( 'Rent Month'[Comparable Area Sq M] ) ),
+				KEEPFILTERS ( 'Rent Month'[Is New Contract] = TRUE () )
+			)
+		formatString: """AED ""#,0"
+		displayFolder: Yields
+		lineageTag: 87c0c09e-c234-5aa5-bd42-eabc11fddb56
+
+	/// Champion (LightGBM) median absolute % error on the out-of-time test set (2025+), from AVM Performance (model card headline).
+	measure 'AVM Test MdAPE' =
+			CALCULATE (
+				MAX ( 'AVM Performance'[MdAPE] ),
+				'AVM Performance'[Model] = "lightgbm",
+				'AVM Performance'[Split] = "Test",
+				'AVM Performance'[Breakdown] = "Overall"
+			)
+		formatString: 0.00%
+		displayFolder: Valuation
+		lineageTag: 690a4ad0-1ea2-5f14-99b1-6ccfd9c10eca
+
+	/// Share of test sales valued within ±10%.
+	measure 'AVM Test Hit Rate 10%' =
+			CALCULATE (
+				MAX ( 'AVM Performance'[Hit Rate 10 Pct] ),
+				'AVM Performance'[Model] = "lightgbm",
+				'AVM Performance'[Split] = "Test",
+				'AVM Performance'[Breakdown] = "Overall"
+			)
+		formatString: 0.0%
+		displayFolder: Valuation
+		lineageTag: ef426b40-ec92-5e1f-b793-2372b7b3ce26
+
+	/// Share of test sales valued within ±20%.
+	measure 'AVM Test Hit Rate 20%' =
+			CALCULATE (
+				MAX ( 'AVM Performance'[Hit Rate 20 Pct] ),
+				'AVM Performance'[Model] = "lightgbm",
+				'AVM Performance'[Split] = "Test",
+				'AVM Performance'[Breakdown] = "Overall"
+			)
+		formatString: 0.0%
+		displayFolder: Valuation
+		lineageTag: 8054d3f1-160b-5f36-b7ed-7208574edf42
+
+	/// Comparable-sales baseline (6 months) on the same test set.
+	measure 'AVM Test MdAPE (Baseline)' =
+			CALCULATE (
+				MAX ( 'AVM Performance'[MdAPE] ),
+				'AVM Performance'[Model] = "comps",
+				'AVM Performance'[Split] = "Test",
+				'AVM Performance'[Breakdown] = "Overall"
+			)
+		formatString: 0.00%
+		displayFolder: Valuation
+		lineageTag: 37b96bb2-8273-54b4-9bd5-7c07166f6d8f
+
+	/// Baseline share within ±10%.
+	measure 'AVM Test Hit Rate 10% (Baseline)' =
+			CALCULATE (
+				MAX ( 'AVM Performance'[Hit Rate 10 Pct] ),
+				'AVM Performance'[Model] = "comps",
+				'AVM Performance'[Split] = "Test",
+				'AVM Performance'[Breakdown] = "Overall"
+			)
+		formatString: 0.0%
+		displayFolder: Valuation
+		lineageTag: 9f6cef11-cecf-5c4a-b964-050dafc66c1c
+
+	/// Baseline share within ±20%.
+	measure 'AVM Test Hit Rate 20% (Baseline)' =
+			CALCULATE (
+				MAX ( 'AVM Performance'[Hit Rate 20 Pct] ),
+				'AVM Performance'[Model] = "comps",
+				'AVM Performance'[Split] = "Test",
+				'AVM Performance'[Breakdown] = "Overall"
+			)
+		formatString: 0.0%
+		displayFolder: Valuation
+		lineageTag: fb44a234-4c87-5090-8a24-f084274c89d4
+
+	/// Percentage points of MdAPE the model saves against comparable sales (positive = better).
+	measure 'AVM MdAPE Gain vs Baseline' = [AVM Test MdAPE (Baseline)] - [AVM Test MdAPE]
+		formatString: 0.00%
+		displayFolder: Valuation
+		lineageTag: f66ebff1-82c6-5842-a658-c219dbfc7972
+
+	/// MdAPE of one model x segment row of AVM Performance (for the accuracy-by-segment bar; filter Split and Breakdown on the visual).
+	measure 'AVM Segment MdAPE' =
+			IF (
+				HASONEVALUE ( 'AVM Performance'[Model] ) && HASONEVALUE ( 'AVM Performance'[Segment] ),
+				MAX ( 'AVM Performance'[MdAPE] )
+			)
+		formatString: 0.00%
+		displayFolder: Valuation
+		lineageTag: 28ce2739-71e7-5f13-bf45-4a3e08fecc55
+
+	/// Out-of-sample sales the AVM valued in context.
+	measure 'Valued Sales' = COUNTROWS ( 'AVM Score' )
+		formatString: #,0
+		displayFolder: Valuation
+		lineageTag: 46ada2ec-d181-5371-8eca-55efb66e8aab
+
+	/// MdAPE recomputed for the current slicers (out-of-sample rows), blank under min-n.
+	measure 'AVM MdAPE (Interactive)' = IF ( [Valued Sales] >= [Min N], MEDIAN ( 'AVM Score'[Absolute Error Pct] ) )
+		formatString: 0.00%
+		displayFolder: Valuation
+		lineageTag: e57cf953-a2a3-5dad-992f-5bf17f7a064e
+
+	/// Share within ±10% for the current slicers, blank under min-n.
+	measure 'AVM Hit Rate 10% (Interactive)' =
+			IF (
+				[Valued Sales] >= [Min N],
+				DIVIDE ( CALCULATE ( COUNTROWS ( 'AVM Score' ), KEEPFILTERS ( 'AVM Score'[Absolute Error Pct] <= 0.10 ) ), [Valued Sales] )
+			)
+		formatString: 0.0%
+		displayFolder: Valuation
+		lineageTag: 46993871-57ce-507c-bcb2-d7c2a98c56cc
+
+	/// Median sale price of the valued sales (actual line of actual vs AVM).
+	measure 'Median Sale Price (AVM Sample)' = IF ( [Valued Sales] >= [Min N], MEDIAN ( 'AVM Score'[Price AED] ) )
+		formatString: """AED ""#,0"
+		displayFolder: Valuation
+		lineageTag: 0d68548f-c6d4-5327-9bcf-6cc587b12b66
+
+	/// Median AVM value of the same sales (predicted line).
+	measure 'Median AVM Value' = IF ( [Valued Sales] >= [Min N], MEDIAN ( 'AVM Score'[AVM Value AED] ) )
+		formatString: """AED ""#,0"
+		displayFolder: Valuation
+		lineageTag: 1cb758b1-3810-513f-8949-03d71525a593
+
+	/// Median (price - AVM) / AVM: positive = sold above the AVM. Blank under min-n.
+	measure 'Median Gap %' = IF ( [Valued Sales] >= [Min N], MEDIAN ( 'AVM Score'[Gap Pct] ) )
+		formatString: +0.0%;-0.0%;0.0%
+		displayFolder: Valuation
+		lineageTag: b0d56eb6-e5ca-525e-b2a6-e007e211742d
+
+	/// Sales more than 25% from their AVM value: statistical anomalies for collateral review, not accusations.
+	measure 'Flagged for Review' = CALCULATE ( COUNTROWS ( 'AVM Score' ), KEEPFILTERS ( 'AVM Score'[Review Flag] = "Review: statistical anomaly" ) )
+		formatString: #,0
+		displayFolder: Valuation
+		lineageTag: bde79ba2-3b57-5b37-8efd-9aaefc529bc8
+
+	/// Flagged for review / valued sales.
+	measure 'Flagged Share' = DIVIDE ( [Flagged for Review], [Valued Sales] )
+		formatString: 0.0%
+		displayFolder: Valuation
+		lineageTag: 049cda3f-0ac1-5e6d-90ac-d81430f2335d
+
+	/// Mean |SHAP| of a feature, in log points of the predicted price (0.05 ≈ 5%).
+	measure 'Mean Abs SHAP' = SUM ( 'Feature Importance'[Mean Abs SHAP] )
+		formatString: 0.000
+		displayFolder: Valuation
+		lineageTag: e6a02fc0-0a3f-5170-b2b3-ffa2bf316bbe
+
+	/// Price Shock % slicer value (integer percent); -20 when none.
+	measure 'Selected Shock' = SELECTEDVALUE ( 'Price Shock %'[Price Shock %], -20 )
+		formatString: 0
+		displayFolder: Risk
+		lineageTag: b1d55c66-5184-5d5d-8789-df87316cb9b0
+
+	/// LTV % slicer value (50/60/70/80/85); 80 when none.
+	measure 'Selected LTV' = SELECTEDVALUE ( 'LTV %'[LTV %], 80 )
+		formatString: 0
+		displayFolder: Risk
+		lineageTag: e0e4948c-8ceb-5193-ba8f-81a462c57b55
+
+	/// Stress segment (Stress Grid[Segment] slicer); Dubai when none. Use for Dubai / type / zone levels: area names repeat, so areas go through the Area-based measure.
+	measure 'Selected Stress Segment' = SELECTEDVALUE ( 'Stress Grid'[Segment], "Dubai (all residential)" )
+		displayFolder: Risk
+		lineageTag: 09d6b8f2-607d-5f5b-89a2-1df8eb78e7f1
+
+	/// Ready / Off-Plan slicer; Ready when none. Off-plan is never pooled with ready.
+	measure 'Selected Ready / Off-Plan' = SELECTEDVALUE ( 'Ready Off-Plan'[Ready / Off-Plan], "Ready" )
+		displayFolder: Risk
+		lineageTag: d732f09d-3154-5b6f-a5e0-cd7eaf489b98
+
+	/// Share of recent buyers (last 36 complete months) whose loan, held at origination, exceeds the shocked current value, for the selected segment, shock and LTV. Pre-computed per segment and blank under min-n: read, never re-averaged. Illustrative.
+	measure 'Negative Equity Share' =
+			VAR _seg = [Selected Stress Segment]
+			VAR _ro = [Selected Ready / Off-Plan]
+			VAR _shock = [Selected Shock]
+			VAR _ltv = [Selected LTV]
+			RETURN
+				CALCULATE (
+					SELECTEDVALUE ( 'Stress Grid'[Negative Equity Share] ),
+					REMOVEFILTERS ( 'Stress Grid' ),
+					'Stress Grid'[Segment] = _seg,
+					'Stress Grid'[Ready / Off-Plan] = _ro,
+					'Stress Grid'[Scenario] = "Price shock",
+					'Stress Grid'[Loan Basis] = "Assumed LTV",
+					'Stress Grid'[Shock Pct] = _shock,
+					'Stress Grid'[LTV Pct] = _ltv
+				)
+		formatString: 0.0%
+		displayFolder: Risk
+		lineageTag: 8a73f593-6118-5dfb-b641-5219143465e8
+
+	/// Loan in excess of the shocked value, summed over buyers in negative equity (upper bound: no amortisation).
+	measure 'Negative Equity AED' =
+			VAR _seg = [Selected Stress Segment]
+			VAR _ro = [Selected Ready / Off-Plan]
+			VAR _shock = [Selected Shock]
+			VAR _ltv = [Selected LTV]
+			RETURN
+				CALCULATE (
+					SUM ( 'Stress Grid'[Negative Equity AED] ),
+					REMOVEFILTERS ( 'Stress Grid' ),
+					'Stress Grid'[Segment] = _seg,
+					'Stress Grid'[Ready / Off-Plan] = _ro,
+					'Stress Grid'[Scenario] = "Price shock",
+					'Stress Grid'[Loan Basis] = "Assumed LTV",
+					'Stress Grid'[Shock Pct] = _shock,
+					'Stress Grid'[LTV Pct] = _ltv
+				)
+		formatString: """AED ""#,0"
+		displayFolder: Risk
+		lineageTag: a8aa59cf-2382-57e1-a0a3-426910ee6890
+
+	/// Buyers in negative equity for the selection.
+	measure 'Negative Equity Count' =
+			VAR _seg = [Selected Stress Segment]
+			VAR _ro = [Selected Ready / Off-Plan]
+			VAR _shock = [Selected Shock]
+			VAR _ltv = [Selected LTV]
+			RETURN
+				CALCULATE (
+					SUM ( 'Stress Grid'[Negative Equity Count] ),
+					REMOVEFILTERS ( 'Stress Grid' ),
+					'Stress Grid'[Segment] = _seg,
+					'Stress Grid'[Ready / Off-Plan] = _ro,
+					'Stress Grid'[Scenario] = "Price shock",
+					'Stress Grid'[Loan Basis] = "Assumed LTV",
+					'Stress Grid'[Shock Pct] = _shock,
+					'Stress Grid'[LTV Pct] = _ltv
+				)
+		formatString: #,0
+		displayFolder: Risk
+		lineageTag: 9120d262-b5d0-5cfb-ba82-fee029df2008
+
+	/// Recent clean residential purchases in the stressed segment.
+	measure 'Stress Purchases' =
+			VAR _seg = [Selected Stress Segment]
+			VAR _ro = [Selected Ready / Off-Plan]
+			VAR _shock = [Selected Shock]
+			VAR _ltv = [Selected LTV]
+			RETURN
+				CALCULATE (
+					SUM ( 'Stress Grid'[Purchases] ),
+					REMOVEFILTERS ( 'Stress Grid' ),
+					'Stress Grid'[Segment] = _seg,
+					'Stress Grid'[Ready / Off-Plan] = _ro,
+					'Stress Grid'[Scenario] = "Price shock",
+					'Stress Grid'[Loan Basis] = "Assumed LTV",
+					'Stress Grid'[Shock Pct] = _shock,
+					'Stress Grid'[LTV Pct] = _ltv
+				)
+		formatString: #,0
+		displayFolder: Risk
+		lineageTag: 09488116-c228-5649-97e8-e535fff82696
+
+	/// Reference: the loan at the CBUAE cap in force on each sale date (expatriate, first home), at the selected shock.
+	measure 'Negative Equity Share (CBUAE Cap)' =
+			VAR _seg = [Selected Stress Segment]
+			VAR _ro = [Selected Ready / Off-Plan]
+			VAR _shock = [Selected Shock]
+			RETURN
+				CALCULATE (
+					SELECTEDVALUE ( 'Stress Grid'[Negative Equity Share] ),
+					REMOVEFILTERS ( 'Stress Grid' ),
+					'Stress Grid'[Segment] = _seg,
+					'Stress Grid'[Ready / Off-Plan] = _ro,
+					'Stress Grid'[Scenario] = "Price shock",
+					'Stress Grid'[Loan Basis] = "CBUAE cap (expatriate, first home)",
+					'Stress Grid'[Shock Pct] = _shock
+				)
+		formatString: 0.0%
+		displayFolder: Risk
+		lineageTag: 745d79a1-eb79-51d2-86bb-6d625d81006b
+
+	/// Reference: the registered loans of matched purchases (a lower-bound subset), at the selected shock.
+	measure 'Negative Equity Share (Registered Loans)' =
+			VAR _seg = [Selected Stress Segment]
+			VAR _ro = [Selected Ready / Off-Plan]
+			VAR _shock = [Selected Shock]
+			RETURN
+				CALCULATE (
+					SELECTEDVALUE ( 'Stress Grid'[Negative Equity Share] ),
+					REMOVEFILTERS ( 'Stress Grid' ),
+					'Stress Grid'[Segment] = _seg,
+					'Stress Grid'[Ready / Off-Plan] = _ro,
+					'Stress Grid'[Scenario] = "Price shock",
+					'Stress Grid'[Loan Basis] = "Registered loan (matched purchases)",
+					'Stress Grid'[Shock Pct] = _shock
+				)
+		formatString: 0.0%
+		displayFolder: Risk
+		lineageTag: d993dd68-0cd0-56b2-ae27-2ffb710f8aa5
+
+	/// A repeat of the 2014-2020 fall at the selected LTV. Replay Depth picks the lower range (Dubai-wide -24% for everyone) or the upper range (each buyer's own zone series, noisier and deeper).
+	measure 'Replay Negative Equity Share' =
+			VAR _seg = [Selected Stress Segment]
+			VAR _ro = [Selected Ready / Off-Plan]
+			VAR _ltv = [Selected LTV]
+			VAR _scenario = SELECTEDVALUE ( 'Replay Depth'[Scenario], "Replay: 2014-2020, Dubai-wide" )
+			RETURN
+				CALCULATE (
+					SELECTEDVALUE ( 'Stress Grid'[Negative Equity Share] ),
+					REMOVEFILTERS ( 'Stress Grid' ),
+					'Stress Grid'[Segment] = _seg,
+					'Stress Grid'[Ready / Off-Plan] = _ro,
+					'Stress Grid'[Scenario] = _scenario,
+					'Stress Grid'[Loan Basis] = "Assumed LTV",
+					'Stress Grid'[LTV Pct] = _ltv
+				)
+		formatString: 0.0%
+		displayFolder: Risk
+		lineageTag: b1b45694-d64b-5311-bca3-dade90cf256a
+
+	/// Map / bar: the area-level grid row for each Area in context, the property type chosen on the slicer (apartments when none or several), at the selected shock and LTV. Blank under min-n.
+	measure 'Negative Equity Share by Area' =
+			VAR _type = SELECTEDVALUE ( 'Property Type'[Property Type Key], 101 )
+			VAR _ro = [Selected Ready / Off-Plan]
+			VAR _shock = [Selected Shock]
+			VAR _ltv = [Selected LTV]
+			RETURN
+				CALCULATE (
+					SELECTEDVALUE ( 'Stress Grid'[Negative Equity Share] ),
+					REMOVEFILTERS ( 'Stress Grid' ),
+					'Stress Grid'[Segment Level] = "Area",
+					TREATAS ( VALUES ( 'Area'[Area Key] ), 'Stress Grid'[Area Key] ),
+					'Stress Grid'[Property Type Key] = _type,
+					'Stress Grid'[Ready / Off-Plan] = _ro,
+					'Stress Grid'[Scenario] = "Price shock",
+					'Stress Grid'[Loan Basis] = "Assumed LTV",
+					'Stress Grid'[Shock Pct] = _shock,
+					'Stress Grid'[LTV Pct] = _ltv
+				)
+		formatString: 0.0%
+		displayFolder: Risk
+		lineageTag: d7e7a3d8-9d11-50af-b58a-4d5e030d492b
+
+	/// Off-plan market sale lines on Transactions (needed per project; equals Off-Plan Sales).
+	measure 'Off-Plan Market Sales (Lines)' =
+			CALCULATE (
+				COUNTROWS ( 'Transactions' ),
+				KEEPFILTERS ( 'Transactions'[Is Market Sale] = TRUE () ),
+				KEEPFILTERS ( 'Transactions'[Is Off-Plan] = TRUE () )
+			)
+		formatString: #,0
+		displayFolder: Risk\Concentration
+		lineageTag: 0457559c-a29a-52de-9b97-b67dacfd6acc
+
+	/// A master project's share of off-plan market sales among known master projects.
+	measure 'Master Project Share (Off-Plan)' =
+			VAR _all =
+				CALCULATE (
+					[Off-Plan Market Sales (Lines)],
+					REMOVEFILTERS ( 'Project' ),
+					NOT ISBLANK ( 'Project'[Master Project] ),
+					'Project'[Master Project] <> "Unknown"
+				)
+			RETURN
+				DIVIDE ( [Off-Plan Market Sales (Lines)], _all )
+		formatString: 0.0%
+		displayFolder: Risk\Concentration
+		lineageTag: eef65ae9-c95f-5cee-806c-0d6f176a22eb
+
+	/// PROXY for developer concentration (Q9 needs the DLD projects file): the ten largest master projects' share of off-plan market sales.
+	measure 'Top 10 Master Project Share (Off-Plan)' =
+			VAR _mp =
+				ADDCOLUMNS (
+					FILTER (
+						ALL ( 'Project'[Master Project] ),
+						NOT ISBLANK ( 'Project'[Master Project] ) && 'Project'[Master Project] <> "Unknown"
+					),
+					"@sales", [Off-Plan Market Sales (Lines)]
+				)
+			VAR _total = SUMX ( _mp, [@sales] )
+			RETURN
+				DIVIDE ( SUMX ( TOPN ( 10, _mp, [@sales], DESC ), [@sales] ), _total )
+		formatString: 0.0%
+		displayFolder: Risk\Concentration
+		lineageTag: 0111452c-aa9f-5c64-85f4-0e63f4567160
+
+	/// PROXY: Herfindahl-Hirschman index over master projects' shares of off-plan market sales (0-10,000; above 1,500 = moderately concentrated by the usual competition thresholds).
+	measure 'Master Project HHI (Off-Plan)' =
+			VAR _mp =
+				ADDCOLUMNS (
+					FILTER (
+						ALL ( 'Project'[Master Project] ),
+						NOT ISBLANK ( 'Project'[Master Project] ) && 'Project'[Master Project] <> "Unknown"
+					),
+					"@sales", [Off-Plan Market Sales (Lines)]
+				)
+			VAR _total = SUMX ( _mp, [@sales] )
+			RETURN
+				SUMX ( _mp, POWER ( DIVIDE ( [@sales], _total ), 2 ) ) * 10000
+		formatString: #,0
+		displayFolder: Risk\Concentration
+		lineageTag: 02bc8c49-c53f-55f9-8040-fdae380bbed1
+
+	/// Central path of the selected rate scenario.
+	measure 'Forecast Central' =
+			VAR _seg = SELECTEDVALUE ( 'Forecast'[Segment], "Dubai (all residential)" )
+			VAR _target = SELECTEDVALUE ( 'Forecast'[Target], "Price index" )
+			VAR _scenario = SELECTEDVALUE ( 'Forecast Scenario'[Scenario], "Rates flat" )
+			RETURN
+				CALCULATE (
+					SUM ( 'Forecast'[Forecast] ),
+					'Forecast'[Segment] = _seg,
+					'Forecast'[Target] = _target,
+					'Forecast'[Scenario] = _scenario
+				)
+		formatString: #,0.0
+		displayFolder: Risk\Outlook
+		lineageTag: ede64814-7199-5afd-a085-2082fb5b0e16
+
+	/// 80% interval, lower bound (assumes the model is right; backtest coverage on the Forecast Backtest table).
+	measure 'Forecast Lower 80' =
+			VAR _seg = SELECTEDVALUE ( 'Forecast'[Segment], "Dubai (all residential)" )
+			VAR _target = SELECTEDVALUE ( 'Forecast'[Target], "Price index" )
+			VAR _scenario = SELECTEDVALUE ( 'Forecast Scenario'[Scenario], "Rates flat" )
+			RETURN
+				CALCULATE (
+					SUM ( 'Forecast'[Lower 80] ),
+					'Forecast'[Segment] = _seg,
+					'Forecast'[Target] = _target,
+					'Forecast'[Scenario] = _scenario
+				)
+		formatString: #,0.0
+		displayFolder: Risk\Outlook
+		lineageTag: 43a320e4-bb84-5e1a-bc97-77ed82d7508a
+
+	/// 80% interval, upper bound.
+	measure 'Forecast Upper 80' =
+			VAR _seg = SELECTEDVALUE ( 'Forecast'[Segment], "Dubai (all residential)" )
+			VAR _target = SELECTEDVALUE ( 'Forecast'[Target], "Price index" )
+			VAR _scenario = SELECTEDVALUE ( 'Forecast Scenario'[Scenario], "Rates flat" )
+			RETURN
+				CALCULATE (
+					SUM ( 'Forecast'[Upper 80] ),
+					'Forecast'[Segment] = _seg,
+					'Forecast'[Target] = _target,
+					'Forecast'[Scenario] = _scenario
+				)
+		formatString: #,0.0
+		displayFolder: Risk\Outlook
+		lineageTag: ca2d9f96-9853-5fb5-b9dc-31d3f1b7e0e4
+
+	/// 95% interval, lower bound.
+	measure 'Forecast Lower 95' =
+			VAR _seg = SELECTEDVALUE ( 'Forecast'[Segment], "Dubai (all residential)" )
+			VAR _target = SELECTEDVALUE ( 'Forecast'[Target], "Price index" )
+			VAR _scenario = SELECTEDVALUE ( 'Forecast Scenario'[Scenario], "Rates flat" )
+			RETURN
+				CALCULATE (
+					SUM ( 'Forecast'[Lower 95] ),
+					'Forecast'[Segment] = _seg,
+					'Forecast'[Target] = _target,
+					'Forecast'[Scenario] = _scenario
+				)
+		formatString: #,0.0
+		displayFolder: Risk\Outlook
+		lineageTag: e5981dcf-0c16-5f3b-a624-d001316e3374
+
+	/// 95% interval, upper bound.
+	measure 'Forecast Upper 95' =
+			VAR _seg = SELECTEDVALUE ( 'Forecast'[Segment], "Dubai (all residential)" )
+			VAR _target = SELECTEDVALUE ( 'Forecast'[Target], "Price index" )
+			VAR _scenario = SELECTEDVALUE ( 'Forecast Scenario'[Scenario], "Rates flat" )
+			RETURN
+				CALCULATE (
+					SUM ( 'Forecast'[Upper 95] ),
+					'Forecast'[Segment] = _seg,
+					'Forecast'[Target] = _target,
+					'Forecast'[Scenario] = _scenario
+				)
+		formatString: #,0.0
+		displayFolder: Risk\Outlook
+		lineageTag: 0e5d1cab-b751-5edf-bed6-9371dae4b989
+
+	/// Actual index or volume to the last complete month (the history line of the fan chart).
+	measure 'Forecast Actual' =
+			VAR _seg = SELECTEDVALUE ( 'Forecast'[Segment], "Dubai (all residential)" )
+			VAR _target = SELECTEDVALUE ( 'Forecast'[Target], "Price index" )
+			VAR _scenario = SELECTEDVALUE ( 'Forecast Scenario'[Scenario], "Rates flat" )
+			RETURN
+				CALCULATE (
+					SUM ( 'Forecast'[Actual] ),
+					'Forecast'[Segment] = _seg,
+					'Forecast'[Target] = _target,
+					'Forecast'[Scenario] = "Actual"
+				)
+		formatString: #,0.0
+		displayFolder: Risk\Outlook
+		lineageTag: 33e65d1d-9c41-530f-a0a3-35e1dd3aa8c0
+
+	/// Card: central path at the end of the 12-month horizon vs the last actual month.
+	measure 'Forecast 12M Change' =
+			VAR _seg = SELECTEDVALUE ( 'Forecast'[Segment], "Dubai (all residential)" )
+			VAR _target = SELECTEDVALUE ( 'Forecast'[Target], "Price index" )
+			VAR _scenario = SELECTEDVALUE ( 'Forecast Scenario'[Scenario], "Rates flat" )
+			VAR _lastActual =
+				CALCULATE ( MAX ( 'Forecast'[Month] ), REMOVEFILTERS ( 'Forecast' ), 'Forecast'[Segment] = _seg, 'Forecast'[Target] = _target, 'Forecast'[Scenario] = "Actual" )
+			VAR _actual =
+				CALCULATE ( SUM ( 'Forecast'[Actual] ), REMOVEFILTERS ( 'Forecast' ), 'Forecast'[Segment] = _seg, 'Forecast'[Target] = _target, 'Forecast'[Scenario] = "Actual", 'Forecast'[Month] = _lastActual )
+			VAR _lastForecast =
+				CALCULATE ( MAX ( 'Forecast'[Month] ), REMOVEFILTERS ( 'Forecast' ), 'Forecast'[Segment] = _seg, 'Forecast'[Target] = _target, 'Forecast'[Scenario] = _scenario )
+			VAR _end =
+				CALCULATE ( SUM ( 'Forecast'[Forecast] ), REMOVEFILTERS ( 'Forecast' ), 'Forecast'[Segment] = _seg, 'Forecast'[Target] = _target, 'Forecast'[Scenario] = _scenario, 'Forecast'[Month] = _lastForecast )
+			RETURN
+				DIVIDE ( _end, _actual ) - 1
+		formatString: +0.0%;-0.0%;0.0%
+		displayFolder: Risk\Outlook
+		lineageTag: bef7f714-0ca4-5dba-98c3-f2d068bf8fab
+
+	/// 80% band, lower end, vs the last actual.
+	measure 'Forecast 12M Lower 80' =
+			VAR _seg = SELECTEDVALUE ( 'Forecast'[Segment], "Dubai (all residential)" )
+			VAR _target = SELECTEDVALUE ( 'Forecast'[Target], "Price index" )
+			VAR _scenario = SELECTEDVALUE ( 'Forecast Scenario'[Scenario], "Rates flat" )
+			VAR _lastActual =
+				CALCULATE ( MAX ( 'Forecast'[Month] ), REMOVEFILTERS ( 'Forecast' ), 'Forecast'[Segment] = _seg, 'Forecast'[Target] = _target, 'Forecast'[Scenario] = "Actual" )
+			VAR _actual =
+				CALCULATE ( SUM ( 'Forecast'[Actual] ), REMOVEFILTERS ( 'Forecast' ), 'Forecast'[Segment] = _seg, 'Forecast'[Target] = _target, 'Forecast'[Scenario] = "Actual", 'Forecast'[Month] = _lastActual )
+			VAR _lastForecast =
+				CALCULATE ( MAX ( 'Forecast'[Month] ), REMOVEFILTERS ( 'Forecast' ), 'Forecast'[Segment] = _seg, 'Forecast'[Target] = _target, 'Forecast'[Scenario] = _scenario )
+			VAR _end =
+				CALCULATE ( SUM ( 'Forecast'[Lower 80] ), REMOVEFILTERS ( 'Forecast' ), 'Forecast'[Segment] = _seg, 'Forecast'[Target] = _target, 'Forecast'[Scenario] = _scenario, 'Forecast'[Month] = _lastForecast )
+			RETURN
+				DIVIDE ( _end, _actual ) - 1
+		formatString: +0.0%;-0.0%;0.0%
+		displayFolder: Risk\Outlook
+		lineageTag: fe0d86f6-5ff9-58e1-977a-9b8141aa17a5
+
+	/// 80% band, upper end, vs the last actual.
+	measure 'Forecast 12M Upper 80' =
+			VAR _seg = SELECTEDVALUE ( 'Forecast'[Segment], "Dubai (all residential)" )
+			VAR _target = SELECTEDVALUE ( 'Forecast'[Target], "Price index" )
+			VAR _scenario = SELECTEDVALUE ( 'Forecast Scenario'[Scenario], "Rates flat" )
+			VAR _lastActual =
+				CALCULATE ( MAX ( 'Forecast'[Month] ), REMOVEFILTERS ( 'Forecast' ), 'Forecast'[Segment] = _seg, 'Forecast'[Target] = _target, 'Forecast'[Scenario] = "Actual" )
+			VAR _actual =
+				CALCULATE ( SUM ( 'Forecast'[Actual] ), REMOVEFILTERS ( 'Forecast' ), 'Forecast'[Segment] = _seg, 'Forecast'[Target] = _target, 'Forecast'[Scenario] = "Actual", 'Forecast'[Month] = _lastActual )
+			VAR _lastForecast =
+				CALCULATE ( MAX ( 'Forecast'[Month] ), REMOVEFILTERS ( 'Forecast' ), 'Forecast'[Segment] = _seg, 'Forecast'[Target] = _target, 'Forecast'[Scenario] = _scenario )
+			VAR _end =
+				CALCULATE ( SUM ( 'Forecast'[Upper 80] ), REMOVEFILTERS ( 'Forecast' ), 'Forecast'[Segment] = _seg, 'Forecast'[Target] = _target, 'Forecast'[Scenario] = _scenario, 'Forecast'[Month] = _lastForecast )
+			RETURN
+				DIVIDE ( _end, _actual ) - 1
+		formatString: +0.0%;-0.0%;0.0%
+		displayFolder: Risk\Outlook
+		lineageTag: 1fd0d21c-aa5f-513a-a8cb-65e38b45ae11
+
+	/// Card subtitle: the 80% band as text.
+	measure 'Forecast 12M Band 80% Label' = FORMAT ( [Forecast 12M Lower 80], "+0.0%;-0.0%" ) & " to " & FORMAT ( [Forecast 12M Upper 80], "+0.0%;-0.0%" )
+		displayFolder: Risk\Outlook
+		lineageTag: 73e11d3f-fa9a-57f9-91a3-42990b6af42f
+
+	/// Page 1 insight title (findings §Executive summary 1).
+	measure 'Title Executive' = "Dubai recorded " & FORMAT ( [Market Sales], "#,0" ) & " market sales worth AED " & FORMAT ( [Market Sales Value] / 1e9, "#,0.0" ) & "bn in " & [Selected Year Label]
+		displayFolder: Report
+		lineageTag: 8a428af0-d987-5eb4-93a8-9d5eb7fe9d32
+
+	/// Off-plan is most sales but not most value (findings 4).
+	measure 'Title Off-Plan' = "Off-plan was " & FORMAT ( [Off-Plan Share (Count)], "0%" ) & " of market sales but " & FORMAT ( [Off-Plan Share (Value)], "0%" ) & " of their value in " & [Selected Year Label]
+		displayFolder: Report
+		lineageTag: ca2ce995-331a-5f1d-befe-00c54b892070
+
+	/// Bank financing of ready purchases (findings 5).
+	measure 'Title Financing' = "At least " & FORMAT ( [Purchase Mortgage Share], "0.0%" ) & " of ready purchases in " & [Selected Year Label] & " were bank-financed at registration (matched lower bound)"
+		displayFolder: Report
+		lineageTag: b385d249-30cd-5ec3-916f-b1ece28fc47c
+
+	/// Like-for-like price change of the selected index segment.
+	measure 'Title Prices' = [Selected Index Segment] & ": like-for-like prices " & FORMAT ( [Index YoY], "+0.0%;-0.0%" ) & " on a year earlier (" & FORMAT ( [Index Latest Complete Period], "mmm yyyy" ) & ")"
+		displayFolder: Report
+		lineageTag: 202f8b4f-fb05-5d13-8d96-1818717c2f07
+
+	/// Headline gross yields (reports/yields.md).
+	measure 'Title Yields' = "Apartments yield " & FORMAT ( CALCULATE ( [Gross Yield (Latest 4 Quarters)], 'Property Type'[Property Type Key] = 101 ), "0.0%" ) & " gross, villas " & FORMAT ( CALCULATE ( [Gross Yield (Latest 4 Quarters)], 'Property Type'[Property Type Key] = 102 ), "0.0%" ) & " (last four complete quarters)"
+		displayFolder: Report
+		lineageTag: e62a09fd-e7f4-5d29-b2fd-c37e9cd66c7e
+
+	/// AVM vs the comparable-sales baseline (model card).
+	measure 'Title Valuation' = "The AVM values test-period sales with a median error of " & FORMAT ( [AVM Test MdAPE], "0.0%" ) & ", against " & FORMAT ( [AVM Test MdAPE (Baseline)], "0.0%" ) & " for comparable sales"
+		displayFolder: Report
+		lineageTag: ddd02597-8c7b-5427-aff2-32d6c9c3f6c8
+
+	/// Stress headline for the slicer state (findings F4c.1).
+	measure 'Title Stress' = "At " & [Selected LTV] & "% LTV, a " & ABS ( [Selected Shock] ) & "% fall puts " & FORMAT ( [Negative Equity Share], "0%" ) & " of recent " & LOWER ( [Selected Ready / Off-Plan] ) & " buyers (" & [Selected Stress Segment] & ") in negative equity"
+		displayFolder: Report
+		lineageTag: abd88c94-53fd-5af7-b419-17ce698bf072
+
+	/// 2014-2020 drawdown of each index series in the replay (Stress Replay; deeper on noisier zone series).
+	measure 'Replay Drawdown' = MIN ( 'Stress Replay'[Drawdown] )
+		formatString: 0.0%
+		displayFolder: Risk
+		lineageTag: 1a2555c2-dc78-5438-8469-129de5028fb0
+
+	/// Concentration proxy headline (master projects, not developers).
+	measure 'Title Concentration' = "Proxy for developer concentration: the top 10 master projects took " & FORMAT ( [Top 10 Master Project Share (Off-Plan)], "0%" ) & " of off-plan sales in " & [Selected Year Label] & " (HHI " & FORMAT ( [Master Project HHI (Off-Plan)], "#,0" ) & ")"
+		displayFolder: Report
+		lineageTag: 3f4478a6-2828-5178-8f21-457b1bd70409
+
+	/// Outlook headline for the selected segment and scenario (reports/forecast.md).
+	measure 'Title Outlook' = "12-month outlook (" & SELECTEDVALUE ( 'Forecast Scenario'[Scenario], "Rates flat" ) & "): " & FORMAT ( [Forecast 12M Change], "+0.0%;-0.0%" ) & " central, 80% band " & [Forecast 12M Band 80% Label] & ". A statistical baseline, not a call"
+		displayFolder: Report
+		lineageTag: 053ef151-b15c-5a53-a9e1-9872d46e34b3
+
+	column Value
+		isHidden
+		lineageTag: a8b2c52f-5a47-58ac-8075-a50360816936
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Value]
+
+		annotation SummarizationSetBy = User
+
+	partition _Measures = calculated
+		mode: import
+		source = ROW ( "Value", BLANK () )
+
+	annotation PBI_Id = 998f143930af5a7989ba50d39c26958a

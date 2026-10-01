@@ -1,0 +1,173 @@
+/// Monthly rents by area x property type x bedrooms x new/renewal (rpt.rent_month). The only rent table: no contract detail.
+table 'Rent Month'
+	lineageTag: b45e242f-53cb-5d19-a157-fcd586d7cd71
+
+	column Month
+		dataType: dateTime
+		isHidden
+		formatString: mmm yyyy
+		lineageTag: 462044b8-712e-5832-8477-37a259a4ef3a
+		summarizeBy: none
+		sourceColumn: Month
+
+		annotation SummarizationSetBy = User
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column 'Area Key'
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 0fa5124b-a096-51a0-9115-87e4f6ce83f4
+		summarizeBy: none
+		sourceColumn: Area Key
+
+		annotation SummarizationSetBy = User
+
+	column 'Property Type Key'
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 7352594c-b131-55c9-8e5b-1abdb9d649f7
+		summarizeBy: none
+		sourceColumn: Property Type Key
+
+		annotation SummarizationSetBy = User
+
+	column Bedrooms
+		dataType: int64
+		formatString: 0
+		lineageTag: 1f9bf2d5-6b38-5241-bc94-f1fc00d95b1e
+		summarizeBy: none
+		sourceColumn: Bedrooms
+
+		annotation SummarizationSetBy = User
+
+	column 'Bedrooms Key'
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 1153804a-0d14-5c87-bcbd-99cf4d6f206d
+		summarizeBy: none
+		sourceColumn: Bedrooms Key
+
+		annotation SummarizationSetBy = User
+
+	column 'Is New Contract'
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: 40196a78-92b4-54b9-a1dc-815f98988d4e
+		summarizeBy: none
+		sourceColumn: Is New Contract
+
+		annotation SummarizationSetBy = User
+
+	column 'Rent Lines'
+		dataType: int64
+		formatString: #,0
+		lineageTag: afbecc31-586f-5b61-a12d-490471e8df82
+		summarizeBy: sum
+		sourceColumn: Rent Lines
+
+		annotation SummarizationSetBy = User
+
+	column Contracts
+		dataType: int64
+		formatString: #,0
+		lineageTag: 308ecb0d-3e7a-5e5b-af64-115b19e2798d
+		summarizeBy: sum
+		sourceColumn: Contracts
+
+		annotation SummarizationSetBy = User
+
+	column 'Annual Rent AED'
+		dataType: int64
+		formatString: """AED ""#,0"
+		lineageTag: 690e3382-3d03-5c8d-a531-3b0feff7d60e
+		summarizeBy: sum
+		sourceColumn: Annual Rent AED
+
+		annotation SummarizationSetBy = User
+
+	column 'Comparable Contracts'
+		dataType: int64
+		formatString: #,0
+		lineageTag: bb24df61-1756-5cbd-bfe8-541931638236
+		summarizeBy: sum
+		sourceColumn: Comparable Contracts
+
+		annotation SummarizationSetBy = User
+
+	column 'Market Rent Contracts'
+		dataType: int64
+		formatString: #,0
+		lineageTag: 46058fa2-9104-5ea6-a2ec-7b3ee0ffc9d8
+		summarizeBy: sum
+		sourceColumn: Market Rent Contracts
+
+		annotation SummarizationSetBy = User
+
+	column 'Comparable Annual Rent AED'
+		dataType: int64
+		formatString: """AED ""#,0"
+		lineageTag: a507b996-f4c8-5ac9-9ca6-d1c1bf8be03f
+		summarizeBy: sum
+		sourceColumn: Comparable Annual Rent AED
+
+		annotation SummarizationSetBy = User
+
+	column 'Median Annual Rent AED'
+		dataType: int64
+		formatString: """AED ""#,0"
+		lineageTag: f51b6dd0-bfd2-5568-96a0-868342e8d52e
+		summarizeBy: none
+		sourceColumn: Median Annual Rent AED
+
+		annotation SummarizationSetBy = User
+
+	column 'Rent per Sq M N'
+		dataType: int64
+		formatString: #,0
+		lineageTag: 9edd7777-6328-53fe-a965-1ed06c8c8d3b
+		summarizeBy: sum
+		sourceColumn: Rent per Sq M N
+
+		annotation SummarizationSetBy = User
+
+	column 'Median Rent per Sq M AED'
+		dataType: int64
+		formatString: """AED ""#,0"
+		lineageTag: 15453cc6-1fca-50d1-9163-2b195474aa83
+		summarizeBy: none
+		sourceColumn: Median Rent per Sq M AED
+
+		annotation SummarizationSetBy = User
+
+	column 'Comparable Area Sq M'
+		dataType: double
+		formatString: #,0.00
+		lineageTag: ec40705a-c221-5d42-b813-36ff8f4b8b65
+		summarizeBy: sum
+		sourceColumn: Comparable Area Sq M
+
+		annotation SummarizationSetBy = User
+
+	column 'Comparable Rent with Area AED'
+		dataType: int64
+		formatString: """AED ""#,0"
+		lineageTag: 53c437de-2fec-5df3-bd42-cd50f431bac1
+		summarizeBy: sum
+		sourceColumn: Comparable Rent with Area AED
+
+		annotation SummarizationSetBy = User
+
+	partition 'Rent Month' = m
+		mode: import
+		source =
+				let
+				  Source = PostgreSQL.Database(PgServer, PgDatabase),
+				  #"Navigation 1" = Source{[Schema = "rpt", Item = "rent_month"]}[Data]
+				in
+				  #"Navigation 1"
+
+	annotation PBI_ResultType = Table

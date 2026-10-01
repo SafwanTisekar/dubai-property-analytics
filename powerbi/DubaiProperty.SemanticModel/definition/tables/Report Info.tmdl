@@ -1,0 +1,50 @@
+/// Data-as-of date, min-n and attributions (rpt.report_info).
+table 'Report Info'
+	lineageTag: 51b0da8e-c44f-5a30-87c0-10a1c120896c
+
+	column 'Data As Of'
+		dataType: dateTime
+		formatString: yyyy-mm-dd
+		lineageTag: 9e71344b-a468-5ad8-ba76-77d25c71b696
+		summarizeBy: none
+		sourceColumn: Data As Of
+
+		annotation SummarizationSetBy = User
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column 'Min N'
+		dataType: int64
+		formatString: 0
+		lineageTag: 3d3c0bd6-5dd1-52af-9502-53a4823eef78
+		summarizeBy: none
+		sourceColumn: Min N
+
+		annotation SummarizationSetBy = User
+
+	column Source
+		dataType: string
+		lineageTag: 5901d5c6-cabf-5532-ac34-e885c012af39
+		summarizeBy: none
+		sourceColumn: Source
+
+		annotation SummarizationSetBy = User
+
+	column 'Map Attribution'
+		dataType: string
+		lineageTag: 9a921a45-6c66-5f17-8fd1-a730c5385bc5
+		summarizeBy: none
+		sourceColumn: Map Attribution
+
+		annotation SummarizationSetBy = User
+
+	partition 'Report Info' = m
+		mode: import
+		source =
+				let
+				  Source = PostgreSQL.Database(PgServer, PgDatabase),
+				  #"Navigation 1" = Source{[Schema = "rpt", Item = "report_info"]}[Data]
+				in
+				  #"Navigation 1"
+
+	annotation PBI_ResultType = Table

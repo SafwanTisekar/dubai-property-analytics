@@ -1,0 +1,162 @@
+/// Out-of-sample AVM valuations, 2024+ (rpt.avm_score).
+table 'AVM Score'
+	lineageTag: ed258833-a841-54ac-8c65-d6375233d8ce
+
+	column Date
+		dataType: dateTime
+		isHidden
+		formatString: yyyy-mm-dd
+		lineageTag: dd3a33c7-009d-55e0-8d4e-82b2e2fbc048
+		summarizeBy: none
+		sourceColumn: Date
+
+		annotation SummarizationSetBy = User
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column 'Area Key'
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 53d08737-4786-5659-80e2-ecdfb7463e6b
+		summarizeBy: none
+		sourceColumn: Area Key
+
+		annotation SummarizationSetBy = User
+
+	column 'Property Type Key'
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 11c62793-7b2e-5b04-bdf4-910cd452af78
+		summarizeBy: none
+		sourceColumn: Property Type Key
+
+		annotation SummarizationSetBy = User
+
+	column 'Project Key'
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 102a081d-7491-578c-b787-00db343ca1ff
+		summarizeBy: none
+		sourceColumn: Project Key
+
+		annotation SummarizationSetBy = User
+
+	column Bedrooms
+		dataType: int64
+		formatString: 0
+		lineageTag: b86ea67e-367a-53ea-99a4-8677a436ab81
+		summarizeBy: none
+		sourceColumn: Bedrooms
+
+		annotation SummarizationSetBy = User
+
+	column 'Bedrooms Key'
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: f3055b82-aaf2-5a7b-b80c-0c98be955a47
+		summarizeBy: none
+		sourceColumn: Bedrooms Key
+
+		annotation SummarizationSetBy = User
+
+	column 'Is Off-Plan'
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: 0ae62e25-499c-5358-a32f-02c68fd031f0
+		summarizeBy: none
+		sourceColumn: Is Off-Plan
+
+		annotation SummarizationSetBy = User
+
+	column 'Ready / Off-Plan'
+		dataType: string
+		isHidden
+		lineageTag: 2d8fd037-e252-5fa9-8dd0-4402b684db5e
+		summarizeBy: none
+		sourceColumn: Ready / Off-Plan
+
+		annotation SummarizationSetBy = User
+
+	column 'Area Sq M'
+		dataType: double
+		formatString: #,0.00
+		lineageTag: a868d9bf-a6a8-5164-a462-4b49ddf825bb
+		summarizeBy: sum
+		sourceColumn: Area Sq M
+
+		annotation SummarizationSetBy = User
+
+	column 'Model Set'
+		dataType: string
+		lineageTag: 852bc0bf-7cde-5e7b-aded-a7b0352a6911
+		summarizeBy: none
+		sourceColumn: Model Set
+
+		annotation SummarizationSetBy = User
+
+	column 'Price AED'
+		dataType: int64
+		formatString: """AED ""#,0"
+		lineageTag: aa9698a9-a545-58ec-ac3c-cb247262414f
+		summarizeBy: sum
+		sourceColumn: Price AED
+
+		annotation SummarizationSetBy = User
+
+	column 'AVM Value AED'
+		dataType: int64
+		formatString: """AED ""#,0"
+		lineageTag: ffac565e-4394-55eb-9b3a-5edecc620754
+		summarizeBy: sum
+		sourceColumn: AVM Value AED
+
+		annotation SummarizationSetBy = User
+
+	column 'Absolute Error Pct'
+		dataType: double
+		formatString: 0.0%
+		lineageTag: 25e48bea-46ea-5403-a0da-6b8588c494a4
+		summarizeBy: none
+		sourceColumn: Absolute Error Pct
+
+		annotation SummarizationSetBy = User
+
+	column 'Gap Pct'
+		dataType: double
+		formatString: 0.0%
+		lineageTag: fe51d63f-24fb-5855-a26d-6e5ba1956077
+		summarizeBy: none
+		sourceColumn: Gap Pct
+
+		annotation SummarizationSetBy = User
+
+	column 'Review Flag'
+		dataType: string
+		lineageTag: 16070c31-b7b2-5ecb-868e-1ed7ce438a45
+		summarizeBy: none
+		sourceColumn: Review Flag
+
+		annotation SummarizationSetBy = User
+
+	column 'Transaction ID'
+		dataType: string
+		lineageTag: 35e6b6fa-2541-5a4b-a2b3-d313c1e213fb
+		summarizeBy: none
+		sourceColumn: Transaction ID
+
+		annotation SummarizationSetBy = User
+
+	partition 'AVM Score' = m
+		mode: import
+		source =
+				let
+				  Source = PostgreSQL.Database(PgServer, PgDatabase),
+				  #"Navigation 1" = Source{[Schema = "rpt", Item = "avm_score"]}[Data]
+				in
+				  #"Navigation 1"
+
+	annotation PBI_ResultType = Table

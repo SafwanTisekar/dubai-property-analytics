@@ -1,6 +1,6 @@
 # KPI reconciliation
 
-Generated 2026-10-01 09:49 UTC by `quality/kpi_reconciliation.py` from database `dubai_property`. Regenerate with `make kpi` (after `make dbt`); `tests/test_kpi_reconciliation.py` fails if any check below fails.
+Generated 2026-10-01 20:13 UTC by `quality/kpi_reconciliation.py` from database `dubai_property`. Regenerate with `make kpi` (after `make dbt`); `tests/test_kpi_reconciliation.py` fails if any check below fails.
 
 These are the numbers the Power BI cards must match (docs/06 §3). Every KPI in docs/01 §4 that exists before the models is computed from silver (canonical, below) and again from the rpt views Power BI imports, at three grains (all time, year, month). **Data snapshot: 2026-09-25** (the latest transaction date; `rpt.report_info` "Data As Of"). Scope: 2004-01-01 to the snapshot; rent contracts starting after it are excluded. **All checks pass.**
 
@@ -99,14 +99,93 @@ Must be within ±40% of each other in every year from 2010. A wider gap would me
 | 2025 | 18,657 | 21,989 | 117.9 | pass |
 | 2026 | 18,568 | 21,982 | 118.4 | pass |
 
-## 6. KPIs pending the models
+## 6. Model KPIs
+
+Computed by the Phase 4 models, not from silver, so they aren't reconciled above; §7 lists the card values from the rpt views.
 
 | KPI | Source |
 |---|---|
-| Price index | Phase 4a: hedonic time-dummy index, Jan 2019 = 100 (docs/05 §2) |
-| YoY price growth | Phase 4a: from the index |
-| Gross rental yield | Phase 4a: agg_yield_quarter with the min-n rule (docs/05 §3) |
-| AVM accuracy (MdAPE, ±10% / ±20%) | Phase 4b (docs/05 §1) |
-| Max drawdown | Phase 4a: from the index |
-| Negative-equity share | Phase 4c: stress grid (docs/05 §4) |
-| Developer concentration (HHI) | Stretch: needs the DLD projects file (deferred) |
+| Price index, YoY growth, max drawdown | rpt.price_index (Phase 4a): §7 cards |
+| Gross rental yield | rpt.yield_quarter (Phase 4a, min-n both sides): §7 cards |
+| AVM accuracy (MdAPE, ±10% / ±20%) | rpt.avm_performance / avm_score (4b): §7 cards |
+| Negative-equity share | rpt.stress_grid (Phase 4c): §7 cards |
+| 12-month outlook | rpt.forecast (Phase 4c): §7 cards |
+| Developer concentration (HHI) | Deferred (needs the DLD projects file); master-project proxy in §7 |
+
+## 7. Power BI card checklist
+
+Set the filters, read the card, tick it. Every other slicer is cleared unless listed. The report opens on **Year = 2025** (the latest complete year; the snapshot year is partial). Values are as the measures' format strings display them; a last-digit difference is rounding, anything more is a bug. AED amounts are formatted "AED "#,0 in the model, so bn values assume the card's display units = Billions with 1 decimal (Auto would switch to Trillions on all-time totals). Measure definitions: `powerbi/DubaiProperty.SemanticModel/definition/tables/_Measures.tmdl`.
+
+| Page | Card (measure) | Filters to set | Expected | Source |
+|---|---|---|---|---|
+| 1 Executive | Market Sales Value | Year = 2025 | AED 668.3bn | kpi_reconciliation §1–2 (silver = rpt) |
+| 1 Executive | Market Sales | Year = 2025 | 211,007 | kpi_reconciliation §1–2 (silver = rpt) |
+| 1 Executive | Median Price per Sq M | Year = 2025 | AED 17,828 | kpi_reconciliation §1–2 (silver = rpt) |
+| 1 Executive | Purchase Mortgage Share | Year = 2025 | 27.9% | kpi_reconciliation §1–2 (silver = rpt) |
+| 1 Executive | Off-Plan Share (Value) | Year = 2025 | 43.6% | kpi_reconciliation §1–2 (silver = rpt) |
+| 2 Financing | Ready Market Sales | Year = 2025 | 77,154 | kpi_reconciliation §1–2 (silver = rpt) |
+| 2 Financing | Purchase Mortgages | Year = 2025 | 21,537 | kpi_reconciliation §1–2 (silver = rpt) |
+| 2 Financing | New Mortgages per 100 Sales | Year = 2025 | 17.9 | kpi_reconciliation §1–2 (silver = rpt) |
+| 2 Financing | Off-Plan Share (Count) | Year = 2025 | 63.4% | kpi_reconciliation §1–2 (silver = rpt) |
+| 2 Financing | Portfolio Mortgage Deals | Year = 2025 | 345 | kpi_reconciliation §1–2 (silver = rpt) |
+| 3 Prices | Area-Weighted Price per Sq M (Homes) | Year = 2025 | AED 20,387 | kpi_reconciliation §1–2 (silver = rpt) |
+| 4 Yields | New Market Rents | Year = 2025 | 307,680 | kpi_reconciliation §1–2 (silver = rpt) |
+| 4 Yields | Area-Weighted New Rent per Sq M (Homes) | Year = 2025 | AED 852 | kpi_reconciliation §1–2 (silver = rpt) |
+| 1 Executive | Market Sales Value | no Year selected | AED 3,568.9bn | kpi_reconciliation §1–2 (silver = rpt) |
+| 1 Executive | Market Sales | no Year selected | 1,290,739 | kpi_reconciliation §1–2 (silver = rpt) |
+| 1 Executive | Median Price per Sq M | no Year selected | AED 13,993 | kpi_reconciliation §1–2 (silver = rpt) |
+| 1 Executive | Purchase Mortgage Share | no Year selected | 16.6% | kpi_reconciliation §1–2 (silver = rpt) |
+| 1 Executive | Off-Plan Share (Value) | no Year selected | 35.0% | kpi_reconciliation §1–2 (silver = rpt) |
+
+Model cards. Defaults: shock -20%, LTV 80%, Ready, scenario Rates flat, AVM page filtered to the test period. Min-n is 20: a blank card means the segment is below it.
+
+| Page | Card (measure) | Filters to set | Expected | Source |
+|---|---|---|---|---|
+| 1 Executive | Index YoY | Year = 2025; index segment = Dubai (all residential) (Dec 2025) | +15.0% | rpt.price_index (latest complete month) |
+| 1 Executive | Index YoY | no Year selected; index segment = Dubai (all residential) (Aug 2026) | +1.0% | rpt.price_index (latest complete month) |
+| 3 Prices | Max Drawdown | no Year selected; index segment = Dubai (all residential) | -23.6% | rpt.price_index (latest complete month) |
+| 3 Prices | Index YoY | no Year selected; index segment = Apartments (Aug 2026) | -0.1% | rpt.price_index (latest complete month) |
+| 3 Prices | Index Value (Latest Complete) | no Year selected; index segment = Apartments (Aug 2026) | 176.3 | rpt.price_index (latest complete month) |
+| 3 Prices | Drawdown from Peak | no Year selected; index segment = Apartments (Aug 2026) | -5.0% | rpt.price_index (latest complete month) |
+| 3 Prices | Max Drawdown | no Year selected; index segment = Apartments | -25.4% | rpt.price_index (latest complete month) |
+| 3 Prices | Index YoY | no Year selected; index segment = Villas / Townhouses (Aug 2026) | +4.9% | rpt.price_index (latest complete month) |
+| 3 Prices | Index Value (Latest Complete) | no Year selected; index segment = Villas / Townhouses (Aug 2026) | 220.8 | rpt.price_index (latest complete month) |
+| 3 Prices | Drawdown from Peak | no Year selected; index segment = Villas / Townhouses (Aug 2026) | -9.3% | rpt.price_index (latest complete month) |
+| 3 Prices | Max Drawdown | no Year selected; index segment = Villas / Townhouses | -30.4% | rpt.price_index (latest complete month) |
+| 4 Yields | Gross Yield (Latest 4 Quarters) | Property Type = Residential · Apartment; 2025-07 to 2026-04 quarter starts | 7.2% | rpt.yield_quarter, zone cells, sales-weighted (yields.md) |
+| 4 Yields | Gross Yield (Latest 4 Quarters) | Property Type = Residential · Villa / Townhouse; 2025-07 to 2026-04 quarter starts | 5.2% | rpt.yield_quarter, zone cells, sales-weighted (yields.md) |
+| 5 Valuation | AVM Test MdAPE | none | 6.83% | rpt.avm_performance, LightGBM, Test / Overall |
+| 5 Valuation | AVM Test Hit Rate 10% | none | 65.0% | rpt.avm_performance, LightGBM, Test / Overall |
+| 5 Valuation | AVM Test Hit Rate 20% | none | 88.2% | rpt.avm_performance, LightGBM, Test / Overall |
+| 5 Valuation | AVM Test MdAPE (Baseline) | none | 9.90% | rpt.avm_performance, Comparable sales (baseline), Test / Overall |
+| 5 Valuation | AVM Test Hit Rate 10% (Baseline) | none | 50.3% | rpt.avm_performance, Comparable sales (baseline), Test / Overall |
+| 5 Valuation | AVM Test Hit Rate 20% (Baseline) | none | 76.1% | rpt.avm_performance, Comparable sales (baseline), Test / Overall |
+| 5 Valuation | Valued Sales | Model Set = Test (page filter); other slicers clear | 275,702 | rpt.avm_score, Model Set = Test |
+| 5 Valuation | AVM MdAPE (Interactive) | Model Set = Test (page filter); other slicers clear | 6.83% | rpt.avm_score, Model Set = Test |
+| 5 Valuation | Flagged Share | Model Set = Test (page filter); other slicers clear | 6.8% | rpt.avm_score, Model Set = Test |
+| 6 Risk | Negative Equity Share | Stress segment = Dubai (all residential); Ready; Shock -10; LTV 80 | 0.0% | rpt.stress_grid |
+| 6 Risk | Negative Equity Share | Stress segment = Dubai (all residential); Ready; Shock -20; LTV 80 | 22.1% | rpt.stress_grid |
+| 6 Risk | Negative Equity AED | Stress segment = Dubai (all residential); Ready; Shock -20; LTV 80 | AED 1.9bn | rpt.stress_grid |
+| 6 Risk | Negative Equity Share | Stress segment = Dubai (all residential); Ready; Shock -30; LTV 80 | 71.9% | rpt.stress_grid |
+| 6 Risk | Replay Negative Equity Share | Stress segment = Dubai (all residential); Ready; LTV 80; Replay Depth = Dubai-wide (lower range) | 41.9% | rpt.stress_grid |
+| 6 Risk | Replay Negative Equity Share | Stress segment = Dubai (all residential); Ready; LTV 80; Replay Depth = Own series (upper range) | 77.8% | rpt.stress_grid |
+| 6 Risk | Negative Equity Share | Stress segment = Apartments; Ready; Shock -10; LTV 80 | 0.0% | rpt.stress_grid |
+| 6 Risk | Negative Equity Share | Stress segment = Apartments; Ready; Shock -20; LTV 80 | 22.4% | rpt.stress_grid |
+| 6 Risk | Negative Equity Share | Stress segment = Apartments; Ready; Shock -30; LTV 80 | 73.2% | rpt.stress_grid |
+| 6 Risk | Replay Negative Equity Share | Stress segment = Apartments; Ready; LTV 80; Replay Depth = Dubai-wide (lower range) | 43.1% | rpt.stress_grid |
+| 6 Risk | Replay Negative Equity Share | Stress segment = Apartments; Ready; LTV 80; Replay Depth = Own series (upper range) | 79.9% | rpt.stress_grid |
+| 6 Risk | Negative Equity Share | Stress segment = Villas / Townhouses; Ready; Shock -10; LTV 80 | 0.0% | rpt.stress_grid |
+| 6 Risk | Negative Equity Share | Stress segment = Villas / Townhouses; Ready; Shock -20; LTV 80 | 19.7% | rpt.stress_grid |
+| 6 Risk | Negative Equity Share | Stress segment = Villas / Townhouses; Ready; Shock -30; LTV 80 | 63.7% | rpt.stress_grid |
+| 6 Risk | Replay Negative Equity Share | Stress segment = Villas / Townhouses; Ready; LTV 80; Replay Depth = Dubai-wide (lower range) | 34.1% | rpt.stress_grid |
+| 6 Risk | Replay Negative Equity Share | Stress segment = Villas / Townhouses; Ready; LTV 80; Replay Depth = Own series (upper range) | 64.3% | rpt.stress_grid |
+| 6 Risk | Negative Equity Share (CBUAE Cap) | Stress segment = Apartments; Ready; Shock -20 | 21.7% | rpt.stress_grid |
+| 6 Risk | Negative Equity Share (Registered Loans) | Stress segment = Apartments; Ready; Shock -20 | 22.8% | rpt.stress_grid |
+| 6 Risk | Forecast 12M Change | Forecast segment = Dubai (all residential); Scenario = Rates flat | +4.6% | rpt.forecast |
+| 6 Risk | Forecast 12M Band 80% Label | Forecast segment = Dubai (all residential); Scenario = Rates flat | -5.1% to +15.4% | rpt.forecast (forecast.md) |
+| 6 Risk | Forecast 12M Change | Forecast segment = Apartments; Scenario = Rates flat | +4.4% | rpt.forecast |
+| 6 Risk | Forecast 12M Band 80% Label | Forecast segment = Apartments; Scenario = Rates flat | -6.1% to +16.1% | rpt.forecast (forecast.md) |
+| 6 Risk | Forecast 12M Change | Forecast segment = Villas / Townhouses; Scenario = Rates flat | +6.7% | rpt.forecast |
+| 6 Risk | Forecast 12M Band 80% Label | Forecast segment = Villas / Townhouses; Scenario = Rates flat | -5.8% to +20.9% | rpt.forecast (forecast.md) |
+| 6 Risk | Top 10 Master Project Share (Off-Plan) | Year = 2025 | 52.8% | rpt.transactions + rpt.dim_project (proxy, not developer HHI) |
+| 6 Risk | Master Project HHI (Off-Plan) | Year = 2025 | 399 | rpt.transactions + rpt.dim_project (proxy, not developer HHI) |

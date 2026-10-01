@@ -2,12 +2,14 @@
 
 -- Transaction lines for Power BI, reporting scope only (2004 onwards, valid date).
 -- Left out to keep the import small (docs/06 §1): the text ids (transaction, deal and batch
--- group ids), building names, and the individual C-rule flags, which collapse to
--- "Is Clean Market Sale" / "Has Quality Flag" (the full flags stay in gold.fct_transaction).
+-- group ids), building names, the individual C-rule flags, which collapse to
+-- "Is Clean Market Sale" / "Has Quality Flag" (the full flags stay in gold.fct_transaction),
+-- and the per-line price (actual_worth), which repeats a portfolio deal's total on every
+-- unit line (C16) and costs ~400k distinct values in the model (Phase 5 size budget).
 --
--- Sum "AED Counted Once" for values: "Price AED" repeats a portfolio deal's total on every
--- unit line (C16) and is for per-line display only. Area-weighted AED per sq m: clean
--- sales with "Area Above Class Cap" = false, within one property class.
+-- Sum "AED Counted Once" for values. Area-weighted AED per sq m: clean sales with
+-- "Area Above Class Cap" = false, within one property class. "Bedrooms Key" and
+-- "Ready / Off-Plan" relate to the shared slicer dimensions (docs/06 §2).
 select
     txn_date as "Date",
     area_key as "Area Key",
@@ -27,6 +29,7 @@ select
     is_deal_group_lead as "Is Deal Lead",
     is_lease_to_own as "Is Lease to Own",
     is_offplan as "Is Off-Plan",
+    {{ rpt_ready_offplan('is_offplan') }} as "Ready / Off-Plan",
     reg_type as "Registration Type",
 
     property_usage as "DLD Property Usage",
@@ -34,11 +37,11 @@ select
     property_sub_type as "DLD Property Sub-Type",
     rooms_en as "Rooms",
     bedrooms as "Bedrooms",
+    {{ rpt_bedrooms_key('bedrooms') }} as "Bedrooms Key",
     has_parking as "Has Parking",
     is_area_above_class_cap as "Area Above Class Cap",
 
     round(area_sqm, 2) as "Area Sq M",
-    {{ rpt_aed('actual_worth_aed') }} as "Price AED",
     {{ rpt_aed('aed_counted_once') }} as "AED Counted Once",
     {{ rpt_aed('price_per_sqm_aed') }} as "Price per Sq M AED",
     {{ rpt_aed('mortgage_amount_once_aed') }} as "Loan Amount AED",

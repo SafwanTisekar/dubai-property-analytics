@@ -1,0 +1,51 @@
+/// DLD's official index rebased to Jan 2019 = 100 (rpt.dld_price_index). Ends May 2024.
+table 'DLD Price Index'
+	lineageTag: f2c6f05a-dffc-5c87-bde0-289618c101ae
+
+	column Segment
+		dataType: string
+		lineageTag: da24a323-79fa-593e-a067-7fd7e85b11bd
+		summarizeBy: none
+		sourceColumn: Segment
+
+		annotation SummarizationSetBy = User
+
+	column 'Period Start'
+		dataType: dateTime
+		formatString: mmm yyyy
+		lineageTag: a68121fb-8dcd-5f14-b09b-439b7978b37b
+		summarizeBy: none
+		sourceColumn: Period Start
+
+		annotation SummarizationSetBy = User
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column 'DLD Index Value'
+		dataType: double
+		formatString: 0.0
+		lineageTag: 7cae7c07-421d-5d59-b7da-41dc3600e7f2
+		summarizeBy: none
+		sourceColumn: DLD Index Value
+
+		annotation SummarizationSetBy = User
+
+	column 'DLD YoY Change'
+		dataType: double
+		formatString: 0.0%
+		lineageTag: db6943d1-23cc-5a4f-bfc6-4947e4310f5f
+		summarizeBy: none
+		sourceColumn: DLD YoY Change
+
+		annotation SummarizationSetBy = User
+
+	partition 'DLD Price Index' = m
+		mode: import
+		source =
+				let
+				  Source = PostgreSQL.Database(PgServer, PgDatabase),
+				  #"Navigation 1" = Source{[Schema = "rpt", Item = "dld_price_index"]}[Data]
+				in
+				  #"Navigation 1"
+
+	annotation PBI_ResultType = Table

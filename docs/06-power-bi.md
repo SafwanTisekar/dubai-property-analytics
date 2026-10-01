@@ -3,132 +3,52 @@
 ## 1. Data connection
 
 - **Source: PostgreSQL** `dubai_property` on the Mac, via Get Data → **PostgreSQL database**, **Import mode** (required for Publish to web). Connection details over the Parallels network are in docs/03 §8.
-- Log in as the read-only role **`pbi_reader`**, and select only **`rpt.*` views** (built in Phase 2b: `rpt.transactions`, `rpt.area_month`, `rpt.rent_month`, `rpt.rates_monthly`, `rpt.report_info` and `rpt.dim_date` / `dim_area` / `dim_property_type` / `dim_procedure` / `dim_project`; Phase 4a added `rpt.price_index` and `rpt.yield_quarter`; 4b added `rpt.avm_score`, `rpt.avm_performance`, `rpt.feature_importance`; 4c added `rpt.stress_grid`, `rpt.stress_replay`, `rpt.forecast`, `rpt.forecast_backtest`). Columns have Title Case names (e.g. `"AED Counted Once"`), AED is whole dirhams, and medians are blank where n < 20 (docs/04 §3). All business logic lives in dbt; Power Query only confirms data types.
+- Log in as the read-only role **`pbi_reader`**, and select only **`rpt.*` views** (built in Phase 2b: `rpt.transactions`, `rpt.area_month`, `rpt.rent_month`, `rpt.rates_monthly`, `rpt.report_info` and `rpt.dim_date` / `dim_area` / `dim_property_type` / `dim_procedure` / `dim_project`; Phase 4a added `rpt.price_index` and `rpt.yield_quarter`; 4b added `rpt.avm_score`, `rpt.avm_performance`, `rpt.feature_importance`; 4c added `rpt.stress_grid`, `rpt.stress_replay`, `rpt.forecast`, `rpt.forecast_backtest`; Phase 5 added `rpt.dld_price_index`, `rpt.dim_bedrooms`, `rpt.dim_ready_offplan`: 22 views, all imported). Columns have Title Case names (e.g. `"AED Counted Once"`), AED is whole dirhams, and medians are blank where n < 20 (docs/04 §3). All business logic lives in dbt; Power Query only confirms data types.
 - Server and database are **Power BI parameters** (`PgServer`, `PgDatabase`), so switching between the Parallels IP and localhost is one change.
 - Save as a **Power BI Project (.pbip)** for git, and attach a `.pbix` to GitHub Releases.
 - Refresh happens in Desktop (the Mac must be on, with Postgres running), then republish. No gateway is needed because the public report is republished from Desktop rather than refreshed in the Service.
-- Model budget: transactions (~1.6M rows) + **rent aggregates only** (`rpt.rent_month`, a few hundred thousand rows; the 10M+ contract lines stay in Postgres) + small aggregates and ML tables. Target a .pbix under 300 MB: round AED to whole numbers in the `rpt` views, keep high-cardinality text (building names) only in dimension views, and exclude `_ar` columns.
+- **Model size budget (Phase 5).** Power BI Pro allows a 1 GB model; Publish to web has no lower limit but slows with model size and query count. Estimate from the measured cardinalities, anchored on Desktop's own cache: the Phase 2b import of the 10 pre-ML tables (transactions included) was a **43.8 MB** `cache.abf`.
+
+  | Table | Rows | Estimate | What drives it |
+  |---|---:|---:|---|
+  | Transactions | 1,769,938 | ~30–40 MB | AED Counted Once (~400k distinct), Area Sq M (94k), Price per Sq M (57k), Loan (48k) |
+  | AVM Score | ~424k | ~6–10 MB | Price AED (~210k distinct), AVM Value AED |
+  | Rent Month | 392,190 | ~5–8 MB | four AED / area sums (~190k distinct each) |
+  | Area Month | 120,799 | ~2 MB | |
+  | everything else | < 40k each | < 2 MB | |
+  | **Total** | | **≈ 45–65 MB** | well inside 1 GB; nothing blocks Publish to web |
+
+  Trimmed in Phase 5 rather than in Power Query (column choice is a dbt decision): `rpt.avm_score` keeps only the **out-of-sample** valuations (validation 2024 + test 2025+, ~424k of 904,551: training-period gaps are in-sample and would flatter the chart; owner decision) and drops the comparable-sales value, AVM value per sq m, model and version columns (the baseline comparison is in `rpt.avm_performance`); `rpt.transactions` drops the per-line `"Price AED"` (it repeats a portfolio deal's total on every unit; `"AED Counted Once"` is the value). **Performance risk:** the DAX medians over Transactions (Median Price per Sq M, the raw-median mix-shift line) are the visuals most likely to exceed 1 s on a monthly axis; if Performance Analyzer says so, pre-compute the monthly median in a small rpt view. **To do (owner):** after the first refresh, record the real size from VertiPaq Analyzer (DAX Studio) here.
 
 ## 2. Semantic model
 
-- Star schema as in docs/04 §3; single-direction one-to-many relationships.
-- `dim_date` (day grain) marked as the date table; facts join on date.
-- `dim_area` and `dim_property_type` are shared by the sales, rent and aggregate facts, so one slicer filters everything.
-- Display folders: **Market, Financing, Prices, Yields, Valuation, Risk, Rates**.
-- What-if parameters: `Price Shock %` (0 to −50, step 5) and `LTV %` with the values **50, 60, 70, 80, 85** (a disconnected table, not a step-5 range: the stress grid holds only those five, and 85 is labelled "UAE national first home cap (worst case)"; Phase 4c, owner 2026-10-01).
-- Format: AED with `"AED "#,0,,"M"` / `"AED "#,0.0,,,"bn"`; percentages to one decimal place.
+Stored as **TMDL** in the PBIP project (`powerbi/DubaiProperty.SemanticModel/definition/`), the source of truth; `tests/test_powerbi_model.py` checks it offline in CI (every rpt view imported once with exactly its columns, every DAX reference resolves, what-if values equal the stress grid's, no hard-coded server).
 
-## 3. Core DAX measures
+- **Friendly table names**: Transactions, Area Month, Rent Month, Rates Monthly, Date, Area, Property Type, Procedure, Project, Bedrooms, Ready Off-Plan, Price Index, DLD Price Index, Yield Quarter, AVM Score, AVM Performance, Feature Importance, Stress Grid, Stress Replay, Forecast, Forecast Backtest, Report Info. Columns keep the rpt Title Case names. Partitions read `PostgreSQL.Database(PgServer, PgDatabase)`.
+- **Star (connected)**: Transactions, Area Month, Rent Month and AVM Score relate many-to-one, single direction, to **Date** (day grain, marked as the date table), **Area**, **Property Type**, **Bedrooms** and **Ready Off-Plan** (Rent Month: no Ready / Off-Plan, rents are of ready units); Rates Monthly → Date; Transactions and AVM Score → Project; Transactions → Procedure. One synced slicer panel therefore filters every fact. Relationship autodetect is off.
+- **Model outputs are disconnected** (Price Index, DLD Price Index, Yield Quarter, Stress Grid / Replay, Forecast / Backtest, AVM Performance, Feature Importance, Report Info) and measures bridge them with `TREATAS`: dates onto `Period Start` / `Quarter Start`, `'Area'[Zone]` / `[Area Key]`, property type and bedrooms onto their columns. **Why:** those tables mix grains (Dubai, type, zone and area rows, with NULL area keys on the Dubai and zone rows), so a physical relationship to Area would make any area slicer silently drop the Dubai and zone rows a card needs.
+- **What-if and selector tables** (DAX calculated tables, integer keys so equality with `rpt.stress_grid` is exact): `Price Shock %` (0 to −50, step 5); `LTV %` with **50, 60, 70, 80, 85** only (85 labelled "UAE national first home cap (worst case)"; Phase 4c, owner 2026-10-01); `Replay Depth` (Dubai-wide = lower range / own series = upper range); `Forecast Scenario` (Rates flat / +100bp / −100bp).
+- **Display folders**: Market, Financing, Prices, Yields, Valuation, Risk (with `Risk\Concentration`, `Risk\Outlook`), Rates, and **Report** (header, footer, dynamic insight titles; added in Phase 5). Every measure has a description. `discourageImplicitMeasures` is on: visuals use measures, not dragged columns.
+- **Format**: every AED amount is `"AED "#,0`; cards and axes show bn / M through the visual's **display units** (set explicitly to Billions or Millions with 1 decimal: Auto switches to Trillions on all-time totals). Excel-style scaling commas (`#,0.0,,,"bn"`) are **not** used: Power BI rendered them literally ("AED 3.6,,,Tbn", Phase 5 gate), and `tests/test_powerbi_model.py` rejects them. Percentages `0.0%` (MdAPE `0.00%`); changes `+0.0%;-0.0%`; index `0.0`.
 
-**Phase 2b note.** The measures below are the design sketch; Phase 5 rewrites them against the rpt column names (e.g. `transactions[AED Counted Once]`). Two are already corrected to the docs/01 §4 definitions: market sales count **every** market sale (quality flags only exclude rows from price statistics) and sum the AED **once per deal** (C16); mortgage share uses individual new mortgages only. `reports/kpi_reconciliation.md` holds the target values.
+## 3. Measures
 
-```dax
-// ---------- Market ----------
-Market Sales = CALCULATE ( COUNTROWS ( fct_transaction ), fct_transaction[is_market_sale] = 1 )
+All measures live in the measure table **`_Measures`** (`tables/_Measures.tmdl`); `powerbi/measures.dax` is a read-only review copy (`make pbi-measures`; a test fails if it is stale). They only aggregate rpt views: definitions sit in dbt. `reports/kpi_reconciliation.md` §7 lists the value every card must show.
 
-Market Sales Value = CALCULATE ( SUM ( fct_transaction[aed_counted_once] ), fct_transaction[is_market_sale] = 1 )
+| Folder | Measures | Notes |
+|---|---|---|
+| Market | Market Sales, Market Sales Value (+ PY, YoY %), Clean Sales, Median Price per Sq M, Area-Weighted Price per Sq M (Homes), Off-Plan Sales, Off-Plan Share (Count / Value) | Counts and AED from Area Month (reconciled to Transactions); medians on Transactions, blank under min-n |
+| Financing | Ready Market Sales, Purchase Mortgages, **Purchase Mortgage Share** (headline, lower bound), Ready Sales Not Bank-Financed, New Mortgages (per 100 Sales), New Mortgage Loans, Portfolio Mortgage Deals / Value, Median Purchase LTV | docs/01 §4 definitions |
+| Rates | Fed Funds Rate, EIBOR 3M, Reference Rate (EIBOR, else Fed Funds), Reference Rate Label | EIBOR is not loaded yet, so charts show Fed Funds labelled as the proxy |
+| Prices | Index Value, Index YoY / Value (Latest Complete) / Drawdown from Peak (cards: latest non-partial period in the selection), Index Drawdown, Max Drawdown, DLD Index Value, Index Value (Apartments), Raw Median Price per Sq M (Apartments), Raw Median Rebased | Segment from a slicer on `'Price Index'[Segment]` (Dubai when none) |
+| Yields | Gross Yield (Latest 4 Quarters) (sales-weighted zone cells, as reports/yields.md), Gross Yield by Area, Gross Yield by Quarter, Index Growth 3Y (Zone), New Market Rents, Area-Weighted New Rent per Sq M (Homes), New Rent per Sq M | Min-n applied upstream (both sides) |
+| Valuation | AVM Test MdAPE / Hit Rate 10% / 20% (+ Baseline), MdAPE Gain vs Baseline, AVM Segment MdAPE, Valued Sales, AVM MdAPE / Hit Rate (Interactive), Median Sale Price / AVM Value / Gap %, Flagged for Review / Share, Mean Abs SHAP | Headline cards read AVM Performance (model card); interactive ones recompute on out-of-sample rows |
+| Risk | Selected Shock / LTV / Stress Segment / Ready / Off-Plan, Negative Equity Share / AED / Count, Stress Purchases, Negative Equity Share (CBUAE Cap / Registered Loans), Replay Negative Equity Share, Negative Equity Share by Area | Shares are read per segment row, never re-averaged; blank under min-n |
+| Risk\Concentration | Off-Plan Market Sales (Lines), Master Project Share, Top 10 Master Project Share, Master Project HHI | **Proxy** for developer concentration (Q9 needs the DLD projects file) |
+| Risk\Outlook | Forecast Actual / Central / Lower-Upper 80 / 95, Forecast 12M Change / Lower / Upper, Band label | Scenario from `Forecast Scenario` |
+| Report | Min N, Data As Of Label, Footer Attribution, Selected Year Label, Stress Disclaimer, Title * (dynamic insight titles) | |
 
-Sales Value YoY % =
-VAR _cy = [Market Sales Value]
-VAR _py = CALCULATE ( [Market Sales Value], SAMEPERIODLASTYEAR ( dim_date[date] ) )
-RETURN DIVIDE ( _cy - _py, _py )
-
-Median Price per Sqm =
-CALCULATE ( MEDIAN ( fct_transaction[price_per_sqm] ), fct_transaction[is_market_sale] = 1, fct_transaction[has_quality_flag] = 0 )
-
-// ---------- Financing ----------
-New Mortgages = CALCULATE ( COUNTROWS ( fct_transaction ), fct_transaction[is_new_mortgage] = 1 )   // individual only (incl. refinancing); portfolio reported separately
-
-// Headline (docs/01 §4, revised 2026-09-30): ready market sales matched to a same-day purchase
-// mortgage of the same unit ÷ ready market sales. A lower bound (see docs/04 Decisions).
-Purchase Mortgages = SUM ( area_month[Purchase Mortgages] )
-Ready Market Sales = CALCULATE ( SUM ( area_month[Market Sales] ), area_month[Is Off-Plan] = FALSE () )
-Purchase Mortgage Share = DIVIDE ( [Purchase Mortgages], [Ready Market Sales] )
-
-// Secondary indicator: new mortgages (incl. refinancing and off-plan pre-registration) per 100 market sales.
-New Mortgages per 100 Sales = DIVIDE ( [New Mortgages], [Market Sales] ) * 100
-
-Off-plan Share (Value) =
-DIVIDE ( CALCULATE ( [Market Sales Value], fct_transaction[is_offplan] = 1 ), [Market Sales Value] )
-
-Avg EIBOR 3M = AVERAGE ( fct_rates_monthly[eibor_3m] )
-
-// ---------- Prices / index ----------
-Price Index = AVERAGE ( fct_price_index[index_value] )     // filter segment via slicer
-
-Index YoY % = AVERAGE ( fct_price_index[yoy] )
-
-Drawdown from Peak = MIN ( fct_price_index[drawdown_from_peak] )
-
-// ---------- Yields ----------
-// Rents come pre-aggregated (agg_rent_month); weighted average of medians is an approximation, so show exact medians from agg_yield_quarter where precision matters
-New Rent Contracts = CALCULATE ( SUM ( agg_rent_month[contracts] ), agg_rent_month[is_new] = 1 )
-
-Avg Annual Rent per Sqm (New) =
-CALCULATE (
-    DIVIDE ( SUMX ( agg_rent_month, agg_rent_month[median_rent_per_sqm] * agg_rent_month[contracts] ), SUM ( agg_rent_month[contracts] ) ),
-    agg_rent_month[is_new] = 1
-)
-
-Gross Yield = AVERAGE ( agg_yield_quarter[gross_yield] )    // pre-computed with min-n rule
-
-// ---------- Valuation (AVM) ----------
-// rpt.avm_score (one row per valued sale; "Is Out of Sample" = validation 2024 + test 2025+)
-// and rpt.avm_performance (pre-computed metrics per model / split / segment, min-n applied).
-AVM MdAPE = MEDIAN ( avm_score[Absolute Error Pct] )
-
-AVM Hit Rate ±10% =
-DIVIDE (
-    CALCULATE ( COUNTROWS ( avm_score ), avm_score[Absolute Error Pct] <= 0.10 ),
-    COUNTROWS ( avm_score )
-)
-
-// Statistical anomalies for collateral review, not accusations; out-of-sample rows only
-// (training rows have a blank flag: their gaps are in sample).
-Flagged for Review = CALCULATE ( COUNTROWS ( avm_score ), avm_score[Review Flag] = "Review: statistical anomaly" )
-
-Flagged Share =
-DIVIDE ( [Flagged for Review], CALCULATE ( COUNTROWS ( avm_score ), avm_score[Is Out of Sample] = TRUE () ) )
-
-// Model comparison cards read rpt.avm_performance (Split = "Test", Breakdown = "Overall").
-Selected Model MdAPE = MAX ( avm_performance[MdAPE] )
-
-// ---------- Stress test (rpt.stress_grid, Phase 4c) ----------
-// Integer keys on both sides (e.g. -20, 80): no floating-point equality.
-Selected Shock = SELECTEDVALUE ( 'Price Shock %'[Price Shock % Value], -20 )
-Selected LTV   = SELECTEDVALUE ( 'LTV %'[LTV % Value], 80 )
-
-// One row per segment: pick a level (Dubai / Type / Zone / Area) with a slicer or the
-// visual's filter, and Ready / Off-Plan (never pooled). Shares are pre-computed per row
-// and blank under min-n, so read them, don't re-average them across segments.
-Negative Equity Share =
-CALCULATE (
-    SELECTEDVALUE ( stress_grid[Negative Equity Share] ),
-    stress_grid[Scenario] = "Price shock",
-    stress_grid[Loan Basis] = "Assumed LTV",
-    stress_grid[Shock Pct] = [Selected Shock],
-    stress_grid[LTV Pct] = [Selected LTV]
-)
-
-Negative Equity AED =
-CALCULATE (
-    SUM ( stress_grid[Negative Equity AED] ),
-    stress_grid[Scenario] = "Price shock",
-    stress_grid[Loan Basis] = "Assumed LTV",
-    stress_grid[Shock Pct] = [Selected Shock],
-    stress_grid[LTV Pct] = [Selected LTV]
-)
-
-// Reference lines: the CBUAE cap (expatriate, first home) and registered loans of matched
-// purchases, at the selected shock (no LTV key on those rows).
-Negative Equity Share CBUAE Cap =
-CALCULATE ( SELECTEDVALUE ( stress_grid[Negative Equity Share] ),
-    stress_grid[Scenario] = "Price shock",
-    stress_grid[Loan Basis] = "CBUAE cap (expatriate, first home)",
-    stress_grid[Shock Pct] = [Selected Shock] )
-```
-
-The shock and LTV values are stored as integers (e.g. −20, 80) in both the parameter tables and `rpt.stress_grid` ("Shock Pct", "LTV Pct"), to avoid floating-point equality issues. Every stress visual carries the label "Illustrative, not a regulatory stress test". The historical replay rows have no Shock Pct and come in two scenarios shown side by side: "Replay: 2014-2020, Dubai-wide" (−24% for every buyer, the lower range) and "Replay: 2014-2020, own series" (each buyer's zone × type or type drawdown; noisier zone series overstate the depth, so it is the upper range). The outlook fan chart reads `rpt.forecast` (Actual line, Forecast per Scenario, Lower/Upper 80 and 95 as error bands). `tests/test_kpi_reconciliation.py` reproduces every KPI in docs/01 §4 in SQL, and the Power BI cards must match before publishing.
+Every stress visual carries "Illustrative, not a regulatory stress test" (`[Stress Disclaimer]`). The historical replay rows have no Shock Pct; the two depths ("Replay: 2014-2020, Dubai-wide", the lower range, and "…, own series", the upper range) are chosen with `Replay Depth`. `tests/test_kpi_reconciliation.py` reproduces every docs/01 §4 KPI in SQL; the cards must match §7 of its report before publishing.
 
 ## 4. Report pages
 
@@ -143,7 +63,9 @@ The shock and LTV values are stored as integers (e.g. −20, 80) in both the par
 | 5 | **Valuation Model (AVM)** | Q5 | AVM KPI cards (MdAPE, ±10%/±20% hit rates vs baseline) · accuracy by segment bar · top feature importance · actual vs predicted by month · table of the largest AVM gaps by area/project |
 | 6 | **Risk & Stress Test** | Q6, Q7, Q9 | **Price Shock** and **LTV** sliders → Negative Equity Share and AED cards · negative-equity share by area map/bar · historical drawdown replay · developer concentration (HHI, top developers' off-plan share) · 12-month outlook fan chart |
 
-**Maps:** test the map visual in Publish to web early. Filled/shape maps need an area boundary TopoJSON (check Dubai Municipality or Dubai Pulse open data for community boundaries); otherwise use a bubble map on area centroids from `seed_area`. **No Python/R visuals**; SHAP images go on the website.
+**Maps:** a bubble map (**Azure Maps visual**, supported in Publish to web; enable it in the Admin portal → Tenant settings → Integration settings) on `'Area'[Latitude]` / `[Longitude]`, centroids from OpenStreetMap (`reports/area_centroids.md`: 194 of 265 areas, 97.7% of 2023+ market sales; unlocated areas have no bubble). The footer credits "Area locations © OpenStreetMap contributors (ODbL)". No boundary file (filled maps) in v1. **No Python/R visuals**; SHAP images go on the website.
+
+**Phase 5 substitutions** (data not available, decisions 2026-10-01): page 2 shows the **Fed Funds rate as the EIBOR proxy** (labelled; EIBOR swaps in once a CBUAE file is loaded); page 6's developer concentration is a **master-project proxy** (top-10 master projects' share of off-plan market sales and an HHI over master projects, labelled as a proxy; owner decision) until the DLD projects file brings developer names.
 
 ## 5. Design standards
 

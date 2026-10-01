@@ -1,0 +1,312 @@
+/// Transaction lines in the reporting scope (rpt.transactions). Medians and line-level analysis; additive totals come from Area Month.
+table Transactions
+	lineageTag: a0c75a1c-3eac-59ff-9351-3d04904d7fae
+
+	column Date
+		dataType: dateTime
+		isHidden
+		formatString: yyyy-mm-dd
+		lineageTag: c757cb2e-b466-5816-b9a5-c2eea0cff12e
+		summarizeBy: none
+		sourceColumn: Date
+
+		annotation SummarizationSetBy = User
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column 'Area Key'
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: d27fdcb6-32f2-5f27-8720-ac4522cc480a
+		summarizeBy: none
+		sourceColumn: Area Key
+
+		annotation SummarizationSetBy = User
+
+	column 'Property Type Key'
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 83d5d831-d74a-57f7-a154-0a0736241ae8
+		summarizeBy: none
+		sourceColumn: Property Type Key
+
+		annotation SummarizationSetBy = User
+
+	column 'Procedure Key'
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: ebca8edb-e9fb-55fd-81d8-83ed79971db8
+		summarizeBy: none
+		sourceColumn: Procedure Key
+
+		annotation SummarizationSetBy = User
+
+	column 'Project Key'
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 967023c7-6d60-522c-b2b1-90ee943ec078
+		summarizeBy: none
+		sourceColumn: Project Key
+
+		annotation SummarizationSetBy = User
+
+	column 'Transaction Group'
+		dataType: string
+		lineageTag: cfae205f-120a-5f99-b1e3-2119a449148b
+		summarizeBy: none
+		sourceColumn: Transaction Group
+
+		annotation SummarizationSetBy = User
+
+	column 'Procedure Category'
+		dataType: string
+		lineageTag: e122d14c-4a41-5d32-a91a-78b2fbad3097
+		summarizeBy: none
+		sourceColumn: Procedure Category
+
+		annotation SummarizationSetBy = User
+
+	column 'Is Market Sale'
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: 4d76c862-0f6f-5acb-ac1c-a32da481bd4d
+		summarizeBy: none
+		sourceColumn: Is Market Sale
+
+		annotation SummarizationSetBy = User
+
+	column 'Is Clean Market Sale'
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: 5901eafc-b5ba-57f2-b195-5fa90a7a8c98
+		summarizeBy: none
+		sourceColumn: Is Clean Market Sale
+
+		annotation SummarizationSetBy = User
+
+	column 'Has Quality Flag'
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: 2aee73aa-f5eb-5eb2-bf5a-b1b7c60fdd37
+		summarizeBy: none
+		sourceColumn: Has Quality Flag
+
+		annotation SummarizationSetBy = User
+
+	column 'Is New Mortgage'
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: 4f52f34e-fb77-5a95-8639-cc6ae13155b5
+		summarizeBy: none
+		sourceColumn: Is New Mortgage
+
+		annotation SummarizationSetBy = User
+
+	column 'Is Portfolio Mortgage'
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: cd31f310-4280-58e9-9e39-24998db13d4f
+		summarizeBy: none
+		sourceColumn: Is Portfolio Mortgage
+
+		annotation SummarizationSetBy = User
+
+	column 'Has Purchase Mortgage'
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: 1d70f8d7-95e6-5a90-9962-c4a878381c66
+		summarizeBy: none
+		sourceColumn: Has Purchase Mortgage
+
+		annotation SummarizationSetBy = User
+
+	column 'Is Purchase Mortgage'
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: af5609c8-ac8d-5f69-8d8c-5f8e8d3911a1
+		summarizeBy: none
+		sourceColumn: Is Purchase Mortgage
+
+		annotation SummarizationSetBy = User
+
+	column 'Is Deal Lead'
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: ac3c25ca-ff37-548d-b60d-80f5a1f6298c
+		summarizeBy: none
+		sourceColumn: Is Deal Lead
+
+		annotation SummarizationSetBy = User
+
+	column 'Is Lease to Own'
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: f84be6db-dea3-5655-a57f-9c8c7e7e6312
+		summarizeBy: none
+		sourceColumn: Is Lease to Own
+
+		annotation SummarizationSetBy = User
+
+	column 'Is Off-Plan'
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: 9351fec2-2d77-5a38-bd67-90467af8afca
+		summarizeBy: none
+		sourceColumn: Is Off-Plan
+
+		annotation SummarizationSetBy = User
+
+	column 'Ready / Off-Plan'
+		dataType: string
+		isHidden
+		lineageTag: 53df597e-f34f-5bf2-a10f-e580eef2ab17
+		summarizeBy: none
+		sourceColumn: Ready / Off-Plan
+
+		annotation SummarizationSetBy = User
+
+	column 'Registration Type'
+		dataType: string
+		lineageTag: c6de0168-1f23-51de-b1bc-0ea2c76e48df
+		summarizeBy: none
+		sourceColumn: Registration Type
+
+		annotation SummarizationSetBy = User
+
+	column 'DLD Property Usage'
+		dataType: string
+		lineageTag: 334e510a-472f-5e9a-bb41-e16c95ce9880
+		summarizeBy: none
+		sourceColumn: DLD Property Usage
+
+		annotation SummarizationSetBy = User
+
+	column 'DLD Property Type'
+		dataType: string
+		lineageTag: 701ea42f-f2b9-5b80-81f0-d8ce6839e71e
+		summarizeBy: none
+		sourceColumn: DLD Property Type
+
+		annotation SummarizationSetBy = User
+
+	column 'DLD Property Sub-Type'
+		dataType: string
+		lineageTag: 8e5e4a22-a800-570e-ab3f-6c3fa64eba5c
+		summarizeBy: none
+		sourceColumn: DLD Property Sub-Type
+
+		annotation SummarizationSetBy = User
+
+	column Rooms
+		dataType: string
+		lineageTag: 4d7d6a37-f453-5d5d-a83a-c4f614affd55
+		summarizeBy: none
+		sourceColumn: Rooms
+
+		annotation SummarizationSetBy = User
+
+	column Bedrooms
+		dataType: int64
+		formatString: 0
+		lineageTag: 4015a05b-d490-517c-9d23-47d7f5cbb262
+		summarizeBy: none
+		sourceColumn: Bedrooms
+
+		annotation SummarizationSetBy = User
+
+	column 'Bedrooms Key'
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 02fe4909-10b3-5644-a4e1-e3f123cc0f6a
+		summarizeBy: none
+		sourceColumn: Bedrooms Key
+
+		annotation SummarizationSetBy = User
+
+	column 'Has Parking'
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: 18181ac5-dbb9-50d6-97ed-74a5917d3c31
+		summarizeBy: none
+		sourceColumn: Has Parking
+
+		annotation SummarizationSetBy = User
+
+	column 'Area Above Class Cap'
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: 0df9916c-b0af-5672-ac84-c74399b45bb1
+		summarizeBy: none
+		sourceColumn: Area Above Class Cap
+
+		annotation SummarizationSetBy = User
+
+	column 'Area Sq M'
+		dataType: double
+		formatString: #,0.00
+		lineageTag: 3d02148a-089e-5732-8095-1545adfed0cc
+		summarizeBy: sum
+		sourceColumn: Area Sq M
+
+		annotation SummarizationSetBy = User
+
+	column 'AED Counted Once'
+		dataType: int64
+		formatString: """AED ""#,0"
+		lineageTag: 59816bd1-4604-580b-ac26-c3aa19cad5a8
+		summarizeBy: sum
+		sourceColumn: AED Counted Once
+
+		annotation SummarizationSetBy = User
+
+	column 'Price per Sq M AED'
+		dataType: int64
+		formatString: """AED ""#,0"
+		lineageTag: d5aaffaf-1b3c-5997-9dbf-ba934b9b8db5
+		summarizeBy: none
+		sourceColumn: Price per Sq M AED
+
+		annotation SummarizationSetBy = User
+
+	column 'Loan Amount AED'
+		dataType: int64
+		formatString: """AED ""#,0"
+		lineageTag: ee648925-baac-5b81-854f-b2f428cecac3
+		summarizeBy: sum
+		sourceColumn: Loan Amount AED
+
+		annotation SummarizationSetBy = User
+
+	column 'Portfolio Mortgage Value AED'
+		dataType: int64
+		formatString: """AED ""#,0"
+		lineageTag: 4d1eab14-86cd-564c-aebc-25e16c185b0a
+		summarizeBy: sum
+		sourceColumn: Portfolio Mortgage Value AED
+
+		annotation SummarizationSetBy = User
+
+	column 'Purchase LTV'
+		dataType: double
+		formatString: 0.0%
+		lineageTag: 503fa3fe-ae74-5e26-b243-ffabec2bd333
+		summarizeBy: none
+		sourceColumn: Purchase LTV
+
+		annotation SummarizationSetBy = User
+
+	partition Transactions = m
+		mode: import
+		source =
+				let
+				  Source = PostgreSQL.Database(PgServer, PgDatabase),
+				  #"Navigation 1" = Source{[Schema = "rpt", Item = "transactions"]}[Data]
+				in
+				  #"Navigation 1"
+
+	annotation PBI_ResultType = Table

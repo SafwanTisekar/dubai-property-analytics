@@ -1,0 +1,209 @@
+/// Monthly sales and financing by area x property type x bedrooms x ready/off-plan (rpt.area_month). Additive.
+table 'Area Month'
+	lineageTag: ee5cdafb-6858-5aeb-b8e4-6540e15471d5
+
+	column Month
+		dataType: dateTime
+		isHidden
+		formatString: mmm yyyy
+		lineageTag: c9abd0f1-2e0f-52e2-94ec-86164b71d7f1
+		summarizeBy: none
+		sourceColumn: Month
+
+		annotation SummarizationSetBy = User
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column 'Area Key'
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 4f6d9fa9-3cd2-5bcd-9266-fb2a5a3bd20b
+		summarizeBy: none
+		sourceColumn: Area Key
+
+		annotation SummarizationSetBy = User
+
+	column 'Property Type Key'
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: feec1613-e0ea-5400-ab23-773ff77bda38
+		summarizeBy: none
+		sourceColumn: Property Type Key
+
+		annotation SummarizationSetBy = User
+
+	column Bedrooms
+		dataType: int64
+		formatString: 0
+		lineageTag: 33eea31f-7d46-59ca-aaad-d6e9acdba2fe
+		summarizeBy: none
+		sourceColumn: Bedrooms
+
+		annotation SummarizationSetBy = User
+
+	column 'Bedrooms Key'
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: ef4fd177-45ac-5ca1-b46c-6f808df6cf49
+		summarizeBy: none
+		sourceColumn: Bedrooms Key
+
+		annotation SummarizationSetBy = User
+
+	column 'Is Off-Plan'
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: 5dcbd321-866f-5140-8458-1b3314f693a5
+		summarizeBy: none
+		sourceColumn: Is Off-Plan
+
+		annotation SummarizationSetBy = User
+
+	column 'Ready / Off-Plan'
+		dataType: string
+		isHidden
+		lineageTag: 5a2969d0-ec5d-5fe1-8a3b-f39c206f5684
+		summarizeBy: none
+		sourceColumn: Ready / Off-Plan
+
+		annotation SummarizationSetBy = User
+
+	column 'Market Sales'
+		dataType: int64
+		formatString: #,0
+		lineageTag: 2715ec59-c3a2-568d-9ea5-f276a8452727
+		summarizeBy: sum
+		sourceColumn: Market Sales
+
+		annotation SummarizationSetBy = User
+
+	column 'Market Sales Value AED'
+		dataType: int64
+		formatString: """AED ""#,0"
+		lineageTag: 4edf6c2d-03df-55b9-8dba-472c71787134
+		summarizeBy: sum
+		sourceColumn: Market Sales Value AED
+
+		annotation SummarizationSetBy = User
+
+	column 'Clean Sales'
+		dataType: int64
+		formatString: #,0
+		lineageTag: da0162c2-a6ae-5d0d-99de-e697c88b8167
+		summarizeBy: sum
+		sourceColumn: Clean Sales
+
+		annotation SummarizationSetBy = User
+
+	column 'Clean Sales AW N'
+		dataType: int64
+		formatString: #,0
+		lineageTag: a35a1fee-7829-57b9-988e-4a64fb430338
+		summarizeBy: sum
+		sourceColumn: Clean Sales AW N
+
+		annotation SummarizationSetBy = User
+
+	column 'Clean Sales Value AED'
+		dataType: int64
+		formatString: """AED ""#,0"
+		lineageTag: fdc47221-62a5-51c4-8072-ad62f8c81a17
+		summarizeBy: sum
+		sourceColumn: Clean Sales Value AED
+
+		annotation SummarizationSetBy = User
+
+	column 'Clean Sales Area Sq M'
+		dataType: double
+		formatString: #,0.00
+		lineageTag: a433cca1-7f24-5b05-afa8-bc0cc1c6c42b
+		summarizeBy: sum
+		sourceColumn: Clean Sales Area Sq M
+
+		annotation SummarizationSetBy = User
+
+	column 'Median Price per Sq M AED'
+		dataType: int64
+		formatString: """AED ""#,0"
+		lineageTag: 5907258f-0429-57cc-97bc-2e57527e2721
+		summarizeBy: none
+		sourceColumn: Median Price per Sq M AED
+
+		annotation SummarizationSetBy = User
+
+	column 'Median Price AED'
+		dataType: int64
+		formatString: """AED ""#,0"
+		lineageTag: 55e58926-8596-52ec-be4b-7a3675835903
+		summarizeBy: none
+		sourceColumn: Median Price AED
+
+		annotation SummarizationSetBy = User
+
+	column 'Purchase Mortgages'
+		dataType: int64
+		formatString: #,0
+		lineageTag: df57c4f5-ac1a-568d-b92c-a8c80c64f28a
+		summarizeBy: sum
+		sourceColumn: Purchase Mortgages
+
+		annotation SummarizationSetBy = User
+
+	column 'New Mortgages'
+		dataType: int64
+		formatString: #,0
+		lineageTag: 35d7de3f-aa66-5e70-a1ab-61dccf561d17
+		summarizeBy: sum
+		sourceColumn: New Mortgages
+
+		annotation SummarizationSetBy = User
+
+	column 'New Mortgage Loans AED'
+		dataType: int64
+		formatString: """AED ""#,0"
+		lineageTag: dacf71cc-ea66-57e7-82aa-6aab1c0d3691
+		summarizeBy: sum
+		sourceColumn: New Mortgage Loans AED
+
+		annotation SummarizationSetBy = User
+
+	column 'Portfolio Mortgage Deals'
+		dataType: int64
+		formatString: #,0
+		lineageTag: 39dfd034-a8fb-5f17-8e23-acf82cc4a92e
+		summarizeBy: sum
+		sourceColumn: Portfolio Mortgage Deals
+
+		annotation SummarizationSetBy = User
+
+	column 'Portfolio Mortgage Lines'
+		dataType: int64
+		formatString: #,0
+		lineageTag: 3aef0f33-022b-5311-8c98-47e8f11f73f7
+		summarizeBy: sum
+		sourceColumn: Portfolio Mortgage Lines
+
+		annotation SummarizationSetBy = User
+
+	column 'Portfolio Mortgage Value AED'
+		dataType: int64
+		formatString: """AED ""#,0"
+		lineageTag: 3cd370ed-7c8f-5936-9d87-d02855cd5ae7
+		summarizeBy: sum
+		sourceColumn: Portfolio Mortgage Value AED
+
+		annotation SummarizationSetBy = User
+
+	partition 'Area Month' = m
+		mode: import
+		source =
+				let
+				  Source = PostgreSQL.Database(PgServer, PgDatabase),
+				  #"Navigation 1" = Source{[Schema = "rpt", Item = "area_month"]}[Data]
+				in
+				  #"Navigation 1"
+
+	annotation PBI_ResultType = Table

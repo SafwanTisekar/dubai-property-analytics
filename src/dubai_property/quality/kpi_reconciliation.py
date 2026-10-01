@@ -22,8 +22,9 @@ so the headline figures cover **residential apartments and villas / townhouses**
 area within the class cap (owner, 2026-09-30). A sanity check requires the apartment
 area-weighted price to stay within ±40% of the apartment median in every year from 2010.
 
-The price index, YoY growth, yields, AVM accuracy, drawdown, negative equity and developer
-concentration come from Phase 4 models and are listed as pending.
+§7 is the Power BI card checklist (``quality/pbi_cards.py``): the value each KPI card
+must show and the slicers to set. The model cards (index, yields, AVM, stress, forecast)
+are added once ``make score`` has built the post_ml views (``make score`` re-runs this).
 """
 
 from __future__ import annotations
@@ -40,6 +41,7 @@ from typing import Any
 import psycopg
 
 from dubai_property import config, db
+from dubai_property.quality import pbi_cards
 from dubai_property.quality.dq_report import md_table
 
 log = logging.getLogger(__name__)
@@ -444,6 +446,9 @@ class Result:
     silver: Table
     checks: dict[str, int]
     mismatches: list[Mismatch]
+    card_year: str = ""
+    cards_pre: list[pbi_cards.Card] | None = None
+    cards_post: list[pbi_cards.Card] | None = None
 
 
 def compute(conn: psycopg.Connection) -> Result:
@@ -459,6 +464,8 @@ def compute(conn: psycopg.Connection) -> Result:
         "rpt.area_month": (silver_sales, fetch(conn, RPT_AREA_MONTH_SQL, start, snapshot)),
         "rpt.rent_month": (silver_rents, fetch(conn, RPT_RENT_MONTH_SQL, start, snapshot)),
     }
+    year = pbi_cards.latest_complete_year(silver_sales, snapshot.year)
+    cards_post = pbi_cards.post_ml_cards(conn, year) if pbi_cards.post_ml_available(conn) else None
     conn.rollback()
     mismatches, checks = [], {}
     for source, (silver, other) in others.items():
@@ -468,7 +475,8 @@ def compute(conn: psycopg.Connection) -> Result:
         p: {**silver_sales.get(p, {}), **silver_rents.get(p, {})}
         for p in silver_sales.keys() | silver_rents.keys()
     }
-    return Result(database, snapshot, merged, checks, mismatches)
+    cards_pre = pbi_cards.pre_ml_cards(merged, derive, year)
+    return Result(database, snapshot, merged, checks, mismatches, year, cards_pre, cards_post)
 
 
 # --- Rendering ------------------------------------------------------------------------
@@ -534,14 +542,16 @@ COLUMNS = [
     "Area-weighted new rent AED / sq m (res. apartments + villas)",
 ]
 
-PENDING = [
-    ("Price index", "Phase 4a: hedonic time-dummy index, Jan 2019 = 100 (docs/05 §2)"),
-    ("YoY price growth", "Phase 4a: from the index"),
-    ("Gross rental yield", "Phase 4a: agg_yield_quarter with the min-n rule (docs/05 §3)"),
-    ("AVM accuracy (MdAPE, ±10% / ±20%)", "Phase 4b (docs/05 §1)"),
-    ("Max drawdown", "Phase 4a: from the index"),
-    ("Negative-equity share", "Phase 4c: stress grid (docs/05 §4)"),
-    ("Developer concentration (HHI)", "Stretch: needs the DLD projects file (deferred)"),
+MODEL_KPIS = [
+    ("Price index, YoY growth, max drawdown", "rpt.price_index (Phase 4a): §7 cards"),
+    ("Gross rental yield", "rpt.yield_quarter (Phase 4a, min-n both sides): §7 cards"),
+    ("AVM accuracy (MdAPE, ±10% / ±20%)", "rpt.avm_performance / avm_score (4b): §7 cards"),
+    ("Negative-equity share", "rpt.stress_grid (Phase 4c): §7 cards"),
+    ("12-month outlook", "rpt.forecast (Phase 4c): §7 cards"),
+    (
+        "Developer concentration (HHI)",
+        "Deferred (needs the DLD projects file); master-project proxy in §7",
+    ),
 ]
 
 
@@ -658,11 +668,16 @@ def render(result: Result) -> str:
             apt_rows,
         ),
         "",
-        "## 6. KPIs pending the models",
+        "## 6. Model KPIs",
         "",
-        *md_table(["KPI", "Source"], PENDING),
+        "Computed by the Phase 4 models, not from silver, so they aren't reconciled above; "
+        "§7 lists the card values from the rpt views.",
+        "",
+        *md_table(["KPI", "Source"], MODEL_KPIS),
         "",
     ]
+    if result.cards_pre is not None:
+        lines += pbi_cards.render(result.cards_pre, result.cards_post, result.card_year)
     return "\n".join(lines)
 
 

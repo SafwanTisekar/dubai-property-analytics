@@ -14,3 +14,15 @@
 {% macro rpt_min_n_median(median_col, n_col) -%}
     case when {{ n_col }} >= {{ var('min_n') }} then round({{ median_col }})::bigint end
 {%- endmacro %}
+
+{# Shared slicer keys (docs/06 §2). Power BI relates facts to rpt.dim_bedrooms and
+   rpt.dim_ready_offplan on these columns, so one Bedrooms slicer and one Ready / Off-Plan
+   slicer filter every fact. Unknown bedrooms are -1, not NULL: a NULL key would land on
+   Power BI's blank member, which a slicer can't label. #}
+{% macro rpt_bedrooms_key(col) -%}
+    coalesce({{ col }}, -1)::smallint
+{%- endmacro %}
+
+{% macro rpt_ready_offplan(col) -%}
+    case when {{ col }} then 'Off-Plan' else 'Ready' end
+{%- endmacro %}

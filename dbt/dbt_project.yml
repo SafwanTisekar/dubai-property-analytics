@@ -77,6 +77,7 @@ seeds:
         zone: text
         latitude: numeric
         longitude: numeric
+        centroid_source: text
     seed_procedure_category:
       +column_types: {procedure_category: text, is_market_sale: boolean, description: text}
     seed_procedure_map:

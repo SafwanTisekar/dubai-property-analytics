@@ -1,6 +1,6 @@
 # Data dictionary
 
-Generated 2026-10-01 16:36 UTC by `quality/data_dictionary.py` from the dbt manifest (descriptions, tests) and the database catalogue (columns, types). Regenerate with `make dictionary` (after `make dbt`). Rules C1-C22 are in docs/04 §2; the star schema in docs/04 §3. Bronze is raw text (docs/04 §1) and not listed.
+Generated 2026-10-01 19:49 UTC by `quality/data_dictionary.py` from the dbt manifest (descriptions, tests) and the database catalogue (columns, types). Regenerate with `make dictionary` (after `make dbt`). Rules C1-C22 are in docs/04 §2; the star schema in docs/04 §3. Bronze is raw text (docs/04 §1) and not listed.
 
 ## Silver: seeds, staging views and intermediate tables (typed, cleaned, flagged)
 
@@ -38,8 +38,9 @@ C8: every DLD area_id seen in transactions or rents (265 IDs; Phase 1's "266" co
 | `area_id` | integer |  | not_null, unique |
 | `area_name_en` | text |  | not_null |
 | `zone` | text | Market zone for roll-ups. NULL = not assigned yet. |  |
-| `latitude` | numeric | Area centroid latitude (WGS84) for the Power BI bubble map. Empty until Phase 5. |  |
-| `longitude` | numeric | Area centroid longitude (WGS84). Empty until Phase 5. |  |
+| `latitude` | numeric | Area centroid latitude (WGS84) for the Power BI bubble map, from OpenStreetMap Nominatim (`make centroids`, reports/area_centroids.md) or typed in by the owner. NULL = not located (no bubble; never a zone centroid). © OpenStreetMap contributors (ODbL). | between |
+| `longitude` | numeric | Area centroid longitude (WGS84); see latitude. | between |
+| `centroid_source` | text | Where the centroid came from: osm_nominatim (the DLD name or a spelling of it), osm_nominatim_alias (a better-known name for the place), osm_nominatim_approx (the parent community only), manual (owner; never overwritten), or NULL (not located). | accepted_values |
 
 <a id="silverseed_ltv_rules"></a>
 ### `silver.seed_ltv_rules`
@@ -549,7 +550,7 @@ DLD transaction lines, typed and decoded (view). C1 keeps the latest snapshot of
 |---|---|---|
 | [`gold.agg_area_month`](#goldagg_area_month) | table | Sales and financing by month x area x property type x bedrooms x off-plan, reporting scope only. Additive counts and AED (reconciled to fct_transaction); medians per cell with their n (min-n applied in rpt.area_month). |
 | [`gold.agg_rent_month`](#goldagg_rent_month) | table | Rents by month x area x property type x bedrooms x new/renewal, reporting scope only. The only rent table Power BI imports. Additive counts and AED (reconciled to fct_rent_contract); medians per cell with their n (min-n applied in rpt.rent_month). |
-| [`gold.dim_area`](#golddim_area) | table | One row per DLD area (seed_area, 265 IDs, all zoned) plus Unknown (-1). area_key is the DLD area_id. Latitude / longitude are NULL until the Phase 5 centroids are added to seed_area. |
+| [`gold.dim_area`](#golddim_area) | table | One row per DLD area (seed_area, 265 IDs, all zoned) plus Unknown (-1). area_key is the DLD area_id. Latitude / longitude are the OpenStreetMap centroid from seed_area (centroid_source says how it was found), NULL where the area wasn't located. |
 | [`gold.dim_date`](#golddim_date) | table | Day-grain calendar, dim_date_start to dim_date_end (beyond the data for Phase 4 forecasts). The Power BI date table. is_after_snapshot marks days after the data snapshot date. |
 | [`gold.dim_procedure`](#golddim_procedure) | table | One row per DLD (trans_group, procedure_id) from seed_procedure_map (C2), with its category. |
 | [`gold.dim_project`](#golddim_project) | table | One row per DLD project in the transaction register, plus Unknown (-1) for lines with no project (C9). Developer, status and completion date wait for the DLD projects file (deferred for v1). master_project is the most frequent one where a project appears under several (master_project_count > 1). |
@@ -616,7 +617,7 @@ Rents by month x area x property type x bedrooms x new/renewal, reporting scope 
 <a id="golddim_area"></a>
 ### `gold.dim_area`
 
-One row per DLD area (seed_area, 265 IDs, all zoned) plus Unknown (-1). area_key is the DLD area_id. Latitude / longitude are NULL until the Phase 5 centroids are added to seed_area.
+One row per DLD area (seed_area, 265 IDs, all zoned) plus Unknown (-1). area_key is the DLD area_id. Latitude / longitude are the OpenStreetMap centroid from seed_area (centroid_source says how it was found), NULL where the area wasn't located.
 
 | Column | Type | Description | Tests |
 |---|---|---|---|
@@ -624,8 +625,9 @@ One row per DLD area (seed_area, 265 IDs, all zoned) plus Unknown (-1). area_key
 | `area_id` | integer |  |  |
 | `area_name` | text |  | not_null |
 | `zone` | text | Market zone used for the min-n roll-up. | not_null |
-| `latitude` | numeric | Area centroid latitude (WGS84) for the Power BI bubble map. Empty until Phase 5. (from `seed_area`) |  |
-| `longitude` | numeric | Area centroid longitude (WGS84). Empty until Phase 5. (from `seed_area`) |  |
+| `latitude` | numeric | Area centroid latitude (WGS84) for the Power BI bubble map, from OpenStreetMap Nominatim (`make centroids`, reports/area_centroids.md) or typed in by the owner. NULL = not located (no bubble; never a zone centroid). © OpenStreetMap contributors (ODbL). (from `seed_area`) |  |
+| `longitude` | numeric | Area centroid longitude (WGS84); see latitude. (from `seed_area`) |  |
+| `centroid_source` | text | Where the centroid came from: osm_nominatim (the DLD name or a spelling of it), osm_nominatim_alias (a better-known name for the place), osm_nominatim_approx (the parent community only), manual (owner; never overwritten), or NULL (not located). (from `seed_area`) |  |
 
 <a id="golddim_date"></a>
 ### `gold.dim_date`
@@ -835,22 +837,25 @@ Every DLD transaction line (Sales, Gifts, Mortgages; 1.79M) with dimension keys 
 |---|---|---|
 | [`rpt.area_month`](#rptarea_month) | view | rpt.area_month. Monthly sales and financing aggregate. |
 | [`rpt.avm_performance`](#rptavm_performance) | view | rpt.avm_performance. AVM accuracy (MdAPE, hit rates, MAPE, R², coverage) per model, split, breakdown and segment; segments with fewer than min_n valued sales left out. |
-| [`rpt.avm_score`](#rptavm_score) | view | rpt.avm_score. AVM value, error and gap per clean residential market sale. The review flag marks \|gap\| > 25% on out-of-sample valuations (2024+) as a statistical anomaly for collateral review, not an accusation; training rows (2011-2023) are not flagged because their gaps are in-sample. Transaction ID only on flagged rows. |
-| [`rpt.dim_area`](#rptdim_area) | view | rpt.dim_area. Areas with zone and centroid. |
+| [`rpt.avm_score`](#rptavm_score) | view | rpt.avm_score. AVM value, error and gap per clean residential market sale valued out of sample (validation 2024, test 2025+); the in-sample training rows stay in ml. The review flag marks \|gap\| > 25% as a statistical anomaly for collateral review, not an accusation. Transaction ID only on flagged rows. |
+| [`rpt.dim_area`](#rptdim_area) | view | rpt.dim_area. Areas with zone and OpenStreetMap centroid (NULL where not located; reports/area_centroids.md). |
+| [`rpt.dim_bedrooms`](#rptdim_bedrooms) | view | rpt.dim_bedrooms. Shared Bedrooms slicer: key -1 (unknown) to 20, labels Unknown / Studio / 1-6 BR / 7+ BR, with a sort order. |
 | [`rpt.dim_date`](#rptdim_date) | view | rpt.dim_date. Calendar; mark as the date table on "Date". |
 | [`rpt.dim_procedure`](#rptdim_procedure) | view | rpt.dim_procedure. DLD procedures and categories. |
 | [`rpt.dim_project`](#rptdim_project) | view | rpt.dim_project. DLD projects (no developer yet). |
 | [`rpt.dim_property_type`](#rptdim_property_type) | view | rpt.dim_property_type. Conformed usage group x property class. |
+| [`rpt.dim_ready_offplan`](#rptdim_ready_offplan) | view | rpt.dim_ready_offplan. Shared Ready / Off-Plan slicer (2 rows). |
+| [`rpt.dld_price_index`](#rptdld_price_index) | view | rpt.dld_price_index. DLD's official monthly Residential Sale Index, rebased to Jan 2019 = 100 with rpt.price_index's segment labels, for the ours-vs-DLD chart. Ends May 2024. |
 | [`rpt.feature_importance`](#rptfeature_importance) | view | rpt.feature_importance. AVM feature importance (mean \|SHAP\|, split gain), ranked. |
 | [`rpt.forecast`](#rptforecast) | view | rpt.forecast. Monthly hedonic index and clean residential sales volume (Dubai, apartments, villas): actuals, then a 12-month SARIMAX forecast per Fed Funds scenario (flat, +100bp, -100bp) with 80% and 95% intervals. |
 | [`rpt.forecast_backtest`](#rptforecast_backtest) | view | rpt.forecast_backtest. Rolling-origin backtest over the last 24 complete months (index on real-time vintages): MAPE, MdAPE and interval coverage per target x segment x model x horizon. |
 | [`rpt.price_index`](#rptprice_index) | view | rpt.price_index. Hedonic price index per segment (Dubai, apartments, villas, zones passing min-n) and period, Jan 2019 = 100, with YoY, volatility and drawdown. |
 | [`rpt.rates_monthly`](#rptrates_monthly) | view | rpt.rates_monthly. Fed Funds, Brent and (later) EIBOR by month. |
 | [`rpt.rent_month`](#rptrent_month) | view | rpt.rent_month. Monthly rent aggregate; the only rent table in Power BI. |
-| [`rpt.report_info`](#rptreport_info) | view | rpt.report_info. One row with the data-as-of date, min-n and attribution. |
-| [`rpt.stress_grid`](#rptstress_grid) | view | rpt.stress_grid. Collateral stress test (illustrative, not a regulatory stress test): negative equity of the last 36 months' clean residential buyers, marked to market with the hedonic index, per segment (Dubai / type / zone / area) x ready or off-plan x scenario (price shock 0 to -50%, or the 2014-2020 replay) x loan basis (assumed LTV 50-85%, CBUAE cap, registered loan of matched purchases). Loans held at origination. Share, count and AED blank under min_n purchases. |
+| [`rpt.report_info`](#rptreport_info) | view | rpt.report_info. One row with the data-as-of date, min-n and the attributions (DLD CC BY 4.0; OpenStreetMap ODbL for the map). |
+| [`rpt.stress_grid`](#rptstress_grid) | view | rpt.stress_grid. Collateral stress test (illustrative, not a regulatory stress test): negative equity of the last 36 months' clean residential buyers, marked to market with the hedonic index, per segment (Dubai / type / zone / area) x ready or off-plan x scenario (price shock 0 to -50%, or the 2014-2020 replay at two depths: Dubai-wide -24%, and each buyer's own series as the upper range) x loan basis (assumed LTV 50-85%, CBUAE cap, registered loan of matched purchases). Loans held at origination. Share, count and AED blank under min_n purchases. |
 | [`rpt.stress_replay`](#rptstress_replay) | view | rpt.stress_replay. The 2014 -> 2020 peak-to-trough drawdown of every published index series, and whether the stress test's replay uses it (zone series only if published from the June 2014 peak). |
-| [`rpt.transactions`](#rpttransactions) | view | rpt.transactions. Transaction lines in the reporting scope, without text ids or the individual quality flags. Sum "AED Counted Once" for values. |
+| [`rpt.transactions`](#rpttransactions) | view | rpt.transactions. Transaction lines in the reporting scope, without text ids or the individual quality flags or the per-line price. Sum "AED Counted Once" for values. |
 | [`rpt.yield_quarter`](#rptyield_quarter) | view | rpt.yield_quarter. Gross yields by area / zone x property type x bedrooms x quarter, with both sample sizes; published cells only. |
 
 <a id="rptarea_month"></a>
@@ -866,7 +871,9 @@ rpt.area_month. Monthly sales and financing aggregate.
 | `Area Key` | integer |  |  |
 | `Property Type Key` | integer |  |  |
 | `Bedrooms` | smallint |  |  |
+| `Bedrooms Key` | smallint |  |  |
 | `Is Off-Plan` | boolean |  |  |
+| `Ready / Off-Plan` | text |  |  |
 | `Market Sales` | bigint |  |  |
 | `Market Sales Value AED` | bigint |  |  |
 | `Clean Sales` | bigint |  |  |
@@ -912,7 +919,7 @@ rpt.avm_performance. AVM accuracy (MdAPE, hit rates, MAPE, R², coverage) per mo
 
 dbt model `rpt_avm_score`.
 
-rpt.avm_score. AVM value, error and gap per clean residential market sale. The review flag marks |gap| > 25% on out-of-sample valuations (2024+) as a statistical anomaly for collateral review, not an accusation; training rows (2011-2023) are not flagged because their gaps are in-sample. Transaction ID only on flagged rows.
+rpt.avm_score. AVM value, error and gap per clean residential market sale valued out of sample (validation 2024, test 2025+); the in-sample training rows stay in ml. The review flag marks |gap| > 25% as a statistical anomaly for collateral review, not an accusation. Transaction ID only on flagged rows.
 
 | Column | Type | Description | Tests |
 |---|---|---|---|
@@ -940,7 +947,7 @@ rpt.avm_score. AVM value, error and gap per clean residential market sale. The r
 
 dbt model `rpt_dim_area`.
 
-rpt.dim_area. Areas with zone and centroid.
+rpt.dim_area. Areas with zone and OpenStreetMap centroid (NULL where not located; reports/area_centroids.md).
 
 | Column | Type | Description | Tests |
 |---|---|---|---|
@@ -949,6 +956,19 @@ rpt.dim_area. Areas with zone and centroid.
 | `Zone` | text |  |  |
 | `Latitude` | numeric |  |  |
 | `Longitude` | numeric |  |  |
+
+<a id="rptdim_bedrooms"></a>
+### `rpt.dim_bedrooms`
+
+dbt model `rpt_dim_bedrooms`.
+
+rpt.dim_bedrooms. Shared Bedrooms slicer: key -1 (unknown) to 20, labels Unknown / Studio / 1-6 BR / 7+ BR, with a sort order.
+
+| Column | Type | Description | Tests |
+|---|---|---|---|
+| `Bedrooms Key` | smallint |  |  |
+| `Bedrooms` | text |  |  |
+| `Bedrooms Order` | smallint |  |  |
 
 <a id="rptdim_date"></a>
 ### `rpt.dim_date`
@@ -1026,6 +1046,32 @@ rpt.dim_property_type. Conformed usage group x property class.
 | `Property Class Order` | integer |  |  |
 | `Property Type` | text |  |  |
 | `Property Class Description` | text |  |  |
+
+<a id="rptdim_ready_offplan"></a>
+### `rpt.dim_ready_offplan`
+
+dbt model `rpt_dim_ready_offplan`.
+
+rpt.dim_ready_offplan. Shared Ready / Off-Plan slicer (2 rows).
+
+| Column | Type | Description | Tests |
+|---|---|---|---|
+| `Ready / Off-Plan` | text |  |  |
+| `Ready / Off-Plan Order` | integer |  |  |
+
+<a id="rptdld_price_index"></a>
+### `rpt.dld_price_index`
+
+dbt model `rpt_dld_price_index`.
+
+rpt.dld_price_index. DLD's official monthly Residential Sale Index, rebased to Jan 2019 = 100 with rpt.price_index's segment labels, for the ours-vs-DLD chart. Ends May 2024.
+
+| Column | Type | Description | Tests |
+|---|---|---|---|
+| `Segment` | text |  |  |
+| `Period Start` | date |  |  |
+| `DLD Index Value` | numeric |  |  |
+| `DLD YoY Change` | numeric |  |  |
 
 <a id="rptfeature_importance"></a>
 ### `rpt.feature_importance`
@@ -1145,6 +1191,7 @@ rpt.rent_month. Monthly rent aggregate; the only rent table in Power BI.
 | `Area Key` | integer |  |  |
 | `Property Type Key` | integer |  |  |
 | `Bedrooms` | smallint |  |  |
+| `Bedrooms Key` | smallint |  |  |
 | `Is New Contract` | boolean |  |  |
 | `Rent Lines` | bigint |  |  |
 | `Contracts` | bigint |  |  |
@@ -1163,46 +1210,23 @@ rpt.rent_month. Monthly rent aggregate; the only rent table in Power BI.
 
 dbt model `rpt_report_info`.
 
-rpt.report_info. One row with the data-as-of date, min-n and attribution.
+rpt.report_info. One row with the data-as-of date, min-n and the attributions (DLD CC BY 4.0; OpenStreetMap ODbL for the map).
 
 | Column | Type | Description | Tests |
 |---|---|---|---|
 | `Data As Of` | date |  |  |
 | `Min N` | integer |  |  |
 | `Source` | text |  |  |
+| `Map Attribution` | text |  |  |
 
 <a id="rptstress_grid"></a>
 ### `rpt.stress_grid`
 
 dbt model `rpt_stress_grid`.
 
-rpt.stress_grid. Collateral stress test (illustrative, not a regulatory stress test): negative equity of the last 36 months' clean residential buyers, marked to market with the hedonic index, per segment (Dubai / type / zone / area) x ready or off-plan x scenario (price shock 0 to -50%, or the 2014-2020 replay) x loan basis (assumed LTV 50-85%, CBUAE cap, registered loan of matched purchases). Loans held at origination. Share, count and AED blank under min_n purchases.
+rpt.stress_grid. Collateral stress test (illustrative, not a regulatory stress test): negative equity of the last 36 months' clean residential buyers, marked to market with the hedonic index, per segment (Dubai / type / zone / area) x ready or off-plan x scenario (price shock 0 to -50%, or the 2014-2020 replay at two depths: Dubai-wide -24%, and each buyer's own series as the upper range) x loan basis (assumed LTV 50-85%, CBUAE cap, registered loan of matched purchases). Loans held at origination. Share, count and AED blank under min_n purchases.
 
-| Column | Type | Description | Tests |
-|---|---|---|---|
-| `Segment Level` | text |  |  |
-| `Segment` | text |  |  |
-| `Property Type Key` | integer |  |  |
-| `Zone` | text |  |  |
-| `Area Key` | integer |  |  |
-| `Ready / Off-Plan` | text |  |  |
-| `Scenario` | text |  |  |
-| `Shock Pct` | integer |  |  |
-| `Applied Shock` | numeric |  |  |
-| `Loan Basis` | text |  |  |
-| `LTV Pct` | integer |  |  |
-| `LTV Label` | text |  |  |
-| `Purchases` | integer |  |  |
-| `Negative Equity Count` | integer |  |  |
-| `Negative Equity Share` | numeric |  |  |
-| `Negative Equity AED` | numeric |  |  |
-| `Loan AED` | numeric |  |  |
-| `Current Value AED` | numeric |  |  |
-| `Zone Index Share` | numeric |  |  |
-| `Is Published` | boolean |  |  |
-| `Purchases From` | date |  |  |
-| `Purchases To` | date |  |  |
-| `Model Version` | text |  |  |
+_Not built in this database._
 
 <a id="rptstress_replay"></a>
 ### `rpt.stress_replay`
@@ -1234,7 +1258,7 @@ rpt.stress_replay. The 2014 -> 2020 peak-to-trough drawdown of every published i
 
 dbt model `rpt_transactions`.
 
-rpt.transactions. Transaction lines in the reporting scope, without text ids or the individual quality flags. Sum "AED Counted Once" for values.
+rpt.transactions. Transaction lines in the reporting scope, without text ids or the individual quality flags or the per-line price. Sum "AED Counted Once" for values.
 
 | Column | Type | Description | Tests |
 |---|---|---|---|
@@ -1255,16 +1279,17 @@ rpt.transactions. Transaction lines in the reporting scope, without text ids or 
 | `Is Deal Lead` | boolean |  |  |
 | `Is Lease to Own` | boolean |  |  |
 | `Is Off-Plan` | boolean |  |  |
+| `Ready / Off-Plan` | text |  |  |
 | `Registration Type` | text |  |  |
 | `DLD Property Usage` | text |  |  |
 | `DLD Property Type` | text |  |  |
 | `DLD Property Sub-Type` | text |  |  |
 | `Rooms` | text |  |  |
 | `Bedrooms` | smallint |  |  |
+| `Bedrooms Key` | smallint |  |  |
 | `Has Parking` | boolean |  |  |
 | `Area Above Class Cap` | boolean |  |  |
 | `Area Sq M` | numeric |  |  |
-| `Price AED` | bigint |  |  |
 | `AED Counted Once` | bigint |  |  |
 | `Price per Sq M AED` | bigint |  |  |
 | `Loan Amount AED` | bigint |  |  |

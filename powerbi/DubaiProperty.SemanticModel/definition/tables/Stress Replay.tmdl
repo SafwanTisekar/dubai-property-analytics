@@ -1,0 +1,151 @@
+/// 2014-2020 drawdown per index series used in the replay (rpt.stress_replay).
+table 'Stress Replay'
+	lineageTag: 51cb4567-4b59-56d9-92ef-b9f5b2340e64
+
+	column 'Segment Key'
+		dataType: string
+		isHidden
+		lineageTag: d8ec42a2-4955-5400-90ec-85eaf1ea415b
+		summarizeBy: none
+		sourceColumn: Segment Key
+
+		annotation SummarizationSetBy = User
+
+	column Segment
+		dataType: string
+		lineageTag: 53e85cb4-b3d1-55de-9ed5-de829a269998
+		summarizeBy: none
+		sourceColumn: Segment
+
+		annotation SummarizationSetBy = User
+
+	column 'Segment Level'
+		dataType: string
+		lineageTag: 83cf13bc-c83f-5872-ab78-6de20a43d4da
+		summarizeBy: none
+		sourceColumn: Segment Level
+
+		annotation SummarizationSetBy = User
+
+	column 'Property Type Key'
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: e23c256f-0ac1-5513-8345-67d07e8c8bac
+		summarizeBy: none
+		sourceColumn: Property Type Key
+
+		annotation SummarizationSetBy = User
+
+	column Zone
+		dataType: string
+		lineageTag: 969c6f1f-f7f6-5c3a-8685-0f3bd30b1f77
+		summarizeBy: none
+		sourceColumn: Zone
+
+		annotation SummarizationSetBy = User
+
+	column Frequency
+		dataType: string
+		lineageTag: a9566135-7ab5-5201-af05-8577d8fe99cb
+		summarizeBy: none
+		sourceColumn: Frequency
+
+		annotation SummarizationSetBy = User
+
+	column 'Published From'
+		dataType: dateTime
+		formatString: yyyy-mm-dd
+		lineageTag: 36eddc56-301b-5646-9aaa-5d4d2e8b0023
+		summarizeBy: none
+		sourceColumn: Published From
+
+		annotation SummarizationSetBy = User
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column Peak
+		dataType: dateTime
+		formatString: yyyy-mm-dd
+		lineageTag: 9d4aa02d-b8d1-52bd-8f9e-d8c2972e63b8
+		summarizeBy: none
+		sourceColumn: Peak
+
+		annotation SummarizationSetBy = User
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column 'Peak Index'
+		dataType: double
+		formatString: 0.0
+		lineageTag: 66d22e48-da82-51eb-9478-346c25c958d0
+		summarizeBy: none
+		sourceColumn: Peak Index
+
+		annotation SummarizationSetBy = User
+
+	column Trough
+		dataType: dateTime
+		formatString: yyyy-mm-dd
+		lineageTag: a9d2f8cc-b513-52cc-aa1a-4de6515a79cf
+		summarizeBy: none
+		sourceColumn: Trough
+
+		annotation SummarizationSetBy = User
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column 'Trough Index'
+		dataType: double
+		formatString: 0.0
+		lineageTag: 949c8f16-e171-5e75-aaa4-4d05c2c5836b
+		summarizeBy: none
+		sourceColumn: Trough Index
+
+		annotation SummarizationSetBy = User
+
+	column Drawdown
+		dataType: double
+		formatString: 0.0%
+		lineageTag: 2f3c3803-6b6a-5b63-841c-d5efea2f3290
+		summarizeBy: none
+		sourceColumn: Drawdown
+
+		annotation SummarizationSetBy = User
+
+	column 'Used In Replay'
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: 5e71d3cd-3160-53a5-8f0e-a07afc75ff92
+		summarizeBy: none
+		sourceColumn: Used In Replay
+
+		annotation SummarizationSetBy = User
+
+	column Note
+		dataType: string
+		lineageTag: 087d8e29-0c96-5edd-9e2a-93aa66f8c28b
+		summarizeBy: none
+		sourceColumn: Note
+
+		annotation SummarizationSetBy = User
+
+	column 'Model Version'
+		dataType: string
+		isHidden
+		lineageTag: 46b7de95-9a61-5661-9dc1-9ef56c35b23a
+		summarizeBy: none
+		sourceColumn: Model Version
+
+		annotation SummarizationSetBy = User
+
+	partition 'Stress Replay' = m
+		mode: import
+		source =
+				let
+				  Source = PostgreSQL.Database(PgServer, PgDatabase),
+				  #"Navigation 1" = Source{[Schema = "rpt", Item = "stress_replay"]}[Data]
+				in
+				  #"Navigation 1"
+
+	annotation PBI_ResultType = Table

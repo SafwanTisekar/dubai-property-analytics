@@ -10,7 +10,9 @@ select
     area_key as "Area Key",
     property_type_key as "Property Type Key",
     bedrooms as "Bedrooms",
+    {{ rpt_bedrooms_key('bedrooms') }} as "Bedrooms Key",
     is_offplan as "Is Off-Plan",
+    {{ rpt_ready_offplan('is_offplan') }} as "Ready / Off-Plan",
 
     market_sales as "Market Sales",
     {{ rpt_aed('market_sales_value_aed') }} as "Market Sales Value AED",

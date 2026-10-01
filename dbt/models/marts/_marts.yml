@@ -28,8 +28,8 @@ models:
   - name: dim_area
     description: >
       One row per DLD area (seed_area, 265 IDs, all zoned) plus Unknown (-1). area_key is the
-      DLD area_id. Latitude / longitude are NULL until the Phase 5 centroids are added to
-      seed_area.
+      DLD area_id. Latitude / longitude are the OpenStreetMap centroid from seed_area
+      (centroid_source says how it was found), NULL where the area wasn't located.
     columns:
       - name: area_key
         tests: [unique, not_null]

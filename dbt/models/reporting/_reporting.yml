@@ -9,7 +9,38 @@ models:
   - name: rpt_dim_date
     description: rpt.dim_date. Calendar; mark as the date table on "Date".
   - name: rpt_dim_area
-    description: rpt.dim_area. Areas with zone and centroid.
+    description: >
+      rpt.dim_area. Areas with zone and OpenStreetMap centroid (NULL where not located;
+      reports/area_centroids.md).
+  - name: rpt_dim_bedrooms
+    description: >
+      rpt.dim_bedrooms. Shared Bedrooms slicer: key -1 (unknown) to 20, labels Unknown /
+      Studio / 1-6 BR / 7+ BR, with a sort order.
+    columns:
+      - name: '"Bedrooms Key"'
+        tests: [unique, not_null]
+  - name: rpt_dim_ready_offplan
+    description: rpt.dim_ready_offplan. Shared Ready / Off-Plan slicer (2 rows).
+    columns:
+      - name: '"Ready / Off-Plan"'
+        tests: [unique, not_null]
+  - name: rpt_dld_price_index
+    description: >
+      rpt.dld_price_index. DLD's official monthly Residential Sale Index, rebased to Jan 2019
+      = 100 with rpt.price_index's segment labels, for the ours-vs-DLD chart. Ends May 2024.
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns: ['"Segment"', '"Period Start"']
+    columns:
+      - name: '"Segment"'
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['Dubai (all residential)', 'Apartments', 'Villas / Townhouses']
+      - name: '"DLD Index Value"'
+        tests: [not_null]
   - name: rpt_dim_property_type
     description: rpt.dim_property_type. Conformed usage group x property class.
   - name: rpt_dim_procedure
@@ -19,15 +50,55 @@ models:
   - name: rpt_transactions
     description: >
       rpt.transactions. Transaction lines in the reporting scope, without text ids or the
-      individual quality flags. Sum "AED Counted Once" for values.
+      individual quality flags or the per-line price. Sum "AED Counted Once" for values.
+    columns:
+      - name: '"Bedrooms Key"'
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('rpt_dim_bedrooms')
+                field: '"Bedrooms Key"'
+      - name: '"Ready / Off-Plan"'
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('rpt_dim_ready_offplan')
+                field: '"Ready / Off-Plan"'
   - name: rpt_area_month
     description: rpt.area_month. Monthly sales and financing aggregate.
+    columns:
+      - name: '"Bedrooms Key"'
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('rpt_dim_bedrooms')
+                field: '"Bedrooms Key"'
+      - name: '"Ready / Off-Plan"'
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('rpt_dim_ready_offplan')
+                field: '"Ready / Off-Plan"'
   - name: rpt_rent_month
     description: rpt.rent_month. Monthly rent aggregate; the only rent table in Power BI.
+    columns:
+      - name: '"Bedrooms Key"'
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('rpt_dim_bedrooms')
+                field: '"Bedrooms Key"'
   - name: rpt_rates_monthly
     description: rpt.rates_monthly. Fed Funds, Brent and (later) EIBOR by month.
   - name: rpt_report_info
-    description: rpt.report_info. One row with the data-as-of date, min-n and attribution.
+    description: >
+      rpt.report_info. One row with the data-as-of date, min-n and the attributions (DLD
+      CC BY 4.0; OpenStreetMap ODbL for the map).
 
   # Phase 4 (tag post_ml): views over the ml.* tables, built by make score after make train.
   - name: rpt_price_index
@@ -87,29 +158,43 @@ models:
         tests: [not_null]
   - name: rpt_avm_score
     description: >
-      rpt.avm_score. AVM value, error and gap per clean residential market sale. The review
-      flag marks |gap| > 25% on out-of-sample valuations (2024+) as a statistical anomaly
-      for collateral review, not an accusation; training rows (2011-2023) are not flagged
-      because their gaps are in-sample. Transaction ID only on flagged rows.
+      rpt.avm_score. AVM value, error and gap per clean residential market sale valued out
+      of sample (validation 2024, test 2025+); the in-sample training rows stay in ml. The
+      review flag marks |gap| > 25% as a statistical anomaly for collateral review, not an
+      accusation. Transaction ID only on flagged rows.
     config:
       tags: [post_ml]
     tests:
       - dbt_utils.expression_is_true:
           arguments:
-            expression: "\"Review Flag\" is null"
-          config:
-            where: "\"Model Set\" = 'Train'"
-      - dbt_utils.expression_is_true:
-          arguments:
-            expression: "\"Review Flag\" is not null"
-          config:
-            where: "\"Model Set\" <> 'Train'"
-      - dbt_utils.expression_is_true:
-          arguments:
             expression: "(\"Transaction ID\" is not null) = (\"Review Flag\" = 'Review: statistical anomaly')"
-          config:
-            where: "\"Review Flag\" is not null"
     columns:
+      - name: '"Bedrooms Key"'
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('rpt_dim_bedrooms')
+                field: '"Bedrooms Key"'
+      - name: '"Ready / Off-Plan"'
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('rpt_dim_ready_offplan')
+                field: '"Ready / Off-Plan"'
+      - name: '"Project Key"'
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('rpt_dim_project')
+                field: '"Project Key"'
+      - name: '"Review Flag"'
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['Review: statistical anomaly', 'Within range']
       - name: '"Date"'
         tests: [not_null]
       - name: '"Area Key"'
@@ -131,12 +216,7 @@ models:
         tests:
           - accepted_values:
               arguments:
-                values: ['Train', 'Validation', 'Test']
-      - name: '"Model Version"'
-        tests:
-          - dbt_expectations.expect_column_distinct_count_to_equal:
-              arguments:
-                value: 1
+                values: ['Validation', 'Test']
   - name: rpt_avm_performance
     description: >
       rpt.avm_performance. AVM accuracy (MdAPE, hit rates, MAPE, R², coverage) per model,

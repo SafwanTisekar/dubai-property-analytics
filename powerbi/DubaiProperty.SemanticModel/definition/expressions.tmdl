@@ -1,0 +1,9 @@
+expression PgServer = "10.211.55.2:5432" meta [IsParameterQuery=true, Type="Text", IsParameterQueryRequired=true]
+	lineageTag: 8b70ddef-3efe-548d-ab89-b487b2e48aed
+
+	annotation PBI_ResultType = Text
+
+expression PgDatabase = "dubai_property" meta [IsParameterQuery=true, Type="Text", IsParameterQueryRequired=true]
+	lineageTag: 32df86ce-eb99-569f-ba09-fcc9aebbbaf0
+
+	annotation PBI_ResultType = Text

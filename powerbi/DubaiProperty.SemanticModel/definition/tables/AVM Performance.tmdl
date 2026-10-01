@@ -1,0 +1,144 @@
+/// AVM accuracy per model x split x breakdown x segment (rpt.avm_performance). Disconnected.
+table 'AVM Performance'
+	lineageTag: a8a1d15b-5da3-5f80-9a39-0f583c1a8cfe
+
+	column Model
+		dataType: string
+		lineageTag: 5b83b3e3-6667-592a-8ddd-e9a9aeea4ff1
+		summarizeBy: none
+		sourceColumn: Model
+
+		annotation SummarizationSetBy = User
+
+	column 'Model Name'
+		dataType: string
+		lineageTag: 592000fd-9059-57a1-88b2-408ab3847cbf
+		summarizeBy: none
+		sourceColumn: Model Name
+
+		annotation SummarizationSetBy = User
+
+	column 'Is Champion'
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: 14af8312-4bae-5418-84e5-2d853750cd90
+		summarizeBy: none
+		sourceColumn: Is Champion
+
+		annotation SummarizationSetBy = User
+
+	column Split
+		dataType: string
+		lineageTag: 0093b90b-7b52-5378-8934-34fbb631007a
+		summarizeBy: none
+		sourceColumn: Split
+
+		annotation SummarizationSetBy = User
+
+	column Breakdown
+		dataType: string
+		lineageTag: 1b326450-d361-5234-b6e0-0e83917e7231
+		summarizeBy: none
+		sourceColumn: Breakdown
+
+		annotation SummarizationSetBy = User
+
+	column Segment
+		dataType: string
+		lineageTag: 4b4e9747-5a80-594a-b15e-2cdf24cc98c7
+		summarizeBy: none
+		sourceColumn: Segment
+
+		annotation SummarizationSetBy = User
+
+	column 'Sales in Segment'
+		dataType: int64
+		formatString: #,0
+		lineageTag: 7d66565a-15c9-5193-9cba-430a07dbb796
+		summarizeBy: sum
+		sourceColumn: Sales in Segment
+
+		annotation SummarizationSetBy = User
+
+	column 'Sales Valued'
+		dataType: int64
+		formatString: #,0
+		lineageTag: ce7bc48f-9c82-5770-8bbd-52ef0798520d
+		summarizeBy: sum
+		sourceColumn: Sales Valued
+
+		annotation SummarizationSetBy = User
+
+	column Coverage
+		dataType: double
+		formatString: 0.0%
+		lineageTag: 59b32c17-0d41-587a-badf-7612e0591f74
+		summarizeBy: none
+		sourceColumn: Coverage
+
+		annotation SummarizationSetBy = User
+
+	column MdAPE
+		dataType: double
+		formatString: 0.0%
+		lineageTag: b2c9bdb2-1ff1-515f-8e95-c788491049a3
+		summarizeBy: none
+		sourceColumn: MdAPE
+
+		annotation SummarizationSetBy = User
+
+	column 'Hit Rate 10 Pct'
+		dataType: double
+		formatString: 0.0%
+		lineageTag: caedd500-661d-54f2-af6d-21a02032aeb7
+		summarizeBy: none
+		sourceColumn: Hit Rate 10 Pct
+
+		annotation SummarizationSetBy = User
+
+	column 'Hit Rate 20 Pct'
+		dataType: double
+		formatString: 0.0%
+		lineageTag: c4ecd080-f8ba-5862-8fd1-371a6a7f71c9
+		summarizeBy: none
+		sourceColumn: Hit Rate 20 Pct
+
+		annotation SummarizationSetBy = User
+
+	column MAPE
+		dataType: double
+		formatString: 0.0%
+		lineageTag: 62ebae11-aa1e-535b-9d4d-0763ab227cff
+		summarizeBy: none
+		sourceColumn: MAPE
+
+		annotation SummarizationSetBy = User
+
+	column 'R2 Log Price'
+		dataType: double
+		formatString: #,0.0000
+		lineageTag: 19c1a7a3-5840-51f6-a22d-2865a6909e78
+		summarizeBy: none
+		sourceColumn: R2 Log Price
+
+		annotation SummarizationSetBy = User
+
+	column 'Model Version'
+		dataType: string
+		isHidden
+		lineageTag: fbf9123e-090e-5d4e-a0e3-1c6a2f3238b1
+		summarizeBy: none
+		sourceColumn: Model Version
+
+		annotation SummarizationSetBy = User
+
+	partition 'AVM Performance' = m
+		mode: import
+		source =
+				let
+				  Source = PostgreSQL.Database(PgServer, PgDatabase),
+				  #"Navigation 1" = Source{[Schema = "rpt", Item = "avm_performance"]}[Data]
+				in
+				  #"Navigation 1"
+
+	annotation PBI_ResultType = Table

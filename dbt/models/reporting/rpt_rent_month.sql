@@ -10,6 +10,7 @@ select
     area_key as "Area Key",
     property_type_key as "Property Type Key",
     bedrooms as "Bedrooms",
+    {{ rpt_bedrooms_key('bedrooms') }} as "Bedrooms Key",
     is_new as "Is New Contract",
 
     rent_lines as "Rent Lines",

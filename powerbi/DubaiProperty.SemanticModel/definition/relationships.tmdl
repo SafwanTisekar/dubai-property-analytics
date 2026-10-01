@@ -1,36 +1,91 @@
-relationship AutoDetected_5164a132-4359-4166-8ada-33f3c0e4191b
-	fromColumn: 'rpt area_month'.'Area Key'
-	toColumn: 'rpt dim_area'.'Area Key'
+relationship 9ac30fda-8e2e-5bf9-8c26-e7e498e91c21
+	fromColumn: Transactions.Date
+	toColumn: Date.Date
 
-relationship AutoDetected_587c1c00-87be-44c6-a6ca-30ba88d70ddc
-	fromColumn: 'rpt rent_month'.'Area Key'
-	toColumn: 'rpt dim_area'.'Area Key'
+relationship 334fa321-d6fc-5291-b409-4f4c58a2a295
+	fromColumn: Transactions.'Area Key'
+	toColumn: Area.'Area Key'
 
-relationship AutoDetected_b19a5075-de11-4178-8bc6-37af50d299e0
-	fromColumn: 'rpt transactions'.'Area Key'
-	toColumn: 'rpt dim_area'.'Area Key'
+relationship 9cb9b942-0702-5cb1-b36f-c5b127990ba2
+	fromColumn: Transactions.'Property Type Key'
+	toColumn: 'Property Type'.'Property Type Key'
 
-relationship AutoDetected_badf8f5f-65cc-4168-9a72-d92a9e5c1da4
-	fromColumn: 'rpt area_month'.'Property Type Key'
-	toColumn: 'rpt dim_property_type'.'Property Type Key'
+relationship bd83f1cf-016f-5465-81ce-cf615bb95e18
+	fromColumn: Transactions.'Procedure Key'
+	toColumn: Procedure.'Procedure Key'
 
-relationship AutoDetected_2cfe4753-b59a-4d95-bdcf-adbc15c079b8
-	fromColumn: 'rpt rent_month'.'Property Type Key'
-	toColumn: 'rpt dim_property_type'.'Property Type Key'
+relationship 6b672ca3-4505-5b65-9faa-a488cf9d719b
+	fromColumn: Transactions.'Project Key'
+	toColumn: Project.'Project Key'
 
-relationship AutoDetected_1a1eaa34-63a8-4af8-98cd-4e06a7415c10
-	fromColumn: 'rpt transactions'.'Property Type Key'
-	toColumn: 'rpt dim_property_type'.'Property Type Key'
+relationship ac12779f-9182-5271-8eaf-0282d0d812cb
+	fromColumn: Transactions.'Bedrooms Key'
+	toColumn: Bedrooms.'Bedrooms Key'
 
-relationship AutoDetected_84fbdd02-ce87-4c7c-bf2e-fb3c5c5de1ff
-	fromColumn: 'rpt transactions'.'Procedure Key'
-	toColumn: 'rpt dim_procedure'.'Procedure Key'
+relationship 83c2cb50-ed5c-5f18-9dd9-60008b518cce
+	fromColumn: Transactions.'Ready / Off-Plan'
+	toColumn: 'Ready Off-Plan'.'Ready / Off-Plan'
 
-relationship AutoDetected_92047c18-2d60-42d2-8221-d361aad1b98b
-	fromColumn: 'rpt transactions'.'Project Key'
-	toColumn: 'rpt dim_project'.'Project Key'
+relationship fb3295e1-d3c4-5b62-b559-cc34b69d662c
+	fromColumn: 'Area Month'.Month
+	toColumn: Date.Date
 
-relationship c63aa7fa-df2a-9a2e-35f1-22be81c07577
-	fromColumn: 'rpt area_month'.Month
-	toColumn: 'rpt dim_date'.Date
+relationship e3ad1387-9387-5c91-a4a5-f566f28303b4
+	fromColumn: 'Area Month'.'Area Key'
+	toColumn: Area.'Area Key'
 
+relationship fd6c36ff-149f-52b1-8b3d-5a57b5a9459b
+	fromColumn: 'Area Month'.'Property Type Key'
+	toColumn: 'Property Type'.'Property Type Key'
+
+relationship 1f88f27b-0619-5003-a6e0-d677bed0a72c
+	fromColumn: 'Area Month'.'Bedrooms Key'
+	toColumn: Bedrooms.'Bedrooms Key'
+
+relationship cc0d7ab6-64bf-5922-9948-982ea4705504
+	fromColumn: 'Area Month'.'Ready / Off-Plan'
+	toColumn: 'Ready Off-Plan'.'Ready / Off-Plan'
+
+relationship 86d850db-814e-5606-8acc-53ee15a84f96
+	fromColumn: 'Rent Month'.Month
+	toColumn: Date.Date
+
+relationship dedc5996-6300-590f-853b-7ca8a8052860
+	fromColumn: 'Rent Month'.'Area Key'
+	toColumn: Area.'Area Key'
+
+relationship 53f3f478-c807-5691-a838-a7cee39ac3bf
+	fromColumn: 'Rent Month'.'Property Type Key'
+	toColumn: 'Property Type'.'Property Type Key'
+
+relationship 8f76cbc2-ea46-53af-b968-f02b5837d04f
+	fromColumn: 'Rent Month'.'Bedrooms Key'
+	toColumn: Bedrooms.'Bedrooms Key'
+
+relationship 94448661-4005-58b8-83be-90daf1f723c4
+	fromColumn: 'Rates Monthly'.Month
+	toColumn: Date.Date
+
+relationship 1a27e271-1e15-52f4-b629-fe32f31dfc04
+	fromColumn: 'AVM Score'.Date
+	toColumn: Date.Date
+
+relationship 87802240-42e5-545a-814c-a32ab505b770
+	fromColumn: 'AVM Score'.'Area Key'
+	toColumn: Area.'Area Key'
+
+relationship 0bf7c01c-0ce2-585f-939f-273bd1763a39
+	fromColumn: 'AVM Score'.'Property Type Key'
+	toColumn: 'Property Type'.'Property Type Key'
+
+relationship 976c2714-3dee-5592-a05a-1089012dde89
+	fromColumn: 'AVM Score'.'Project Key'
+	toColumn: Project.'Project Key'
+
+relationship bfe14d16-8e11-5e98-b70c-c24224bcf528
+	fromColumn: 'AVM Score'.'Bedrooms Key'
+	toColumn: Bedrooms.'Bedrooms Key'
+
+relationship 0f92edc0-df35-5ebd-8d16-ab5d8425575e
+	fromColumn: 'AVM Score'.'Ready / Off-Plan'
+	toColumn: 'Ready Off-Plan'.'Ready / Off-Plan'

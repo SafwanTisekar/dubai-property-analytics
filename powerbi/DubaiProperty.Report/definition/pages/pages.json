@@ -1,7 +1,12 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/pagesMetadata/1.1.0/schema.json",
   "pageOrder": [
-    "3c46acaa2a7271c9cab0"
+    "p1Executive",
+    "p2Financing",
+    "p3Prices",
+    "p4Yields",
+    "p5Valuation",
+    "p6Risk"
   ],
-  "activePageName": "3c46acaa2a7271c9cab0"
+  "activePageName": "p1Executive"
 }

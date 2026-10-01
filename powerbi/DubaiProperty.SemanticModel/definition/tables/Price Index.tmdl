@@ -1,0 +1,175 @@
+/// Hedonic price index, Jan 2019 = 100 (rpt.price_index). Disconnected: measures bridge it with TREATAS.
+table 'Price Index'
+	lineageTag: 2387fd5d-22ab-5893-a454-75cae4df48ba
+
+	column 'Segment Key'
+		dataType: string
+		isHidden
+		lineageTag: a4e3c2cb-dc6f-5cab-9601-f932864079bd
+		summarizeBy: none
+		sourceColumn: Segment Key
+
+		annotation SummarizationSetBy = User
+
+	column Segment
+		dataType: string
+		lineageTag: 58169317-2bd2-5ace-80e8-3ab99ba73c05
+		summarizeBy: none
+		sourceColumn: Segment
+
+		annotation SummarizationSetBy = User
+
+	column 'Segment Level'
+		dataType: string
+		lineageTag: 9b9172b3-645a-5113-b56b-4e747fdeaf24
+		summarizeBy: none
+		sourceColumn: Segment Level
+
+		annotation SummarizationSetBy = User
+
+	column 'Property Type Key'
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 142c9d13-6d27-540c-87ed-77932d1597d9
+		summarizeBy: none
+		sourceColumn: Property Type Key
+
+		annotation SummarizationSetBy = User
+
+	column Zone
+		dataType: string
+		lineageTag: 758a9f0b-0b25-5406-ab59-b762f18753e7
+		summarizeBy: none
+		sourceColumn: Zone
+
+		annotation SummarizationSetBy = User
+
+	column Frequency
+		dataType: string
+		lineageTag: a7dfb005-f0d6-5d4c-8351-dcec81062ef9
+		summarizeBy: none
+		sourceColumn: Frequency
+
+		annotation SummarizationSetBy = User
+
+	column 'Period Start'
+		dataType: dateTime
+		formatString: mmm yyyy
+		lineageTag: 45aa17ed-1078-5684-8022-c0421d3a3e29
+		summarizeBy: none
+		sourceColumn: Period Start
+
+		annotation SummarizationSetBy = User
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column Sales
+		dataType: int64
+		formatString: #,0
+		lineageTag: f93a23e0-d1eb-52e9-a288-91baa43a7c33
+		summarizeBy: sum
+		sourceColumn: Sales
+
+		annotation SummarizationSetBy = User
+
+	column 'Index Value'
+		dataType: double
+		formatString: 0.0
+		lineageTag: a0120cbc-46e8-5e77-8455-be8181459c04
+		summarizeBy: none
+		sourceColumn: Index Value
+
+		annotation SummarizationSetBy = User
+
+	column 'Index 3M Average'
+		dataType: double
+		formatString: 0.0
+		lineageTag: cd626dcc-3c68-5776-94c2-2089848650b2
+		summarizeBy: none
+		sourceColumn: Index 3M Average
+
+		annotation SummarizationSetBy = User
+
+	column 'Change on Previous Period'
+		dataType: double
+		formatString: 0.0%
+		lineageTag: 7106cca5-dd10-57ba-b8e5-140b82d7d819
+		summarizeBy: none
+		sourceColumn: Change on Previous Period
+
+		annotation SummarizationSetBy = User
+
+	column 'YoY Change'
+		dataType: double
+		formatString: 0.0%
+		lineageTag: ac65d80d-40f1-5b78-b235-1ecddbead240
+		summarizeBy: none
+		sourceColumn: YoY Change
+
+		annotation SummarizationSetBy = User
+
+	column 'Volatility 12M'
+		dataType: double
+		formatString: 0.0%
+		lineageTag: 4dd1dbe6-ae10-50c8-b2b4-7d5e5a0f807f
+		summarizeBy: none
+		sourceColumn: Volatility 12M
+
+		annotation SummarizationSetBy = User
+
+	column 'Running Peak'
+		dataType: double
+		formatString: 0.0
+		lineageTag: 57023a31-26d7-59c4-bb0c-40aaeaabaa10
+		summarizeBy: none
+		sourceColumn: Running Peak
+
+		annotation SummarizationSetBy = User
+
+	column Drawdown
+		dataType: double
+		formatString: 0.0%
+		lineageTag: 5141f1ed-0d62-5fa2-9bb4-82e60290a0c9
+		summarizeBy: none
+		sourceColumn: Drawdown
+
+		annotation SummarizationSetBy = User
+
+	column 'Drawdown Episode'
+		dataType: int64
+		formatString: 0
+		lineageTag: 03a0a1d4-aea6-56cf-8010-a919643534fb
+		summarizeBy: none
+		sourceColumn: Drawdown Episode
+
+		annotation SummarizationSetBy = User
+
+	column 'Is Partial Period'
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: a90741e2-cb9b-54d7-a6a6-7df3d9bbf7ba
+		summarizeBy: none
+		sourceColumn: Is Partial Period
+
+		annotation SummarizationSetBy = User
+
+	column 'Model Version'
+		dataType: string
+		isHidden
+		lineageTag: f13a9fbe-f20c-5785-b640-29b3ef5283be
+		summarizeBy: none
+		sourceColumn: Model Version
+
+		annotation SummarizationSetBy = User
+
+	partition 'Price Index' = m
+		mode: import
+		source =
+				let
+				  Source = PostgreSQL.Database(PgServer, PgDatabase),
+				  #"Navigation 1" = Source{[Schema = "rpt", Item = "price_index"]}[Data]
+				in
+				  #"Navigation 1"
+
+	annotation PBI_ResultType = Table

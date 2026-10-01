@@ -1,0 +1,43 @@
+/// Bedrooms slicer shared by every fact (rpt.dim_bedrooms).
+table Bedrooms
+	lineageTag: bf0e68bc-965f-55ac-87d0-bf484091c7da
+
+	column 'Bedrooms Key'
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 778831e8-f1f5-56cc-b08e-9a072a15b721
+		summarizeBy: none
+		sourceColumn: Bedrooms Key
+
+		annotation SummarizationSetBy = User
+
+	column Bedrooms
+		dataType: string
+		lineageTag: 12781498-0077-5e8c-b960-42e824a36f8c
+		summarizeBy: none
+		sourceColumn: Bedrooms
+		sortByColumn: 'Bedrooms Order'
+
+		annotation SummarizationSetBy = User
+
+	column 'Bedrooms Order'
+		dataType: int64
+		isHidden
+		formatString: #,0
+		lineageTag: 1cf3f7bb-2f24-5eeb-8510-b80d1d476d32
+		summarizeBy: none
+		sourceColumn: Bedrooms Order
+
+		annotation SummarizationSetBy = User
+
+	partition Bedrooms = m
+		mode: import
+		source =
+				let
+				  Source = PostgreSQL.Database(PgServer, PgDatabase),
+				  #"Navigation 1" = Source{[Schema = "rpt", Item = "dim_bedrooms"]}[Data]
+				in
+				  #"Navigation 1"
+
+	annotation PBI_ResultType = Table

@@ -1,0 +1,78 @@
+/// Conformed property type shared by sales and rents (rpt.dim_property_type).
+table 'Property Type'
+	lineageTag: 4905f529-258e-5d25-a66d-53b1299d30c5
+
+	column 'Property Type Key'
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 70bd1df7-be83-53cf-8001-28b72a9f269d
+		summarizeBy: none
+		sourceColumn: Property Type Key
+
+		annotation SummarizationSetBy = User
+
+	column 'Usage Group'
+		dataType: string
+		lineageTag: 3361b8ae-0e41-5fb5-8d56-d13e367d0aba
+		summarizeBy: none
+		sourceColumn: Usage Group
+		sortByColumn: 'Usage Group Order'
+
+		annotation SummarizationSetBy = User
+
+	column 'Usage Group Order'
+		dataType: int64
+		isHidden
+		formatString: #,0
+		lineageTag: 4728fb02-b9a2-5b98-a642-e2065ab86c95
+		summarizeBy: none
+		sourceColumn: Usage Group Order
+
+		annotation SummarizationSetBy = User
+
+	column 'Property Class'
+		dataType: string
+		lineageTag: e5ba9d47-66bd-5cd6-ad35-bea76c4f33e5
+		summarizeBy: none
+		sourceColumn: Property Class
+		sortByColumn: 'Property Class Order'
+
+		annotation SummarizationSetBy = User
+
+	column 'Property Class Order'
+		dataType: int64
+		isHidden
+		formatString: #,0
+		lineageTag: 373ea8ce-a60f-5add-aec6-7e284211f5eb
+		summarizeBy: none
+		sourceColumn: Property Class Order
+
+		annotation SummarizationSetBy = User
+
+	column 'Property Type'
+		dataType: string
+		lineageTag: dfe601eb-3160-5ce3-93b7-a1504053db9f
+		summarizeBy: none
+		sourceColumn: Property Type
+
+		annotation SummarizationSetBy = User
+
+	column 'Property Class Description'
+		dataType: string
+		lineageTag: 5958583a-631a-57b5-803f-ad7a3e7b6203
+		summarizeBy: none
+		sourceColumn: Property Class Description
+
+		annotation SummarizationSetBy = User
+
+	partition 'Property Type' = m
+		mode: import
+		source =
+				let
+				  Source = PostgreSQL.Database(PgServer, PgDatabase),
+				  #"Navigation 1" = Source{[Schema = "rpt", Item = "dim_property_type"]}[Data]
+				in
+				  #"Navigation 1"
+
+	annotation PBI_ResultType = Table

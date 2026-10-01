@@ -124,6 +124,21 @@ DATASETS_BY_NAME = {d.name: d for d in DATASETS}
 FRED_CSV_URL = "https://fred.stlouisfed.org/graph/fredgraph.csv?id={series}"
 FRED_SERIES = {"FEDFUNDS": "fedfunds", "DCOILBRENTEU": "brent"}
 
+# Area centroids for the Power BI bubble map (docs/06 §4, owner 2026-10-01): OpenStreetMap
+# Nominatim, queried once with the public DLD area names only. The usage policy requires a
+# descriptive User-Agent and at most 1 request per second; raw responses are cached under
+# data/raw/osm so a re-run makes no network calls. Attribution: docs/06 §4, docs/07.
+NOMINATIM_URL = "https://nominatim.openstreetmap.org/search"
+NOMINATIM_USER_AGENT = (
+    "dubai-property-analytics/0.1 "
+    "(+https://github.com/SafwanTisekar/dubai-property-analytics; one-off area centroid lookup)"
+)
+NOMINATIM_MIN_INTERVAL_SECONDS = 1.1
+DATA_RAW_OSM = DATA_RAW / "osm" / "nominatim"
+OSM_ATTRIBUTION = "Area locations © OpenStreetMap contributors (ODbL)"
+# Dubai emirate (incl. Hatta) as lon_min, lat_min, lon_max, lat_max; dbt tests the same box.
+DUBAI_BBOX = (54.89, 24.60, 56.20, 25.40)
+
 # `make sample` (CLAUDE.md): share of deals/contracts kept per year x area stratum.
 SAMPLE_FRACTION = 0.02
 

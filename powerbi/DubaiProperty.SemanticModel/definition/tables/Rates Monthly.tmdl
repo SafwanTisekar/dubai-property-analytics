@@ -1,0 +1,80 @@
+/// Fed Funds, EIBOR (blank until loaded) and Brent by month (rpt.rates_monthly). Rates are decimals.
+table 'Rates Monthly'
+	lineageTag: 0bcb4308-4577-594d-ae84-ef2a9a43b49f
+
+	column Month
+		dataType: dateTime
+		isHidden
+		formatString: mmm yyyy
+		lineageTag: 9463de41-c515-5b09-ba91-49fa009ef1c9
+		summarizeBy: none
+		sourceColumn: Month
+
+		annotation SummarizationSetBy = User
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column 'Fed Funds Rate'
+		dataType: double
+		formatString: 0.0%
+		lineageTag: 3dc7d9ba-eee2-57ea-9ea0-c6dcd86833e5
+		summarizeBy: none
+		sourceColumn: Fed Funds Rate
+
+		annotation SummarizationSetBy = User
+
+	column 'EIBOR 1M'
+		dataType: double
+		formatString: 0.0%
+		lineageTag: a8b120fd-385d-5417-87f4-cc46f96e092f
+		summarizeBy: none
+		sourceColumn: EIBOR 1M
+
+		annotation SummarizationSetBy = User
+
+	column 'EIBOR 3M'
+		dataType: double
+		formatString: 0.0%
+		lineageTag: b262388b-0aec-5fcc-aabb-f7f4506f807f
+		summarizeBy: none
+		sourceColumn: EIBOR 3M
+
+		annotation SummarizationSetBy = User
+
+	column 'EIBOR 6M'
+		dataType: double
+		formatString: 0.0%
+		lineageTag: 2949999c-9b1e-5fcb-a938-26c1f8f6f2df
+		summarizeBy: none
+		sourceColumn: EIBOR 6M
+
+		annotation SummarizationSetBy = User
+
+	column 'EIBOR 12M'
+		dataType: double
+		formatString: 0.0%
+		lineageTag: a2ffb0fb-6c70-5e28-9e54-e52be0e5425d
+		summarizeBy: none
+		sourceColumn: EIBOR 12M
+
+		annotation SummarizationSetBy = User
+
+	column 'Brent USD'
+		dataType: double
+		formatString: #,0.0000
+		lineageTag: 52e4734e-7b1b-5da9-aeb7-275b34bba904
+		summarizeBy: none
+		sourceColumn: Brent USD
+
+		annotation SummarizationSetBy = User
+
+	partition 'Rates Monthly' = m
+		mode: import
+		source =
+				let
+				  Source = PostgreSQL.Database(PgServer, PgDatabase),
+				  #"Navigation 1" = Source{[Schema = "rpt", Item = "rates_monthly"]}[Data]
+				in
+				  #"Navigation 1"
+
+	annotation PBI_ResultType = Table

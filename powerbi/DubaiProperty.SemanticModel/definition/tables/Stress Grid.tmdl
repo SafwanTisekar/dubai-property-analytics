@@ -1,0 +1,220 @@
+/// Collateral stress test, illustrative (rpt.stress_grid). Disconnected: read through the Risk measures.
+table 'Stress Grid'
+	lineageTag: be2125d5-2532-5aae-a567-c7700fd0936a
+
+	column 'Segment Level'
+		dataType: string
+		lineageTag: 14821ef9-9c05-5e69-b2af-f19afa47e13f
+		summarizeBy: none
+		sourceColumn: Segment Level
+
+		annotation SummarizationSetBy = User
+
+	column Segment
+		dataType: string
+		lineageTag: d4bb54c5-7274-5483-8c4f-3036eef1e413
+		summarizeBy: none
+		sourceColumn: Segment
+
+		annotation SummarizationSetBy = User
+
+	column 'Property Type Key'
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: a1202941-11f1-5a5e-b74e-67701755393b
+		summarizeBy: none
+		sourceColumn: Property Type Key
+
+		annotation SummarizationSetBy = User
+
+	column Zone
+		dataType: string
+		lineageTag: 601448e5-55a7-5eed-9cc7-278638c5feef
+		summarizeBy: none
+		sourceColumn: Zone
+
+		annotation SummarizationSetBy = User
+
+	column 'Area Key'
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 35013e72-7f27-5309-b3de-410cf617057b
+		summarizeBy: none
+		sourceColumn: Area Key
+
+		annotation SummarizationSetBy = User
+
+	column 'Ready / Off-Plan'
+		dataType: string
+		lineageTag: 672518ba-18fe-5bc5-8e03-c36ac93f2e7b
+		summarizeBy: none
+		sourceColumn: Ready / Off-Plan
+
+		annotation SummarizationSetBy = User
+
+	column Scenario
+		dataType: string
+		lineageTag: 1c194ad0-0e9f-5e43-8809-d416481cd94e
+		summarizeBy: none
+		sourceColumn: Scenario
+
+		annotation SummarizationSetBy = User
+
+	column 'Shock Pct'
+		dataType: int64
+		formatString: #,0
+		lineageTag: b261610b-0720-5685-b5ff-9646fd69860c
+		summarizeBy: sum
+		sourceColumn: Shock Pct
+
+		annotation SummarizationSetBy = User
+
+	column 'Applied Shock'
+		dataType: double
+		formatString: 0.0%
+		lineageTag: a12ba894-7f57-5b85-8c5b-2c4a7c28e5ba
+		summarizeBy: none
+		sourceColumn: Applied Shock
+
+		annotation SummarizationSetBy = User
+
+	column 'Loan Basis'
+		dataType: string
+		lineageTag: 114723b0-31ab-5797-9990-73dbbfa43837
+		summarizeBy: none
+		sourceColumn: Loan Basis
+
+		annotation SummarizationSetBy = User
+
+	column 'LTV Pct'
+		dataType: int64
+		formatString: #,0
+		lineageTag: 06706ae6-b232-5f59-a715-dc392ba2eee8
+		summarizeBy: sum
+		sourceColumn: LTV Pct
+
+		annotation SummarizationSetBy = User
+
+	column 'LTV Label'
+		dataType: string
+		lineageTag: 7de85062-58de-5c9e-b7fd-73ed1d4c1547
+		summarizeBy: none
+		sourceColumn: LTV Label
+
+		annotation SummarizationSetBy = User
+
+	column Purchases
+		dataType: int64
+		formatString: #,0
+		lineageTag: 74ecf23b-8ab4-5edc-a80f-d163ee945a57
+		summarizeBy: sum
+		sourceColumn: Purchases
+
+		annotation SummarizationSetBy = User
+
+	column 'Negative Equity Count'
+		dataType: int64
+		formatString: #,0
+		lineageTag: bd5f1008-71c8-5f7a-9a37-6579e6591b5b
+		summarizeBy: sum
+		sourceColumn: Negative Equity Count
+
+		annotation SummarizationSetBy = User
+
+	column 'Negative Equity Share'
+		dataType: double
+		formatString: 0.0%
+		lineageTag: 400a5d44-995c-5eea-9243-4295c4f281ba
+		summarizeBy: none
+		sourceColumn: Negative Equity Share
+
+		annotation SummarizationSetBy = User
+
+	column 'Negative Equity AED'
+		dataType: double
+		formatString: """AED ""#,0"
+		lineageTag: 9e36b050-ef61-53bb-89e7-2a93de78617e
+		summarizeBy: sum
+		sourceColumn: Negative Equity AED
+
+		annotation SummarizationSetBy = User
+
+	column 'Loan AED'
+		dataType: double
+		formatString: """AED ""#,0"
+		lineageTag: 2800487a-078f-5988-b582-be3369ce437d
+		summarizeBy: sum
+		sourceColumn: Loan AED
+
+		annotation SummarizationSetBy = User
+
+	column 'Current Value AED'
+		dataType: double
+		formatString: """AED ""#,0"
+		lineageTag: 78c2523d-22e0-59ee-8655-9be600fe2bdb
+		summarizeBy: sum
+		sourceColumn: Current Value AED
+
+		annotation SummarizationSetBy = User
+
+	column 'Zone Index Share'
+		dataType: double
+		formatString: 0.0%
+		lineageTag: f89e72ea-7dfe-5026-9393-7c298e98bdc7
+		summarizeBy: none
+		sourceColumn: Zone Index Share
+
+		annotation SummarizationSetBy = User
+
+	column 'Is Published'
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: d69e91ab-852b-52b1-99e8-efc6ea11226c
+		summarizeBy: none
+		sourceColumn: Is Published
+
+		annotation SummarizationSetBy = User
+
+	column 'Purchases From'
+		dataType: dateTime
+		formatString: yyyy-mm-dd
+		lineageTag: 7b04717e-1a50-5d93-98d6-0c103308b78d
+		summarizeBy: none
+		sourceColumn: Purchases From
+
+		annotation SummarizationSetBy = User
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column 'Purchases To'
+		dataType: dateTime
+		formatString: yyyy-mm-dd
+		lineageTag: 546384ab-de93-50ec-ba09-6d60aa3d8cc4
+		summarizeBy: none
+		sourceColumn: Purchases To
+
+		annotation SummarizationSetBy = User
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column 'Model Version'
+		dataType: string
+		isHidden
+		lineageTag: 909776fd-5954-53f3-88b3-6e130c6ac758
+		summarizeBy: none
+		sourceColumn: Model Version
+
+		annotation SummarizationSetBy = User
+
+	partition 'Stress Grid' = m
+		mode: import
+		source =
+				let
+				  Source = PostgreSQL.Database(PgServer, PgDatabase),
+				  #"Navigation 1" = Source{[Schema = "rpt", Item = "stress_grid"]}[Data]
+				in
+				  #"Navigation 1"
+
+	annotation PBI_ResultType = Table

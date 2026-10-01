@@ -1,0 +1,110 @@
+/// Rolling-origin backtest accuracy and interval coverage (rpt.forecast_backtest).
+table 'Forecast Backtest'
+	lineageTag: 2aa917c5-c924-5ca0-8c96-97a772865eb0
+
+	column Target
+		dataType: string
+		lineageTag: f1b0c31f-440b-5654-a02d-de7ed4b776ea
+		summarizeBy: none
+		sourceColumn: Target
+
+		annotation SummarizationSetBy = User
+
+	column Segment
+		dataType: string
+		lineageTag: 3e006775-ec06-55c2-a996-2d8dfba735ae
+		summarizeBy: none
+		sourceColumn: Segment
+
+		annotation SummarizationSetBy = User
+
+	column Model
+		dataType: string
+		lineageTag: c2967fa6-cea0-56c7-88be-8ad174a7d123
+		summarizeBy: none
+		sourceColumn: Model
+
+		annotation SummarizationSetBy = User
+
+	column 'Horizon Months'
+		dataType: int64
+		formatString: 0
+		lineageTag: f986950e-6c5f-5493-9600-1e441c06fbec
+		summarizeBy: none
+		sourceColumn: Horizon Months
+
+		annotation SummarizationSetBy = User
+
+	column 'Origins Scored'
+		dataType: int64
+		formatString: #,0
+		lineageTag: 9f63787f-95c1-5f00-a0d0-ef36ae0fd627
+		summarizeBy: sum
+		sourceColumn: Origins Scored
+
+		annotation SummarizationSetBy = User
+
+	column MAPE
+		dataType: double
+		formatString: 0.0%
+		lineageTag: 8553f1ff-a343-5a6c-a8f6-d0fb1a6e8bf2
+		summarizeBy: none
+		sourceColumn: MAPE
+
+		annotation SummarizationSetBy = User
+
+	column MdAPE
+		dataType: double
+		formatString: 0.0%
+		lineageTag: b67a4d3b-c7b7-5914-b7a0-1c7d063fd258
+		summarizeBy: none
+		sourceColumn: MdAPE
+
+		annotation SummarizationSetBy = User
+
+	column 'Coverage 80'
+		dataType: double
+		formatString: 0.0%
+		lineageTag: e457f716-1a92-5d85-83ae-4e19fca95a09
+		summarizeBy: none
+		sourceColumn: Coverage 80
+
+		annotation SummarizationSetBy = User
+
+	column 'Coverage 95'
+		dataType: double
+		formatString: 0.0%
+		lineageTag: 8d8910bc-5987-5a87-9814-f33dcbb468ea
+		summarizeBy: none
+		sourceColumn: Coverage 95
+
+		annotation SummarizationSetBy = User
+
+	column 'Is Baseline'
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: 6220167c-ba39-5a77-a2ce-e4c119a4d6ef
+		summarizeBy: none
+		sourceColumn: Is Baseline
+
+		annotation SummarizationSetBy = User
+
+	column 'Model Version'
+		dataType: string
+		isHidden
+		lineageTag: a0bcc4a1-4111-5fc5-8c60-c49b227f71cb
+		summarizeBy: none
+		sourceColumn: Model Version
+
+		annotation SummarizationSetBy = User
+
+	partition 'Forecast Backtest' = m
+		mode: import
+		source =
+				let
+				  Source = PostgreSQL.Database(PgServer, PgDatabase),
+				  #"Navigation 1" = Source{[Schema = "rpt", Item = "forecast_backtest"]}[Data]
+				in
+				  #"Navigation 1"
+
+	annotation PBI_ResultType = Table
