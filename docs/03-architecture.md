@@ -115,8 +115,10 @@ dubai-property-analytics/
 │       ├── avm_explain.py      # SHAP, worked examples
 │       ├── report_4a.py        # reports/price_index.md, yields.md
 │       ├── report_avm.py       # reports/avm_model_card.md, avm_examples.json
-│       ├── stress_test.py      # Phase 4c
-│       └── forecast.py         # Phase 4c
+│       ├── stress_test.py      # 4c: negative equity under shocks -> ml.stress_grid (make score)
+│       ├── forecast.py         # 4c: SARIMAX + backtest on index vintages -> ml.forecast (make train)
+│       ├── score.py            # make score: stress test, ml table check, dbt post_ml
+│       └── report_4c.py        # reports/stress_test.md, forecast.md
 ├── dbt/
 │   ├── dbt_project.yml
 │   ├── profiles.yml            # dbt-postgres target reading credentials from env vars

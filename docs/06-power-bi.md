@@ -3,7 +3,7 @@
 ## 1. Data connection
 
 - **Source: PostgreSQL** `dubai_property` on the Mac, via Get Data → **PostgreSQL database**, **Import mode** (required for Publish to web). Connection details over the Parallels network are in docs/03 §8.
-- Log in as the read-only role **`pbi_reader`**, and select only **`rpt.*` views** (built in Phase 2b: `rpt.transactions`, `rpt.area_month`, `rpt.rent_month`, `rpt.rates_monthly`, `rpt.report_info` and `rpt.dim_date` / `dim_area` / `dim_property_type` / `dim_procedure` / `dim_project`; Phase 4a added `rpt.price_index` and `rpt.yield_quarter`; 4b/4c add `rpt.stress_grid` and the other model outputs). Columns have Title Case names (e.g. `"AED Counted Once"`), AED is whole dirhams, and medians are blank where n < 20 (docs/04 §3). All business logic lives in dbt; Power Query only confirms data types.
+- Log in as the read-only role **`pbi_reader`**, and select only **`rpt.*` views** (built in Phase 2b: `rpt.transactions`, `rpt.area_month`, `rpt.rent_month`, `rpt.rates_monthly`, `rpt.report_info` and `rpt.dim_date` / `dim_area` / `dim_property_type` / `dim_procedure` / `dim_project`; Phase 4a added `rpt.price_index` and `rpt.yield_quarter`; 4b added `rpt.avm_score`, `rpt.avm_performance`, `rpt.feature_importance`; 4c added `rpt.stress_grid`, `rpt.stress_replay`, `rpt.forecast`, `rpt.forecast_backtest`). Columns have Title Case names (e.g. `"AED Counted Once"`), AED is whole dirhams, and medians are blank where n < 20 (docs/04 §3). All business logic lives in dbt; Power Query only confirms data types.
 - Server and database are **Power BI parameters** (`PgServer`, `PgDatabase`), so switching between the Parallels IP and localhost is one change.
 - Save as a **Power BI Project (.pbip)** for git, and attach a `.pbix` to GitHub Releases.
 - Refresh happens in Desktop (the Mac must be on, with Postgres running), then republish. No gateway is needed because the public report is republished from Desktop rather than refreshed in the Service.
@@ -15,7 +15,7 @@
 - `dim_date` (day grain) marked as the date table; facts join on date.
 - `dim_area` and `dim_property_type` are shared by the sales, rent and aggregate facts, so one slicer filters everything.
 - Display folders: **Market, Financing, Prices, Yields, Valuation, Risk, Rates**.
-- What-if parameters: `Price Shock %` (0 to −50, step 5) and `LTV %` (50–85, step 5).
+- What-if parameters: `Price Shock %` (0 to −50, step 5) and `LTV %` with the values **50, 60, 70, 80, 85** (a disconnected table, not a step-5 range: the stress grid holds only those five, and 85 is labelled "UAE national first home cap (worst case)"; Phase 4c, owner 2026-10-01).
 - Format: AED with `"AED "#,0,,"M"` / `"AED "#,0.0,,,"bn"`; percentages to one decimal place.
 
 ## 3. Core DAX measures
@@ -93,26 +93,42 @@ DIVIDE ( [Flagged for Review], CALCULATE ( COUNTROWS ( avm_score ), avm_score[Is
 // Model comparison cards read rpt.avm_performance (Split = "Test", Breakdown = "Overall").
 Selected Model MdAPE = MAX ( avm_performance[MdAPE] )
 
-// ---------- Stress test ----------
-Selected Shock = SELECTEDVALUE ( 'Price Shock %'[Price Shock % Value], -0.20 )
-Selected LTV   = SELECTEDVALUE ( 'LTV %'[LTV % Value], 0.80 )
+// ---------- Stress test (rpt.stress_grid, Phase 4c) ----------
+// Integer keys on both sides (e.g. -20, 80): no floating-point equality.
+Selected Shock = SELECTEDVALUE ( 'Price Shock %'[Price Shock % Value], -20 )
+Selected LTV   = SELECTEDVALUE ( 'LTV %'[LTV % Value], 80 )
 
+// One row per segment: pick a level (Dubai / Type / Zone / Area) with a slicer or the
+// visual's filter, and Ready / Off-Plan (never pooled). Shares are pre-computed per row
+// and blank under min-n, so read them, don't re-average them across segments.
 Negative Equity Share =
 CALCULATE (
-    DIVIDE ( SUM ( ml_stress_grid[negative_equity_count] ), SUM ( ml_stress_grid[purchases] ) ),
-    ml_stress_grid[shock_pct] = [Selected Shock],
-    ml_stress_grid[ltv_pct] = [Selected LTV]
+    SELECTEDVALUE ( stress_grid[Negative Equity Share] ),
+    stress_grid[Scenario] = "Price shock",
+    stress_grid[Loan Basis] = "Assumed LTV",
+    stress_grid[Shock Pct] = [Selected Shock],
+    stress_grid[LTV Pct] = [Selected LTV]
 )
 
 Negative Equity AED =
 CALCULATE (
-    SUM ( ml_stress_grid[negative_equity_aed] ),
-    ml_stress_grid[shock_pct] = [Selected Shock],
-    ml_stress_grid[ltv_pct] = [Selected LTV]
+    SUM ( stress_grid[Negative Equity AED] ),
+    stress_grid[Scenario] = "Price shock",
+    stress_grid[Loan Basis] = "Assumed LTV",
+    stress_grid[Shock Pct] = [Selected Shock],
+    stress_grid[LTV Pct] = [Selected LTV]
 )
+
+// Reference lines: the CBUAE cap (expatriate, first home) and registered loans of matched
+// purchases, at the selected shock (no LTV key on those rows).
+Negative Equity Share CBUAE Cap =
+CALCULATE ( SELECTEDVALUE ( stress_grid[Negative Equity Share] ),
+    stress_grid[Scenario] = "Price shock",
+    stress_grid[Loan Basis] = "CBUAE cap (expatriate, first home)",
+    stress_grid[Shock Pct] = [Selected Shock] )
 ```
 
-The shock and LTV values are stored as integers (e.g. −20, 80) in both the parameter tables and `ml_stress_grid`, to avoid floating-point equality issues. Adjust the measures accordingly. `tests/test_kpi_reconciliation.py` reproduces every KPI in docs/01 §4 in SQL, and the Power BI cards must match before publishing.
+The shock and LTV values are stored as integers (e.g. −20, 80) in both the parameter tables and `rpt.stress_grid` ("Shock Pct", "LTV Pct"), to avoid floating-point equality issues. Every stress visual carries the label "Illustrative, not a regulatory stress test". The historical replay rows have Scenario = "Replay: 2014-2020 drawdown" and no Shock Pct. The outlook fan chart reads `rpt.forecast` (Actual line, Forecast per Scenario, Lower/Upper 80 and 95 as error bands). `tests/test_kpi_reconciliation.py` reproduces every KPI in docs/01 §4 in SQL, and the Power BI cards must match before publishing.
 
 ## 4. Report pages
 

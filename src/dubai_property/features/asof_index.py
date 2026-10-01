@@ -87,6 +87,7 @@ def realtime_index(
     keep_fits: bool = False,
     min_n: int = config.MIN_N,
     window: int = config.RTD_WINDOW_MONTHS,
+    keep_periods: int | None = KEEP_PERIODS,
 ) -> tuple[pl.DataFrame, dict[date, PricingFit]]:
     """The segment's index as known at each vintage.
 
@@ -98,9 +99,11 @@ def realtime_index(
         keep_fits: Also return each vintage's last-window fit for pricing.
         min_n: Sales a period needs to enter the chain.
         window: Window length in months.
+        keep_periods: Chained periods kept per vintage (the last ones); None keeps the
+            whole chain (the forecast backtest fits each vintage's full history).
 
     Returns:
-        One row per (vintage, period) for the last ``KEEP_PERIODS`` chained periods
+        One row per (vintage, period) for the last ``keep_periods`` chained periods
         (columns as ``VINTAGE_SCHEMA``), and ``{vintage: PricingFit}`` if asked.
     """
     data = segment.select(population)
@@ -135,7 +138,8 @@ def realtime_index(
             continue  # a window that can't be linked: no index this vintage
         if not chain:
             continue
-        for p in sorted(chain)[-KEEP_PERIODS:]:
+        periods = sorted(chain)
+        for p in periods if keep_periods is None else periods[-keep_periods:]:
             rows.append(
                 {
                     "segment_id": segment.segment_id,

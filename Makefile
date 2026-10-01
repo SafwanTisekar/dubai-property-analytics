@@ -145,26 +145,29 @@ eda:  ## Execute notebooks/0*.ipynb in place -> reports/figures/*.png (findings:
 	$(PY).analysis.run_notebooks
 
 # --- Phase 4: models (docs/05) ----------------------------------------------------------
-# train fits the models and writes ml.* with COPY; score builds the rpt views over them
-# (dbt tag post_ml). 4a: hedonic price index and gross yields. 4b: the AVM. Stress test
-# and forecast join in 4c.
+# train fits the models and writes their ml.* tables with COPY (4a: hedonic price index and
+# gross yields; 4b: the AVM; 4c: the forecast, incl. its rolling-origin backtest). score
+# runs the stress test (no fitting: it marks the recent book to market against the index),
+# checks every ml.* table exists, then builds the rpt views over them (dbt tag post_ml).
 #
 # AVM tuning: by default the saved Optuna study (artifacts/avm/best_params.json) is reused
 # when the features are unchanged, else 20 trials run (docs/05 §8). Force a re-tune with
 # AVM_TRIALS=20; AVM_TRIALS=2 for a quick run (CI on the fixtures).
 AVM_TRIALS ?=
 
-train:  ## Fit the models (4a: hedonic index, yields; 4b: AVM) and write ml.* via COPY
+train:  ## Fit the models (hedonic index, yields, AVM, forecast) and write ml.* via COPY
 	$(PY).models.hedonic_index
 	$(PY).models.yields
 	$(PY).models.avm $(if $(AVM_TRIALS),--trials $(AVM_TRIALS))
+	$(PY).models.forecast
 
-score:  ## dbt build --select tag:post_ml (rpt views over ml.* + their tests)
-	$(DBT) build --select tag:post_ml $(DBT_FLAGS)
+score:  ## Stress test -> ml.stress_*, check every ml.* table, then dbt build --select tag:post_ml
+	$(PY).models.score
 
-model-reports:  ## Model reports from ml.* -> reports/price_index.md, yields.md, avm_model_card.md, figures
+model-reports:  ## Model reports from ml.* -> reports/price_index.md, yields.md, avm_model_card.md, stress_test.md, forecast.md, figures
 	$(PY).models.report_4a
 	$(PY).models.report_avm
+	$(PY).models.report_4c
 
 # --- Stubs (implemented in later phases, see docs/08) ---------------------------------
 

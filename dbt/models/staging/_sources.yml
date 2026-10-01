@@ -59,3 +59,21 @@ sources:
           models/avm.py.
       - name: feature_importance
         description: AVM feature importance (mean |SHAP| on test sales, split gain). models/avm.py.
+      - name: stress_grid
+        description: >
+          Collateral stress test (illustrative): negative equity of the last 36 months' clean
+          residential buyers per segment x off-plan flag x scenario (shock grid, 2014-2020
+          replay) x loan basis (assumed LTV grid, CBUAE cap, matched actual loan). Shares,
+          counts and AED NULL under min_n purchases. models/stress_test.py (make score).
+      - name: stress_replay
+        description: >
+          The 2014 -> 2020 peak-to-trough drawdown of each published index series, and whether
+          the replay uses it. models/stress_test.py.
+      - name: forecast
+        description: >
+          Monthly hedonic index and clean residential sales volume, actuals plus a 12-month
+          SARIMAX forecast per rate scenario with 80% / 95% intervals. models/forecast.py.
+      - name: forecast_backtest
+        description: >
+          Rolling-origin backtest (last 24 months, real-time index vintages): MAPE, MdAPE and
+          interval coverage per target x segment x model x horizon. models/forecast.py.

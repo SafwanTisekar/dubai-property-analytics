@@ -48,6 +48,8 @@ def test_model_versions_and_index_base_match_dbt_vars():
     assert v["hedonic_model_version"] == config.HEDONIC_MODEL_VERSION
     assert v["yield_model_version"] == config.YIELD_MODEL_VERSION
     assert v["avm_model_version"] == config.AVM_MODEL_VERSION
+    assert v["stress_model_version"] == config.STRESS_MODEL_VERSION
+    assert v["forecast_model_version"] == config.FORECAST_MODEL_VERSION
     assert v["index_base_month"] == config.INDEX_BASE_MONTH.isoformat()
 
 
@@ -63,3 +65,16 @@ def test_avm_settings_are_consistent():
     assert 0 < config.AVM_OPTUNA_TRIALS <= 50  # docs/05 §1: at most 50 trials
     assert list(config.AVM_PRICE_BANDS) == sorted(config.AVM_PRICE_BANDS)
     assert 0 < config.LEAKAGE_MDAPE_FLOOR < config.AVM_REVIEW_GAP
+
+
+def test_stress_and_forecast_settings_are_consistent():
+    """Integer what-if keys (docs/06), shocks from 0 down to -50 in 5-point steps."""
+    assert config.STRESS_SHOCKS == tuple(range(0, -55, -5))
+    assert all(isinstance(x, int) for x in (*config.STRESS_SHOCKS, *config.STRESS_LTV_GRID))
+    assert list(config.STRESS_LTV_GRID) == sorted(config.STRESS_LTV_GRID)
+    assert max(config.STRESS_LTV_GRID) < 100  # base case: no negative equity at a 0 shock
+    assert set(config.STRESS_LTV_LABELS) <= set(config.STRESS_LTV_GRID)
+    assert config.STRESS_REPLAY_START <= config.STRESS_REPLAY_PEAK_BY < config.STRESS_REPLAY_END
+    assert max(config.FORECAST_HORIZONS) <= config.FORECAST_STEPS
+    assert config.FORECAST_RATE_SCENARIOS["rates_flat"] == 0
+    assert all(0 < x < 1 for x in config.FORECAST_INTERVALS)

@@ -1,6 +1,6 @@
 # Data dictionary
 
-Generated 2026-10-01 14:15 UTC by `quality/data_dictionary.py` from the dbt manifest (descriptions, tests) and the database catalogue (columns, types). Regenerate with `make dictionary` (after `make dbt`). Rules C1-C22 are in docs/04 §2; the star schema in docs/04 §3. Bronze is raw text (docs/04 §1) and not listed.
+Generated 2026-10-01 15:54 UTC by `quality/data_dictionary.py` from the dbt manifest (descriptions, tests) and the database catalogue (columns, types). Regenerate with `make dictionary` (after `make dbt`). Rules C1-C22 are in docs/04 §2; the star schema in docs/04 §3. Bronze is raw text (docs/04 §1) and not listed.
 
 ## Silver: seeds, staging views and intermediate tables (typed, cleaned, flagged)
 
@@ -842,10 +842,14 @@ Every DLD transaction line (Sales, Gifts, Mortgages; 1.79M) with dimension keys 
 | [`rpt.dim_project`](#rptdim_project) | view | rpt.dim_project. DLD projects (no developer yet). |
 | [`rpt.dim_property_type`](#rptdim_property_type) | view | rpt.dim_property_type. Conformed usage group x property class. |
 | [`rpt.feature_importance`](#rptfeature_importance) | view | rpt.feature_importance. AVM feature importance (mean \|SHAP\|, split gain), ranked. |
+| [`rpt.forecast`](#rptforecast) | view | rpt.forecast. Monthly hedonic index and clean residential sales volume (Dubai, apartments, villas): actuals, then a 12-month SARIMAX forecast per Fed Funds scenario (flat, +100bp, -100bp) with 80% and 95% intervals. |
+| [`rpt.forecast_backtest`](#rptforecast_backtest) | view | rpt.forecast_backtest. Rolling-origin backtest over the last 24 complete months (index on real-time vintages): MAPE, MdAPE and interval coverage per target x segment x model x horizon. |
 | [`rpt.price_index`](#rptprice_index) | view | rpt.price_index. Hedonic price index per segment (Dubai, apartments, villas, zones passing min-n) and period, Jan 2019 = 100, with YoY, volatility and drawdown. |
 | [`rpt.rates_monthly`](#rptrates_monthly) | view | rpt.rates_monthly. Fed Funds, Brent and (later) EIBOR by month. |
 | [`rpt.rent_month`](#rptrent_month) | view | rpt.rent_month. Monthly rent aggregate; the only rent table in Power BI. |
 | [`rpt.report_info`](#rptreport_info) | view | rpt.report_info. One row with the data-as-of date, min-n and attribution. |
+| [`rpt.stress_grid`](#rptstress_grid) | view | rpt.stress_grid. Collateral stress test (illustrative, not a regulatory stress test): negative equity of the last 36 months' clean residential buyers, marked to market with the hedonic index, per segment (Dubai / type / zone / area) x ready or off-plan x scenario (price shock 0 to -50%, or the 2014-2020 replay) x loan basis (assumed LTV 50-85%, CBUAE cap, registered loan of matched purchases). Loans held at origination. Share, count and AED blank under min_n purchases. |
+| [`rpt.stress_replay`](#rptstress_replay) | view | rpt.stress_replay. The 2014 -> 2020 peak-to-trough drawdown of every published index series, and whether the stress test's replay uses it (zone series only if published from the June 2014 peak). |
 | [`rpt.transactions`](#rpttransactions) | view | rpt.transactions. Transaction lines in the reporting scope, without text ids or the individual quality flags. Sum "AED Counted Once" for values. |
 | [`rpt.yield_quarter`](#rptyield_quarter) | view | rpt.yield_quarter. Gross yields by area / zone x property type x bedrooms x quarter, with both sample sizes; published cells only. |
 
@@ -1039,6 +1043,50 @@ rpt.feature_importance. AVM feature importance (mean |SHAP|, split gain), ranked
 | `Rank` | integer |  |  |
 | `Model Version` | text |  |  |
 
+<a id="rptforecast"></a>
+### `rpt.forecast`
+
+dbt model `rpt_forecast`.
+
+rpt.forecast. Monthly hedonic index and clean residential sales volume (Dubai, apartments, villas): actuals, then a 12-month SARIMAX forecast per Fed Funds scenario (flat, +100bp, -100bp) with 80% and 95% intervals.
+
+| Column | Type | Description | Tests |
+|---|---|---|---|
+| `Target` | text |  |  |
+| `Segment` | text |  |  |
+| `Month` | date |  |  |
+| `Scenario` | text |  |  |
+| `Is Forecast` | boolean |  |  |
+| `Actual` | numeric |  |  |
+| `Forecast` | numeric |  |  |
+| `Lower 80` | numeric |  |  |
+| `Upper 80` | numeric |  |  |
+| `Lower 95` | numeric |  |  |
+| `Upper 95` | numeric |  |  |
+| `Fed Funds Rate Path` | numeric |  |  |
+| `Model Version` | text |  |  |
+
+<a id="rptforecast_backtest"></a>
+### `rpt.forecast_backtest`
+
+dbt model `rpt_forecast_backtest`.
+
+rpt.forecast_backtest. Rolling-origin backtest over the last 24 complete months (index on real-time vintages): MAPE, MdAPE and interval coverage per target x segment x model x horizon.
+
+| Column | Type | Description | Tests |
+|---|---|---|---|
+| `Target` | text |  |  |
+| `Segment` | text |  |  |
+| `Model` | text |  |  |
+| `Horizon Months` | integer |  |  |
+| `Origins Scored` | integer |  |  |
+| `MAPE` | numeric |  |  |
+| `MdAPE` | numeric |  |  |
+| `Coverage 80` | numeric |  |  |
+| `Coverage 95` | numeric |  |  |
+| `Is Baseline` | boolean |  |  |
+| `Model Version` | text |  |  |
+
 <a id="rptprice_index"></a>
 ### `rpt.price_index`
 
@@ -1122,6 +1170,64 @@ rpt.report_info. One row with the data-as-of date, min-n and attribution.
 | `Data As Of` | date |  |  |
 | `Min N` | integer |  |  |
 | `Source` | text |  |  |
+
+<a id="rptstress_grid"></a>
+### `rpt.stress_grid`
+
+dbt model `rpt_stress_grid`.
+
+rpt.stress_grid. Collateral stress test (illustrative, not a regulatory stress test): negative equity of the last 36 months' clean residential buyers, marked to market with the hedonic index, per segment (Dubai / type / zone / area) x ready or off-plan x scenario (price shock 0 to -50%, or the 2014-2020 replay) x loan basis (assumed LTV 50-85%, CBUAE cap, registered loan of matched purchases). Loans held at origination. Share, count and AED blank under min_n purchases.
+
+| Column | Type | Description | Tests |
+|---|---|---|---|
+| `Segment Level` | text |  |  |
+| `Segment` | text |  |  |
+| `Property Type Key` | integer |  |  |
+| `Zone` | text |  |  |
+| `Area Key` | integer |  |  |
+| `Ready / Off-Plan` | text |  |  |
+| `Scenario` | text |  |  |
+| `Shock Pct` | integer |  |  |
+| `Applied Shock` | numeric |  |  |
+| `Loan Basis` | text |  |  |
+| `LTV Pct` | integer |  |  |
+| `LTV Label` | text |  |  |
+| `Purchases` | integer |  |  |
+| `Negative Equity Count` | integer |  |  |
+| `Negative Equity Share` | numeric |  |  |
+| `Negative Equity AED` | numeric |  |  |
+| `Loan AED` | numeric |  |  |
+| `Current Value AED` | numeric |  |  |
+| `Zone Index Share` | numeric |  |  |
+| `Is Published` | boolean |  |  |
+| `Purchases From` | date |  |  |
+| `Purchases To` | date |  |  |
+| `Model Version` | text |  |  |
+
+<a id="rptstress_replay"></a>
+### `rpt.stress_replay`
+
+dbt model `rpt_stress_replay`.
+
+rpt.stress_replay. The 2014 -> 2020 peak-to-trough drawdown of every published index series, and whether the stress test's replay uses it (zone series only if published from the June 2014 peak).
+
+| Column | Type | Description | Tests |
+|---|---|---|---|
+| `Segment Key` | text |  |  |
+| `Segment` | text |  |  |
+| `Segment Level` | text |  |  |
+| `Property Type Key` | integer |  |  |
+| `Zone` | text |  |  |
+| `Frequency` | text |  |  |
+| `Published From` | date |  |  |
+| `Peak` | date |  |  |
+| `Peak Index` | numeric |  |  |
+| `Trough` | date |  |  |
+| `Trough Index` | numeric |  |  |
+| `Drawdown` | numeric |  |  |
+| `Used In Replay` | boolean |  |  |
+| `Note` | text |  |  |
+| `Model Version` | text |  |  |
 
 <a id="rpttransactions"></a>
 ### `rpt.transactions`

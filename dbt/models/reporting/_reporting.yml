@@ -180,3 +180,155 @@ models:
         tests: [not_null, unique]
       - name: '"Rank"'
         tests: [not_null, unique]
+  - name: rpt_stress_grid
+    description: >
+      rpt.stress_grid. Collateral stress test (illustrative, not a regulatory stress test):
+      negative equity of the last 36 months' clean residential buyers, marked to market with
+      the hedonic index, per segment (Dubai / type / zone / area) x ready or off-plan x
+      scenario (price shock 0 to -50%, or the 2014-2020 replay) x loan basis (assumed LTV
+      50-85%, CBUAE cap, registered loan of matched purchases). Loans held at origination.
+      Share, count and AED blank under min_n purchases.
+    config:
+      tags: [post_ml]
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - '"Segment Level"'
+              - '"Property Type Key"'
+              - '"Zone"'
+              - '"Area Key"'
+              - '"Ready / Off-Plan"'
+              - '"Scenario"'
+              - '"Shock Pct"'
+              - '"Loan Basis"'
+              - '"LTV Pct"'
+      - dbt_utils.expression_is_true:
+          arguments:
+            expression: "\"Purchases\" >= {{ var('min_n') }} and \"Negative Equity Share\" is not null"
+          config:
+            where: "\"Is Published\""
+      - dbt_utils.expression_is_true:
+          arguments:
+            expression: "\"Negative Equity Share\" is null and \"Negative Equity AED\" is null"
+          config:
+            where: "not \"Is Published\""
+      - dbt_utils.expression_is_true:
+          arguments:
+            expression: "(\"Shock Pct\" is null) = (\"Scenario\" <> 'Price shock')"
+      - dbt_utils.expression_is_true:
+          arguments:
+            expression: "(\"LTV Pct\" is null) = (\"Loan Basis\" <> 'Assumed LTV')"
+    columns:
+      - name: '"Segment"'
+        tests: [not_null]
+      - name: '"Scenario"'
+        tests: [not_null]
+      - name: '"Loan Basis"'
+        tests: [not_null]
+      - name: '"Shock Pct"'
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              arguments:
+                min_value: -50
+                max_value: 0
+      - name: '"LTV Pct"'
+        tests:
+          - accepted_values:
+              arguments:
+                values: [50, 60, 70, 80, 85]
+                quote: false
+      - name: '"Negative Equity Share"'
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              arguments:
+                min_value: 0
+                max_value: 1
+      - name: '"Negative Equity AED"'
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              arguments:
+                min_value: 0
+      - name: '"Area Key"'
+        tests:
+          - relationships:
+              arguments:
+                to: ref('rpt_dim_area')
+                field: '"Area Key"'
+  - name: rpt_stress_replay
+    description: >
+      rpt.stress_replay. The 2014 -> 2020 peak-to-trough drawdown of every published index
+      series, and whether the stress test's replay uses it (zone series only if published
+      from the June 2014 peak).
+    config:
+      tags: [post_ml]
+    columns:
+      - name: '"Segment Key"'
+        tests: [not_null, unique]
+      - name: '"Drawdown"'
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              arguments:
+                min_value: -1
+                max_value: 0
+  - name: rpt_forecast
+    description: >
+      rpt.forecast. Monthly hedonic index and clean residential sales volume (Dubai,
+      apartments, villas): actuals, then a 12-month SARIMAX forecast per Fed Funds scenario
+      (flat, +100bp, -100bp) with 80% and 95% intervals.
+    config:
+      tags: [post_ml]
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns: ['"Target"', '"Segment"', '"Month"', '"Scenario"']
+      - dbt_utils.expression_is_true:
+          arguments:
+            expression: >
+              "Lower 95" <= "Lower 80" and "Lower 80" <= "Forecast"
+              and "Forecast" <= "Upper 80" and "Upper 80" <= "Upper 95"
+          config:
+            where: "\"Is Forecast\""
+      - dbt_utils.expression_is_true:
+          arguments:
+            expression: "\"Actual\" is not null and \"Forecast\" is null"
+          config:
+            where: "not \"Is Forecast\""
+    columns:
+      - name: '"Month"'
+        tests: [not_null]
+      - name: '"Scenario"'
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['Actual', 'Rates flat', 'Rates +100bp', 'Rates -100bp']
+  - name: rpt_forecast_backtest
+    description: >
+      rpt.forecast_backtest. Rolling-origin backtest over the last 24 complete months (index
+      on real-time vintages): MAPE, MdAPE and interval coverage per target x segment x model
+      x horizon.
+    config:
+      tags: [post_ml]
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns: ['"Target"', '"Segment"', '"Model"', '"Horizon Months"']
+    columns:
+      - name: '"MAPE"'
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_between:
+              arguments:
+                min_value: 0
+      - name: '"Coverage 80"'
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              arguments:
+                min_value: 0
+                max_value: 1
+      - name: '"Coverage 95"'
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              arguments:
+                min_value: 0
+                max_value: 1

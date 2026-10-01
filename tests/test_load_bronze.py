@@ -212,3 +212,40 @@ def test_schema_drift_is_refused(conn, tmp_path, monkeypatch):
         lb.load_dataset(conn, TEST_DATASET, root)
     # The failed file left nothing behind.
     assert conn.execute(f"select count(*) from bronze.{TEST_DATASET.table}").fetchone() == (3,)
+
+
+# --- Main-database guard ------------------------------------------------------------------
+def test_guard_refuses_a_non_raw_root_on_the_main_database():
+    fixtures = config.PROJECT_ROOT / "tests" / "fixtures"
+    with pytest.raises(lb.IngestError, match="only"):
+        lb.check_target(config.MAIN_DB, fixtures, reset=False, env={})
+    # Even with the reset switch: the switch allows a reload of data/raw, nothing else.
+    with pytest.raises(lb.IngestError, match="only"):
+        lb.check_target(config.MAIN_DB, fixtures, reset=True, env={"ALLOW_MAIN_RESET": "1"})
+
+
+def test_guard_refuses_reset_on_the_main_database_without_the_switch():
+    with pytest.raises(lb.IngestError, match="ALLOW_MAIN_RESET"):
+        lb.check_target(config.MAIN_DB, config.DATA_RAW, reset=True, env={})
+    with pytest.raises(lb.IngestError, match="ALLOW_MAIN_RESET"):
+        lb.check_target(config.MAIN_DB, config.DATA_RAW, reset=True, env={"CI": "true"})
+    lb.check_target(config.MAIN_DB, config.DATA_RAW, reset=True, env={"ALLOW_MAIN_RESET": "1"})
+
+
+def test_guard_allows_incremental_raw_loads_ci_fixtures_and_scratch_databases():
+    fixtures = config.PROJECT_ROOT / "tests" / "fixtures"
+    lb.check_target(config.MAIN_DB, config.DATA_RAW, reset=False, env={})
+    lb.check_target(config.MAIN_DB, fixtures, reset=False, env={"CI": "true"})
+    lb.check_target("dubai_property_scratch", fixtures, reset=True, env={})
+
+
+def test_run_checks_the_target_before_connecting(monkeypatch):
+    monkeypatch.setattr(lb.db, "current_dbname", lambda: config.MAIN_DB)
+    monkeypatch.delenv("CI", raising=False)
+
+    def no_connect(*args, **kwargs):
+        raise AssertionError("connected before the guard")
+
+    monkeypatch.setattr(lb.db, "connect", no_connect)
+    with pytest.raises(lb.IngestError):
+        lb.run(config.PROJECT_ROOT / "tests" / "fixtures", list(config.DATASETS), reset=True)

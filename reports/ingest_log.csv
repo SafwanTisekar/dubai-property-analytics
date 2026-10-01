@@ -32,3 +32,20 @@ logged_at,dataset,table,file,status,encoding,had_bom,size_mb,rows_in_file,rows_l
 2026-09-30T11:53:56Z,fedfunds,bronze.rates_fedfunds,raw/fred/fedfunds/FEDFUNDS_2026-09-30.csv,skipped,,,0.0,866,866,True,,,,sha256 already in bronze._load_manifest
 2026-09-30T11:53:56Z,brent,bronze.rates_brent,raw/fred/dcoilbrenteu/DCOILBRENTEU_2026-09-30.csv,skipped,,,0.2,10265,10265,True,,,,sha256 already in bronze._load_manifest
 2026-10-01T09:00:04Z,price_index,bronze.dld_price_index,raw/dld/price_index/residential_sale_index_2026-09-01_18-28-58_0001.csv,loaded,UTF8,False,0.0,159,159,True,0.0,0.1,2343,
+2026-10-01T15:00:36Z,transactions,bronze.dld_transactions,raw/dld/transactions/transactions_2026-09-29_06-34-19_0001.csv,loaded,UTF8,False,573.4,894076,894076,True,4.1,9.0,99494,
+2026-10-01T15:00:49Z,transactions,bronze.dld_transactions,raw/dld/transactions/transactions_2026-09-29_06-34-19_0002.csv,loaded,UTF8,False,573.6,894074,894074,True,4.1,8.7,103099,
+2026-10-01T15:01:01Z,rents,bronze.dld_rent_contracts,raw/dld/rents/rent_contracts_2026-09-30_00-46-44_0001.csv,loaded,UTF8,False,482.5,958085,958085,True,3.6,7.5,127887,
+2026-10-01T15:01:13Z,rents,bronze.dld_rent_contracts,raw/dld/rents/rent_contracts_2026-09-30_00-46-44_0002.csv,loaded,UTF8,False,482.6,958085,958085,True,3.5,7.5,127908,
+2026-10-01T15:01:24Z,rents,bronze.dld_rent_contracts,raw/dld/rents/rent_contracts_2026-09-30_00-46-44_0003.csv,loaded,UTF8,False,482.6,958085,958085,True,3.5,7.8,122291,
+2026-10-01T15:01:36Z,rents,bronze.dld_rent_contracts,raw/dld/rents/rent_contracts_2026-09-30_00-46-44_0004.csv,loaded,UTF8,False,482.6,958083,958083,True,3.6,7.5,127236,
+2026-10-01T15:01:47Z,rents,bronze.dld_rent_contracts,raw/dld/rents/rent_contracts_2026-09-30_00-46-44_0005.csv,loaded,UTF8,False,482.5,958083,958083,True,3.6,7.6,126699,
+2026-10-01T15:01:59Z,rents,bronze.dld_rent_contracts,raw/dld/rents/rent_contracts_2026-09-30_00-46-44_0006.csv,loaded,UTF8,False,482.7,958083,958083,True,3.5,7.7,124350,
+2026-10-01T15:02:10Z,rents,bronze.dld_rent_contracts,raw/dld/rents/rent_contracts_2026-09-30_00-46-44_0007.csv,loaded,UTF8,False,482.7,958083,958083,True,3.5,7.7,123895,
+2026-10-01T15:02:22Z,rents,bronze.dld_rent_contracts,raw/dld/rents/rent_contracts_2026-09-30_00-46-44_0008.csv,loaded,UTF8,False,482.6,958085,958085,True,3.5,7.7,124804,
+2026-10-01T15:02:34Z,rents,bronze.dld_rent_contracts,raw/dld/rents/rent_contracts_2026-09-30_00-46-44_0009.csv,loaded,UTF8,False,482.6,958084,958084,True,3.5,8.7,110603,
+2026-10-01T15:02:46Z,rents,bronze.dld_rent_contracts,raw/dld/rents/rent_contracts_2026-09-30_00-46-44_0010.csv,loaded,UTF8,False,482.6,958085,958085,True,3.5,7.6,125298,
+2026-10-01T15:02:58Z,rents,bronze.dld_rent_contracts,raw/dld/rents/rent_contracts_2026-09-30_00-46-44_0011.csv,loaded,UTF8,False,482.7,958085,958085,True,3.6,7.9,121283,
+2026-10-01T15:03:00Z,transactions_increment,bronze.dld_transactions_increment,raw/dld/transactions_increment/transactions-2026-09-29.csv,disabled,,,,,,,,,,"DLD portal export (22-column schema, IDs don't match the bulk file). Fully overlapped by the bulk snapshot, so skipped for v1 (docs/04 Decisions)"
+2026-10-01T15:03:00Z,price_index,bronze.dld_price_index,raw/dld/price_index/residential_sale_index_2026-09-01_18-28-58_0001.csv,loaded,UTF8,False,0.0,159,159,True,0.0,0.0,32855,
+2026-10-01T15:03:00Z,fedfunds,bronze.rates_fedfunds,raw/fred/fedfunds/FEDFUNDS_2026-09-30.csv,loaded,UTF8,False,0.0,866,866,True,0.0,0.0,184373,
+2026-10-01T15:03:01Z,brent,bronze.rates_brent,raw/fred/dcoilbrenteu/DCOILBRENTEU_2026-09-30.csv,loaded,UTF8,False,0.2,10265,10265,True,0.0,0.0,484593,

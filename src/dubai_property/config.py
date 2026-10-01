@@ -226,3 +226,45 @@ LEAKAGE_HIT10_CEILING = 0.90
 # The alarm needs this many scored test sales: on the ~2k-line CI fixtures a handful of
 # test sales can land anywhere, so their metrics mean nothing.
 LEAKAGE_MIN_SCORED = 1_000
+
+# --- Collateral stress test (docs/05 §4, Phase 4c) -------------------------------------
+# Illustrative, not a regulatory stress test. Population: clean residential market sales of
+# the last 36 complete months before the snapshot (the recent-vintage buyers).
+STRESS_WINDOW_MONTHS = 36
+# Assumed-LTV grid (integer %, the Power BI what-if keys; docs/06). 85 is the CBUAE cap for a
+# UAE national's first home up to AED 5M: the most permissive cap, so the worst case (owner,
+# 2026-10-01).
+STRESS_LTV_GRID = (50, 60, 70, 80, 85)
+STRESS_LTV_LABELS = {85: "UAE national first home cap (worst case)"}
+# Price shocks on top of the mark-to-market value: 0 to -50% in 5-point steps (integers).
+STRESS_SHOCKS = tuple(range(0, -55, -5))
+# Reference scenario: the CBUAE cap in force on the sale date for this borrower (seed
+# seed_ltv_rules). Nationality and first/second home aren't in the register; an expatriate
+# first home matches the observed median loan/price of 0.80 since 2020 (findings F2.4).
+STRESS_CAP_BORROWER = "Expatriate"
+STRESS_CAP_HOME = "first"
+STRESS_CAP_VALUE_BAND_AED = 5_000_000  # "up to AED 5M" / "above AED 5M" in the seed
+# Historical replay (owner, 2026-10-01): the 2014 -> 2020 episode, peak to trough, measured
+# per series inside this window. A zone series is used only if it is published from the
+# peak month on (so it saw the 2014 peak); otherwise its type series.
+STRESS_REPLAY_START = date(2014, 1, 1)
+STRESS_REPLAY_END = date(2021, 12, 1)
+STRESS_REPLAY_PEAK_BY = date(2014, 6, 1)
+STRESS_REPLAY_NAME = "replay_2014_2020"
+STRESS_MODEL_VERSION = "stress-mtm-v1"
+
+# --- Market forecast (docs/05 §5, Phase 4c) ---------------------------------------------
+# Rolling-origin backtest: forecasts made at the start of each of the last 24 complete
+# months, scored at these horizons (months ahead).
+FORECAST_ORIGINS = 24
+FORECAST_HORIZONS = (1, 3, 6, 12)
+FORECAST_STEPS = 12
+# Fed Funds (the EIBOR proxy while EIBOR isn't loaded, docs/01: the AED is pegged to the USD)
+# enters lagged by this many months, so a rate change reaches prices after the lag.
+FORECAST_RATE_LAG = 6
+# Rate scenarios: a step change from the first forecast month, in basis points.
+FORECAST_RATE_SCENARIOS = {"rates_flat": 0, "rates_up_100bp": 100, "rates_down_100bp": -100}
+FORECAST_INTERVALS = (0.80, 0.95)
+# Series need this many months before the first backtest origin to fit SARIMAX at all.
+FORECAST_MIN_MONTHS = 48
+FORECAST_MODEL_VERSION = "forecast-sarimax-v1"

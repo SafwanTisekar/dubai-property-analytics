@@ -194,6 +194,17 @@ Phase 4a replaced the Q3 and Q4 previews above with models; the full write-ups a
 - Table: [avm_model_card.md](avm_model_card.md#by-segment-mdape--10-hit-rate)
 - Caveat: villas are the bedroom-known subset (F3.1) and about one in eight training sales.
 
+## Phase 4c: stress test and outlook (see the reports)
+
+- **Collateral stress test (illustrative, not a regulatory stress test):** [`stress_test.md`](stress_test.md). The 459,644 clean residential buyers of Sep 2023 – Aug 2026, marked to market with the hedonic index (Aug 2026), loans held at origination. At 80% LTV almost none is under water today; **a 20% fall puts 22% of ready apartment and 20% of ready villa buyers in negative equity, a 30% fall 73% / 64%**, and a repeat of each zone's 2014→2020 drawdown 80% / 64%. Matched purchase mortgages (36.8% of ready purchases, a lower bound) show the same picture: median LTV 80% at purchase, 74% today.
+- **12-month outlook:** [`forecast.md`](forecast.md). SARIMAX with Fed Funds (lagged 6 months, the EIBOR proxy), backtested on 24 origins with real-time index vintages. Central path with rates flat: Dubai index +4.6% to Aug 2027, 80% band −5% to +15%.
+
+**F4c.1 Recent buyers' cushion is their deposit, so negative equity is a cliff at 1 − LTV.** Ready buyers since late 2023 bought into a rising market (median value today 1.05× the price paid), yet at 80% LTV a 10% fall leaves almost no one under water and a 20% fall about one in five; by −30% it is most of them. Where the cliff sits differs by zone: Dubailand apartments reach 49% at −20%, Silicon Oasis apartments 2%, because their indices moved differently after the purchases. Off-plan buyers at the 50% cap need a fall of about half before any are under water.
+- Chart: [stress_heatmap.png](figures/stress_heatmap.png), [stress_by_zone.png](figures/stress_by_zone.png); caveats (illustrative, latest index months the least certain) in [stress_test.md](stress_test.md#caveats)
+
+**F4c.2 The model forecasts prices better than a naive guess but not volumes, and its rate effect has the wrong sign.** On the index, SARIMAX beats "next month = this month" in 11 of 12 segment × horizon cells (Dubai 12-month MAPE 5.7% vs 7.5%); on sales volume it wins 1 of 12, as launches and the 2026 slowdown move monthly counts more than any seasonal pattern. The lagged Fed Funds coefficient is positive in all six series and significant in none: 2022–23 had rising rates and a boom at once, so the ±100bp scenarios show model sensitivity, not a causal effect.
+- Table: [forecast.md](forecast.md#backtest-rolling-origin-real-time-vintages); chart [forecast_fan_index.png](figures/forecast_fan_index.png)
+
 ## Limitations and what's out of Phase 3
 
 - **Q9 (developer concentration, HHI)** is deferred. It needs developer names from the DLD projects file, which isn't loaded (docs/08 Phase 0).

@@ -64,6 +64,7 @@ convention = "google"
 # The model card is mostly prose sentences and markdown table rows; wrapping each one
 # mid-sentence makes the template harder to read and review.
 "src/dubai_property/models/report_avm.py" = ["E501"]
+"src/dubai_property/models/report_4c.py" = ["E501"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

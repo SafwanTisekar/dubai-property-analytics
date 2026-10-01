@@ -39,6 +39,7 @@ import hashlib
 import io
 import json
 import logging
+import os
 import re
 import sys
 import time
@@ -685,8 +686,49 @@ def reset_dataset(conn: psycopg.Connection, dataset: Dataset) -> None:
     log.info("reset %s.%s (and dependent silver views)", SCHEMA, dataset.table)
 
 
+# --- Main-database guard -----------------------------------------------------------------
+# On 2026-10-01 a fixture run meant for a scratch database reset the main database's bronze
+# (``PG_DB=x make ...`` doesn't override the PG_DB the Makefile reads from .env; it has to
+# be a make argument). Rebuilding bronze from data/raw takes most of an hour, so the main
+# database now refuses both mistakes outright (owner decision, docs/05 §8).
+ALLOW_MAIN_RESET_ENV = "ALLOW_MAIN_RESET"
+
+
+def check_target(dbname: str, root: Path, reset: bool, env: dict[str, str] | None = None) -> None:
+    """Refuse a bronze load that could overwrite the main database by mistake.
+
+    On the main database (``config.MAIN_DB``):
+
+    * only ``data/raw`` may be loaded, except in CI (``CI=true``, set by GitHub Actions),
+      whose throwaway database has the same name and loads the committed fixtures;
+    * ``--reset`` needs ``ALLOW_MAIN_RESET=1`` in the environment, set explicitly for an
+      approved full reload.
+
+    Raises:
+        IngestError: If the load is refused.
+    """
+    env = os.environ if env is None else env
+    if dbname != config.MAIN_DB:
+        return
+    is_ci = env.get("CI", "").lower() == "true"
+    if root.resolve() != config.DATA_RAW.resolve() and not is_ci:
+        raise IngestError(
+            f"refusing to load {root} into the main database {dbname}: only {config.DATA_RAW}"
+            " may be loaded there. For a scratch database pass PG_DB as a make argument"
+            " (make bronze ... PG_DB=<scratch>), not as an environment prefix."
+        )
+    if reset and env.get(ALLOW_MAIN_RESET_ENV) != "1":
+        raise IngestError(
+            f"refusing --reset on the main database {dbname}: a full reload takes most of an"
+            f" hour. Set {ALLOW_MAIN_RESET_ENV}=1 for an approved reload."
+        )
+
+
 def run(root: Path, datasets: Sequence[Dataset], *, reset: bool = False) -> list[dict[str, object]]:
     """Load the given datasets from ``root`` and write the manifest and ingest log."""
+    dbname = db.current_dbname()
+    log.info("target database %s, bronze root %s, reset %s", dbname, root, reset)
+    check_target(dbname, root, reset)
     all_rows: list[dict[str, object]] = []
     with db.connect() as conn:
         # Bigger sort memory speeds up ANALYZE; this session only.
