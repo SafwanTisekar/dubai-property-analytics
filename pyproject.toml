@@ -61,6 +61,9 @@ convention = "google"
 "tests/**" = ["D"]
 # Notebooks: chart titles and subtitles are long strings; wrapping them hurts reading.
 "notebooks/**" = ["D", "E501"]
+# The model card is mostly prose sentences and markdown table rows; wrapping each one
+# mid-sentence makes the template harder to read and review.
+"src/dubai_property/models/report_avm.py" = ["E501"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

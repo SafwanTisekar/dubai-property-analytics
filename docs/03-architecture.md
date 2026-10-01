@@ -102,20 +102,21 @@ dubai-property-analytics/
 │   │   ├── investigate.py      # Phase 1 investigations → reports/phase1_evidence.md
 │   │   ├── dq_report.py        # silver rows per step / per rule → reports/dq_report.md
 │   │   └── reconcile.py        # file vs bronze vs gold counts/AED totals
-│   ├── features/
-│   │   ├── feature_list.py     # ALLOW-LIST of AVM features
-│   │   └── build.py            # as-of lag features (SQL window functions, no look-ahead)
+│   ├── features/               # AVM features, pure Polars (as built, Phase 4b)
+│   │   ├── asof_index.py       # real-time index vintages (no look-ahead)
+│   │   ├── asof_market.py      # trailing comparable medians, index changes, rolling OLS prices
+│   │   └── build.py            # feature table + allow-list (FEATURES), reference price
 │   └── models/
-│       ├── split.py
-│       ├── avm_baseline.py
-│       ├── avm_lgbm.py
-│       ├── hedonic_index.py
-│       ├── yields.py
-│       ├── stress_test.py
-│       ├── forecast.py
-│       ├── evaluate.py
-│       ├── explain.py
-│       └── score.py            # write ml.* tables via COPY
+│       ├── split.py            # out-of-time split (history / train / validation / test)
+│       ├── hedonic_index.py    # Phase 4a
+│       ├── yields.py           # Phase 4a
+│       ├── avm.py              # AVM: baselines, hedonic OLS, LightGBM; writes ml.avm_* (COPY)
+│       ├── avm_eval.py         # MdAPE, hit rates, coverage, leakage alarm
+│       ├── avm_explain.py      # SHAP, worked examples
+│       ├── report_4a.py        # reports/price_index.md, yields.md
+│       ├── report_avm.py       # reports/avm_model_card.md, avm_examples.json
+│       ├── stress_test.py      # Phase 4c
+│       └── forecast.py         # Phase 4c
 ├── dbt/
 │   ├── dbt_project.yml
 │   ├── profiles.yml            # dbt-postgres target reading credentials from env vars
@@ -159,6 +160,7 @@ brew install --cask dbeaver-community    # or: brew install --cask pgadmin4
 # 3. Project (keep it OUT of OneDrive/iCloud-synced folders)
 cd <project folder>/dubai-property-analytics
 brew install uv
+brew install libomp                      # OpenMP runtime: LightGBM (the AVM) won't load without it on macOS
 uv python install 3.11
 cp .env.example .env                     # set PG_* values and passwords (PG_ADMIN_USER defaults to your macOS user)
 make setup                               # uv sync, pre-commit install, dbt deps

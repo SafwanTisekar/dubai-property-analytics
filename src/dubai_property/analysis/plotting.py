@@ -28,7 +28,7 @@ import numpy as np
 from matplotlib.colors import LinearSegmentedColormap
 from matplotlib.ticker import FuncFormatter, PercentFormatter
 
-from dubai_property import config
+from dubai_property import db
 
 # --- Tokens ---------------------------------------------------------------------------
 SURFACE = "#fcfcfb"
@@ -260,8 +260,12 @@ def direct_label(ax, x, y, text: str, color: str = TEXT, **kwargs) -> None:
 
 
 def save(fig, name: str, directory: Path | None = None) -> Path:
-    """Save ``fig`` as ``<directory>/<name>.png`` at ``SAVE_DPI`` and return the path."""
-    directory = directory or config.FIGURES
+    """Save ``fig`` as ``<directory>/<name>.png`` at ``SAVE_DPI`` and return the path.
+
+    ``directory`` defaults to ``db.figures_dir()``: ``reports/figures`` on the main
+    database, a scratch folder otherwise.
+    """
+    directory = directory or db.figures_dir()
     directory.mkdir(parents=True, exist_ok=True)
     path = directory / f"{name}.png"
     fig.savefig(path, dpi=SAVE_DPI)

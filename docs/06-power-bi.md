@@ -73,15 +73,25 @@ CALCULATE (
 Gross Yield = AVERAGE ( agg_yield_quarter[gross_yield] )    // pre-computed with min-n rule
 
 // ---------- Valuation (AVM) ----------
-AVM MdAPE = MEDIAN ( fct_transaction[avm_abs_pct_error] )
+// rpt.avm_score (one row per valued sale; "Is Out of Sample" = validation 2024 + test 2025+)
+// and rpt.avm_performance (pre-computed metrics per model / split / segment, min-n applied).
+AVM MdAPE = MEDIAN ( avm_score[Absolute Error Pct] )
 
 AVM Hit Rate ±10% =
 DIVIDE (
-    CALCULATE ( COUNTROWS ( fct_transaction ), fct_transaction[avm_abs_pct_error] <= 0.10, fct_transaction[model_set] = "test" ),
-    CALCULATE ( COUNTROWS ( fct_transaction ), fct_transaction[model_set] = "test" )
+    CALCULATE ( COUNTROWS ( avm_score ), avm_score[Absolute Error Pct] <= 0.10 ),
+    COUNTROWS ( avm_score )
 )
 
-Flagged for Review = CALCULATE ( COUNTROWS ( fct_transaction ), ABS ( fct_transaction[avm_gap_pct] ) > 0.25 )
+// Statistical anomalies for collateral review, not accusations; out-of-sample rows only
+// (training rows have a blank flag: their gaps are in sample).
+Flagged for Review = CALCULATE ( COUNTROWS ( avm_score ), avm_score[Review Flag] = "Review: statistical anomaly" )
+
+Flagged Share =
+DIVIDE ( [Flagged for Review], CALCULATE ( COUNTROWS ( avm_score ), avm_score[Is Out of Sample] = TRUE () ) )
+
+// Model comparison cards read rpt.avm_performance (Split = "Test", Breakdown = "Overall").
+Selected Model MdAPE = MAX ( avm_performance[MdAPE] )
 
 // ---------- Stress test ----------
 Selected Shock = SELECTEDVALUE ( 'Price Shock %'[Price Shock % Value], -0.20 )

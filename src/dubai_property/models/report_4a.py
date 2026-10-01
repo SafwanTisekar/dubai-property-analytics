@@ -34,8 +34,8 @@ from dubai_property.models import hedonic_index as h  # noqa: E402
 
 log = logging.getLogger(__name__)
 
-PRICE_REPORT = config.REPORTS / "price_index.md"
-YIELD_REPORT = config.REPORTS / "yields.md"
+PRICE_REPORT = "price_index.md"  # under db.reports_dir() (a scratch folder off the main DB)
+YIELD_REPORT = "yields.md"
 HEADLINE = ("dubai", "apartment", "villa")
 LABEL = {"dubai": "Dubai (all residential)", "apartment": "Apartments", "villa": "Villas"}
 SHORT = {"dubai": "Dubai", "apartment": "Apartments", "villa": "Villas"}
@@ -106,7 +106,7 @@ def table(header: Sequence[str], rows: Sequence[Sequence[object]], align: str = 
 
 def rel(path: Path) -> str:
     """Path relative to reports/ for markdown links."""
-    return path.relative_to(config.REPORTS).as_posix()
+    return path.relative_to(db.reports_dir()).as_posix()
 
 
 # --- Data -----------------------------------------------------------------------------
@@ -135,9 +135,10 @@ def load_yields() -> pl.DataFrame:
 
 def load_diagnostics() -> dict:
     """What ``make train`` wrote next to the ml table."""
-    if not h.DIAGNOSTICS_PATH.exists():
-        raise SystemExit(f"{h.DIAGNOSTICS_PATH} missing: run make train first")
-    return json.loads(h.DIAGNOSTICS_PATH.read_text())
+    path = h.diagnostics_path()
+    if not path.exists():
+        raise SystemExit(f"{path} missing: run make train first")
+    return json.loads(path.read_text())
 
 
 def query(sql: str) -> pl.DataFrame:
@@ -1309,11 +1310,13 @@ def main(argv: Sequence[str] | None = None) -> int:
         "robustness": fig_robustness(diag, snapshot),
         "zones": fig_zones(index, snapshot),
     }
-    PRICE_REPORT.write_text(price_report(index, diag, raw, raw_year, figs))
-    log.info("wrote %s", PRICE_REPORT.relative_to(config.PROJECT_ROOT))
+    price_path = db.reports_dir() / PRICE_REPORT
+    price_path.write_text(price_report(index, diag, raw, raw_year, figs))
+    log.info("wrote %s", price_path.relative_to(config.PROJECT_ROOT))
     text, yfigs = yield_report(load_yields(), index, snapshot)
-    YIELD_REPORT.write_text(text)
-    log.info("wrote %s", YIELD_REPORT.relative_to(config.PROJECT_ROOT))
+    yield_path = db.reports_dir() / YIELD_REPORT
+    yield_path.write_text(text)
+    log.info("wrote %s", yield_path.relative_to(config.PROJECT_ROOT))
     for p in [*figs.values(), *yfigs.values()]:
         log.info("figure %s", p.relative_to(config.PROJECT_ROOT))
     return 0

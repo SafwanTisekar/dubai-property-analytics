@@ -16,12 +16,19 @@ import sys
 from datetime import UTC, datetime
 from pathlib import Path
 
-from dubai_property import config, db
+from dubai_property import db
 from dubai_property.quality.dq_report import md_table
 
 log = logging.getLogger(__name__)
 
-REPORT_PATH = config.REPORTS / "unzoned_areas.md"
+REPORT_NAME = "unzoned_areas.md"
+
+
+def report_path() -> Path:
+    """``reports/unzoned_areas.md``; a scratch folder when PG_DB isn't the main DB."""
+    return db.reports_dir() / REPORT_NAME
+
+
 SALES_SINCE = "2020-01-01"
 TOP_N = 3
 
@@ -69,8 +76,9 @@ order by coalesce(s.market_sales_since_2020, 0) desc, u.area_id
 ZONES_SQL = "select distinct zone from silver.seed_area where zone is not null order by 1"
 
 
-def run(path: Path = REPORT_PATH) -> Path:
+def run(path: Path | None = None) -> Path:
     """Query silver and write the worksheet."""
+    path = path or report_path()
     with db.connect() as conn:
         rows = conn.execute(UNZONED_SQL).fetchall()
         zones = [z for (z,) in conn.execute(ZONES_SQL).fetchall()]

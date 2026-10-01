@@ -16,6 +16,10 @@
 # --- Trained model binaries (large, reproducible via `make train`) ------------
 /artifacts/
 
+# --- Outputs of runs against a scratch / fixture database (db.reports_dir) -----
+# Only the main database (config.MAIN_DB) writes the committed reports/*.md and figures.
+/reports/scratch/
+
 # --- Database dumps -----------------------------------------------------------
 *.dump
 *.backup

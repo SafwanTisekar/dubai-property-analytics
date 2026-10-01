@@ -35,11 +35,17 @@ from datetime import UTC, datetime
 from decimal import Decimal
 from pathlib import Path
 
-from dubai_property import config, db
+from dubai_property import db
 
 log = logging.getLogger(__name__)
 
-REPORT_PATH = config.REPORTS / "phase1_evidence.md"
+REPORT_NAME = "phase1_evidence.md"
+
+
+def report_path() -> Path:
+    """``reports/phase1_evidence.md``; a scratch folder when PG_DB isn't the main DB."""
+    return db.reports_dir() / REPORT_NAME
+
 
 # Inferred repeated-value groups (see module docstring). Kept as named SQL so the
 # findings doc and the Phase 2 dbt flag can use exactly the same definition.
@@ -568,8 +574,9 @@ def _table(columns: list[str], rows: list[tuple]) -> list[str]:
     return out
 
 
-def run(path: Path = REPORT_PATH) -> Path:
+def run(path: Path | None = None) -> Path:
     """Run every section and write the evidence report."""
+    path = path or report_path()
     lines = [
         "# Phase 1 evidence: bronze investigations",
         "",

@@ -31,7 +31,7 @@ from pathlib import Path
 import psycopg
 from psycopg import sql
 
-from dubai_property import config, db
+from dubai_property import db
 from dubai_property.ingest.load_bronze import MANIFEST_TABLE, SCHEMA
 
 log = logging.getLogger(__name__)
@@ -188,8 +188,13 @@ def render(table: str, profiles: Sequence[ColumnProfile], meta: dict[str, str]) 
     return "\n".join(lines) + "\n"
 
 
-def profile_table(conn: psycopg.Connection, table: str, out_dir: Path = config.REPORTS) -> Path:
-    """Profile all columns of one bronze table and write its markdown report."""
+def profile_table(conn: psycopg.Connection, table: str, out_dir: Path | None = None) -> Path:
+    """Profile all columns of one bronze table and write its markdown report.
+
+    ``out_dir`` defaults to ``db.reports_dir()`` (``reports/``, or a scratch folder when
+    ``PG_DB`` isn't the main database).
+    """
+    out_dir = out_dir or db.reports_dir()
     t0 = time.perf_counter()
     profiles = []
     for column in table_columns(conn, table):

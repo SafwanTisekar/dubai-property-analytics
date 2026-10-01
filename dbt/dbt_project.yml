@@ -45,6 +45,7 @@ vars:
   # match config.HEDONIC_MODEL_VERSION / YIELD_MODEL_VERSION (tests/test_config.py).
   hedonic_model_version: "hedonic-rtd-v1"
   yield_model_version: "yield-gross-v1"
+  avm_model_version: "avm-lgbm-v1"
   index_base_month: "2019-01-01"      # hedonic index = 100 (Q1 2019 for quarterly series)
 
 # Layer -> schema + materialisation (docs/03 §3 and §7). Schema names are used verbatim

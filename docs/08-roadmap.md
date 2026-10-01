@@ -174,6 +174,15 @@ and avm_lgbm.py per docs/05 §1. Evaluate on the out-of-time test set by segment
 vs baseline), run SHAP, and write reports/avm_model_card.md. Stop and investigate if results look too good
 (see CLAUDE.md).
 ```
+**4b status (WIP, 2026-10-01): code, tests and rpt views built; full-data training not yet run to the end.**
+- Done: scratch-DB guard (`db.reports_dir` / `figures_dir` / `artifacts_dir`, `tests/test_output_dirs.py`); `hedonic_index` refactor (full re-fit reproduces all 2,432 index points exactly); `features/` (real-time index vintages, as-of comparables, relative target) with the no-look-ahead proof (`tests/test_avm_features.py`); `models/split.py`, `avm.py`, `avm_eval.py`, `avm_explain.py`, `report_avm.py`; `rpt.avm_score`, `rpt.avm_performance`, `rpt.feature_importance` with dbt tests; Makefile, CI, docs/03, docs/06, docs/05 §8. The CI sequence on a scratch DB with the fixtures is green, and no committed report changed. macOS needs `brew install libomp` for LightGBM.
+- Untuned probe on full data (test 2025+): LightGBM MdAPE 7.7%, ±10% 60.8%; comparables 9.9% / 49.7%; index-adjusted comparables 10.1%; rolling OLS 12.3%.
+- Resume:
+  1. `uv run python -m dubai_property.models.avm --trials 20` (saves `artifacts/avm/best_params.json`, reused by later `make train`).
+  2. `make score model-reports`, then check the model card's claims against the numbers.
+  3. Fill in docs/04 §3 (ml.avm_* rows and counts), the docs/05 §1 "as built" section, this checklist with timings, and a pointer in reports/findings.md; run `make dictionary`.
+  4. `make lint test`, then commit.
+
 **4c: Stress test + forecast**
 ```
 Implement stress_test.py (shock × LTV grid plus historical drawdown replay) and forecast.py (seasonal naive

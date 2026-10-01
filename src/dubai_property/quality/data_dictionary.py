@@ -30,6 +30,16 @@ log = logging.getLogger(__name__)
 
 DICTIONARY_PATH = config.PROJECT_ROOT / "docs" / "data-dictionary.md"
 
+
+def dictionary_path() -> Path:
+    """``docs/data-dictionary.md`` on the main DB; a scratch DB's goes to its reports folder.
+
+    Column types come from the database catalogue, and a scratch database may lack the
+    ml-backed views, so its dictionary must not replace the committed one.
+    """
+    return DICTIONARY_PATH if db.is_main_db() else db.reports_dir() / DICTIONARY_PATH.name
+
+
 # Layers in reading order: schema -> heading and what the layer is for (docs/03 §3).
 LAYERS = {
     "silver": "Silver: seeds, staging views and intermediate tables (typed, cleaned, flagged)",
@@ -174,8 +184,9 @@ def render(relations: list[Relation], cat: dict[tuple[str, str], list[tuple[str,
     return "\n".join(lines)
 
 
-def run(path: Path = DICTIONARY_PATH, manifest_path: Path = MANIFEST_PATH) -> Path:
+def run(path: Path | None = None, manifest_path: Path = MANIFEST_PATH) -> Path:
     """Read the manifest and catalogue, write the dictionary."""
+    path = path or dictionary_path()
     relations = relations_from_manifest(load_manifest(manifest_path))
     with db.connect() as conn:
         cat = catalogue(conn)

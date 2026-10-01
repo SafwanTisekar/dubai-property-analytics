@@ -44,7 +44,13 @@ from dubai_property.quality.dq_report import md_table
 
 log = logging.getLogger(__name__)
 
-REPORT_PATH = config.REPORTS / "kpi_reconciliation.md"
+REPORT_NAME = "kpi_reconciliation.md"
+
+
+def report_path() -> Path:
+    """``reports/kpi_reconciliation.md``; a scratch folder when PG_DB isn't the main DB."""
+    return db.reports_dir() / REPORT_NAME
+
 
 # Apartment sanity check: area-weighted vs median AED per sq m, every year from 2010.
 DIVERGENCE_FROM_YEAR = 2010
@@ -660,8 +666,9 @@ def render(result: Result) -> str:
     return "\n".join(lines)
 
 
-def run(path: Path = REPORT_PATH) -> Result:
+def run(path: Path | None = None) -> Result:
     """Compute, compare and write the report."""
+    path = path or report_path()
     t0 = time.perf_counter()
     with db.connect() as conn:
         if not rpt_available(conn):

@@ -49,6 +49,7 @@ import time
 from collections.abc import Sequence
 from dataclasses import asdict, dataclass, field, replace
 from datetime import date, datetime
+from pathlib import Path
 
 import connectorx as cx
 import numpy as np
@@ -60,8 +61,13 @@ from dubai_property import config, db
 log = logging.getLogger(__name__)
 
 ML_TABLE = "fct_price_index"
-ARTIFACTS = config.PROJECT_ROOT / "artifacts" / "hedonic_index"
-DIAGNOSTICS_PATH = ARTIFACTS / "diagnostics.json"
+ARTIFACTS_NAME = "hedonic_index"
+
+
+def diagnostics_path() -> Path:
+    """``artifacts/hedonic_index/diagnostics.json`` (scratch DBs: under artifacts/scratch/)."""
+    return db.artifacts_dir() / ARTIFACTS_NAME / "diagnostics.json"
+
 
 APARTMENT, VILLA = config.RESIDENTIAL_APARTMENT_KEY, 102
 TYPE_NAMES = {APARTMENT: "apartment", VILLA: "villa"}
@@ -299,6 +305,13 @@ class FitResult:
     r2: float
     resid_sd: float
     coefficients: dict[str, float] = field(default_factory=dict)
+    # Everything needed to price a new sale with this fit (the AVM's rolling hedonic OLS,
+    # docs/05 §1): every coefficient by name, each categorical's reference level and each
+    # numeric's centring mean. Filled only with ``fit_time_dummy(..., keep_params=True)``.
+    params: dict[str, float] = field(default_factory=dict)
+    references: dict[str, str] = field(default_factory=dict)
+    numeric_means: dict[str, float] = field(default_factory=dict)
+    resid_median: float = 0.0
 
 
 def _one_hot(values: np.ndarray, reference: object) -> tuple[sp.csr_matrix, list]:
@@ -325,6 +338,7 @@ def fit_time_dummy(
     categoricals: Sequence[str],
     numerics: Sequence[str] = (),
     y: str = "ln_ppsqm",
+    keep_params: bool = False,
 ) -> FitResult:
     """Fit ``y ~ period dummies + categoricals + numerics`` by OLS; return the period effects.
 
@@ -337,6 +351,8 @@ def fit_time_dummy(
         numerics: Columns entered as they are, centred (that doesn't change the period
             effects but keeps XᵀX well conditioned).
         y: Dependent variable.
+        keep_params: Also return every coefficient, reference level and centring mean,
+            so the fit can price new sales (``predict_log``).
 
     Raises:
         ValueError: If the base period has no observations.
@@ -351,15 +367,19 @@ def fit_time_dummy(
     period_mat, period_levels = _one_hot(periods, np.datetime64(base))
     blocks.append(period_mat)
     names += [f"period:{p}" for p in period_levels]
+    references: dict[str, str] = {}
+    means: dict[str, float] = {}
     for col in categoricals:
         values = df[col].cast(pl.Utf8).fill_null("null").to_numpy()
-        mat, levels = _one_hot(values, _reference_level(values))
+        references[col] = str(_reference_level(values))
+        mat, levels = _one_hot(values, references[col])
         if mat.shape[1]:
             blocks.append(mat)
             names += [f"{col}={lv}" for lv in levels]
     for col in numerics:
         v = df[col].to_numpy().astype("float64")
-        blocks.append(sp.csr_matrix((v - v.mean()).reshape(-1, 1)))
+        means[col] = float(v.mean())
+        blocks.append(sp.csr_matrix((v - means[col]).reshape(-1, 1)))
         names.append(col)
     X = sp.hstack(blocks, format="csr")
     yv = df[y].to_numpy().astype("float64")
@@ -386,7 +406,48 @@ def fit_time_dummy(
             for name, b in zip(names, beta, strict=True)
             if not name.startswith(("period:", "area_key=", "intercept"))
         },
+        params=dict(zip(names, map(float, beta), strict=True)) if keep_params else {},
+        references=references if keep_params else {},
+        numeric_means=means if keep_params else {},
+        resid_median=float(np.median(resid)) if keep_params else 0.0,
     )
+
+
+def predict_log(
+    fit: FitResult,
+    df: pl.DataFrame,
+    period: date,
+    categoricals: Sequence[str],
+    numerics: Sequence[str],
+) -> np.ndarray:
+    """Price sales with a kept fit at ``period``'s effect: ln y-hat, NaN if unpriceable.
+
+    ln y-hat = intercept + β_period + Σ categorical effects + Σ γ·(x − fit mean). A level
+    the fit never saw (an area with no sale in the window, say) has no coefficient, so
+    the sale can't be priced and gets NaN rather than a silent reference-level guess.
+    The fit's median residual is added (median calibration: the result is a median, not
+    a mean, estimate, which is what MdAPE and hit rates measure).
+    """
+    if not fit.params:
+        raise ValueError("fit has no params: fit with keep_params=True")
+    if period == min(fit.effects):  # the base period: effect 0, no dummy
+        b_period = 0.0
+    else:
+        b_period = fit.params.get(f"period:{np.datetime64(period)}")
+        if b_period is None:
+            return np.full(df.height, np.nan)
+    out = np.full(df.height, fit.params["intercept"] + b_period + fit.resid_median)
+    for col in categoricals:
+        values = df[col].cast(pl.Utf8).fill_null("null").to_numpy()
+        ref = fit.references.get(col)
+        effect = np.array(
+            [0.0 if v == ref else fit.params.get(f"{col}={v}", np.nan) for v in values]
+        )
+        out = out + effect
+    for col in numerics:
+        v = df[col].to_numpy().astype("float64")
+        out = out + fit.params[col] * (v - fit.numeric_means[col])
+    return out
 
 
 def segment_features(segment: Segment, df: pl.DataFrame) -> tuple[pl.DataFrame, list, list]:
@@ -418,6 +479,73 @@ def fit_pooled(segment: Segment, df: pl.DataFrame, frequency: str) -> FitResult:
     """One time-dummy fit over the whole span (the robustness comparison)."""
     data, cats, nums = segment_features(segment, with_period(df, frequency))
     return fit_time_dummy(data, base_period(frequency), cats, nums)
+
+
+def window_starts(
+    start: date,
+    end: date,
+    frequency: str = "month",
+    window: int = config.RTD_WINDOW_MONTHS,
+    step: int = config.RTD_STEP_MONTHS,
+) -> list[date]:
+    """Rolling-window starts from ``start`` to ``end``.
+
+    Every ``step`` months while a full window fits, plus a last window ending at ``end``,
+    so the latest months are always covered.
+    """
+    starts, s = [], start
+    while add_months(s, window - 1) <= end:
+        starts.append(s)
+        s = add_months(s, step)
+    last = add_months(end, -(window - 1))
+    if frequency == "quarter":
+        last = quarter_start(last)
+    if not starts or starts[-1] < last:
+        starts.append(max(last, start))
+    return starts
+
+
+def fit_window(
+    segment: Segment,
+    df: pl.DataFrame,
+    ws: date,
+    we: date,
+    frequency: str = "month",
+    min_n: int = config.MIN_N,
+    keep_params: bool = False,
+) -> tuple[dict[date, float], FitResult] | None:
+    """One window's time-dummy fit on the sales dated ``ws``..``we`` (months, inclusive).
+
+    Returns the effects of the periods with ≥ ``min_n`` sales (relative to the first of
+    them) and the fit, or None if no period passes min-n.
+    """
+    part = with_period(df.filter(pl.col("month").is_between(ws, we)), frequency)
+    good = sorted(p for p, c in counts_by_period(part, frequency).items() if c >= min_n)
+    if not good:
+        return None
+    data, cats, nums = segment_features(segment, part)
+    fit = fit_time_dummy(data, good[0], cats, nums, keep_params=keep_params)
+    return {p: b for p, b in fit.effects.items() if p in good}, fit
+
+
+def link_window(chain: dict[date, float], effects: dict[date, float]) -> int:
+    """Chain a window's effects onto ``chain`` in place; return the periods linked on.
+
+    The window is shifted by the mean log gap over the periods both cover (the geometric
+    mean ratio) and contributes only the periods after the chain's last one.
+
+    Raises:
+        ValueError: If the chain is non-empty and shares no period with the window.
+    """
+    overlap = [p for p in effects if p in chain]
+    if chain and not overlap:
+        raise ValueError(f"window from {min(effects)} shares no published period with the chain")
+    link = float(np.mean([chain[p] - effects[p] for p in overlap])) if chain else 0.0
+    chain_end = max(chain) if chain else None
+    for p, b in effects.items():
+        if chain_end is None or p > chain_end:
+            chain[p] = b + link
+    return len(overlap)
 
 
 def rolling_window_index(
@@ -455,41 +583,22 @@ def rolling_window_index(
         ValueError: If a window can't be linked (no shared period) or the chain misses
             the base period.
     """
-    starts, s = [], segment.start
-    while add_months(s, window - 1) <= end:
-        starts.append(s)
-        s = add_months(s, step)
-    last = add_months(end, -(window - 1))
-    if frequency == "quarter":
-        last = quarter_start(last)
-    if not starts or starts[-1] < last:
-        starts.append(max(last, segment.start))
-
+    starts = window_starts(segment.start, end, frequency, window, step)
     chain: dict[date, float] = {}
     windows = []
     for ws in starts:
         we = add_months(ws, window - 1)
-        part = with_period(df.filter(pl.col("month").is_between(ws, we)), frequency)
-        good = sorted(p for p, c in counts_by_period(part, frequency).items() if c >= min_n)
-        if not good:
+        fitted = fit_window(segment, df, ws, we, frequency, min_n)
+        if fitted is None:
             continue
-        data, cats, nums = segment_features(segment, part)
-        fit = fit_time_dummy(data, good[0], cats, nums)
-        effects = {p: b for p, b in fit.effects.items() if p in good}
-        overlap = [p for p in effects if p in chain]
-        if chain and not overlap:
-            raise ValueError(f"window starting {ws} shares no published period with the chain")
-        link = float(np.mean([chain[p] - effects[p] for p in overlap])) if chain else 0.0
-        chain_end = max(chain) if chain else None
-        for p, b in effects.items():
-            if chain_end is None or p > chain_end:
-                chain[p] = b + link
+        effects, fit = fitted
+        overlap = link_window(chain, effects)
         windows.append(
             {
                 "start": ws,
                 "end": we,
                 "rows": fit.n_obs,
-                "linked_on": len(overlap),
+                "linked_on": overlap,
                 "r2": fit.r2,
                 **{k: v for k, v in fit.coefficients.items() if "offplan" in k},
             }
@@ -1111,8 +1220,9 @@ def run() -> dict:
         "validation": validation,
         "rows_written": written,
     }
-    ARTIFACTS.mkdir(parents=True, exist_ok=True)
-    DIAGNOSTICS_PATH.write_text(json.dumps(diagnostics, default=str, indent=1))
+    path = diagnostics_path()
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(diagnostics, default=str, indent=1))
     return diagnostics
 
 

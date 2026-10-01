@@ -47,6 +47,7 @@ def test_model_versions_and_index_base_match_dbt_vars():
     v = yaml.safe_load((config.DBT_DIR / "dbt_project.yml").read_text())["vars"]
     assert v["hedonic_model_version"] == config.HEDONIC_MODEL_VERSION
     assert v["yield_model_version"] == config.YIELD_MODEL_VERSION
+    assert v["avm_model_version"] == config.AVM_MODEL_VERSION
     assert v["index_base_month"] == config.INDEX_BASE_MONTH.isoformat()
 
 
@@ -54,3 +55,11 @@ def test_hedonic_settings_are_consistent():
     assert config.HEDONIC_START <= config.INDEX_BASE_MONTH
     assert config.RTD_STEP_MONTHS < config.RTD_WINDOW_MONTHS  # windows must overlap to chain
     assert 0 < config.YIELD_SANITY[0] < config.YIELD_SANITY[1] < 1
+
+
+def test_avm_settings_are_consistent():
+    assert config.AVM_HISTORY_START < config.AVM_TRAIN_START <= config.TRAIN_END
+    assert config.TRAIN_END < config.VALID_START <= config.VALID_END < config.TEST_START
+    assert 0 < config.AVM_OPTUNA_TRIALS <= 50  # docs/05 §1: at most 50 trials
+    assert list(config.AVM_PRICE_BANDS) == sorted(config.AVM_PRICE_BANDS)
+    assert 0 < config.LEAKAGE_MDAPE_FLOOR < config.AVM_REVIEW_GAP

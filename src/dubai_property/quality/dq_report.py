@@ -39,7 +39,14 @@ from dubai_property import config, db
 
 log = logging.getLogger(__name__)
 
-REPORT_PATH = config.REPORTS / "dq_report.md"
+REPORT_NAME = "dq_report.md"
+
+
+def report_path() -> Path:
+    """``reports/dq_report.md``; a scratch folder when PG_DB isn't the main DB."""
+    return db.reports_dir() / REPORT_NAME
+
+
 MANIFEST_PATH = config.DBT_DIR / "target" / "manifest.json"
 PACKAGE = "dubai_property"
 
@@ -309,8 +316,9 @@ def md_table(columns: list[str], rows: list[tuple]) -> list[str]:
     return out
 
 
-def run(path: Path = REPORT_PATH, manifest_path: Path = MANIFEST_PATH) -> Path:
+def run(path: Path | None = None, manifest_path: Path = MANIFEST_PATH) -> Path:
     """Query silver and write the report."""
+    path = path or report_path()
     flags = flags_from_manifest(load_manifest(manifest_path))
     t0 = time.perf_counter()
     with db.connect() as conn:

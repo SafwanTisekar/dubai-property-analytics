@@ -17,11 +17,14 @@ pytestmark = pytest.mark.db
 # list here and the dbt reporting folder can't drift apart.
 EXPECTED_VIEWS = {
     "area_month",
+    "avm_performance",
+    "avm_score",
     "dim_area",
     "dim_date",
     "dim_procedure",
     "dim_project",
     "dim_property_type",
+    "feature_importance",
     "price_index",
     "rates_monthly",
     "rent_month",

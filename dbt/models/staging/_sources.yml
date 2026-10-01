@@ -48,3 +48,14 @@ sources:
           Gross yields (median new rent / median ready price) by area or zone x property
           type x bedrooms x quarter, published cells only (n >= min_n on both sides).
           models/yields.py.
+      - name: avm_score
+        description: >
+          AVM valuation of every clean residential market sale the champion values: value,
+          absolute % error, gap % and the out-of-sample review flag (NULL on training rows).
+          models/avm.py.
+      - name: avm_performance
+        description: >
+          AVM accuracy per model x split x breakdown x segment (min-n scored sales).
+          models/avm.py.
+      - name: feature_importance
+        description: AVM feature importance (mean |SHAP| on test sales, split gain). models/avm.py.

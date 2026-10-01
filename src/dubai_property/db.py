@@ -7,6 +7,8 @@ Three access paths, each used for what it does best (docs/03 §4):
 * ``connectorx_uri()``: URI for connectorx, the fastest way to pull a model-sized
   result set into Polars/pandas.
 * ``copy_frame()``: write a model result back with ``COPY`` (never row-by-row inserts).
+* ``reports_dir()`` / ``figures_dir()`` / ``artifacts_dir()``: where outputs go, which
+  depends on the database in use (scratch databases never write the committed reports).
 
 Credentials come only from environment variables (loaded from `.env`), never code.
 """
@@ -15,8 +17,10 @@ from __future__ import annotations
 
 import io
 import os
+import re
 from dataclasses import dataclass
 from functools import lru_cache
+from pathlib import Path
 from urllib.parse import quote
 
 import polars as pl
@@ -26,6 +30,7 @@ from psycopg import sql
 from psycopg.conninfo import make_conninfo
 from sqlalchemy import Engine, create_engine
 
+from dubai_property import config
 from dubai_property.config import PROJECT_ROOT
 
 _REQUIRED = ("PG_HOST", "PG_PORT", "PG_DB", "PG_USER", "PG_PASSWORD")
@@ -111,6 +116,49 @@ def get_engine() -> Engine:
 def connectorx_uri() -> str:
     """Return the connectorx URI for the configured database."""
     return PgSettings.from_env().connectorx_uri()
+
+
+# --- Where outputs go: the main database writes the committed reports, others don't ---
+# Reports, figures and model artifacts describe the database they were computed from. A
+# run against a scratch or fixture database (e.g. the CI sequence reproduced locally with
+# PG_DB=dpa_scratch) must never overwrite the committed reports/*.md, which describe the
+# full register: in Phase 4a one such run replaced reports/kpi_reconciliation.md with
+# fixture numbers. So every DB-derived writer resolves its directory here, at run time.
+def current_dbname() -> str:
+    """The database this process talks to (``PG_DB``, `.env` read first)."""
+    load_dotenv(PROJECT_ROOT / ".env", override=False)
+    return os.environ.get("PG_DB") or config.MAIN_DB
+
+
+def is_main_db() -> bool:
+    """True when ``PG_DB`` is the project database whose results are committed."""
+    return current_dbname() == config.MAIN_DB
+
+
+def _scratch_name() -> str:
+    # Database names may hold characters a folder name shouldn't.
+    return re.sub(r"[^A-Za-z0-9_.-]+", "_", current_dbname())
+
+
+def reports_dir() -> Path:
+    """``reports/`` for the main database, else ``reports/scratch/<db>/`` (gitignored)."""
+    if is_main_db():
+        return config.REPORTS
+    path = config.REPORTS / config.SCRATCH_DIRNAME / _scratch_name()
+    path.mkdir(parents=True, exist_ok=True)
+    return path
+
+
+def figures_dir() -> Path:
+    """``figures/`` under :func:`reports_dir` (``reports/figures`` for the main DB)."""
+    return reports_dir() / config.FIGURES.name
+
+
+def artifacts_dir() -> Path:
+    """``artifacts/`` for the main database, else ``artifacts/scratch/<db>/``."""
+    if is_main_db():
+        return config.ARTIFACTS
+    return config.ARTIFACTS / config.SCRATCH_DIRNAME / _scratch_name()
 
 
 def copy_frame(conn: psycopg.Connection, df: pl.DataFrame, schema: str, table: str) -> int:

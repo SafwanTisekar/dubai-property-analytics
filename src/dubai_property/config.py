@@ -27,7 +27,13 @@ DBT_DIR = PROJECT_ROOT / "dbt"
 SQL_DIR = PROJECT_ROOT / "sql"
 # Trained model binaries: gitignored, rebuilt by `make train`. Kept outside src/ so no
 # ignore pattern can ever touch the dubai_property.models package.
-ARTIFACTS_MODELS = PROJECT_ROOT / "artifacts" / "models"
+ARTIFACTS = PROJECT_ROOT / "artifacts"
+ARTIFACTS_MODELS = ARTIFACTS / "models"
+# The database whose results are committed (reports/*.md, figures). Any other PG_DB (a
+# scratch or fixture database) writes to reports/scratch/<db>/ and artifacts/scratch/<db>/
+# instead (db.reports_dir), so a test run can't overwrite the full-data reports.
+MAIN_DB = "dubai_property"
+SCRATCH_DIRNAME = "scratch"
 
 # --- Database schemas (medallion layers, docs/03 §3) ---------------------------------
 SCHEMA_BRONZE = "bronze"
@@ -189,7 +195,34 @@ YIELD_SANITY = (0.02, 0.15)
 YIELD_START = date(2010, 1, 1)
 YIELD_MODEL_VERSION = "yield-gross-v1"
 
+# --- AVM (docs/05 §1, decisions in §8) ------------------------------------------------
+# Fitting starts in 2011, like the index (owner, 2026-10-01): 2009-10 registrations carry
+# backlog prices agreed in the 2006-08 boom. 2010 sales are loaded only as history for the
+# trailing features of early-2011 sales. TRAIN_START (2010) is kept for the ablation.
+AVM_TRAIN_START = date(2011, 1, 1)
+AVM_HISTORY_START = date(2010, 1, 1)
+# Comparable-sales baselines: a cell is area x property type x bedrooms x off-plan flag.
+# A valuation needs at least this many comparables (a valuer's comp set; the min-n rule
+# is for *published* medians and doesn't apply to one sale's estimate).
+AVM_COMPS_MIN_N = 5
+AVM_COMPS_MONTHS = 6  # baseline (a): median over the previous 6 months (docs/05 §1)
+AVM_COMPS_INDEXED_MONTHS = 12  # baseline (b): comps of the last 12 months, index-adjusted
+# |gap| above this flags a sale for collateral review: a statistical anomaly, not an
+# accusation (docs/05 §1). Set only on out-of-sample rows (owner, 2026-10-01).
+AVM_REVIEW_GAP = 0.25
+AVM_OPTUNA_TRIALS = 20  # docs/05 §1 allows 50; 20 on full data (docs/05 §8)
+AVM_SEED = 42
+# Breakdowns: price bands (AED) by *predicted* value (owner, 2026-10-01: banding by the
+# actual price builds in regression to the mean); the top areas by test volume.
+AVM_PRICE_BANDS = (1_000_000, 2_000_000, 5_000_000)
+AVM_TOP_AREAS = 20
+AVM_SHAP_SAMPLE = 20_000
+AVM_MODEL_VERSION = "avm-lgbm-v1"
+
 # --- AVM leakage alarms (CLAUDE.md) ---------------------------------------------------
 # Real-world AVMs rarely beat ~5-8% MdAPE. Results better than this mean: investigate.
 LEAKAGE_MDAPE_FLOOR = 0.03
 LEAKAGE_HIT10_CEILING = 0.90
+# The alarm needs this many scored test sales: on the ~2k-line CI fixtures a handful of
+# test sales can land anywhere, so their metrics mean nothing.
+LEAKAGE_MIN_SCORED = 1_000

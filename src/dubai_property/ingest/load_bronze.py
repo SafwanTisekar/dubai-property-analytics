@@ -483,7 +483,8 @@ def _source_prefix(root: Path) -> str:
 
 def append_ingest_log(rows: Iterable[dict[str, object]], path: Path | None = None) -> None:
     """Append rows to ``reports/ingest_log.csv``, writing the header on first use."""
-    path = path or config.INGEST_LOG
+    # Off the main database the log goes to the scratch reports folder (db.reports_dir).
+    path = path or db.reports_dir() / config.INGEST_LOG.name
     rows = list(rows)
     if not rows:
         return

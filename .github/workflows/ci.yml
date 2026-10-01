@@ -77,8 +77,9 @@ jobs:
       # Phase 4 on the fixtures: the models run end to end and write ml.*, and the post_ml
       # rpt views build over them. ~2k lines leave almost every segment under min-n, so the
       # tables are mostly empty; this proves the plumbing, not the numbers.
+      # AVM_TRIALS=2: two Optuna trials prove the tuning path without the full 50.
       - name: Models (make train) + post_ml views (make score) on the fixtures
-        run: make train score
+        run: make train score AVM_TRIALS=2
 
       # The first pytest run happens before gold exists, so these skip there. Re-run them
       # now: pbi_reader reads rpt and nothing else, every KPI reconciles silver -> rpt,
@@ -88,3 +89,4 @@ jobs:
         run: >-
           uv run pytest tests/test_rpt_access.py tests/test_kpi_reconciliation.py
           tests/test_analysis.py tests/test_hedonic_index.py tests/test_yields.py
+          tests/test_avm_model.py

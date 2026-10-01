@@ -24,12 +24,17 @@ from pathlib import Path
 import psycopg
 from psycopg import sql
 
-from dubai_property import config, db
+from dubai_property import db
 from dubai_property.ingest.load_bronze import MANIFEST_TABLE, SCHEMA
 
 log = logging.getLogger(__name__)
 
-REPORT_PATH = config.REPORTS / "bronze_reconciliation.md"
+REPORT_NAME = "bronze_reconciliation.md"
+
+
+def report_path() -> Path:
+    """``reports/bronze_reconciliation.md``; a scratch folder when PG_DB isn't the main DB."""
+    return db.reports_dir() / REPORT_NAME
 
 
 @dataclass(frozen=True)
@@ -72,8 +77,9 @@ def check(conn: psycopg.Connection) -> list[FileCheck]:
     return results
 
 
-def write_report(results: list[FileCheck], path: Path = REPORT_PATH) -> Path:
+def write_report(results: list[FileCheck], path: Path | None = None) -> Path:
     """Write the reconciliation table as markdown."""
+    path = path or report_path()
     ok = all(r.ok for r in results)
     lines = [
         "# Bronze reconciliation: files vs bronze row counts",

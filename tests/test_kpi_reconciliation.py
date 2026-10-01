@@ -23,7 +23,7 @@ def test_every_kpi_reconciles_silver_to_rpt():
     if not available:
         pytest.skip("rpt views not built yet (run make dbt)")
     result = kpi.run()
-    assert kpi.REPORT_PATH.exists()
+    assert kpi.report_path().exists()
     assert result.silver["all"]["market_sales"] > 0
     assert all(n > 0 for n in result.checks.values())
     assert result.mismatches == []
