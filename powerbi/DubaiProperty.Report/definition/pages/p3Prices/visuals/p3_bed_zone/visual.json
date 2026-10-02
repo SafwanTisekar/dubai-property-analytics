@@ -211,7 +211,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'Median AED / sq m (K), zone × bedrooms, residential'"
+                  "Value": "'Median AED / sq m (K), zone × Studio–4 BR, residential'"
                 }
               }
             }
@@ -237,7 +237,7 @@
             "altText": {
               "expr": {
                 "Literal": {
-                  "Value": "'Table of the residential median price per square metre in thousands of AED by zone and bedrooms; blank cells have fewer than 20 sales.'"
+                  "Value": "'Table of the residential median price per square metre in thousands of AED by zone, studios to four bedrooms; blank cells have fewer than 20 sales.'"
                 }
               }
             }
@@ -326,32 +326,56 @@
           "Where": [
             {
               "Condition": {
-                "Not": {
-                  "Expression": {
-                    "In": {
-                      "Expressions": [
-                        {
-                          "Column": {
-                            "Expression": {
-                              "SourceRef": {
-                                "Source": "b"
-                              }
-                            },
-                            "Property": "Bedrooms"
+                "In": {
+                  "Expressions": [
+                    {
+                      "Column": {
+                        "Expression": {
+                          "SourceRef": {
+                            "Source": "b"
                           }
-                        }
-                      ],
-                      "Values": [
-                        [
-                          {
-                            "Literal": {
-                              "Value": "'Unknown'"
-                            }
-                          }
-                        ]
-                      ]
+                        },
+                        "Property": "Bedrooms"
+                      }
                     }
-                  }
+                  ],
+                  "Values": [
+                    [
+                      {
+                        "Literal": {
+                          "Value": "'Studio'"
+                        }
+                      }
+                    ],
+                    [
+                      {
+                        "Literal": {
+                          "Value": "'1 BR'"
+                        }
+                      }
+                    ],
+                    [
+                      {
+                        "Literal": {
+                          "Value": "'2 BR'"
+                        }
+                      }
+                    ],
+                    [
+                      {
+                        "Literal": {
+                          "Value": "'3 BR'"
+                        }
+                      }
+                    ],
+                    [
+                      {
+                        "Literal": {
+                          "Value": "'4 BR'"
+                        }
+                      }
+                    ]
+                  ]
                 }
               }
             }

@@ -28,7 +28,7 @@
               },
               "queryRef": "_Measures.Max Drawdown",
               "nativeQueryRef": "Max Drawdown",
-              "displayName": "Deepest fall"
+              "displayName": "Deepest fall since 2011"
             }
           ]
         }
@@ -64,7 +64,7 @@
             "show": {
               "expr": {
                 "Literal": {
-                  "Value": "false"
+                  "Value": "true"
                 }
               }
             }
@@ -82,14 +82,7 @@
             "show": {
               "expr": {
                 "Literal": {
-                  "Value": "true"
-                }
-              }
-            },
-            "text": {
-              "expr": {
-                "Literal": {
-                  "Value": "'Deepest fall'"
+                  "Value": "false"
                 }
               }
             }
@@ -102,25 +95,7 @@
             "show": {
               "expr": {
                 "Literal": {
-                  "Value": "true"
-                }
-              }
-            },
-            "text": {
-              "expr": {
-                "Literal": {
-                  "Value": "'Since 2011; all years'"
-                }
-              }
-            },
-            "fontColor": {
-              "solid": {
-                "color": {
-                  "expr": {
-                    "Literal": {
-                      "Value": "'#52514e'"
-                    }
-                  }
+                  "Value": "false"
                 }
               }
             }
@@ -133,7 +108,7 @@
             "altText": {
               "expr": {
                 "Literal": {
-                  "Value": "'The deepest fall of the selected price index from a previous peak, over its whole history.'"
+                  "Value": "'The deepest fall of the selected price index from a previous peak since 2011, over its whole history (not filtered by Year).'"
                 }
               }
             }

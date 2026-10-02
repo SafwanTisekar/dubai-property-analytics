@@ -28,7 +28,7 @@
               },
               "queryRef": "_Measures.Purchase Mortgage Share",
               "nativeQueryRef": "Purchase Mortgage Share",
-              "displayName": "Mortgage share (ready)"
+              "displayName": "Mortgage share (ready, at least)"
             }
           ]
         }
@@ -64,7 +64,7 @@
             "show": {
               "expr": {
                 "Literal": {
-                  "Value": "false"
+                  "Value": "true"
                 }
               }
             }
@@ -82,14 +82,7 @@
             "show": {
               "expr": {
                 "Literal": {
-                  "Value": "true"
-                }
-              }
-            },
-            "text": {
-              "expr": {
-                "Literal": {
-                  "Value": "'Mortgage share (ready)'"
+                  "Value": "false"
                 }
               }
             }
@@ -102,25 +95,7 @@
             "show": {
               "expr": {
                 "Literal": {
-                  "Value": "true"
-                }
-              }
-            },
-            "text": {
-              "expr": {
-                "Literal": {
-                  "Value": "'at least – matched loans only'"
-                }
-              }
-            },
-            "fontColor": {
-              "solid": {
-                "color": {
-                  "expr": {
-                    "Literal": {
-                      "Value": "'#52514e'"
-                    }
-                  }
+                  "Value": "false"
                 }
               }
             }
@@ -133,7 +108,7 @@
             "altText": {
               "expr": {
                 "Literal": {
-                  "Value": "'Share of ready purchases matched to a same-day mortgage of the same unit: a lower bound (in 2025 between 28% matched and 48% for all ready-unit mortgages).'"
+                  "Value": "'Share of ready purchases matched to a same-day mortgage of the same unit: a lower bound, matched loans only (in 2025 between 28% matched and 48% for all ready-unit mortgages).'"
                 }
               }
             }

@@ -1054,7 +1054,7 @@ table _Measures
 		lineageTag: 1a2555c2-dc78-5438-8469-129de5028fb0
 
 	/// Concentration proxy headline (master projects, not developers).
-	measure 'Title Concentration' = "Top 5 shown; top 10 hold " & FORMAT ( [Top 10 Master Project Share (Off-Plan)], "0%" ) & " of off-plan (HHI " & FORMAT ( [Master Project HHI (Off-Plan)], "#,0" ) & ")"
+	measure 'Title Concentration' = "Top 5 master projects (top 10: " & FORMAT ( [Top 10 Master Project Share (Off-Plan)], "0%" ) & ", HHI " & FORMAT ( [Master Project HHI (Off-Plan)], "#,0" ) & ")"
 		displayFolder: Report
 		lineageTag: 3f4478a6-2828-5178-8f21-457b1bd70409
 

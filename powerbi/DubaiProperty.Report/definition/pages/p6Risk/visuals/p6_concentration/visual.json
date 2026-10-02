@@ -3,10 +3,10 @@
   "name": "p6_concentration",
   "position": {
     "x": 424,
-    "y": 476,
+    "y": 472,
     "z": 14000,
     "width": 400,
-    "height": 204,
+    "height": 208,
     "tabOrder": 14000
   },
   "visual": {

@@ -43,7 +43,7 @@
 [Title Stress] = "At " & [Selected LTV] & "% LTV, a " & ABS ( [Selected Shock] ) & "% fall puts " & FORMAT ( [Negative Equity Share], "0%" ) & " of recent " & LOWER ( [Selected Ready / Off-Plan] ) & " buyers in negative equity – " & [Selected Stress Segment]
 
 // Concentration proxy headline (master projects, not developers).
-[Title Concentration] = "Top 5 shown; top 10 hold " & FORMAT ( [Top 10 Master Project Share (Off-Plan)], "0%" ) & " of off-plan (HHI " & FORMAT ( [Master Project HHI (Off-Plan)], "#,0" ) & ")"
+[Title Concentration] = "Top 5 master projects (top 10: " & FORMAT ( [Top 10 Master Project Share (Off-Plan)], "0%" ) & ", HHI " & FORMAT ( [Master Project HHI (Off-Plan)], "#,0" ) & ")"
 
 // Outlook headline for the selected segment and scenario (reports/forecast.md).
 [Title Outlook] = SELECTEDVALUE ( 'Forecast Scenario'[Scenario], "Rates flat" ) & ": " & FORMAT ( [Forecast 12M Change], "+0.0%;-0.0%" ) & " in 12m (80%: " & [Forecast 12M Band 80% Label] & ")"
