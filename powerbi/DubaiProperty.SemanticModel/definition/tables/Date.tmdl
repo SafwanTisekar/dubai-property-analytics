@@ -1,7 +1,7 @@
 /// Calendar, day grain (rpt.dim_date). The model's date table.
 table Date
-	dataCategory: Time
 	lineageTag: 6c2a6869-83b3-5532-90cb-35093cd1648a
+	dataCategory: Time
 
 	column Date
 		dataType: dateTime
@@ -161,3 +161,4 @@ table Date
 				  #"Navigation 1"
 
 	annotation PBI_ResultType = Table
+

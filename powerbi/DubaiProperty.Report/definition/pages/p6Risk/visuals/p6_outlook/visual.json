@@ -1,12 +1,12 @@
 {
-  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.13.0/schema.json",
   "name": "p6_outlook",
   "position": {
     "x": 910,
     "y": 494,
     "z": 46000,
-    "width": 348,
     "height": 182,
+    "width": 348,
     "tabOrder": 46000
   },
   "visual": {
@@ -27,7 +27,8 @@
                 }
               },
               "queryRef": "Forecast.Month",
-              "nativeQueryRef": "Month"
+              "nativeQueryRef": "Month",
+              "active": true
             }
           ]
         },
@@ -332,6 +333,62 @@
             }
           ]
         }
+      },
+      {
+        "name": "0c5613b9793dc194b9ce",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "_Measures"
+              }
+            },
+            "Property": "Forecast Actual"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "efa417c3472db5a0c2c3",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "_Measures"
+              }
+            },
+            "Property": "Forecast Central"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "c6a2a7c548b4925408d5",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "_Measures"
+              }
+            },
+            "Property": "Forecast Lower 80"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "6594c99e625d34676c05",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "_Measures"
+              }
+            },
+            "Property": "Forecast Upper 80"
+          }
+        },
+        "type": "Advanced"
       }
     ]
   }

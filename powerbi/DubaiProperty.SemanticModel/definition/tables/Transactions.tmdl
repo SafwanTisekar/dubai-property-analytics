@@ -257,7 +257,7 @@ table Transactions
 
 	column 'AED Counted Once'
 		dataType: int64
-		formatString: """AED ""#,0"
+		formatString: "AED "#,0
 		lineageTag: 59816bd1-4604-580b-ac26-c3aa19cad5a8
 		summarizeBy: sum
 		sourceColumn: AED Counted Once
@@ -266,7 +266,7 @@ table Transactions
 
 	column 'Price per Sq M AED'
 		dataType: int64
-		formatString: """AED ""#,0"
+		formatString: "AED "#,0
 		lineageTag: d5aaffaf-1b3c-5997-9dbf-ba934b9b8db5
 		summarizeBy: none
 		sourceColumn: Price per Sq M AED
@@ -275,7 +275,7 @@ table Transactions
 
 	column 'Loan Amount AED'
 		dataType: int64
-		formatString: """AED ""#,0"
+		formatString: "AED "#,0
 		lineageTag: ee648925-baac-5b81-854f-b2f428cecac3
 		summarizeBy: sum
 		sourceColumn: Loan Amount AED
@@ -284,7 +284,7 @@ table Transactions
 
 	column 'Portfolio Mortgage Value AED'
 		dataType: int64
-		formatString: """AED ""#,0"
+		formatString: "AED "#,0
 		lineageTag: 4d1eab14-86cd-564c-aebc-25e16c185b0a
 		summarizeBy: sum
 		sourceColumn: Portfolio Mortgage Value AED
@@ -310,3 +310,4 @@ table Transactions
 				  #"Navigation 1"
 
 	annotation PBI_ResultType = Table
+

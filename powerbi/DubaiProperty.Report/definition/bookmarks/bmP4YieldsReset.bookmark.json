@@ -3,6 +3,7 @@
   "displayName": "Reset 4 Yields",
   "name": "bmP4YieldsReset",
   "options": {
+    "applyOnlyToTargetVisuals": true,
     "targetVisualNames": [
       "p4_Area",
       "p4_Bedrooms",
@@ -10,11 +11,10 @@
       "p4_ReadyOffPlan",
       "p4_Year"
     ],
-    "applyOnlyToTargetVisuals": true,
     "suppressDisplay": true
   },
   "explorationState": {
-    "version": "1.3",
+    "version": "1.0",
     "activeSection": "p4Yields",
     "sections": {
       "p4Yields": {

@@ -1,12 +1,12 @@
 {
-  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.13.0/schema.json",
   "name": "p4_yield_growth",
   "position": {
     "x": 948,
     "y": 282,
     "z": 44000,
-    "width": 310,
     "height": 180,
+    "width": 310,
     "tabOrder": 44000
   },
   "visual": {
@@ -27,7 +27,27 @@
                 }
               },
               "queryRef": "Area.Zone",
-              "nativeQueryRef": "Zone"
+              "nativeQueryRef": "Zone",
+              "active": true
+            }
+          ]
+        },
+        "Size": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_Measures"
+                    }
+                  },
+                  "Property": "Market Sales"
+                }
+              },
+              "queryRef": "_Measures.Market Sales",
+              "nativeQueryRef": "Market Sales",
+              "displayName": "Market sales"
             }
           ]
         },
@@ -46,6 +66,7 @@
               },
               "queryRef": "_Measures.Index Growth 3Y (Zone)",
               "nativeQueryRef": "Index Growth 3Y (Zone)",
+              "active": true,
               "displayName": "Price growth, 3 years"
             }
           ]
@@ -66,25 +87,6 @@
               "queryRef": "_Measures.Gross Yield (Latest 4 Quarters)",
               "nativeQueryRef": "Gross Yield (Latest 4 Quarters)",
               "displayName": "Gross yield"
-            }
-          ]
-        },
-        "Size": {
-          "projections": [
-            {
-              "field": {
-                "Measure": {
-                  "Expression": {
-                    "SourceRef": {
-                      "Entity": "_Measures"
-                    }
-                  },
-                  "Property": "Market Sales"
-                }
-              },
-              "queryRef": "_Measures.Market Sales",
-              "nativeQueryRef": "Market Sales",
-              "displayName": "Market sales"
             }
           ]
         }

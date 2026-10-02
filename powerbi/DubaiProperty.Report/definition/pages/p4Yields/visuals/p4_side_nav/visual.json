@@ -1,12 +1,12 @@
 {
-  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.13.0/schema.json",
   "name": "p4_side_nav",
   "position": {
     "x": 12,
     "y": 92,
     "z": 2000,
-    "width": 146,
     "height": 324,
+    "width": 146,
     "tabOrder": 2000
   },
   "visual": {
@@ -186,22 +186,6 @@
           },
           "selector": {
             "id": "selected"
-          }
-        }
-      ],
-      "border": [
-        {
-          "properties": {
-            "show": {
-              "expr": {
-                "Literal": {
-                  "Value": "false"
-                }
-              }
-            }
-          },
-          "selector": {
-            "id": "default"
           }
         }
       ]

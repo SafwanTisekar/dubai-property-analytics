@@ -78,7 +78,7 @@ table 'Yield Quarter'
 
 	column 'Median Annual Rent AED'
 		dataType: int64
-		formatString: """AED ""#,0"
+		formatString: "AED "#,0
 		lineageTag: 5ecb18b1-a56b-51ee-98c9-6f8d269e7d23
 		summarizeBy: none
 		sourceColumn: Median Annual Rent AED
@@ -87,7 +87,7 @@ table 'Yield Quarter'
 
 	column 'Median Price AED'
 		dataType: int64
-		formatString: """AED ""#,0"
+		formatString: "AED "#,0
 		lineageTag: 713b364f-cc5c-5975-b49a-f1c7a8396407
 		summarizeBy: none
 		sourceColumn: Median Price AED
@@ -140,3 +140,4 @@ table 'Yield Quarter'
 				  #"Navigation 1"
 
 	annotation PBI_ResultType = Table
+

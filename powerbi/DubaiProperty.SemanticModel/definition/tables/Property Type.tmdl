@@ -76,3 +76,4 @@ table 'Property Type'
 				  #"Navigation 1"
 
 	annotation PBI_ResultType = Table
+

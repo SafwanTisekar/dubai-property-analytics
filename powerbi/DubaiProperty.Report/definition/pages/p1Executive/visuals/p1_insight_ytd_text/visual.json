@@ -1,12 +1,12 @@
 {
-  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.13.0/schema.json",
   "name": "p1_insight_ytd_text",
   "position": {
     "x": 554,
     "y": 544,
     "z": 46000,
-    "width": 346,
     "height": 132,
+    "width": 346,
     "tabOrder": 46000
   },
   "visual": {
@@ -177,7 +177,7 @@
             "autoSizeColumnWidth": {
               "expr": {
                 "Literal": {
-                  "Value": "false"
+                  "Value": "true"
                 }
               }
             }

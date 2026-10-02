@@ -1,12 +1,12 @@
 {
-  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.13.0/schema.json",
   "name": "p1_top_areas",
   "position": {
     "x": 828,
     "y": 282,
     "z": 43000,
-    "width": 430,
     "height": 252,
+    "width": 430,
     "tabOrder": 43000
   },
   "visual": {
@@ -27,7 +27,8 @@
                 }
               },
               "queryRef": "Area.Area",
-              "nativeQueryRef": "Area"
+              "nativeQueryRef": "Area",
+              "active": true
             }
           ]
         },
@@ -66,8 +67,7 @@
             },
             "direction": "Descending"
           }
-        ],
-        "isDefaultSort": false
+        ]
       }
     },
     "objects": {

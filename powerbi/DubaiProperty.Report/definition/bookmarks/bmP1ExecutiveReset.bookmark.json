@@ -3,6 +3,7 @@
   "displayName": "Reset 1 Executive",
   "name": "bmP1ExecutiveReset",
   "options": {
+    "applyOnlyToTargetVisuals": true,
     "targetVisualNames": [
       "p1_Area",
       "p1_Bedrooms",
@@ -10,11 +11,10 @@
       "p1_ReadyOffPlan",
       "p1_Year"
     ],
-    "applyOnlyToTargetVisuals": true,
     "suppressDisplay": true
   },
   "explorationState": {
-    "version": "1.3",
+    "version": "1.0",
     "activeSection": "p1Executive",
     "sections": {
       "p1Executive": {

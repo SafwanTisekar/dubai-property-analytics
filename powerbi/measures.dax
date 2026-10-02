@@ -83,11 +83,11 @@
 [Market Sales] = SUM ( 'Area Month'[Market Sales] )
 
 // The total money spent on homes and other property bought on the open market. Calculation: sum of sale prices, each deal counted once (a deal that covers many units is not repeated). Source: Area Month. Caveat: gifts, inheritances and mortgages are not sales and are left out; amounts are not adjusted for inflation.
-// Format: """AED ""#,0"
+// Format: "AED "#,0
 [Market Sales Value] = SUM ( 'Area Month'[Market Sales Value AED] )
 
 // Market sales value in the same period a year earlier.
-// Format: """AED ""#,0"
+// Format: "AED "#,0
 [Market Sales Value PY] = CALCULATE ( [Market Sales Value], SAMEPERIODLASTYEAR ( 'Date'[Date] ) )
 
 // Change in market sales value on the same period a year earlier.
@@ -111,7 +111,7 @@
 [Clean Sales] = SUM ( 'Area Month'[Clean Sales] )
 
 // The middle price per square metre: half of sales were cheaper, half dearer. Calculation: median of AED per sq m over clean market sales; blank if fewer than 20 sales. Source: Transactions. Caveat: mixes property types; compare like with like using the price index.
-// Format: """AED ""#,0"
+// Format: "AED "#,0
 [Median Price per Sq M] =
     VAR _n = CALCULATE ( COUNTROWS ( 'Transactions' ), KEEPFILTERS ( 'Transactions'[Is Clean Market Sale] = TRUE () ) )
     RETURN
@@ -128,7 +128,7 @@
 [Median Price per Sq M (K)] = DIVIDE ( [Median Price per Sq M], 1000 )
 
 // The average price per square metre of apartments and villas, weighting big homes by their size. Calculation: total sale value divided by total floor area of clean apartment and villa sales. Source: Area Month. Caveat: only meaningful for homes; land and whole buildings are left out.
-// Format: """AED ""#,0"
+// Format: "AED "#,0
 [Area-Weighted Price per Sq M (Homes)] =
     CALCULATE (
         DIVIDE ( SUM ( 'Area Month'[Clean Sales Value AED] ), SUM ( 'Area Month'[Clean Sales Area Sq M] ) ),
@@ -204,7 +204,7 @@
 [New Mortgages per 100 Sales] = DIVIDE ( [New Mortgages], [Market Sales] ) * 100
 
 // Loan amount of individual new mortgages.
-// Format: """AED ""#,0"
+// Format: "AED "#,0
 [New Mortgage Loans] = SUM ( 'Area Month'[New Mortgage Loans AED] )
 
 // Portfolio (bulk) mortgage registrations, counted once per deal; reported separately.
@@ -212,7 +212,7 @@
 [Portfolio Mortgage Deals] = SUM ( 'Area Month'[Portfolio Mortgage Deals] )
 
 // Portfolio mortgage value, once per deal.
-// Format: """AED ""#,0"
+// Format: "AED "#,0
 [Portfolio Mortgage Value] = SUM ( 'Area Month'[Portfolio Mortgage Value AED] )
 
 // Median loan / price of matched purchase mortgages (observed LTV).
@@ -349,7 +349,7 @@
     )
 
 // Raw median AED per sq m of clean residential apartment sales, blank under min-n: what a median shows before mix adjustment.
-// Format: """AED ""#,0"
+// Format: "AED "#,0
 [Raw Median Price per Sq M (Apartments)] = CALCULATE ( [Median Price per Sq M], KEEPFILTERS ( 'Transactions'[Property Type Key] = 101 ) )
 
 // Raw apartment median rebased to Jan 2019 = 100 (the index base month, config.INDEX_BASE_MONTH), so it sits on the hedonic index's axis: the gap is the mix shift.
@@ -468,7 +468,7 @@
 [New Market Rents] = SUM ( 'Rent Month'[Market Rent Contracts] )
 
 // The yearly rent per square metre of new apartment and villa leases. Calculation: total annual rent divided by total floor area of new contracts with a plausible size. Source: Rent Month.
-// Format: """AED ""#,0"
+// Format: "AED "#,0
 [Area-Weighted New Rent per Sq M (Homes)] =
     CALCULATE (
         DIVIDE ( SUM ( 'Rent Month'[Comparable Rent with Area AED] ), SUM ( 'Rent Month'[Comparable Area Sq M] ) ),
@@ -477,7 +477,7 @@
     )
 
 // Area-weighted annual rent per sq m of new comparable contracts in context (any property type in the filter; compare within one class).
-// Format: """AED ""#,0"
+// Format: "AED "#,0
 [New Rent per Sq M] =
     CALCULATE (
         DIVIDE ( SUM ( 'Rent Month'[Comparable Rent with Area AED] ), SUM ( 'Rent Month'[Comparable Area Sq M] ) ),
@@ -596,11 +596,11 @@
     )
 
 // Median sale price of the valued sales (actual line of actual vs AVM).
-// Format: """AED ""#,0"
+// Format: "AED "#,0
 [Median Sale Price (AVM Sample)] = IF ( [Valued Sales] >= [Min N], MEDIAN ( 'AVM Score'[Price AED] ) )
 
 // Median AVM value of the same sales (predicted line).
-// Format: """AED ""#,0"
+// Format: "AED "#,0
 [Median AVM Value] = IF ( [Valued Sales] >= [Min N], MEDIAN ( 'AVM Score'[AVM Value AED] ) )
 
 // Median (price - AVM) / AVM: positive = sold above the AVM. Blank under min-n.
@@ -677,7 +677,7 @@
         )
 
 // Loan in excess of the shocked value, summed over buyers in negative equity (upper bound: no amortisation).
-// Format: """AED ""#,0"
+// Format: "AED "#,0
 [Negative Equity AED] =
     VAR _seg = [Selected Stress Segment]
     VAR _ro = [Selected Ready / Off-Plan]

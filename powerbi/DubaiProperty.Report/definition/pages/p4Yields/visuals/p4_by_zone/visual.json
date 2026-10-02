@@ -1,12 +1,12 @@
 {
-  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.13.0/schema.json",
   "name": "p4_by_zone",
   "position": {
     "x": 198,
     "y": 282,
     "z": 42000,
-    "width": 420,
     "height": 394,
+    "width": 420,
     "tabOrder": 42000
   },
   "visual": {
@@ -27,7 +27,26 @@
                 }
               },
               "queryRef": "Area.Zone Short",
-              "nativeQueryRef": "Zone Short"
+              "nativeQueryRef": "Zone Short",
+              "active": true
+            }
+          ]
+        },
+        "Series": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Property Type"
+                    }
+                  },
+                  "Property": "Property Type"
+                }
+              },
+              "queryRef": "Property Type.Property Type",
+              "nativeQueryRef": "Property Type"
             }
           ]
         },
@@ -49,24 +68,6 @@
               "displayName": "Gross yield"
             }
           ]
-        },
-        "Series": {
-          "projections": [
-            {
-              "field": {
-                "Column": {
-                  "Expression": {
-                    "SourceRef": {
-                      "Entity": "Property Type"
-                    }
-                  },
-                  "Property": "Property Type"
-                }
-              },
-              "queryRef": "Property Type.Property Type",
-              "nativeQueryRef": "Property Type"
-            }
-          ]
         }
       },
       "sortDefinition": {
@@ -84,8 +85,7 @@
             },
             "direction": "Descending"
           }
-        ],
-        "isDefaultSort": false
+        ]
       }
     },
     "objects": {

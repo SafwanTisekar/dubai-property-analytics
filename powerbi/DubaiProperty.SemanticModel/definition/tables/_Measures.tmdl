@@ -36,13 +36,13 @@ table _Measures
 
 	/// The total money spent on homes and other property bought on the open market. Calculation: sum of sale prices, each deal counted once (a deal that covers many units is not repeated). Source: Area Month. Caveat: gifts, inheritances and mortgages are not sales and are left out; amounts are not adjusted for inflation.
 	measure 'Market Sales Value' = SUM ( 'Area Month'[Market Sales Value AED] )
-		formatString: """AED ""#,0"
+		formatString: "AED "#,0
 		displayFolder: Market
 		lineageTag: 60b09570-6bf1-5e1d-b815-0e6a51772f68
 
 	/// Market sales value in the same period a year earlier.
 	measure 'Market Sales Value PY' = CALCULATE ( [Market Sales Value], SAMEPERIODLASTYEAR ( 'Date'[Date] ) )
-		formatString: """AED ""#,0"
+		formatString: "AED "#,0
 		displayFolder: Market
 		lineageTag: 721d5633-7a8b-5678-9e0c-90030d77b11a
 
@@ -83,7 +83,7 @@ table _Measures
 						KEEPFILTERS ( 'Transactions'[Is Clean Market Sale] = TRUE () )
 					)
 				)
-		formatString: """AED ""#,0"
+		formatString: "AED "#,0
 		displayFolder: Market
 		lineageTag: 342239cf-d073-502b-b9f0-3b1f72f9867e
 
@@ -99,7 +99,7 @@ table _Measures
 				DIVIDE ( SUM ( 'Area Month'[Clean Sales Value AED] ), SUM ( 'Area Month'[Clean Sales Area Sq M] ) ),
 				KEEPFILTERS ( 'Area Month'[Property Type Key] IN { 101, 102 } )
 			)
-		formatString: """AED ""#,0"
+		formatString: "AED "#,0
 		displayFolder: Market
 		lineageTag: 2d4e583a-8a7b-5518-aae6-a77bb14e2a32
 
@@ -159,7 +159,7 @@ table _Measures
 
 	/// Loan amount of individual new mortgages.
 	measure 'New Mortgage Loans' = SUM ( 'Area Month'[New Mortgage Loans AED] )
-		formatString: """AED ""#,0"
+		formatString: "AED "#,0
 		displayFolder: Financing
 		lineageTag: feb36ad5-693a-54e4-9bca-616a9d9020ba
 
@@ -171,7 +171,7 @@ table _Measures
 
 	/// Portfolio mortgage value, once per deal.
 	measure 'Portfolio Mortgage Value' = SUM ( 'Area Month'[Portfolio Mortgage Value AED] )
-		formatString: """AED ""#,0"
+		formatString: "AED "#,0
 		displayFolder: Financing
 		lineageTag: 2574cb6c-5bb0-5362-bb40-ae468068b73b
 
@@ -324,7 +324,7 @@ table _Measures
 
 	/// Raw median AED per sq m of clean residential apartment sales, blank under min-n: what a median shows before mix adjustment.
 	measure 'Raw Median Price per Sq M (Apartments)' = CALCULATE ( [Median Price per Sq M], KEEPFILTERS ( 'Transactions'[Property Type Key] = 101 ) )
-		formatString: """AED ""#,0"
+		formatString: "AED "#,0
 		displayFolder: Prices
 		lineageTag: 751dda38-d7d5-5e7e-9f5a-300277fa9f5a
 
@@ -447,7 +447,7 @@ table _Measures
 				KEEPFILTERS ( 'Rent Month'[Is New Contract] = TRUE () ),
 				KEEPFILTERS ( 'Rent Month'[Property Type Key] IN { 101, 102 } )
 			)
-		formatString: """AED ""#,0"
+		formatString: "AED "#,0
 		displayFolder: Yields
 		lineageTag: 20e85efc-cf54-51df-a0e5-e84555f5f41e
 
@@ -457,7 +457,7 @@ table _Measures
 				DIVIDE ( SUM ( 'Rent Month'[Comparable Rent with Area AED] ), SUM ( 'Rent Month'[Comparable Area Sq M] ) ),
 				KEEPFILTERS ( 'Rent Month'[Is New Contract] = TRUE () )
 			)
-		formatString: """AED ""#,0"
+		formatString: "AED "#,0
 		displayFolder: Yields
 		lineageTag: 87c0c09e-c234-5aa5-bd42-eabc11fddb56
 
@@ -573,13 +573,13 @@ table _Measures
 
 	/// Median sale price of the valued sales (actual line of actual vs AVM).
 	measure 'Median Sale Price (AVM Sample)' = IF ( [Valued Sales] >= [Min N], MEDIAN ( 'AVM Score'[Price AED] ) )
-		formatString: """AED ""#,0"
+		formatString: "AED "#,0
 		displayFolder: Valuation
 		lineageTag: 0d68548f-c6d4-5327-9bcf-6cc587b12b66
 
 	/// Median AVM value of the same sales (predicted line).
 	measure 'Median AVM Value' = IF ( [Valued Sales] >= [Min N], MEDIAN ( 'AVM Score'[AVM Value AED] ) )
-		formatString: """AED ""#,0"
+		formatString: "AED "#,0
 		displayFolder: Valuation
 		lineageTag: 1cb758b1-3810-513f-8949-03d71525a593
 
@@ -667,7 +667,7 @@ table _Measures
 					'Stress Grid'[Shock Pct] = _shock,
 					'Stress Grid'[LTV Pct] = _ltv
 				)
-		formatString: """AED ""#,0"
+		formatString: "AED "#,0
 		displayFolder: Risk
 		lineageTag: a8aa59cf-2382-57e1-a0a3-426910ee6890
 
@@ -1343,3 +1343,4 @@ table _Measures
 		source = ROW ( "Value", BLANK () )
 
 	annotation PBI_Id = 998f143930af5a7989ba50d39c26958a
+

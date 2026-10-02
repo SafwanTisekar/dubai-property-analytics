@@ -1,12 +1,12 @@
 {
-  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.13.0/schema.json",
   "name": "p2_ready_financed",
   "position": {
     "x": 198,
     "y": 282,
     "z": 41000,
-    "width": 346,
     "height": 180,
+    "width": 346,
     "tabOrder": 41000
   },
   "visual": {
@@ -27,7 +27,8 @@
                 }
               },
               "queryRef": "Date.Month Start",
-              "nativeQueryRef": "Month Start"
+              "nativeQueryRef": "Month Start",
+              "active": true
             }
           ]
         },

@@ -82,7 +82,7 @@ table 'Rent Month'
 
 	column 'Annual Rent AED'
 		dataType: int64
-		formatString: """AED ""#,0"
+		formatString: "AED "#,0
 		lineageTag: 690e3382-3d03-5c8d-a531-3b0feff7d60e
 		summarizeBy: sum
 		sourceColumn: Annual Rent AED
@@ -109,7 +109,7 @@ table 'Rent Month'
 
 	column 'Comparable Annual Rent AED'
 		dataType: int64
-		formatString: """AED ""#,0"
+		formatString: "AED "#,0
 		lineageTag: a507b996-f4c8-5ac9-9ca6-d1c1bf8be03f
 		summarizeBy: sum
 		sourceColumn: Comparable Annual Rent AED
@@ -118,7 +118,7 @@ table 'Rent Month'
 
 	column 'Median Annual Rent AED'
 		dataType: int64
-		formatString: """AED ""#,0"
+		formatString: "AED "#,0
 		lineageTag: f51b6dd0-bfd2-5568-96a0-868342e8d52e
 		summarizeBy: none
 		sourceColumn: Median Annual Rent AED
@@ -136,7 +136,7 @@ table 'Rent Month'
 
 	column 'Median Rent per Sq M AED'
 		dataType: int64
-		formatString: """AED ""#,0"
+		formatString: "AED "#,0
 		lineageTag: 15453cc6-1fca-50d1-9163-2b195474aa83
 		summarizeBy: none
 		sourceColumn: Median Rent per Sq M AED
@@ -154,7 +154,7 @@ table 'Rent Month'
 
 	column 'Comparable Rent with Area AED'
 		dataType: int64
-		formatString: """AED ""#,0"
+		formatString: "AED "#,0
 		lineageTag: 53c437de-2fec-5df3-bd42-cd50f431bac1
 		summarizeBy: sum
 		sourceColumn: Comparable Rent with Area AED
@@ -171,3 +171,4 @@ table 'Rent Month'
 				  #"Navigation 1"
 
 	annotation PBI_ResultType = Table
+

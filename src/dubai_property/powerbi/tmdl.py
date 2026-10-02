@@ -366,8 +366,28 @@ def _dax_string(text: str) -> str:
     return '"' + text.replace('"', '""') + '"'
 
 
+def _existing_lineage_tags() -> dict[str, str]:
+    """Lineage tags Desktop gave the KPI Guide table and its columns (kept on regeneration)."""
+    tags: dict[str, str] = {}
+    if not KPI_GUIDE_TMDL.exists():
+        return tags
+    owner = "table"
+    for line in KPI_GUIDE_TMDL.read_text(encoding="utf-8-sig").splitlines():
+        s = line.strip()
+        if s.startswith("column "):
+            owner = unquote(s[7:])
+        elif s.startswith("lineageTag:"):
+            tags[owner] = s.split(":", 1)[1].strip()
+    return tags
+
+
 def kpi_guide_tmdl(entries: list[KpiEntry]) -> str:
-    """The 'KPI Guide' calculated table (DATATABLE), in TMDL with CRLF line endings."""
+    """The 'KPI Guide' calculated table (DATATABLE), in TMDL with CRLF line endings.
+
+    Desktop adds lineage tags when it saves the model; they are read back and kept, so
+    regenerating the table doesn't churn the identities Desktop assigned.
+    """
+    tags = _existing_lineage_tags()
     columns = [
         ("Page", "STRING", False, "Page Order"),
         ("Page Order", "INTEGER", True, None),
@@ -385,12 +405,15 @@ def kpi_guide_tmdl(entries: list[KpiEntry]) -> str:
         "/// source table and caveats. Generated from the _Measures descriptions by",
         "/// `make pbi-measures` (dubai_property.powerbi.tmdl); do not edit by hand.",
         f"table '{KPI_GUIDE_TABLE}'",
+        *([f"\tlineageTag: {tags['table']}"] if "table" in tags else []),
         "",
     ]
     for name, _, hidden, sort in columns:
         lines.append(f"\tcolumn '{name}'" if " " in name else f"\tcolumn {name}")
         if hidden:
             lines.append("\t\tisHidden")
+        if name in tags:
+            lines.append(f"\t\tlineageTag: {tags[name]}")
         lines += ["\t\tsummarizeBy: none", "\t\tisNameInferred", f"\t\tsourceColumn: [{name}]"]
         if sort:
             lines.append(f"\t\tsortByColumn: '{sort}'")
@@ -417,7 +440,7 @@ def kpi_guide_tmdl(entries: list[KpiEntry]) -> str:
         ]
         rows.append("\t\t\t\t\t\t{ " + ", ".join(values) + " }")
     lines.append(",\r\n".join(rows))
-    lines += ["\t\t\t\t\t}", "\t\t\t\t)", ""]
+    lines += ["\t\t\t\t\t}", "\t\t\t\t)", "", ""]  # Desktop ends the file with a blank line
     return "\r\n".join(lines)
 
 

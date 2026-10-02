@@ -89,3 +89,4 @@ relationship bfe14d16-8e11-5e98-b70c-c24224bcf528
 relationship 0f92edc0-df35-5ebd-8d16-ab5d8425575e
 	fromColumn: 'AVM Score'.'Ready / Off-Plan'
 	toColumn: 'Ready Off-Plan'.'Ready / Off-Plan'
+

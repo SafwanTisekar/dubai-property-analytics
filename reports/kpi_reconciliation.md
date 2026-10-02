@@ -1,6 +1,6 @@
 # KPI reconciliation
 
-Generated 2026-10-02 16:46 UTC by `quality/kpi_reconciliation.py` from database `dubai_property`. Regenerate with `make kpi` (after `make dbt`); `tests/test_kpi_reconciliation.py` fails if any check below fails.
+Generated 2026-10-02 17:00 UTC by `quality/kpi_reconciliation.py` from database `dubai_property`. Regenerate with `make kpi` (after `make dbt`); `tests/test_kpi_reconciliation.py` fails if any check below fails.
 
 These are the numbers the Power BI cards must match (docs/06 §3). Every KPI in docs/01 §4 that exists before the models is computed from silver (canonical, below) and again from the rpt views Power BI imports, at three grains (all time, year, month). **Data snapshot: 2026-09-25** (the latest transaction date; `rpt.report_info` "Data As Of"). Scope: 2004-01-01 to the snapshot; rent contracts starting after it are excluded. **All checks pass.**
 

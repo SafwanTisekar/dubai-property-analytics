@@ -128,3 +128,4 @@ table Forecast
 				  #"Navigation 1"
 
 	annotation PBI_ResultType = Table
+

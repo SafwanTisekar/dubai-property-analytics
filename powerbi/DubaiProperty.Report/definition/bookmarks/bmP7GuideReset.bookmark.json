@@ -3,14 +3,14 @@
   "displayName": "Reset KPI guide",
   "name": "bmP7GuideReset",
   "options": {
+    "applyOnlyToTargetVisuals": true,
     "targetVisualNames": [
       "p7Guide_Page"
     ],
-    "applyOnlyToTargetVisuals": true,
     "suppressDisplay": true
   },
   "explorationState": {
-    "version": "1.3",
+    "version": "1.0",
     "activeSection": "p7Guide",
     "sections": {
       "p7Guide": {

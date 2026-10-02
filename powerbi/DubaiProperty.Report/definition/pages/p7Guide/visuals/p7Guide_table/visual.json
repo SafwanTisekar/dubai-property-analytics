@@ -1,12 +1,12 @@
 {
-  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.13.0/schema.json",
   "name": "p7Guide_table",
   "position": {
     "x": 198,
     "y": 124,
     "z": 21000,
-    "width": 1060,
     "height": 552,
+    "width": 1060,
     "tabOrder": 21000
   },
   "visual": {
@@ -132,8 +132,7 @@
             },
             "direction": "Ascending"
           }
-        ],
-        "isDefaultSort": false
+        ]
       }
     },
     "objects": {
@@ -184,7 +183,7 @@
             "autoSizeColumnWidth": {
               "expr": {
                 "Literal": {
-                  "Value": "false"
+                  "Value": "true"
                 }
               }
             },
@@ -377,5 +376,107 @@
         }
       ]
     }
+  },
+  "filterConfig": {
+    "filters": [
+      {
+        "name": "c256bd829a20a4540485",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "KPI Guide"
+              }
+            },
+            "Property": "KPI Sort"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "7be1ffb2abdb7112abe4",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "KPI Guide"
+              }
+            },
+            "Property": "Page"
+          }
+        },
+        "type": "Categorical"
+      },
+      {
+        "name": "31c562657d8377864b04",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "KPI Guide"
+              }
+            },
+            "Property": "KPI"
+          }
+        },
+        "type": "Categorical"
+      },
+      {
+        "name": "5d8d4fa904a805563bd0",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "KPI Guide"
+              }
+            },
+            "Property": "Meaning"
+          }
+        },
+        "type": "Categorical"
+      },
+      {
+        "name": "7be55607796c23d305d9",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "KPI Guide"
+              }
+            },
+            "Property": "How it is calculated"
+          }
+        },
+        "type": "Categorical"
+      },
+      {
+        "name": "f22dee09930205e4c123",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "KPI Guide"
+              }
+            },
+            "Property": "Source table"
+          }
+        },
+        "type": "Categorical"
+      },
+      {
+        "name": "e43200a53298760c02d0",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "KPI Guide"
+              }
+            },
+            "Property": "Caveats"
+          }
+        },
+        "type": "Categorical"
+      }
+    ]
   }
 }

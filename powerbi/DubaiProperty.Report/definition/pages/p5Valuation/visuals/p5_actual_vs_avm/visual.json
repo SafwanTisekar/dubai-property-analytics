@@ -1,12 +1,12 @@
 {
-  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.13.0/schema.json",
   "name": "p5_actual_vs_avm",
   "position": {
     "x": 198,
     "y": 474,
     "z": 43000,
-    "width": 520,
     "height": 202,
+    "width": 520,
     "tabOrder": 43000
   },
   "visual": {
@@ -27,7 +27,8 @@
                 }
               },
               "queryRef": "Date.Month Start",
-              "nativeQueryRef": "Month Start"
+              "nativeQueryRef": "Month Start",
+              "active": true
             }
           ]
         },

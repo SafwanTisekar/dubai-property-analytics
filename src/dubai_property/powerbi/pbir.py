@@ -54,6 +54,26 @@ def _registry() -> Registry:
 _REGISTRY: Registry | None = None
 
 
+def _version_key(name: str) -> tuple[int, ...]:
+    return tuple(int(x) for x in name.split("."))
+
+
+def _same_major_fallback(missing: Path) -> Path | None:
+    """The newest vendored ``<item>/<major>.x.y/<file>`` at or below a missing version."""
+    version_dir, item_dir = missing.parent, missing.parent.parent
+    if not item_dir.exists():
+        return None
+    want = _version_key(version_dir.name)
+    candidates = [
+        d for d in item_dir.iterdir()
+        if d.is_dir() and _version_key(d.name)[0] == want[0] and _version_key(d.name) <= want
+        and (d / missing.name).exists()
+    ]  # fmt: skip
+    return (
+        max(candidates, key=lambda d: _version_key(d.name)) / missing.name if candidates else None
+    )
+
+
 def schema_errors(path: Path) -> list[str]:
     """Validation errors of one PBIR file against the schema its ``$schema`` names."""
     global _REGISTRY
@@ -64,7 +84,14 @@ def schema_errors(path: Path) -> list[str]:
         return [f"$schema is not an official PBIR schema: {url!r}"]
     local = SCHEMA_DIR / url[len(SCHEMA_BASE) :]
     if not local.exists():
-        return [f"schema version not vendored (powerbi/schemas/pbir): {url}"]
+        # Desktop writes versions before Microsoft publishes them (visualContainer 2.13.0 in
+        # Phase 5). Validate against the newest vendored version of the same major instead;
+        # a different major (a breaking change) still fails.
+        local = _same_major_fallback(local)
+        if local is None:
+            return [f"schema version not vendored (powerbi/schemas/pbir): {url}"]
+        # The schema pins its own $schema value; check the content, not the version string.
+        doc = {**doc, "$schema": SCHEMA_BASE + local.relative_to(SCHEMA_DIR).as_posix()}
     schema = json.loads(local.read_text(encoding="utf-8"))
     validator = Draft7Validator(schema, registry=_REGISTRY)
     return [f"{e.json_path}: {e.message[:200]}" for e in validator.iter_errors(doc)]

@@ -31,3 +31,4 @@ table 'Ready Off-Plan'
 				  #"Navigation 1"
 
 	annotation PBI_ResultType = Table
+

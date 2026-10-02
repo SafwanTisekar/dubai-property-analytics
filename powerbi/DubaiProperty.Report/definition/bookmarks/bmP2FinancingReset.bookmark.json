@@ -3,6 +3,7 @@
   "displayName": "Reset 2 Financing",
   "name": "bmP2FinancingReset",
   "options": {
+    "applyOnlyToTargetVisuals": true,
     "targetVisualNames": [
       "p2_Area",
       "p2_Bedrooms",
@@ -10,11 +11,10 @@
       "p2_ReadyOffPlan",
       "p2_Year"
     ],
-    "applyOnlyToTargetVisuals": true,
     "suppressDisplay": true
   },
   "explorationState": {
-    "version": "1.3",
+    "version": "1.0",
     "activeSection": "p2Financing",
     "sections": {
       "p2Financing": {

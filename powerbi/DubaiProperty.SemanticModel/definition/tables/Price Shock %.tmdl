@@ -13,7 +13,7 @@ table 'Price Shock %'
 
 	partition 'Price Shock %' = calculated
 		mode: import
-		source =
-				SELECTCOLUMNS ( GENERATESERIES ( -50, 0, 5 ), "Price Shock %", [Value] )
+		source = SELECTCOLUMNS ( GENERATESERIES ( -50, 0, 5 ), "Price Shock %", [Value] )
 
 	annotation PBI_Id = 436dfb295084517f91174b8a60f77dc8
+

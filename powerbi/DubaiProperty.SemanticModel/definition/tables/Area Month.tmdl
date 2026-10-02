@@ -82,7 +82,7 @@ table 'Area Month'
 
 	column 'Market Sales Value AED'
 		dataType: int64
-		formatString: """AED ""#,0"
+		formatString: "AED "#,0
 		lineageTag: 4edf6c2d-03df-55b9-8dba-472c71787134
 		summarizeBy: sum
 		sourceColumn: Market Sales Value AED
@@ -109,7 +109,7 @@ table 'Area Month'
 
 	column 'Clean Sales Value AED'
 		dataType: int64
-		formatString: """AED ""#,0"
+		formatString: "AED "#,0
 		lineageTag: fdc47221-62a5-51c4-8072-ad62f8c81a17
 		summarizeBy: sum
 		sourceColumn: Clean Sales Value AED
@@ -127,7 +127,7 @@ table 'Area Month'
 
 	column 'Median Price per Sq M AED'
 		dataType: int64
-		formatString: """AED ""#,0"
+		formatString: "AED "#,0
 		lineageTag: 5907258f-0429-57cc-97bc-2e57527e2721
 		summarizeBy: none
 		sourceColumn: Median Price per Sq M AED
@@ -136,7 +136,7 @@ table 'Area Month'
 
 	column 'Median Price AED'
 		dataType: int64
-		formatString: """AED ""#,0"
+		formatString: "AED "#,0
 		lineageTag: 55e58926-8596-52ec-be4b-7a3675835903
 		summarizeBy: none
 		sourceColumn: Median Price AED
@@ -163,7 +163,7 @@ table 'Area Month'
 
 	column 'New Mortgage Loans AED'
 		dataType: int64
-		formatString: """AED ""#,0"
+		formatString: "AED "#,0
 		lineageTag: dacf71cc-ea66-57e7-82aa-6aab1c0d3691
 		summarizeBy: sum
 		sourceColumn: New Mortgage Loans AED
@@ -190,7 +190,7 @@ table 'Area Month'
 
 	column 'Portfolio Mortgage Value AED'
 		dataType: int64
-		formatString: """AED ""#,0"
+		formatString: "AED "#,0
 		lineageTag: 3cd370ed-7c8f-5936-9d87-d02855cd5ae7
 		summarizeBy: sum
 		sourceColumn: Portfolio Mortgage Value AED
@@ -207,3 +207,4 @@ table 'Area Month'
 				  #"Navigation 1"
 
 	annotation PBI_ResultType = Table
+

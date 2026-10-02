@@ -1,12 +1,12 @@
 {
-  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.13.0/schema.json",
   "name": "p2_offplan_areas",
   "position": {
     "x": 910,
     "y": 494,
     "z": 47000,
-    "width": 348,
     "height": 182,
+    "width": 348,
     "tabOrder": 47000
   },
   "visual": {
@@ -27,7 +27,8 @@
                 }
               },
               "queryRef": "Area.Area",
-              "nativeQueryRef": "Area"
+              "nativeQueryRef": "Area",
+              "active": true
             }
           ]
         },
@@ -66,8 +67,7 @@
             },
             "direction": "Descending"
           }
-        ],
-        "isDefaultSort": false
+        ]
       }
     },
     "objects": {

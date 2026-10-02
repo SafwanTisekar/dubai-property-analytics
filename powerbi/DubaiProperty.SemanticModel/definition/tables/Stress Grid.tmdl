@@ -134,7 +134,7 @@ table 'Stress Grid'
 
 	column 'Negative Equity AED'
 		dataType: double
-		formatString: """AED ""#,0"
+		formatString: "AED "#,0
 		lineageTag: 9e36b050-ef61-53bb-89e7-2a93de78617e
 		summarizeBy: sum
 		sourceColumn: Negative Equity AED
@@ -143,7 +143,7 @@ table 'Stress Grid'
 
 	column 'Loan AED'
 		dataType: double
-		formatString: """AED ""#,0"
+		formatString: "AED "#,0
 		lineageTag: 2800487a-078f-5988-b582-be3369ce437d
 		summarizeBy: sum
 		sourceColumn: Loan AED
@@ -152,7 +152,7 @@ table 'Stress Grid'
 
 	column 'Current Value AED'
 		dataType: double
-		formatString: """AED ""#,0"
+		formatString: "AED "#,0
 		lineageTag: 78c2523d-22e0-59ee-8655-9be600fe2bdb
 		summarizeBy: sum
 		sourceColumn: Current Value AED
@@ -218,3 +218,4 @@ table 'Stress Grid'
 				  #"Navigation 1"
 
 	annotation PBI_ResultType = Table
+

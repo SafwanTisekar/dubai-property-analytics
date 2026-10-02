@@ -7,3 +7,4 @@ expression PgDatabase = "dubai_property" meta [IsParameterQuery=true, Type="Text
 	lineageTag: 32df86ce-eb99-569f-ba09-fcc9aebbbaf0
 
 	annotation PBI_ResultType = Text
+

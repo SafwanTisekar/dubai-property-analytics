@@ -1,12 +1,12 @@
 {
-  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.13.0/schema.json",
   "name": "p6_replay",
   "position": {
     "x": 910,
     "y": 282,
     "z": 44000,
-    "width": 348,
     "height": 180,
+    "width": 348,
     "tabOrder": 44000
   },
   "visual": {
@@ -27,7 +27,8 @@
                 }
               },
               "queryRef": "Stress Replay.Segment",
-              "nativeQueryRef": "Segment"
+              "nativeQueryRef": "Segment",
+              "active": true
             }
           ]
         },
@@ -66,8 +67,7 @@
             },
             "direction": "Ascending"
           }
-        ],
-        "isDefaultSort": false
+        ]
       }
     },
     "objects": {

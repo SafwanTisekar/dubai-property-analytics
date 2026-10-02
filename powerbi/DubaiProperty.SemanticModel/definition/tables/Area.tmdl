@@ -38,8 +38,8 @@ table Area
 
 	column Latitude
 		dataType: double
-		dataCategory: Latitude
 		lineageTag: 5ef7e028-531a-5dfa-9209-f7662470e539
+		dataCategory: Latitude
 		summarizeBy: none
 		sourceColumn: Latitude
 
@@ -47,8 +47,8 @@ table Area
 
 	column Longitude
 		dataType: double
-		dataCategory: Longitude
 		lineageTag: f29c0634-0c9d-539b-b2b1-e0eedfc18517
+		dataCategory: Longitude
 		summarizeBy: none
 		sourceColumn: Longitude
 
@@ -64,3 +64,4 @@ table Area
 				  #"Navigation 1"
 
 	annotation PBI_ResultType = Table
+

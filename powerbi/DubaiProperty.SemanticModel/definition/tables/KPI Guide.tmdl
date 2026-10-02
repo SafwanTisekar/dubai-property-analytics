@@ -2,8 +2,10 @@
 /// source table and caveats. Generated from the _Measures descriptions by
 /// `make pbi-measures` (dubai_property.powerbi.tmdl); do not edit by hand.
 table 'KPI Guide'
+	lineageTag: f89aadd7-81a3-4d51-891d-254028dcdcbd
 
 	column Page
+		lineageTag: 01b5caa3-ba93-44a7-b1f5-4b5baf84d327
 		summarizeBy: none
 		isNameInferred
 		sourceColumn: [Page]
@@ -13,6 +15,7 @@ table 'KPI Guide'
 
 	column 'Page Order'
 		isHidden
+		lineageTag: c17ebd4e-73a0-4fe9-ad83-aae75bc14f73
 		summarizeBy: none
 		isNameInferred
 		sourceColumn: [Page Order]
@@ -20,6 +23,7 @@ table 'KPI Guide'
 		annotation SummarizationSetBy = User
 
 	column KPI
+		lineageTag: ffae008e-033e-4965-a3a1-1dd3da6aab43
 		summarizeBy: none
 		isNameInferred
 		sourceColumn: [KPI]
@@ -27,6 +31,7 @@ table 'KPI Guide'
 		annotation SummarizationSetBy = User
 
 	column 'KPI Sort'
+		lineageTag: c652d4da-0767-4304-8731-2c2d5a62ded0
 		summarizeBy: none
 		isNameInferred
 		sourceColumn: [KPI Sort]
@@ -34,6 +39,7 @@ table 'KPI Guide'
 		annotation SummarizationSetBy = User
 
 	column Meaning
+		lineageTag: 3c7ce79d-8254-4c1a-a4f6-b0434401701c
 		summarizeBy: none
 		isNameInferred
 		sourceColumn: [Meaning]
@@ -41,6 +47,7 @@ table 'KPI Guide'
 		annotation SummarizationSetBy = User
 
 	column 'How it is calculated'
+		lineageTag: af6cdbf4-094c-4edd-94be-f49c161d814d
 		summarizeBy: none
 		isNameInferred
 		sourceColumn: [How it is calculated]
@@ -48,6 +55,7 @@ table 'KPI Guide'
 		annotation SummarizationSetBy = User
 
 	column 'Source table'
+		lineageTag: e369504d-bc10-4d19-8e22-0ae4e71b4c08
 		summarizeBy: none
 		isNameInferred
 		sourceColumn: [Source table]
@@ -55,6 +63,7 @@ table 'KPI Guide'
 		annotation SummarizationSetBy = User
 
 	column Caveats
+		lineageTag: 07c86ff7-c328-4d78-9a75-b31b0c9ae698
 		summarizeBy: none
 		isNameInferred
 		sourceColumn: [Caveats]
@@ -103,3 +112,4 @@ table 'KPI Guide'
 						{ "6 Risk", 6, "Top-10 master projects", 27, "How concentrated off-plan sales are in the largest master projects.", "off-plan sales of the 10 biggest master projects divided by all off-plan sales with a known master project.", "Transactions and Project.", "a proxy for developer concentration; developer names need the DLD projects file." }
 					}
 				)
+

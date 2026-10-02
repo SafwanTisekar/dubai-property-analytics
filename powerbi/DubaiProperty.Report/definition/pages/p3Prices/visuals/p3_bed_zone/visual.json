@@ -1,36 +1,18 @@
 {
-  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.13.0/schema.json",
   "name": "p3_bed_zone",
   "position": {
     "x": 858,
     "y": 282,
     "z": 47000,
-    "width": 400,
     "height": 394,
+    "width": 400,
     "tabOrder": 47000
   },
   "visual": {
     "visualType": "pivotTable",
     "query": {
       "queryState": {
-        "Rows": {
-          "projections": [
-            {
-              "field": {
-                "Column": {
-                  "Expression": {
-                    "SourceRef": {
-                      "Entity": "Area"
-                    }
-                  },
-                  "Property": "Zone Short"
-                }
-              },
-              "queryRef": "Area.Zone Short",
-              "nativeQueryRef": "Zone Short"
-            }
-          ]
-        },
         "Columns": {
           "projections": [
             {
@@ -45,7 +27,27 @@
                 }
               },
               "queryRef": "Bedrooms.Bedrooms",
-              "nativeQueryRef": "Bedrooms"
+              "nativeQueryRef": "Bedrooms",
+              "active": true
+            }
+          ]
+        },
+        "Rows": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Area"
+                    }
+                  },
+                  "Property": "Zone Short"
+                }
+              },
+              "queryRef": "Area.Zone Short",
+              "nativeQueryRef": "Zone Short",
+              "active": true
             }
           ]
         },

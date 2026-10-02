@@ -48,3 +48,4 @@ table 'Report Info'
 				  #"Navigation 1"
 
 	annotation PBI_ResultType = Table
+

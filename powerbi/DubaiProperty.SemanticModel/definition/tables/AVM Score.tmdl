@@ -100,7 +100,7 @@ table 'AVM Score'
 
 	column 'Price AED'
 		dataType: int64
-		formatString: """AED ""#,0"
+		formatString: "AED "#,0
 		lineageTag: aa9698a9-a545-58ec-ac3c-cb247262414f
 		summarizeBy: sum
 		sourceColumn: Price AED
@@ -109,7 +109,7 @@ table 'AVM Score'
 
 	column 'AVM Value AED'
 		dataType: int64
-		formatString: """AED ""#,0"
+		formatString: "AED "#,0
 		lineageTag: ffac565e-4394-55eb-9b3a-5edecc620754
 		summarizeBy: sum
 		sourceColumn: AVM Value AED
@@ -160,3 +160,4 @@ table 'AVM Score'
 				  #"Navigation 1"
 
 	annotation PBI_ResultType = Table
+
