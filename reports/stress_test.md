@@ -2,7 +2,7 @@
 
 Phase 4c (docs/05 §4). **Illustrative, not a regulatory stress test.** It answers docs/01 Q7: if prices fell X%, what share of recent buyers would owe more than their home is worth, at typical loan-to-value ratios, and where? Every number below rests on stated assumptions (next section); none is a forecast of losses.
 
-- **Data:** clean residential market sales, Sep 2023 to Aug 2026 (36 complete months; Sep 2026 is partial and left out), marked to market with the hedonic index as of **Aug 2026**. Model `stress-mtm-v1`, run 2026-10-01 20:34.
+- **Data:** clean residential market sales, Sep 2023 to Aug 2026 (36 complete months; Sep 2026 is partial and left out), marked to market with the hedonic index as of **Aug 2026**. Model `stress-mtm-v1`, run 2026-10-02 16:00.
 - **Tables:** `ml.stress_grid`, `ml.stress_replay`; Power BI views `rpt.stress_grid`, `rpt.stress_replay` (Shock % and LTV % are integer keys for the what-if slicers).
 - **Regenerate:** `make score model-reports`. Code: `src/dubai_property/models/stress_test.py`; this report: `models/report_4c.py`.
 
@@ -129,8 +129,8 @@ Ready buyers at 80% LTV, zones with ≥ 20 purchases (sorted by the −20% share
 | Jebel Ali, Dubai South & Waterfront | Apartments | 8,120 | 0.0% | 20.2% | 59.6% | 48.1% | -32% | 71.4% |
 | Deira | Villas | 285 | 0.0% | 18.9% | 75.8% | 42.5% | -30% | 75.8% |
 | Deira | Apartments | 23 | 0.0% | 17.4% | 65.2% | 43.5% | -25% | 47.8% |
-| Palm & Islands | Villas | 24 | 0.0% | 16.7% | 70.8% | 29.2% | -30% | 70.8% |
 | Marina, JBR & JLT | Villas | 42 | 0.0% | 16.7% | 54.8% | 31.0% | -30% | 54.8% |
+| Palm & Islands | Villas | 24 | 0.0% | 16.7% | 70.8% | 29.2% | -30% | 70.8% |
 | Industrial | Villas | 60 | 0.0% | 16.7% | 61.7% | 31.7% | -30% | 61.7% |
 | Jebel Ali, Dubai South & Waterfront | Villas | 2,055 | 0.0% | 15.7% | 63.1% | 32.4% | -30% | 63.1% |
 | Qusais, Nahda, Twar & Muhaisnah | Villas | 167 | 0.0% | 15.6% | 73.1% | 44.3% | -30% | 73.1% |
@@ -146,8 +146,8 @@ Ready buyers at 80% LTV, zones with ≥ 20 purchases (sorted by the −20% share
 | Emirates Hills, Meadows & Greens | Apartments | 1,836 | 0.0% | 6.8% | 58.8% | 40.6% | -38% | 97.1% |
 | DIFC, Trade Centre & Za'abeel | Apartments | 853 | 0.0% | 4.2% | 61.2% | 16.4% | -25% | 22.0% |
 | Silicon Oasis, International City & Academic City | Apartments | 7,196 | 0.0% | 2.0% | 57.8% | 21.6% | -44% | 97.2% |
-| Creek Harbour, Jaddaf & Festival City | Apartments | 5,425 | 0.0% | 0.0% | 72.2% | 30.9% | -38% | 100.0% |
 | Emirates Hills, Meadows & Greens | Villas | 1,414 | 0.0% | 0.0% | 43.5% | 26.2% | -31% | 43.5% |
+| Creek Harbour, Jaddaf & Festival City | Apartments | 5,425 | 0.0% | 0.0% | 72.2% | 30.9% | -38% | 100.0% |
 
 Differences between zones at the same shock come from how far each zone's index has moved since its buyers bought: a zone whose prices rose after the purchases has a bigger cushion. Area-level rows (min-n applied) are in `rpt.stress_grid` for the Power BI map.
 

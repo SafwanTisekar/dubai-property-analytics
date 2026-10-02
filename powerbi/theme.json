@@ -1,50 +1,50 @@
 {
-  "name": "Dubai Property Analytics",
+  "name": "Dubai Property Risk",
   "dataColors": [
-    "#2a78d6",
-    "#eb6834",
-    "#1baf7a",
-    "#eda100",
-    "#e87ba4",
-    "#008300",
-    "#4a3aa7",
-    "#e34948"
+    "#1b2a4a",
+    "#d6247f",
+    "#6b7280",
+    "#0f8b8d",
+    "#b57900",
+    "#6b5bd2",
+    "#3e7cc7",
+    "#b7414a"
   ],
-  "background": "#fcfcfb",
-  "foreground": "#0b0b0b",
-  "foregroundNeutralSecondary": "#52514e",
-  "foregroundNeutralTertiary": "#8a8984",
-  "backgroundLight": "#f6f5f2",
-  "backgroundNeutral": "#e4e3df",
-  "tableAccent": "#2a78d6",
-  "hyperlink": "#256abf",
+  "background": "#ffffff",
+  "foreground": "#1b2a4a",
+  "foregroundNeutralSecondary": "#5f6673",
+  "foregroundNeutralTertiary": "#8a8f99",
+  "backgroundLight": "#f2f3f5",
+  "backgroundNeutral": "#e3e5ea",
+  "tableAccent": "#1b2a4a",
+  "hyperlink": "#3e7cc7",
   "good": "#0ca30c",
   "neutral": "#f0efec",
   "bad": "#d03b3b",
-  "maximum": "#184f95",
+  "maximum": "#9aaacd",
   "center": "#f0efec",
-  "minimum": "#d03b3b",
-  "null": "#e4e3df",
+  "minimum": "#ffffff",
+  "null": "#e3e5ea",
   "textClasses": {
     "callout": {
-      "fontSize": 28,
+      "fontSize": 24,
       "fontFace": "Segoe UI Semibold",
-      "color": "#0b0b0b"
+      "color": "#1b2a4a"
     },
     "title": {
-      "fontSize": 12,
+      "fontSize": 11,
       "fontFace": "Segoe UI Semibold",
-      "color": "#0b0b0b"
+      "color": "#1b2a4a"
     },
     "header": {
       "fontSize": 11,
       "fontFace": "Segoe UI Semibold",
-      "color": "#0b0b0b"
+      "color": "#1b2a4a"
     },
     "label": {
-      "fontSize": 10,
+      "fontSize": 9,
       "fontFace": "Segoe UI",
-      "color": "#52514e"
+      "color": "#5f6673"
     }
   },
   "visualStyles": {
@@ -54,7 +54,7 @@
           {
             "color": {
               "solid": {
-                "color": "#fcfcfb"
+                "color": "#1b2a4a"
               }
             },
             "transparency": 0
@@ -64,7 +64,7 @@
           {
             "color": {
               "solid": {
-                "color": "#f6f5f2"
+                "color": "#1b2a4a"
               }
             },
             "transparency": 0
@@ -79,7 +79,7 @@
             "show": true,
             "color": {
               "solid": {
-                "color": "#fcfcfb"
+                "color": "#ffffff"
               }
             },
             "transparency": 0
@@ -87,12 +87,29 @@
         ],
         "border": [
           {
-            "show": false
+            "show": true,
+            "color": {
+              "solid": {
+                "color": "#e3e5ea"
+              }
+            },
+            "radius": 10
           }
         ],
         "dropShadow": [
           {
-            "show": false
+            "show": true,
+            "color": {
+              "solid": {
+                "color": "#1b2a4a"
+              }
+            },
+            "position": "Outer",
+            "preset": "Custom",
+            "transparency": 88,
+            "shadowBlur": 8,
+            "shadowDistance": 2,
+            "shadowSpread": 0
           }
         ],
         "title": [
@@ -100,10 +117,10 @@
             "show": true,
             "fontColor": {
               "solid": {
-                "color": "#0b0b0b"
+                "color": "#1b2a4a"
               }
             },
-            "fontSize": 12,
+            "fontSize": 11,
             "alignment": "left"
           }
         ],
@@ -112,7 +129,7 @@
             "showAxisTitle": false,
             "labelColor": {
               "solid": {
-                "color": "#52514e"
+                "color": "#5f6673"
               }
             },
             "gridlineShow": false
@@ -123,13 +140,13 @@
             "showAxisTitle": false,
             "labelColor": {
               "solid": {
-                "color": "#52514e"
+                "color": "#5f6673"
               }
             },
             "gridlineShow": true,
             "gridlineColor": {
               "solid": {
-                "color": "#e4e3df"
+                "color": "#e3e5ea"
               }
             },
             "gridlineThickness": 1
@@ -141,10 +158,10 @@
             "position": "Top",
             "labelColor": {
               "solid": {
-                "color": "#52514e"
+                "color": "#5f6673"
               }
             },
-            "fontSize": 10
+            "fontSize": 9
           }
         ],
         "lineStyles": [

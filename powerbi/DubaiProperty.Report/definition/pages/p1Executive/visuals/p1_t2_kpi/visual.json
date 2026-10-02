@@ -1,13 +1,13 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
-  "name": "p1_mortgage",
+  "name": "p1_t2_kpi",
   "position": {
-    "x": 1060,
-    "y": 116,
-    "z": 11000,
-    "width": 204,
-    "height": 100,
-    "tabOrder": 11000
+    "x": 376,
+    "y": 148,
+    "z": 23000,
+    "width": 168,
+    "height": 74,
+    "tabOrder": 23000
   },
   "visual": {
     "visualType": "cardVisual",
@@ -23,12 +23,12 @@
                       "Entity": "_Measures"
                     }
                   },
-                  "Property": "Purchase Mortgage Share"
+                  "Property": "Market Sales"
                 }
               },
-              "queryRef": "_Measures.Purchase Mortgage Share",
-              "nativeQueryRef": "Purchase Mortgage Share",
-              "displayName": "Mortgage share (ready, at least)"
+              "queryRef": "_Measures.Market Sales",
+              "nativeQueryRef": "Market Sales",
+              "displayName": "Market sales"
             }
           ]
         }
@@ -41,7 +41,7 @@
             "fontSize": {
               "expr": {
                 "Literal": {
-                  "Value": "18D"
+                  "Value": "15D"
                 }
               }
             }
@@ -108,7 +108,7 @@
             "altText": {
               "expr": {
                 "Literal": {
-                  "Value": "'Share of ready purchases matched to a same-day mortgage of the same unit: a lower bound, matched loans only (in 2025 between 28% matched and 48% for all ready-unit mortgages).'"
+                  "Value": "'KPI: Market sales for the selected filters, with a split underneath.'"
                 }
               }
             }

@@ -2,10 +2,12 @@
 
 Design rules (kept deliberately few):
 
-* **Colour follows the entity.** Ready and apartments are blue, off-plan and villas are
-  orange, a third series is aqua. These are the first three slots of a published
-  colour-blind-validated categorical palette, the only slots that stay distinguishable
-  for every pair. Magnitude (heatmaps) uses one blue ramp, light to dark.
+* **Colour follows the entity.** Ready and apartments are navy, off-plan and villas are
+  magenta, a third series is teal, context is grey: the Power BI report's palette
+  (powerbi/theme.json, Phase 5), so the report, the figures and the website match. Navy and
+  magenta differ strongly in lightness, so they stay apart for colour-blind readers too, and
+  each clears 3:1 on white (magenta 4.75:1, so it also works as text). Magnitude (heatmaps)
+  uses one navy ramp, light to dark.
 * **One y-axis per panel.** Two measures on different scales (e.g. mortgage share and the
   Fed Funds rate) go in stacked panels sharing the time axis, never a dual axis.
 * **Every chart is labelled for scope**: 2026 is partial (hatched bars, "2026*" ticks)
@@ -38,19 +40,19 @@ MUTED = "#8a8984"
 GRID = "#e4e3df"
 PHASE_FILLS = ("#efeeea", "#f6f5f2")  # alternate so adjacent phases stay distinct
 
-BLUE, ORANGE, AQUA = "#2a78d6", "#eb6834", "#1baf7a"
+NAVY, MAGENTA, TEAL, GREY = "#1b2a4a", "#d6247f", "#0f8b8d", "#6b7280"
 SERIES = {
-    "ready": BLUE,
-    "offplan": ORANGE,
-    "apartment": BLUE,
-    "villa": ORANGE,
-    "third": AQUA,
-    "total": BLUE,
+    "ready": NAVY,
+    "offplan": MAGENTA,
+    "apartment": NAVY,
+    "villa": MAGENTA,
+    "third": TEAL,
+    "total": NAVY,
     "neutral": MUTED,
 }
-# Sequential blue ramp (100 → 700) for heatmaps.
-BLUE_RAMP = ["#cde2fb", "#9ec5f4", "#6da7ec", "#3987e5", "#256abf", "#184f95", "#0d366b"]
-SEQUENTIAL = LinearSegmentedColormap.from_list("dpa_blue", BLUE_RAMP)
+# Sequential navy ramp (light → dark) for heatmaps.
+NAVY_RAMP = ["#e3e8f2", "#c2cde3", "#9aaacd", "#6f84b1", "#4a6294", "#2f4573", "#1b2a4a"]
+SEQUENTIAL = LinearSegmentedColormap.from_list("dpa_navy", NAVY_RAMP)
 
 INLINE_DPI = 72
 SAVE_DPI = 150
@@ -149,7 +151,7 @@ def year_bars(
     years: Sequence[int],
     values: Sequence[float],
     snapshot: date,
-    color: str = BLUE,
+    color: str = NAVY,
     label: str | None = None,
     bottom: Sequence[float] | None = None,
     width: float = 0.8,

@@ -1,13 +1,13 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
-  "name": "p1_kpis",
+  "name": "p1_t1_kpi",
   "position": {
-    "x": 16,
-    "y": 116,
-    "z": 10000,
-    "width": 1036,
-    "height": 100,
-    "tabOrder": 10000
+    "x": 198,
+    "y": 148,
+    "z": 21000,
+    "width": 168,
+    "height": 74,
+    "tabOrder": 21000
   },
   "visual": {
     "visualType": "cardVisual",
@@ -29,66 +29,6 @@
               "queryRef": "_Measures.Market Sales Value",
               "nativeQueryRef": "Market Sales Value",
               "displayName": "Sales value"
-            },
-            {
-              "field": {
-                "Measure": {
-                  "Expression": {
-                    "SourceRef": {
-                      "Entity": "_Measures"
-                    }
-                  },
-                  "Property": "Market Sales"
-                }
-              },
-              "queryRef": "_Measures.Market Sales",
-              "nativeQueryRef": "Market Sales",
-              "displayName": "Market sales"
-            },
-            {
-              "field": {
-                "Measure": {
-                  "Expression": {
-                    "SourceRef": {
-                      "Entity": "_Measures"
-                    }
-                  },
-                  "Property": "Median Price per Sq M"
-                }
-              },
-              "queryRef": "_Measures.Median Price per Sq M",
-              "nativeQueryRef": "Median Price per Sq M",
-              "displayName": "Median AED / sq m"
-            },
-            {
-              "field": {
-                "Measure": {
-                  "Expression": {
-                    "SourceRef": {
-                      "Entity": "_Measures"
-                    }
-                  },
-                  "Property": "Index YoY"
-                }
-              },
-              "queryRef": "_Measures.Index YoY",
-              "nativeQueryRef": "Index YoY",
-              "displayName": "Prices YoY (like for like)"
-            },
-            {
-              "field": {
-                "Measure": {
-                  "Expression": {
-                    "SourceRef": {
-                      "Entity": "_Measures"
-                    }
-                  },
-                  "Property": "Off-Plan Share (Value)"
-                }
-              },
-              "queryRef": "_Measures.Off-Plan Share (Value)",
-              "nativeQueryRef": "Off-Plan Share (Value)",
-              "displayName": "Off-plan share (value)"
             }
           ]
         }
@@ -101,7 +41,7 @@
             "fontSize": {
               "expr": {
                 "Literal": {
-                  "Value": "18D"
+                  "Value": "15D"
                 }
               }
             }
@@ -189,7 +129,7 @@
             "altText": {
               "expr": {
                 "Literal": {
-                  "Value": "'Five headline numbers for the selected year: sales value, number of market sales, median price per square metre, like-for-like price change, off-plan share of value.'"
+                  "Value": "'KPI: Sales value for the selected filters, with a split underneath.'"
                 }
               }
             }

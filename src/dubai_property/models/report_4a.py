@@ -39,9 +39,9 @@ YIELD_REPORT = "yields.md"
 HEADLINE = ("dubai", "apartment", "villa")
 LABEL = {"dubai": "Dubai (all residential)", "apartment": "Apartments", "villa": "Villas"}
 SHORT = {"dubai": "Dubai", "apartment": "Apartments", "villa": "Villas"}
-COLOR = {"dubai": P.AQUA, "apartment": P.BLUE, "villa": P.ORANGE}
+COLOR = {"dubai": P.TEAL, "apartment": P.NAVY, "villa": P.MAGENTA}
 TYPE_LABEL = {101: "Apartments", 102: "Villas / townhouses"}
-TYPE_COLOR = {101: P.BLUE, 102: P.ORANGE}
+TYPE_COLOR = {101: P.NAVY, 102: P.MAGENTA}
 DLD_NOTE = "Comparison: DLD Residential Properties Sale Index (data.dubai), monthly, to May 2024."
 
 # Raw median AED per sq m of the index population (apartments): the mix-shift comparison.
@@ -216,8 +216,8 @@ def fig_validation(diag: dict, snapshot: date) -> Path:
         v = diag["validation"][seg]
         rows = pl.DataFrame(v["series"]).with_columns(pl.col("period").str.to_date())
         ax.axhline(0, color=P.MUTED, lw=0.8)
-        ax.plot(rows["period"], rows["ours_yoy"], color=P.BLUE, lw=0.8, alpha=0.35)
-        ax.plot(rows["period"], rows["aligned_yoy"], color=P.BLUE, lw=1.8)
+        ax.plot(rows["period"], rows["ours_yoy"], color=P.NAVY, lw=0.8, alpha=0.35)
+        ax.plot(rows["period"], rows["aligned_yoy"], color=P.NAVY, lw=1.8)
         ax.plot(rows["period"], rows["dld_yoy"], color=P.TEXT_2, lw=1.4, ls=(0, (4, 2)))
         m = v["metrics"]
         ax.set_title(
@@ -227,8 +227,8 @@ def fig_validation(diag: dict, snapshot: date) -> Path:
         P.pct_axis(ax)
         date_axis(ax, 3)
     axes[0].set_ylabel("Change on a year earlier")
-    axes[0].plot([], [], color=P.BLUE, lw=1.8, label="Ours, 12-month trailing mean")
-    axes[0].plot([], [], color=P.BLUE, lw=0.8, alpha=0.35, label="Ours, monthly")
+    axes[0].plot([], [], color=P.NAVY, lw=1.8, label="Ours, 12-month trailing mean")
+    axes[0].plot([], [], color=P.NAVY, lw=0.8, alpha=0.35, label="Ours, monthly")
     axes[0].plot([], [], color=P.TEXT_2, lw=1.4, ls=(0, (4, 2)), label="DLD index")
     axes[0].legend(loc="upper left")
     P.titled(
@@ -248,7 +248,7 @@ def fig_mix_shift(index: pl.DataFrame, raw: pl.DataFrame, snapshot: date) -> Pat
     fig, ax = P.figure(size=(10, 5.2))
     ax.axhline(100, color=P.MUTED, lw=0.8, ls=(0, (3, 3)))
     ax.plot(raw["period"], raw["median_ppsqm"] / base * 100, color=P.TEXT_2, lw=1.2)
-    ax.plot(s["period_start"], s["index_value"], color=P.BLUE, lw=1.8)
+    ax.plot(s["period_start"], s["index_value"], color=P.NAVY, lw=1.8)
     P.direct_label(ax, raw["period"][-1], raw["median_ppsqm"][-1] / base * 100, "Raw median")
     P.direct_label(ax, s["period_start"][-1], s["index_value"][-1], "Hedonic index")
     date_axis(ax)
@@ -273,18 +273,18 @@ def fig_robustness(diag: dict, snapshot: date) -> Path:
             pl.col("period").str.to_date()
         )
         ax.plot(rows["period"], rows["index_pooled"], color=P.TEXT_2, lw=1.2, ls=(0, (4, 2)))
-        ax.plot(rows["period"], rows["index_rtd"], color=P.BLUE, lw=1.6)
+        ax.plot(rows["period"], rows["index_rtd"], color=P.NAVY, lw=1.6)
         ax.set_title(LABEL[seg], fontsize=10)
         date_axis(ax, 4)
     axes[0].set_ylabel("Jan 2019 = 100")
-    axes[0].plot([], [], color=P.BLUE, lw=1.6, label="Published: rolling windows")
+    axes[0].plot([], [], color=P.NAVY, lw=1.6, label="Published: rolling windows")
     axes[0].plot([], [], color=P.TEXT_2, lw=1.2, ls=(0, (4, 2)), label="One pooled fit")
     axes[0].legend(loc="upper left")
     ax = axes[-1]
     windows = next(s for s in diag["segments"] if s["segment_id"] == "apartment")["windows"]
     mids = [to_date(w["start"]).year + 1.5 for w in windows]
     prem = [np.exp(w.get("is_offplan=true", np.nan)) - 1 for w in windows]
-    ax.plot(mids, prem, color=P.BLUE, lw=1.6, marker="o", ms=4)
+    ax.plot(mids, prem, color=P.NAVY, lw=1.6, marker="o", ms=4)
     ax.axhline(0, color=P.MUTED, lw=0.8)
     P.pct_axis(ax)
     ax.set_title("Apartment off-plan premium per window", fontsize=10)

@@ -12,6 +12,19 @@ A step-by-step guide to the six pages of docs/06 §4 on the semantic model in `D
 6. Canvas: every page is 16:9, **1280 × 720** (already set on the six empty pages).
 7. **Money formats.** Every AED measure is formatted `"AED "#,0`. For bn / M, set the visual's **display units explicitly** (Billions or Millions, 1 decimal): *Auto* switches to Trillions on all-time totals (the Phase 5 gate showed "AED 3.6…T"). Never type Excel-style scaling commas (`#,0.0,,,"bn"`) into a format string: Power BI renders them literally, and a test rejects them.
 
+## Redesign (Phase 5b, gate 1 built 2026-10-02)
+
+Style modelled on a reference banking dashboard (style only; built-in visuals only, no paid or custom visuals, no third-party logos).
+
+- **Frame on every page:** navy page background (`#1b2a4a`) forms the side bar and the frame; a grey rounded panel (`#f2f3f5`) holds the content. The panel is the **container background of a blank text box** (rounded border), drawn first: the same mechanism as every white card. A built-in shape's fill did not render at gate 1, which left navy titles on navy. Side bar: text logo "DUBAI PROPERTY / RISK", a vertical built-in **Page navigator** (active page white with navy text, others navy with white text) and a faint decorative house glyph.
+- **Header bar:** bold uppercase title with a lighter second part ("EXECUTIVE OVERVIEW DASHBOARD"), "Data as of", a **Reset all filters** button and an **ⓘ** button that opens the KPI guide. Footer: DLD CC BY 4.0 · OpenStreetMap ODbL.
+- **Reset all filters** uses the built-in **Clear all slicers** button action, not a bookmark: a hand-written bookmark state can't be checked offline, and the measures already fall back to sensible defaults when nothing is selected (shock −20, LTV 80%, Dubai, Ready, Rates flat). After a reset, Year shows all years (not 2025). Swap in a bookmark later if the 2025 default should come back.
+- **Cards and sections:** every visual sits in a white rounded card with a soft shadow (theme defaults); bold section headings group them. **KPI tiles** are a value card over a grey strip with a split (Sales value → Ready · Off-plan; Median AED / sq m → Apartments · Villas; Prices YoY → Apartments · Villas; Mortgage share → matched loans · ready sales). Strips are text measures with descriptions.
+- **Text cards** carry a bold heading inside the card and 12–14 px inner padding. PBIR has no documented bullet-list format for text boxes, so bullets are written to **fit on one line** (no wrapped line, so no hanging indent is needed); text-measure cards get heights sized for their rendered line count, with spare room.
+- **Beginner pages:** "Introduction" and "Key terms & methods" open the report (plain English, short sentences). Every number that can change (data counts, snapshot date, AVM test size and error, today's index change, the −20% stress example, the 12-month outlook) is a measure (`Report\Guide` folder), not typed text; worked examples with round numbers are hypothetical and say so.
+- **Page order:** Introduction, Key terms & methods, 1–6, KPI guide; the report opens on Introduction. At gate 1 pages 2–6 still have the previous layout and the KPI guide is a placeholder (gate 2).
+- **Palette:** navy = ready / apartments, magenta `#d6247f` = off-plan / villas, greys for context; text navy (14.2:1) and grey `#5f6673` (5.8:1, AA). The reference's lighter pink (`#e83e8c`, 3.8:1) and the light context grey (`#a3a9b5`, 2.4:1) failed contrast and were replaced. `analysis/plotting.py` uses the same palette, so figures and the website match.
+
 ## 1. Layout grid and rules (every page)
 
 Exact positions, fields, filters, titles and alt text of every visual are in **`powerbi/VISUALS.md`**, generated from the PBIR files (`make pbi-inventory`; a test fails if it is stale). This section holds the rules; the page sections below hold the intent and the decisions.

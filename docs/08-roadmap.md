@@ -251,6 +251,11 @@ Then, in Power BI Desktop (Parallels), connect to PostgreSQL as pbi_reader (impo
 - [x] **Gate (owner): round 2 confirmed 2026-10-02**, committed `f1f9b78`
 - [x] Final batch: flags table without project "Unknown", mortgage-share and deepest-fall cards in the row's style ("Mortgage share (ready, at least)", "Deepest fall since 2011"), page 3 matrix Studio–4 BR (no horizontal scroll), page 6 master-projects bar shows all 5 (one-line title, 208 px)
 
+**Phase 5b: redesign (owner request 2026-10-02)**
+- [x] Gate 1 built: navy / magenta theme (validated against the theme schema; WCAG AA text), figures regenerated in the same palette, side bar with page navigator, header bar (Data as of, Reset all filters = Clear all slicers, ⓘ to the KPI guide), white-card sections, Introduction and Key terms & methods (numbers from measures), page 1 with KPI split strips and data-driven insights
+- [ ] **Gate 1 (owner): check in Desktop**
+- [ ] Gate 2: pages 2–6 in the new layout, KPI guide generated from the measure descriptions (+ test)
+
 **Phase 5 checklist (owner, Power BI Desktop)**
 - [x] Six pages built (PBIR, generated and validated offline) and reviewed in Desktop over three gates (2026-10-02); `powerbi/VISUALS.md` lists every visual
 - [ ] Every card matches `reports/kpi_reconciliation.md` §7

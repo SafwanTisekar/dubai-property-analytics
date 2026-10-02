@@ -48,6 +48,34 @@
 // Outlook headline for the selected segment and scenario (reports/forecast.md).
 [Title Outlook] = SELECTEDVALUE ( 'Forecast Scenario'[Scenario], "Rates flat" ) & ": " & FORMAT ( [Forecast 12M Change], "+0.0%;-0.0%" ) & " in 12m (80%: " & [Forecast 12M Band 80% Label] & ")"
 
+// Page 1 insight: off-plan share of sales by number and by value in the last complete year, Dubai-wide (slicers ignored).
+[Insight Off-Plan] =
+    VAR _year = YEAR ( MAX ( 'Report Info'[Data As Of] ) ) - 1
+    VAR _count = CALCULATE ( [Off-Plan Share (Count)], REMOVEFILTERS ( 'Area' ), REMOVEFILTERS ( 'Property Type' ), REMOVEFILTERS ( 'Bedrooms' ), REMOVEFILTERS ( 'Ready Off-Plan' ), REMOVEFILTERS ( 'Date' ), 'Date'[Year] = _year )
+    VAR _value = CALCULATE ( [Off-Plan Share (Value)], REMOVEFILTERS ( 'Area' ), REMOVEFILTERS ( 'Property Type' ), REMOVEFILTERS ( 'Bedrooms' ), REMOVEFILTERS ( 'Ready Off-Plan' ), REMOVEFILTERS ( 'Date' ), 'Date'[Year] = _year )
+    RETURN
+        "In " & _year & ", off-plan homes were " & FORMAT ( _count, "0%" ) & " of market sales but only "
+            & FORMAT ( _value, "0%" ) & " of the money spent: off-plan homes are cheaper on average."
+
+// Page 1 insight: market sales from January to the last complete month against the same months a year earlier, ready and off-plan separately, Dubai-wide (slicers ignored).
+[Insight Year to Date] =
+    VAR _asOf = MAX ( 'Report Info'[Data As Of] )
+    VAR _end = EOMONTH ( _asOf, -1 )
+    VAR _year = YEAR ( _end )
+    VAR _endPrev = EOMONTH ( DATE ( _year - 1, MONTH ( _end ), 1 ), 0 )
+    VAR _now = CALCULATE ( [Market Sales], REMOVEFILTERS ( 'Area' ), REMOVEFILTERS ( 'Property Type' ), REMOVEFILTERS ( 'Bedrooms' ), REMOVEFILTERS ( 'Ready Off-Plan' ), REMOVEFILTERS ( 'Date' ), DATESBETWEEN ( 'Date'[Date], DATE ( _year, 1, 1 ), _end ) )
+    VAR _prev = CALCULATE ( [Market Sales], REMOVEFILTERS ( 'Area' ), REMOVEFILTERS ( 'Property Type' ), REMOVEFILTERS ( 'Bedrooms' ), REMOVEFILTERS ( 'Ready Off-Plan' ), REMOVEFILTERS ( 'Date' ), DATESBETWEEN ( 'Date'[Date], DATE ( _year - 1, 1, 1 ), _endPrev ) )
+    VAR _readyNow = CALCULATE ( [Ready Market Sales], REMOVEFILTERS ( 'Area' ), REMOVEFILTERS ( 'Property Type' ), REMOVEFILTERS ( 'Bedrooms' ), REMOVEFILTERS ( 'Ready Off-Plan' ), REMOVEFILTERS ( 'Date' ), DATESBETWEEN ( 'Date'[Date], DATE ( _year, 1, 1 ), _end ) )
+    VAR _readyPrev = CALCULATE ( [Ready Market Sales], REMOVEFILTERS ( 'Area' ), REMOVEFILTERS ( 'Property Type' ), REMOVEFILTERS ( 'Bedrooms' ), REMOVEFILTERS ( 'Ready Off-Plan' ), REMOVEFILTERS ( 'Date' ), DATESBETWEEN ( 'Date'[Date], DATE ( _year - 1, 1, 1 ), _endPrev ) )
+    VAR _offNow = CALCULATE ( [Off-Plan Sales], REMOVEFILTERS ( 'Area' ), REMOVEFILTERS ( 'Property Type' ), REMOVEFILTERS ( 'Bedrooms' ), REMOVEFILTERS ( 'Ready Off-Plan' ), REMOVEFILTERS ( 'Date' ), DATESBETWEEN ( 'Date'[Date], DATE ( _year, 1, 1 ), _end ) )
+    VAR _offPrev = CALCULATE ( [Off-Plan Sales], REMOVEFILTERS ( 'Area' ), REMOVEFILTERS ( 'Property Type' ), REMOVEFILTERS ( 'Bedrooms' ), REMOVEFILTERS ( 'Ready Off-Plan' ), REMOVEFILTERS ( 'Date' ), DATESBETWEEN ( 'Date'[Date], DATE ( _year - 1, 1, 1 ), _endPrev ) )
+    VAR _change = DIVIDE ( _now - _prev, _prev )
+    RETURN
+        "From January to " & FORMAT ( _end, "mmmm" ) & " " & _year & ", market sales were " & FORMAT ( ABS ( _change ), "0%" )
+            & IF ( _change < 0, " lower", " higher" ) & " than a year earlier. Ready homes "
+            & FORMAT ( DIVIDE ( _readyNow - _readyPrev, _readyPrev ), "+0%;-0%" ) & ", off-plan "
+            & FORMAT ( DIVIDE ( _offNow - _offPrev, _offPrev ), "+0%;-0%" ) & "."
+
 // ---------- Market ----------
 
 // Arm's-length market sales (is_market_sale; every market sale, quality flags only exclude rows from price statistics). From Area Month, which reconciles to Transactions.
@@ -119,6 +147,26 @@
 // Format: 0.0%
 [Off-Plan Share (Value)] = DIVIDE ( CALCULATE ( [Market Sales Value], KEEPFILTERS ( 'Area Month'[Is Off-Plan] = TRUE () ) ), [Market Sales Value] )
 
+// Grey strip under Sales value: the same total split into ready and off-plan sales, in AED billions. Calculation: Market Sales Value with Is Off-Plan = false / true. Source: Area Month.
+[Sales Value Split] =
+    VAR _ready = CALCULATE ( [Market Sales Value], KEEPFILTERS ( 'Area Month'[Is Off-Plan] = FALSE () ) )
+    VAR _off = CALCULATE ( [Market Sales Value], KEEPFILTERS ( 'Area Month'[Is Off-Plan] = TRUE () ) )
+    RETURN
+        "Ready " & FORMAT ( _ready / 1e9, "#,0" ) & "bn · Off-plan " & FORMAT ( _off / 1e9, "#,0" ) & "bn"
+
+// Grey strip under Market sales: ready and off-plan sales counted separately. Calculation: Ready Market Sales and Off-Plan Sales. Source: Area Month.
+[Market Sales Split] = "Ready " & FORMAT ( [Ready Market Sales] / 1000, "#,0" ) & "k · Off-plan " & FORMAT ( [Off-Plan Sales] / 1000, "#,0" ) & "k"
+
+// Grey strip under Median AED / sq m: the same median for apartments and for villas / townhouses (blank under 20 clean sales). Calculation: Median Price per Sq M with the property type fixed. Source: Transactions.
+[Median Price Split] =
+    VAR _apt = CALCULATE ( [Median Price per Sq M], REMOVEFILTERS ( 'Property Type' ), 'Property Type'[Property Type Key] = 101 )
+    VAR _villa = CALCULATE ( [Median Price per Sq M], REMOVEFILTERS ( 'Property Type' ), 'Property Type'[Property Type Key] = 102 )
+    RETURN
+        "Apt " & FORMAT ( _apt / 1000, "#,0.0" ) & "k · Villa " & FORMAT ( _villa / 1000, "#,0.0" ) & "k"
+
+// Grey strip under Off-plan share of value: the share by number of sales, which is higher because off-plan homes are cheaper on average. Calculation: Off-Plan Share (Count). Source: Area Month.
+[Off-Plan Share Split] = "By number of sales " & FORMAT ( [Off-Plan Share (Count)], "0%" )
+
 // ---------- Financing ----------
 
 // Ready (not off-plan) market sales: the denominator of the purchase-mortgage share.
@@ -160,6 +208,9 @@
 // Median loan / price of matched purchase mortgages (observed LTV).
 // Format: 0.0%
 [Median Purchase LTV] = MEDIAN ( 'Transactions'[Purchase LTV] )
+
+// Grey strip under Mortgage share: the matched loans and the ready sales behind the share. Calculation: Purchase Mortgages and Ready Market Sales. Source: Area Month.
+[Mortgage Share Split] = FORMAT ( [Purchase Mortgages] / 1000, "#,0.0" ) & "k of " & FORMAT ( [Ready Market Sales] / 1000, "#,0.0" ) & "k ready sales"
 
 // ---------- Rates ----------
 
@@ -293,6 +344,13 @@
         )
     RETURN
         DIVIDE ( [Raw Median Price per Sq M (Apartments)], _base ) * 100
+
+// Grey strip under Prices YoY: the like-for-like change for apartments and for villas / townhouses at the latest complete month. Calculation: Index YoY with the index segment fixed. Source: Price Index.
+[Index YoY Split] =
+    VAR _apt = CALCULATE ( [Index YoY], 'Price Index'[Segment] = "Apartments" )
+    VAR _villa = CALCULATE ( [Index YoY], 'Price Index'[Segment] = "Villas / Townhouses" )
+    RETURN
+        "Apt " & FORMAT ( _apt, "+0.0%;-0.0%" ) & " · Villa " & FORMAT ( _villa, "+0.0%;-0.0%" )
 
 // ---------- Yields ----------
 
@@ -514,6 +572,16 @@
 // Mean |SHAP| of a feature, in log points of the predicted price (0.05 ≈ 5%).
 // Format: 0.000
 [Mean Abs SHAP] = SUM ( 'Feature Importance'[Mean Abs SHAP] )
+
+// Number of 2025-26 test sales the AVM valued (it never saw them in training). Calculation: Sales Valued of LightGBM, Split = Test, Breakdown = Overall. Source: AVM Performance.
+// Format: #,0
+[AVM Test Sales Valued] =
+    CALCULATE (
+        MAX ( 'AVM Performance'[Sales Valued] ),
+        'AVM Performance'[Model] = "lightgbm",
+        'AVM Performance'[Split] = "Test",
+        'AVM Performance'[Breakdown] = "Overall"
+    )
 
 // ---------- Risk ----------
 
@@ -877,3 +945,52 @@
 
 // Card subtitle: the 80% band as text.
 [Forecast 12M Band 80% Label] = FORMAT ( [Forecast 12M Lower 80], "+0.0%;-0.0%" ) & " to " & FORMAT ( [Forecast 12M Upper 80], "+0.0%;-0.0%" )
+
+// ---------- Report\Guide ----------
+
+// Introduction: what the data covers, with the live counts and the snapshot date.
+[Guide Data Line] =
+    VAR _asOf = MAX ( 'Report Info'[Data As Of] )
+    VAR _sales = CALCULATE ( [Market Sales], REMOVEFILTERS ( 'Area' ), REMOVEFILTERS ( 'Property Type' ), REMOVEFILTERS ( 'Bedrooms' ), REMOVEFILTERS ( 'Ready Off-Plan' ), REMOVEFILTERS ( 'Date' ) )
+    VAR _rents = CALCULATE ( [New Market Rents], REMOVEFILTERS ( 'Area' ), REMOVEFILTERS ( 'Property Type' ), REMOVEFILTERS ( 'Bedrooms' ), REMOVEFILTERS ( 'Ready Off-Plan' ), REMOVEFILTERS ( 'Date' ) )
+    RETURN
+        "Every property sale and rent contract registered with the Dubai Land Department from 2004 to "
+            & FORMAT ( _asOf, "d mmmm yyyy" ) & ": " & FORMAT ( _sales, "#,0" ) & " market sales and "
+            & FORMAT ( _rents, "#,0" ) & " new rent contracts. It is public open data (CC BY 4.0)."
+
+// Key terms: today's like-for-like price change for Dubai, as a live example of the price index.
+[Guide Index Line] =
+    VAR _yoy = CALCULATE ( [Index YoY], REMOVEFILTERS ( 'Date' ), 'Price Index'[Segment] = "Dubai (all residential)" )
+    VAR _period = CALCULATE ( [Index Latest Complete Period], REMOVEFILTERS ( 'Date' ), 'Price Index'[Segment] = "Dubai (all residential)" )
+    RETURN
+        "Right now: like-for-like prices in Dubai are " & FORMAT ( _yoy, "+0.0%;-0.0%" ) & " on a year earlier ("
+            & FORMAT ( _period, "mmmm yyyy" ) & ")."
+
+// Key terms: how the AVM was tested and how accurate it was, from the model card numbers.
+[Guide AVM Line] =
+    "It learned from past Dubai sales (2011 to 2023), then valued " & FORMAT ( [AVM Test Sales Valued], "#,0" )
+        & " sales from 2025 and 2026 that it had never seen. Its typical error was " & FORMAT ( [AVM Test MdAPE], "0.0%" )
+        & ", against " & FORMAT ( [AVM Test MdAPE (Baseline)], "0.0%" ) & " for a simple comparison with recent nearby sales."
+
+// Key terms: one worked stress-test result (ready buyers, Dubai, prices -20%, 80% loans), slicers ignored.
+[Guide Stress Line] =
+    VAR _share =
+        CALCULATE (
+            SELECTEDVALUE ( 'Stress Grid'[Negative Equity Share] ),
+            REMOVEFILTERS ( 'Stress Grid' ),
+            'Stress Grid'[Segment] = "Dubai (all residential)",
+            'Stress Grid'[Ready / Off-Plan] = "Ready",
+            'Stress Grid'[Scenario] = "Price shock",
+            'Stress Grid'[Loan Basis] = "Assumed LTV",
+            'Stress Grid'[Shock Pct] = -20,
+            'Stress Grid'[LTV Pct] = 80
+        )
+    RETURN
+        "Example: if prices fell 20%, about " & FORMAT ( _share, "0%" )
+            & " of recent buyers of a ready home with an 80% loan would owe more than it is worth."
+
+// Key terms: the 12-month outlook for Dubai prices with its 80% range (rates flat), as a live example.
+[Guide Forecast Line] =
+    "For Dubai prices over the next 12 months the central path is " & FORMAT ( [Forecast 12M Change], "+0%;-0%" )
+        & ", but the likely range (80%) runs from " & FORMAT ( [Forecast 12M Lower 80], "+0%;-0%" ) & " to "
+        & FORMAT ( [Forecast 12M Upper 80], "+0%;-0%" ) & "."

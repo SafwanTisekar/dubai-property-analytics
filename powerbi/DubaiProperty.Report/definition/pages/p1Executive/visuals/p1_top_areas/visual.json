@@ -2,12 +2,12 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
   "name": "p1_top_areas",
   "position": {
-    "x": 844,
-    "y": 224,
-    "z": 13000,
-    "width": 420,
-    "height": 344,
-    "tabOrder": 13000
+    "x": 828,
+    "y": 282,
+    "z": 43000,
+    "width": 430,
+    "height": 252,
+    "tabOrder": 43000
   },
   "visual": {
     "visualType": "clusteredBarChart",
@@ -153,7 +153,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'Top 10 areas by sales value'"
+                  "Value": "'Top 7 areas by sales value'"
                 }
               }
             }
@@ -179,7 +179,7 @@
             "altText": {
               "expr": {
                 "Literal": {
-                  "Value": "'Bar chart of the ten areas with the highest sales value in the selected period.'"
+                  "Value": "'Bar chart of the seven areas with the highest sales value in the selected period.'"
                 }
               }
             }
@@ -252,7 +252,7 @@
                         }
                       }
                     ],
-                    "Top": 10
+                    "Top": 7
                   }
                 }
               },

@@ -44,9 +44,9 @@ NAME = {
 }
 # Colour follows the model, never its rank (one fixed slot each).
 COLOR = {
-    "lightgbm": P.BLUE,
-    "comps_indexed": P.ORANGE,
-    "comps": P.AQUA,
+    "lightgbm": P.NAVY,
+    "comps_indexed": P.MAGENTA,
+    "comps": P.TEAL,
     "hedonic_ols": P.MUTED,
 }
 ORDER = ["lightgbm", "comps_indexed", "comps", "hedonic_ols"]
@@ -186,7 +186,7 @@ def fig_importance(imp: pl.DataFrame, snapshot: date, top: int = 15) -> Path:
     d = imp.sort("rank").head(top)
     fig, ax = P.figure(size=(10, 5.8))
     y = np.arange(d.height)
-    ax.barh(y, d["mean_abs_shap"], color=P.BLUE, height=0.7)
+    ax.barh(y, d["mean_abs_shap"], color=P.NAVY, height=0.7)
     ax.set_yticks(y, [label(f) for f in d["feature"]])
     ax.invert_yaxis()
     ax.grid(True, axis="x")
@@ -243,7 +243,7 @@ def fig_dependence(sample: pl.DataFrame, snapshot: date) -> Path:
         .sort("shap_area_key")
     )
     y = np.arange(areas.height)
-    a3.barh(y, areas["shap_area_key"], color=P.BLUE, height=0.7)
+    a3.barh(y, areas["shap_area_key"], color=P.NAVY, height=0.7)
     a3.set_yticks(y, areas["area_name"].to_list(), fontsize=8)
     a3.axvline(0, color=P.MUTED, lw=1)
     a3.grid(True, axis="x")
@@ -299,11 +299,11 @@ def fig_example(ex: dict, snapshot: date) -> Path:
         y += 1
         start, end = np.exp(level), np.exp(level + delta)
         ax.barh(y, end - start, left=start, height=0.6,
-                color=P.BLUE if delta >= 0 else P.ORANGE)  # fmt: skip
+                color=P.NAVY if delta >= 0 else P.MAGENTA)  # fmt: skip
         names.append(name)
         level += delta
     y += 1
-    ax.barh(y, np.exp(level), color=P.BLUE, height=0.6)
+    ax.barh(y, np.exp(level), color=P.NAVY, height=0.6)
     names.append("AVM value")
     ax.axvline(ex["price_aed"], color=P.TEXT, lw=1.2, ls="--")
     ax.annotate(f"Sale price {P.fmt_aed(ex['price_aed'], decimals=2)}", (ex["price_aed"], y + 0.6),
@@ -334,7 +334,7 @@ def fig_gaps(gaps: pl.DataFrame, snapshot: date) -> Path:
     """Distribution of the test-period gap with the ±25% review thresholds."""
     fig, ax = P.figure(size=(10, 4.8))
     review = (gaps["bin"] < -25) | (gaps["bin"] >= 25)
-    colors = [P.ORANGE if r else P.BLUE for r in review]
+    colors = [P.MAGENTA if r else P.NAVY for r in review]
     ax.bar(gaps["bin"], gaps["n"], width=0.9, color=colors)
     for x in (-25, 25):
         ax.axvline(x, color=P.TEXT, lw=1, ls="--")

@@ -2,29 +2,101 @@
 
 Generated from the PBIR files by `make pbi-inventory` (`powerbi/pbir.py`); `tests/test_powerbi_model.py` fails when it is stale. Positions are x, y, width, height on the 1280 × 720 canvas. Intent, decisions and checks: `powerbi/BUILD.md`.
 
-## 1 Executive Overview
+## Introduction
+
+| Visual | Type | Position | Fields | Filters | Title | Alt text |
+|---|---|---|---|---|---|---|
+| `p0Intro_frame_panel` | textbox | 182, 12, 1086, 696 |  |  |  | Content panel (decorative). |
+| `p0Intro_side_logo` | textbox | 14, 18, 150, 56 |  |  |  | Report name: Dubai Property Risk. |
+| `p0Intro_side_nav` | pageNavigator | 12, 92, 146, 324 |  |  |  | Page navigation: one button per report page. |
+| `p0Intro_side_icon` | textbox | 34, 550, 110, 130 |  |  |  | Decorative house icon. |
+| `p0Intro_hdr_title` | textbox | 198, 16, 620, 36 |  |  |  | Page title: INTRODUCTION TO THE REPORT. |
+| `p0Intro_hdr_asof` | cardVisual | 826, 20, 226, 28 | Data: [Data As Of Label] |  |  | Date of the latest transaction in the data. |
+| `p0Intro_hdr_reset` | actionButton | 1060, 18, 152, 32 |  |  |  | Button: reset all filters on this page. |
+| `p0Intro_hdr_info` | actionButton | 1218, 18, 40, 32 |  |  |  | Button: open the KPI guide. |
+| `p0Intro_what` | textbox | 198, 60, 520, 116 |  |  |  | What this report is. |
+| `p0Intro_why` | textbox | 198, 186, 520, 140 |  |  |  | Why it matters. |
+| `p0Intro_data` | cardVisual | 198, 336, 520, 132 | Data: [Guide Data Line] |  | Where the data comes from | Where the data comes from: the number of sales and rent contracts and the snapshot date. |
+| `p0Intro_questions` | textbox | 198, 478, 520, 198 |  |  |  | The questions the report answers. |
+| `p0Intro_use` | textbox | 728, 60, 530, 214 |  |  |  | How to use the report. |
+| `p0Intro_pages` | textbox | 728, 284, 530, 250 |  |  |  | One line per page of the report. |
+| `p0Intro_good` | textbox | 728, 544, 530, 132 |  |  |  | Good to know. |
+| `p0Intro_ftr_source` | cardVisual | 198, 684, 1060, 22 | Data: [Footer Attribution] |  |  | Data sources and licences. |
+
+## Key terms
+
+| Visual | Type | Position | Fields | Filters | Title | Alt text |
+|---|---|---|---|---|---|---|
+| `p0Terms_frame_panel` | textbox | 182, 12, 1086, 696 |  |  |  | Content panel (decorative). |
+| `p0Terms_side_logo` | textbox | 14, 18, 150, 56 |  |  |  | Report name: Dubai Property Risk. |
+| `p0Terms_side_nav` | pageNavigator | 12, 92, 146, 324 |  |  |  | Page navigation: one button per report page. |
+| `p0Terms_side_icon` | textbox | 34, 550, 110, 130 |  |  |  | Decorative house icon. |
+| `p0Terms_hdr_title` | textbox | 198, 16, 620, 36 |  |  |  | Page title: KEY TERMS & METHODS. |
+| `p0Terms_hdr_asof` | cardVisual | 826, 20, 226, 28 | Data: [Data As Of Label] |  |  | Date of the latest transaction in the data. |
+| `p0Terms_hdr_reset` | actionButton | 1060, 18, 152, 32 |  |  |  | Button: reset all filters on this page. |
+| `p0Terms_hdr_info` | actionButton | 1218, 18, 40, 32 |  |  |  | Button: open the KPI guide. |
+| `p0Terms_h_terms` | textbox | 198, 60, 1060, 22 |  |  |  | Section heading: Property terms. |
+| `p0Terms_term1` | textbox | 198, 84, 346, 124 |  |  |  | Term: Off-plan and ready. Off-plan means buying a home before it is built, usually paying the developer in stages. Ready means it is finished and you can move in. Example: a flat bought in 2025 for handover in 2028 is off-plan. |
+| `p0Terms_term2` | textbox | 554, 84, 346, 124 |  |  |  | Term: AED per sq m. The price divided by the floor area. It lets you compare homes of different sizes. Example: a 70 sq m flat sold for AED 1,400,000 costs AED 20,000 per sq m. |
+| `p0Terms_term3` | textbox | 910, 84, 346, 124 |  |  |  | Term: Mortgage. A bank loan to buy a home. The home is the bank's security: if the loan is not repaid, the bank can sell it. Example: a buyer pays AED 300,000 and borrows AED 1,200,000 for a AED 1,500,000 home. |
+| `p0Terms_term4` | textbox | 198, 216, 346, 124 |  |  |  | Term: Loan-to-value (LTV). The loan as a share of the home's value. The higher it is, the smaller the buyer's cushion. Example: AED 1,200,000 borrowed on a AED 1,500,000 home is an LTV of 80%. |
+| `p0Terms_term5` | textbox | 554, 216, 346, 124 |  |  |  | Term: Gross rental yield. A year's rent as a share of the price, before costs such as service charges and empty months. Example: AED 90,000 a year of rent on a AED 1,500,000 flat is a 6% gross yield. |
+| `p0Terms_term6` | textbox | 910, 216, 346, 124 |  |  |  | Term: Negative equity. When a home is worth less than the loan on it. Selling it would not repay the bank in full. Example: bought for AED 1,500,000 with a AED 1,200,000 loan, now worth AED 1,100,000: AED 100,000 short. |
+| `p0Terms_h_models` | textbox | 198, 348, 1060, 22 |  |  |  | Section heading: How the four models work. |
+| `p0Terms_model1` | textbox | 198, 372, 257, 120 |  |  |  | Model: Price index: a fixed shopping basket. Instead of averaging whatever sold this month, it compares similar homes over time. Prices don't look higher just because more expensive homes happened to sell. |
+| `p0Terms_model1_live` | cardVisual | 198, 498, 257, 112 | Data: [Guide Index Line] |  | From the data | Live example for Price index: a fixed shopping basket, from the data. |
+| `p0Terms_model2` | textbox | 465, 372, 257, 120 |  |  |  | Model: AVM: an automated valuer. It learned how size, location, bedrooms and recent nearby prices relate to price, then estimates what a home is worth. |
+| `p0Terms_model2_live` | cardVisual | 465, 498, 257, 112 | Data: [Guide AVM Line] |  | From the data | Live example for AVM: an automated valuer, from the data. |
+| `p0Terms_model3` | textbox | 732, 372, 257, 120 |  |  |  | Model: Stress test: a what-if calculator. It applies a price fall of X% to every recent purchase and counts who would owe more than the home is worth. It is illustrative, not a regulatory test. |
+| `p0Terms_model3_live` | cardVisual | 732, 498, 257, 112 | Data: [Guide Stress Line] |  | From the data | Live example for Stress test: a what-if calculator, from the data. |
+| `p0Terms_model4` | textbox | 999, 372, 257, 120 |  |  |  | Model: Forecast: a baseline with a range. It extends past patterns over the next 12 months. It is not a promise, and the range matters as much as the central line. |
+| `p0Terms_model4_live` | cardVisual | 999, 498, 257, 112 | Data: [Guide Forecast Line] |  | From the data | Live example for Forecast: a baseline with a range, from the data. |
+| `p0Terms_limits` | textbox | 198, 618, 1060, 58 |  |  |  | What this can't tell you. |
+| `p0Terms_ftr_source` | cardVisual | 198, 684, 1060, 22 | Data: [Footer Attribution] |  |  | Data sources and licences. |
+
+## 1 Executive
 
 Interactions set to none: p1_Year → p1_value_by_month.
 
 | Visual | Type | Position | Fields | Filters | Title | Alt text |
 |---|---|---|---|---|---|---|
-| `p1_hdr_title` | cardVisual | 16, 4, 876, 44 | Data: [Title Executive] |  |  | Page title with this page's headline finding. |
-| `p1_hdr_asof` | cardVisual | 900, 8, 364, 36 | Data: [Data As Of Label] |  |  | Date of the latest transaction in the data. |
-| `p1_Year` | slicer | 16, 52, 150, 58 | Values: 'Date'[Year] |  |  | Slicer: Year |
-| `p1_Area` | slicer | 174, 52, 260, 58 | Values: 'Area'[Zone], 'Area'[Area] |  |  | Slicer: Zone / area |
-| `p1_PropertyType` | slicer | 442, 52, 260, 58 | Values: 'Property Type'[Property Type] |  |  | Slicer: Property type |
-| `p1_Bedrooms` | slicer | 710, 52, 160, 58 | Values: 'Bedrooms'[Bedrooms] |  |  | Slicer: Bedrooms |
-| `p1_ReadyOffPlan` | slicer | 878, 52, 180, 58 | Values: 'Ready Off-Plan'[Ready / Off-Plan] |  |  | Slicer: Ready / off-plan |
-| `p1_kpis` | cardVisual | 16, 116, 1036, 100 | Data: [Market Sales Value] as "Sales value", [Market Sales] as "Market sales", [Median Price per Sq M] as "Median AED / sq m", [Index YoY] as "Prices YoY (like for like)", [Off-Plan Share (Value)] as "Off-plan share (value)" |  |  | Five headline numbers for the selected year: sales value, number of market sales, median price per square metre, like-for-like price change, off-plan share of value. |
-| `p1_mortgage` | cardVisual | 1060, 116, 204, 100 | Data: [Purchase Mortgage Share] as "Mortgage share (ready, at least)" |  |  | Share of ready purchases matched to a same-day mortgage of the same unit: a lower bound, matched loans only (in 2025 between 28% matched and 48% for all ready-unit mortgages). |
-| `p1_value_by_month` | lineChart | 16, 224, 820, 344 | Category: 'Date'[Month Start]; Y: [Market Sales Value] as "Sales value" | 'Date'[Is After Snapshot] in false | Market sales value by month, AED / All years; not filtered by Year | Line chart of monthly market sales value since 2004, with the 2008, 2014, 2020 and 2021 cycle points marked. Shows all years regardless of the Year slicer. |
-| `p1_top_areas` | clusteredBarChart | 844, 224, 420, 344 | Category: 'Area'[Area]; Y: [Market Sales Value] as "Sales value" | top 10 'Area'[Area] by [Market Sales Value] | Top 10 areas by sales value | Bar chart of the ten areas with the highest sales value in the selected period. |
-| `p1_insight_offplan` | textbox | 16, 576, 410, 104 |  |  |  | Insight: off-plan share of sales by count and by value. |
-| `p1_insight_2026` | textbox | 434, 576, 410, 104 |  |  |  | Insight: the 2026 slowdown compared with 2025. |
-| `p1_insight_2009` | textbox | 852, 576, 410, 104 |  |  |  | Insight: the 2009 registration backlog. |
-| `p1_ftr_source` | cardVisual | 16, 684, 1248, 32 | Data: [Footer Attribution] |  |  | Data sources and licences. |
+| `p1_frame_panel` | textbox | 182, 12, 1086, 696 |  |  |  | Content panel (decorative). |
+| `p1_side_logo` | textbox | 14, 18, 150, 56 |  |  |  | Report name: Dubai Property Risk. |
+| `p1_side_nav` | pageNavigator | 12, 92, 146, 324 |  |  |  | Page navigation: one button per report page. |
+| `p1_side_icon` | textbox | 34, 550, 110, 130 |  |  |  | Decorative house icon. |
+| `p1_hdr_title` | textbox | 198, 16, 620, 36 |  |  |  | Page title: EXECUTIVE OVERVIEW DASHBOARD. |
+| `p1_hdr_asof` | cardVisual | 826, 20, 226, 28 | Data: [Data As Of Label] |  |  | Date of the latest transaction in the data. |
+| `p1_hdr_reset` | actionButton | 1060, 18, 152, 32 |  |  |  | Button: reset all filters on this page. |
+| `p1_hdr_info` | actionButton | 1218, 18, 40, 32 |  |  |  | Button: open the KPI guide. |
+| `p1_Year` | slicer | 198, 60, 150, 56 | Values: 'Date'[Year] |  |  | Slicer: Year |
+| `p1_Area` | slicer | 358, 60, 250, 56 | Values: 'Area'[Zone], 'Area'[Area] |  |  | Slicer: Zone / area |
+| `p1_PropertyType` | slicer | 618, 60, 250, 56 | Values: 'Property Type'[Property Type] |  |  | Slicer: Property type |
+| `p1_Bedrooms` | slicer | 878, 60, 170, 56 | Values: 'Bedrooms'[Bedrooms] |  |  | Slicer: Bedrooms |
+| `p1_ReadyOffPlan` | slicer | 1058, 60, 196, 56 | Values: 'Ready Off-Plan'[Ready / Off-Plan] |  |  | Slicer: Ready / off-plan |
+| `p1_h_activity` | textbox | 198, 124, 600, 22 |  |  |  | Section heading: Market activity. |
+| `p1_t1_kpi` | cardVisual | 198, 148, 168, 74 | Data: [Market Sales Value] as "Sales value" |  |  | KPI: Sales value for the selected filters, with a split underneath. |
+| `p1_t1_strip` | cardVisual | 198, 222, 168, 26 | Data: [Sales Value Split] |  |  | Split of Sales value. |
+| `p1_t2_kpi` | cardVisual | 376, 148, 168, 74 | Data: [Market Sales] as "Market sales" |  |  | KPI: Market sales for the selected filters, with a split underneath. |
+| `p1_t2_strip` | cardVisual | 376, 222, 168, 26 | Data: [Market Sales Split] |  |  | Split of Market sales. |
+| `p1_t3_kpi` | cardVisual | 554, 148, 168, 74 | Data: [Median Price per Sq M] as "Median AED / sq m" |  |  | KPI: Median AED / sq m for the selected filters, with a split underneath. |
+| `p1_t3_strip` | cardVisual | 554, 222, 168, 26 | Data: [Median Price Split] |  |  | Split of Median AED / sq m. |
+| `p1_t4_kpi` | cardVisual | 732, 148, 168, 74 | Data: [Index YoY] as "Prices YoY (like for like)" |  |  | KPI: Prices YoY (like for like) for the selected filters, with a split underneath. |
+| `p1_t4_strip` | cardVisual | 732, 222, 168, 26 | Data: [Index YoY Split] |  |  | Split of Prices YoY (like for like). |
+| `p1_t5_kpi` | cardVisual | 910, 148, 168, 74 | Data: [Off-Plan Share (Value)] as "Off-plan share (value)" |  |  | KPI: Off-plan share (value) for the selected filters, with a split underneath. |
+| `p1_t5_strip` | cardVisual | 910, 222, 168, 26 | Data: [Off-Plan Share Split] |  |  | Split of Off-plan share (value). |
+| `p1_t6_kpi` | cardVisual | 1088, 148, 168, 74 | Data: [Purchase Mortgage Share] as "Mortgage share (ready, at least)" |  |  | KPI: Mortgage share (ready, at least) for the selected filters, with a split underneath. |
+| `p1_t6_strip` | cardVisual | 1088, 222, 168, 26 | Data: [Mortgage Share Split] |  |  | Split of Mortgage share (ready, at least). |
+| `p1_h_cycles` | textbox | 198, 258, 620, 22 |  |  |  | Section heading: Market cycles. |
+| `p1_h_where` | textbox | 828, 258, 430, 22 |  |  |  | Section heading: Where value concentrates. |
+| `p1_value_by_month` | lineChart | 198, 282, 620, 252 | Category: 'Date'[Month Start]; Y: [Market Sales Value] as "Sales value" | 'Date'[Is After Snapshot] in false | Market sales value by month, AED / All years; not filtered by Year | Line chart of monthly market sales value since 2004, with the 2008, 2014, 2020 and 2021 cycle points marked. Shows all years regardless of the Year slicer. |
+| `p1_top_areas` | clusteredBarChart | 828, 282, 430, 252 | Category: 'Area'[Area]; Y: [Market Sales Value] as "Sales value" | top 7 'Area'[Area] by [Market Sales Value] | Top 7 areas by sales value | Bar chart of the seven areas with the highest sales value in the selected period. |
+| `p1_h_stands` | textbox | 198, 542, 600, 22 |  |  |  | Section heading: What stands out. |
+| `p1_insight_offplan` | cardVisual | 198, 566, 346, 110 | Data: [Insight Off-Plan] |  | Off-plan: most sales, not most value | Insight: off-plan share of sales by number and by value in the last complete year. |
+| `p1_insight_ytd` | cardVisual | 554, 566, 346, 110 | Data: [Insight Year to Date] |  | This year so far | Insight: this year's market sales so far against the same months last year. |
+| `p1_insight_2009` | textbox | 910, 566, 346, 110 |  |  |  | Insight: the 2009 registration backlog. |
+| `p1_ftr_source` | cardVisual | 198, 684, 1060, 22 | Data: [Footer Attribution] |  |  | Data sources and licences. |
 
-## 2 Financing & Market Mix
+## 2 Financing
 
 Interactions set to none: p2_Year → p2_ready_financed; p2_Year → p2_share; p2_Year → p2_rate; p2_Year → p2_per100; p2_Year → p2_mix.
 
@@ -47,7 +119,7 @@ Interactions set to none: p2_Year → p2_ready_financed; p2_Year → p2_share; p
 | `p2_offplan_areas` | clusteredBarChart | 840, 452, 424, 228 | Category: 'Area'[Area]; Y: [Off-Plan Share (Count)] as "Off-plan share" | top 6 'Area'[Area] by [Market Sales] | Off-plan share, 6 busiest areas | Off-plan share of sales in the six areas with the most market sales. |
 | `p2_ftr_source` | cardVisual | 16, 684, 1248, 32 | Data: [Footer Attribution] |  |  | Data sources and licences. |
 
-## 3 Prices & Index
+## 3 Prices
 
 Interactions set to none: p3_Year → p3_maxdd; p3_Year → p3_vs_dld; p3_Year → p3_mix_shift; p3_Year → p3_drawdown.
 
@@ -70,7 +142,7 @@ Interactions set to none: p3_Year → p3_maxdd; p3_Year → p3_vs_dld; p3_Year �
 | `p3_bed_zone` | pivotTable | 792, 224, 472, 456 | Rows: 'Area'[Zone]; Columns: 'Bedrooms'[Bedrooms]; Values: [Median Price per Sq M (K)] as "Median AED / sq m" | 'Property Type'[Usage Group] in 'Residential'; 'Bedrooms'[Bedrooms] in 'Studio', '1 BR', '2 BR', '3 BR', '4 BR'; [Clean Sales] >= 20L | Median AED / sq m (K), zone × Studio–4 BR, residential | Table of the residential median price per square metre in thousands of AED by zone, studios to four bedrooms; blank cells have fewer than 20 sales. |
 | `p3_ftr_source` | cardVisual | 16, 684, 1248, 32 | Data: [Footer Attribution] |  |  | Data sources and licences. |
 
-## 4 Rental Yields
+## 4 Yields
 
 Interactions set to none: p4_Year → p4_trend.
 
@@ -91,7 +163,7 @@ Interactions set to none: p4_Year → p4_trend.
 | `p4_rent_beds` | clusteredColumnChart | 892, 452, 372, 228 | Category: 'Bedrooms'[Bedrooms]; Y: [New Rent per Sq M] as "AED / sq m / year" | 'Property Type'[Property Type] in 'Residential · Apartment'; 'Bedrooms'[Bedrooms] not in 'Unknown' | New rent per sq m by bedrooms / Apartments, new contracts | Annual rent per square metre of new apartment contracts by number of bedrooms. |
 | `p4_ftr_source` | cardVisual | 16, 684, 1248, 32 | Data: [Footer Attribution] |  |  | Data sources and licences. |
 
-## 5 Valuation Model (AVM)
+## 5 Valuation
 
 Page filters: 'AVM Score'[Model Set] in 'Test'.
 
@@ -115,7 +187,7 @@ Interactions set to none: p5_Year → p5_actual_vs_avm.
 | `p5_note` | textbox | 1024, 448, 240, 232 |  |  |  | Note on how to read the review flags. |
 | `p5_ftr_source` | cardVisual | 16, 684, 1248, 32 | Data: [Footer Attribution] |  |  | Data sources and licences. |
 
-## 6 Risk & Stress Test
+## 6 Risk
 
 Page filters: 'Forecast'[Target] in 'Price index'.
 
@@ -143,3 +215,18 @@ Interactions set to none: p6_Shock → p6_heatmap; p6_LTV → p6_heatmap.
 | `p6_concentration` | clusteredBarChart | 424, 472, 400, 208 | Category: 'Project'[Master Project]; Y: [Master Project Share (Off-Plan)] as "Share of off-plan sales" | top 5 'Project'[Master Project] by [Off-Plan Market Sales (Lines)]; 'Project'[Master Project] not in 'Unknown' | [Title Concentration] | Top five master projects' shares of off-plan sales in the selected year, a proxy for developer concentration. |
 | `p6_outlook` | lineChart | 832, 472, 432, 208 | Category: 'Forecast'[Month]; Y: [Forecast Actual] as "Actual", [Forecast Central] as "Forecast", [Forecast Lower 80] as "80% low", [Forecast Upper 80] as "80% high" | 'Forecast'[Month] >= datetime'2021-01-01T00:00:00' | [Title Outlook] / Dashed = 80% interval; a baseline, not a call | Price index history since 2021 and the 12-month forecast with its 80% interval for the selected rate scenario. |
 | `p6_ftr_source` | cardVisual | 16, 684, 1248, 32 | Data: [Footer Attribution] |  |  | Data sources and licences. |
+
+## KPI guide
+
+| Visual | Type | Position | Fields | Filters | Title | Alt text |
+|---|---|---|---|---|---|---|
+| `p7_frame_panel` | textbox | 182, 12, 1086, 696 |  |  |  | Content panel (decorative). |
+| `p7_side_logo` | textbox | 14, 18, 150, 56 |  |  |  | Report name: Dubai Property Risk. |
+| `p7_side_nav` | pageNavigator | 12, 92, 146, 324 |  |  |  | Page navigation: one button per report page. |
+| `p7_side_icon` | textbox | 34, 550, 110, 130 |  |  |  | Decorative house icon. |
+| `p7_hdr_title` | textbox | 198, 16, 620, 36 |  |  |  | Page title: KPI GUIDE. |
+| `p7_hdr_asof` | cardVisual | 826, 20, 226, 28 | Data: [Data As Of Label] |  |  | Date of the latest transaction in the data. |
+| `p7_hdr_reset` | actionButton | 1060, 18, 152, 32 |  |  |  | Button: reset all filters on this page. |
+| `p7_hdr_info` | actionButton | 1218, 18, 40, 32 |  |  |  | Button: open the KPI guide. |
+| `p7Guide_placeholder` | textbox | 198, 60, 1060, 60 |  |  |  | Placeholder for the KPI guide. |
+| `p7_ftr_source` | cardVisual | 198, 684, 1060, 22 | Data: [Footer Attribution] |  |  | Data sources and licences. |

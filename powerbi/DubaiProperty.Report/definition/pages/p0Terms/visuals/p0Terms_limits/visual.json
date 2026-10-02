@@ -1,13 +1,13 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
-  "name": "p1_insight_2026",
+  "name": "p0Terms_limits",
   "position": {
-    "x": 434,
-    "y": 576,
-    "z": 15000,
-    "width": 410,
-    "height": 104,
-    "tabOrder": 15000
+    "x": 198,
+    "y": 618,
+    "z": 41000,
+    "width": 1060,
+    "height": 58,
+    "tabOrder": 41000
   },
   "visual": {
     "visualType": "textbox",
@@ -19,8 +19,10 @@
               {
                 "textRuns": [
                   {
-                    "value": "2026 has slowed, led by ready homes",
+                    "value": "What this can't tell you",
                     "textStyle": {
+                      "fontSize": "11pt",
+                      "color": "#1b2a4a",
                       "fontWeight": "bold"
                     }
                   }
@@ -29,8 +31,11 @@
               {
                 "textRuns": [
                   {
-                    "value": "January–August 2026 market sales are 19% below the same months of 2025 (ready −37%, off-plan −7%). Registration-lag checks show it is not late data.",
-                    "textStyle": {}
+                    "value": "There is no floor, view or condition in the data, so similar-looking flats can be worth different amounts. The stress test is illustrative, not a regulatory test. Nothing here is investment advice.",
+                    "textStyle": {
+                      "fontSize": "9pt",
+                      "color": "#1b2a4a"
+                    }
                   }
                 ]
               }
@@ -72,7 +77,41 @@
             "altText": {
               "expr": {
                 "Literal": {
-                  "Value": "'Insight: the 2026 slowdown compared with 2025.'"
+                  "Value": "'What this can''t tell you.'"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "padding": [
+        {
+          "properties": {
+            "top": {
+              "expr": {
+                "Literal": {
+                  "Value": "12D"
+                }
+              }
+            },
+            "bottom": {
+              "expr": {
+                "Literal": {
+                  "Value": "12D"
+                }
+              }
+            },
+            "left": {
+              "expr": {
+                "Literal": {
+                  "Value": "14D"
+                }
+              }
+            },
+            "right": {
+              "expr": {
+                "Literal": {
+                  "Value": "14D"
                 }
               }
             }

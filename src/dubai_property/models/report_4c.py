@@ -47,9 +47,9 @@ log = logging.getLogger(__name__)
 STRESS_REPORT = "stress_test.md"
 FORECAST_REPORT = "forecast.md"
 TYPE_LABEL = {101: "Apartments", 102: "Villas / townhouses"}
-TYPE_COLOR = {101: P.BLUE, 102: P.ORANGE}
+TYPE_COLOR = {101: P.NAVY, 102: P.MAGENTA}
 SEG_LABEL = {"dubai": "Dubai (all residential)", "apartment": "Apartments", "villa": "Villas"}
-SEG_COLOR = {"dubai": P.AQUA, "apartment": P.BLUE, "villa": P.ORANGE}
+SEG_COLOR = {"dubai": P.TEAL, "apartment": P.NAVY, "villa": P.MAGENTA}
 MODEL_LABEL = {
     "naive_rw": "Naive (last value)",
     "naive_seasonal": "Seasonal naive",
@@ -219,8 +219,8 @@ def fig_stress_zones(grid: pl.DataFrame, snapshot: date, shock: int, ltv: int) -
     ax.grid(False, axis="y")
     from matplotlib.patches import Patch
 
-    handles = [Patch(color=P.BLUE, label=f"Apartments, {shock}% shock"),
-               Patch(color=P.ORANGE, label=f"Villas, {shock}% shock"),
+    handles = [Patch(color=P.NAVY, label=f"Apartments, {shock}% shock"),
+               Patch(color=P.MAGENTA, label=f"Villas, {shock}% shock"),
                *ax.get_legend_handles_labels()[0][:2]]  # fmt: skip
     ax.legend(handles=handles, loc="lower left", bbox_to_anchor=(0, 1.0), ncol=2, frameon=False,
               fontsize=8)  # fmt: skip
@@ -319,7 +319,7 @@ def fig_backtest(b: pl.DataFrame, snapshot: date) -> Path:
     margins(fig)
     fig.subplots_adjust(hspace=0.55, wspace=0.25)
     styles = {"naive_rw": (P.MUTED, "--"), "naive_seasonal": (P.MUTED, ":"),
-              "sarimax": (P.BLUE, "-")}  # fmt: skip
+              "sarimax": (P.NAVY, "-")}  # fmt: skip
     for ax in axes.ravel():
         ax.set_visible(False)
     for target, seg in keys:

@@ -2,12 +2,12 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
   "name": "p1_insight_2009",
   "position": {
-    "x": 852,
-    "y": 576,
-    "z": 16000,
-    "width": 410,
-    "height": 104,
-    "tabOrder": 16000
+    "x": 910,
+    "y": 566,
+    "z": 47000,
+    "width": 346,
+    "height": 110,
+    "tabOrder": 47000
   },
   "visual": {
     "visualType": "textbox",
@@ -19,8 +19,10 @@
               {
                 "textRuns": [
                   {
-                    "value": "The 2009 'spike' was paperwork, not demand",
+                    "value": "2009 was a backlog",
                     "textStyle": {
+                      "fontSize": "11pt",
+                      "color": "#1b2a4a",
                       "fontWeight": "bold"
                     }
                   }
@@ -29,8 +31,11 @@
               {
                 "textRuns": [
                   {
-                    "value": "93.5% of 2009 off-plan registrations were applied for in earlier years: a backlog entered into the new off-plan register (Law No. 13 of 2008).",
-                    "textStyle": {}
+                    "value": "The 2009 jump in sales was paperwork, not demand: most off-plan sales registered that year had been agreed earlier and were entered when the new register opened.",
+                    "textStyle": {
+                      "fontSize": "9pt",
+                      "color": "#1b2a4a"
+                    }
                   }
                 ]
               }
@@ -73,6 +78,40 @@
               "expr": {
                 "Literal": {
                   "Value": "'Insight: the 2009 registration backlog.'"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "padding": [
+        {
+          "properties": {
+            "top": {
+              "expr": {
+                "Literal": {
+                  "Value": "12D"
+                }
+              }
+            },
+            "bottom": {
+              "expr": {
+                "Literal": {
+                  "Value": "12D"
+                }
+              }
+            },
+            "left": {
+              "expr": {
+                "Literal": {
+                  "Value": "14D"
+                }
+              }
+            },
+            "right": {
+              "expr": {
+                "Literal": {
+                  "Value": "14D"
                 }
               }
             }

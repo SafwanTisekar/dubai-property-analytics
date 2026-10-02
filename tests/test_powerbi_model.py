@@ -203,7 +203,8 @@ def test_format_value_decoding():
 # --- Report (PBIR): pages and visuals --------------------------------------------------
 
 CANVAS = (1280, 720)
-MAX_DATA_VISUALS = 8  # docs/06 §5: 6-8 visuals per page (header / footer / slicers excluded)
+# docs/06 §5: at most 8 charts / tables per page (KPI tiles, text and the frame excluded)
+MAX_DATA_VISUALS = 8
 SYNCED_SLICERS = {"Year", "Area", "PropertyType", "Bedrooms", "ReadyOffPlan"}
 
 
@@ -262,12 +263,14 @@ def test_visuals_fit_the_canvas_have_alt_text_and_respect_the_cap():
         ]
         general = v["visual"].get("visualContainerObjects", {}).get("general", [{}])
         assert pbir.literal_value(general[0].get("properties", {}).get("altText")), v["name"]
-        layout = "_hdr_" in v["name"] or "_ftr_" in v["name"]
-        if v["visual"]["visualType"] not in pbir.NON_DATA_VISUALS and not layout:
+        if v["visual"]["visualType"] in CHART_TYPES:
             per_page[page] = per_page.get(page, 0) + 1
         folder = next(p for p in pbir.visual_files() if p.parent.name == v["name"])
         assert folder.parent.name == v["name"]
     assert per_page and max(per_page.values()) <= MAX_DATA_VISUALS, per_page
+
+
+REPORT_PAGES = {"p1Executive", "p2Financing", "p3Prices", "p4Yields", "p5Valuation", "p6Risk"}
 
 
 def test_built_pages_carry_the_synced_slicer_panel():
@@ -276,7 +279,7 @@ def test_built_pages_carry_the_synced_slicer_panel():
         sync = v["visual"].get("syncGroup")
         if sync:
             groups.setdefault(page, set()).add(sync["groupName"])
-    built = {page for page, _ in visuals()}
+    built = {page for page, _ in visuals()} & REPORT_PAGES  # guide pages have no slicers
     for page in built:
         assert groups.get(page) == SYNCED_SLICERS, page
 

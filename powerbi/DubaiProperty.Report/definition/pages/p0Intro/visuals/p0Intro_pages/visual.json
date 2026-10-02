@@ -1,0 +1,264 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
+  "name": "p0Intro_pages",
+  "position": {
+    "x": 728,
+    "y": 284,
+    "z": 31000,
+    "width": 530,
+    "height": 250,
+    "tabOrder": 31000
+  },
+  "visual": {
+    "visualType": "textbox",
+    "objects": {
+      "general": [
+        {
+          "properties": {
+            "paragraphs": [
+              {
+                "textRuns": [
+                  {
+                    "value": "What's on each page",
+                    "textStyle": {
+                      "fontSize": "11pt",
+                      "color": "#1b2a4a",
+                      "fontWeight": "bold"
+                    }
+                  }
+                ]
+              },
+              {
+                "textRuns": [
+                  {
+                    "value": "Key terms",
+                    "textStyle": {
+                      "fontSize": "10pt",
+                      "color": "#1b2a4a",
+                      "fontWeight": "bold"
+                    }
+                  },
+                  {
+                    "value": ": the words and models used, in plain English.",
+                    "textStyle": {
+                      "fontSize": "10pt",
+                      "color": "#1b2a4a"
+                    }
+                  }
+                ]
+              },
+              {
+                "textRuns": [
+                  {
+                    "value": "1 Executive",
+                    "textStyle": {
+                      "fontSize": "10pt",
+                      "color": "#1b2a4a",
+                      "fontWeight": "bold"
+                    }
+                  },
+                  {
+                    "value": ": the big picture: sales, prices and mortgages.",
+                    "textStyle": {
+                      "fontSize": "10pt",
+                      "color": "#1b2a4a"
+                    }
+                  }
+                ]
+              },
+              {
+                "textRuns": [
+                  {
+                    "value": "2 Financing",
+                    "textStyle": {
+                      "fontSize": "10pt",
+                      "color": "#1b2a4a",
+                      "fontWeight": "bold"
+                    }
+                  },
+                  {
+                    "value": ": how buyers pay, and off-plan versus ready homes.",
+                    "textStyle": {
+                      "fontSize": "10pt",
+                      "color": "#1b2a4a"
+                    }
+                  }
+                ]
+              },
+              {
+                "textRuns": [
+                  {
+                    "value": "3 Prices",
+                    "textStyle": {
+                      "fontSize": "10pt",
+                      "color": "#1b2a4a",
+                      "fontWeight": "bold"
+                    }
+                  },
+                  {
+                    "value": ": what prices did, measured like for like.",
+                    "textStyle": {
+                      "fontSize": "10pt",
+                      "color": "#1b2a4a"
+                    }
+                  }
+                ]
+              },
+              {
+                "textRuns": [
+                  {
+                    "value": "4 Yields",
+                    "textStyle": {
+                      "fontSize": "10pt",
+                      "color": "#1b2a4a",
+                      "fontWeight": "bold"
+                    }
+                  },
+                  {
+                    "value": ": the rent a home earns compared with its price.",
+                    "textStyle": {
+                      "fontSize": "10pt",
+                      "color": "#1b2a4a"
+                    }
+                  }
+                ]
+              },
+              {
+                "textRuns": [
+                  {
+                    "value": "5 Valuation",
+                    "textStyle": {
+                      "fontSize": "10pt",
+                      "color": "#1b2a4a",
+                      "fontWeight": "bold"
+                    }
+                  },
+                  {
+                    "value": ": how close the automated valuer gets to real prices.",
+                    "textStyle": {
+                      "fontSize": "10pt",
+                      "color": "#1b2a4a"
+                    }
+                  }
+                ]
+              },
+              {
+                "textRuns": [
+                  {
+                    "value": "6 Risk",
+                    "textStyle": {
+                      "fontSize": "10pt",
+                      "color": "#1b2a4a",
+                      "fontWeight": "bold"
+                    }
+                  },
+                  {
+                    "value": ": what a fall in prices would do to recent buyers.",
+                    "textStyle": {
+                      "fontSize": "10pt",
+                      "color": "#1b2a4a"
+                    }
+                  }
+                ]
+              },
+              {
+                "textRuns": [
+                  {
+                    "value": "KPI guide",
+                    "textStyle": {
+                      "fontSize": "10pt",
+                      "color": "#1b2a4a",
+                      "fontWeight": "bold"
+                    }
+                  },
+                  {
+                    "value": ": every number, how it is calculated and its limits.",
+                    "textStyle": {
+                      "fontSize": "10pt",
+                      "color": "#1b2a4a"
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "visualContainerObjects": {
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "subTitle": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "general": [
+        {
+          "properties": {
+            "altText": {
+              "expr": {
+                "Literal": {
+                  "Value": "'One line per page of the report.'"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "padding": [
+        {
+          "properties": {
+            "top": {
+              "expr": {
+                "Literal": {
+                  "Value": "12D"
+                }
+              }
+            },
+            "bottom": {
+              "expr": {
+                "Literal": {
+                  "Value": "12D"
+                }
+              }
+            },
+            "left": {
+              "expr": {
+                "Literal": {
+                  "Value": "14D"
+                }
+              }
+            },
+            "right": {
+              "expr": {
+                "Literal": {
+                  "Value": "14D"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}
