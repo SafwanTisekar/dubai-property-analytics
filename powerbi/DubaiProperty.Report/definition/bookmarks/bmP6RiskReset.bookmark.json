@@ -52,7 +52,7 @@
                                               "Source": "d"
                                             }
                                           },
-                                          "Property": "Year"
+                                          "Property": "Year Label"
                                         }
                                       }
                                     ],
@@ -60,7 +60,7 @@
                                       [
                                         {
                                           "Literal": {
-                                            "Value": "2025L"
+                                            "Value": "'2025'"
                                           }
                                         }
                                       ]

@@ -257,6 +257,7 @@ Then, in Power BI Desktop (Parallels), connect to PostgreSQL as pbi_reader (impo
 - [x] Gate 1 round 2: dynamic text in wrapping one-column tables (cards cut it to one line), headings inside the insight and data cards, strips ≤ 26 characters at 7.5 pt, "Mortgage share (ready)", symmetric frame, panel `#e8ebf0`
 - [x] Gate 2 built: pages 2–6 in the new frame (KPI tiles with strips, section headings, 180 px chart cards, top-N sized to fit), KPI guide page generated from structured measure descriptions (25 KPI descriptions rewritten in plain English; `'KPI Guide'` table; tests), card checklist (§7) aligned
 - [x] **Gate 2 (owner): checked in Desktop 2026-10-02**; final fixes: KPI guide shows all 27 KPIs with a page column and a no-default page filter, page 3 matrix fits (short zone labels, 400 px), Key terms text fits without scrolling, page 5 segment labels outside the bars, **Reset all filters = per-page bookmarks** restoring the defaults (owner to confirm they load in Desktop; fallback: recreate by hand, BUILD.md)
+- [x] Slicer fixes: Year (and shock, LTV, segment controls) single select + Require single selection, tested; Year shows "2026 (to 25 Sep)" and only years with data (`rpt.dim_date` "Year Label", "Is Data Year" from the snapshot date)
 
 **Phase 5 checklist (owner, Power BI Desktop)**
 - [x] Six pages built (PBIR, generated and validated offline) and reviewed in Desktop over three gates (2026-10-02); `powerbi/VISUALS.md` lists every visual

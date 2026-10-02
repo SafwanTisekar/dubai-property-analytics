@@ -66,7 +66,7 @@ Interactions set to none: p1_Year → p1_value_by_month.
 | `p1_hdr_asof` | cardVisual | 826, 20, 226, 28 | Data: [Data As Of Label] |  |  | Date of the latest transaction in the data. |
 | `p1_hdr_reset` | actionButton | 1060, 18, 152, 32 |  |  |  | Button: reset the filters on this page to their defaults. |
 | `p1_hdr_info` | actionButton | 1218, 18, 40, 32 |  |  |  | Button: open the KPI guide. |
-| `p1_Year` | slicer | 198, 60, 150, 56 | Values: 'Date'[Year] |  |  | Slicer: Year |
+| `p1_Year` | slicer | 198, 60, 150, 56 | Values: 'Date'[Year Label] | 'Date'[Is Data Year] in true |  | Slicer: Year |
 | `p1_Area` | slicer | 358, 60, 250, 56 | Values: 'Area'[Zone], 'Area'[Area] |  |  | Slicer: Zone / area |
 | `p1_PropertyType` | slicer | 618, 60, 250, 56 | Values: 'Property Type'[Property Type] |  |  | Slicer: Property type |
 | `p1_Bedrooms` | slicer | 878, 60, 170, 56 | Values: 'Bedrooms'[Bedrooms] |  |  | Slicer: Bedrooms |
@@ -107,7 +107,7 @@ Interactions set to none: p2_Year → p2_ready_financed; p2_Year → p2_share; p
 | `p2_hdr_asof` | cardVisual | 826, 20, 226, 28 | Data: [Data As Of Label] |  |  | Date of the latest transaction in the data. |
 | `p2_hdr_reset` | actionButton | 1060, 18, 152, 32 |  |  |  | Button: reset the filters on this page to their defaults. |
 | `p2_hdr_info` | actionButton | 1218, 18, 40, 32 |  |  |  | Button: open the KPI guide. |
-| `p2_Year` | slicer | 198, 60, 150, 56 | Values: 'Date'[Year] |  |  | Slicer: Year |
+| `p2_Year` | slicer | 198, 60, 150, 56 | Values: 'Date'[Year Label] | 'Date'[Is Data Year] in true |  | Slicer: Year |
 | `p2_Area` | slicer | 358, 60, 250, 56 | Values: 'Area'[Zone], 'Area'[Area] |  |  | Slicer: Zone / area |
 | `p2_PropertyType` | slicer | 618, 60, 250, 56 | Values: 'Property Type'[Property Type] |  |  | Slicer: Property type |
 | `p2_Bedrooms` | slicer | 878, 60, 170, 56 | Values: 'Bedrooms'[Bedrooms] |  |  | Slicer: Bedrooms |
@@ -147,7 +147,7 @@ Interactions set to none: p3_Year → p3_vs_dld; p3_Year → p3_mix_shift; p3_Ye
 | `p3_hdr_asof` | cardVisual | 826, 20, 226, 28 | Data: [Data As Of Label] |  |  | Date of the latest transaction in the data. |
 | `p3_hdr_reset` | actionButton | 1060, 18, 152, 32 |  |  |  | Button: reset the filters on this page to their defaults. |
 | `p3_hdr_info` | actionButton | 1218, 18, 40, 32 |  |  |  | Button: open the KPI guide. |
-| `p3_Year` | slicer | 198, 60, 110, 56 | Values: 'Date'[Year] |  |  | Slicer: Year |
+| `p3_Year` | slicer | 198, 60, 110, 56 | Values: 'Date'[Year Label] | 'Date'[Is Data Year] in true |  | Slicer: Year |
 | `p3_Area` | slicer | 318, 60, 200, 56 | Values: 'Area'[Zone], 'Area'[Area] |  |  | Slicer: Zone / area |
 | `p3_PropertyType` | slicer | 528, 60, 200, 56 | Values: 'Property Type'[Property Type] |  |  | Slicer: Property type |
 | `p3_Bedrooms` | slicer | 738, 60, 120, 56 | Values: 'Bedrooms'[Bedrooms] |  |  | Slicer: Bedrooms |
@@ -186,7 +186,7 @@ Interactions set to none: p4_Year → p4_trend.
 | `p4_hdr_asof` | cardVisual | 826, 20, 226, 28 | Data: [Data As Of Label] |  |  | Date of the latest transaction in the data. |
 | `p4_hdr_reset` | actionButton | 1060, 18, 152, 32 |  |  |  | Button: reset the filters on this page to their defaults. |
 | `p4_hdr_info` | actionButton | 1218, 18, 40, 32 |  |  |  | Button: open the KPI guide. |
-| `p4_Year` | slicer | 198, 60, 150, 56 | Values: 'Date'[Year] |  |  | Slicer: Year |
+| `p4_Year` | slicer | 198, 60, 150, 56 | Values: 'Date'[Year Label] | 'Date'[Is Data Year] in true |  | Slicer: Year |
 | `p4_Area` | slicer | 358, 60, 250, 56 | Values: 'Area'[Zone], 'Area'[Area] |  |  | Slicer: Zone / area |
 | `p4_PropertyType` | slicer | 618, 60, 250, 56 | Values: 'Property Type'[Property Type] |  |  | Slicer: Property type |
 | `p4_Bedrooms` | slicer | 878, 60, 170, 56 | Values: 'Bedrooms'[Bedrooms] |  |  | Slicer: Bedrooms |
@@ -223,7 +223,7 @@ Interactions set to none: p5_Year → p5_actual_vs_avm.
 | `p5_hdr_asof` | cardVisual | 826, 20, 226, 28 | Data: [Data As Of Label] |  |  | Date of the latest transaction in the data. |
 | `p5_hdr_reset` | actionButton | 1060, 18, 152, 32 |  |  |  | Button: reset the filters on this page to their defaults. |
 | `p5_hdr_info` | actionButton | 1218, 18, 40, 32 |  |  |  | Button: open the KPI guide. |
-| `p5_Year` | slicer | 198, 60, 110, 56 | Values: 'Date'[Year] |  |  | Slicer: Year |
+| `p5_Year` | slicer | 198, 60, 110, 56 | Values: 'Date'[Year Label] | 'Date'[Is Data Year] in true |  | Slicer: Year |
 | `p5_Area` | slicer | 318, 60, 200, 56 | Values: 'Area'[Zone], 'Area'[Area] |  |  | Slicer: Zone / area |
 | `p5_PropertyType` | slicer | 528, 60, 200, 56 | Values: 'Property Type'[Property Type] |  |  | Slicer: Property type |
 | `p5_Bedrooms` | slicer | 738, 60, 120, 56 | Values: 'Bedrooms'[Bedrooms] |  |  | Slicer: Bedrooms |
@@ -262,7 +262,7 @@ Interactions set to none: p6_Shock → p6_heatmap; p6_LTV → p6_heatmap.
 | `p6_hdr_asof` | cardVisual | 826, 20, 226, 28 | Data: [Data As Of Label] |  |  | Date of the latest transaction in the data. |
 | `p6_hdr_reset` | actionButton | 1060, 18, 152, 32 |  |  |  | Button: reset the filters on this page to their defaults. |
 | `p6_hdr_info` | actionButton | 1218, 18, 40, 32 |  |  |  | Button: open the KPI guide. |
-| `p6_Year` | slicer | 198, 60, 100, 56 | Values: 'Date'[Year] |  |  | Slicer: Year |
+| `p6_Year` | slicer | 198, 60, 100, 56 | Values: 'Date'[Year Label] | 'Date'[Is Data Year] in true |  | Slicer: Year |
 | `p6_Area` | slicer | 308, 60, 170, 56 | Values: 'Area'[Zone], 'Area'[Area] |  |  | Slicer: Zone / area |
 | `p6_PropertyType` | slicer | 488, 60, 170, 56 | Values: 'Property Type'[Property Type] |  |  | Slicer: Property type |
 | `p6_Bedrooms` | slicer | 668, 60, 100, 56 | Values: 'Bedrooms'[Bedrooms] |  |  | Slicer: Bedrooms |

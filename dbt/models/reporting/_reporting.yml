@@ -7,7 +7,15 @@ version: 2
 
 models:
   - name: rpt_dim_date
-    description: rpt.dim_date. Calendar; mark as the date table on "Date".
+    description: >
+      rpt.dim_date. Calendar; mark as the date table on "Date". "Year Label" marks the
+      snapshot year as partial ("2026 (to 25 Sep)") and "Is Data Year" limits year slicers to
+      years with data (dim_date runs on to the end of the forecast horizon).
+    columns:
+      - name: '"Year Label"'
+        tests: [not_null]
+      - name: '"Is Data Year"'
+        tests: [not_null]
   - name: rpt_dim_area
     description: >
       rpt.dim_area. Areas with zone, a short zone label for narrow columns, and the

@@ -529,3 +529,54 @@ def test_reset_buttons_restore_their_page_slicers():
                     page,
                     name,
                 )
+
+
+# --- Slicer selection settings ------------------------------------------------------------
+
+# One value at a time (owner): Year, and the page controls that pick a scenario or a series.
+SINGLE_SELECT = ("_Year", "_Shock", "_LTV", "_StressSegment", "_IndexSegment", "_Breakdown")
+MULTI_SELECT = ("_Area", "_PropertyType", "_Bedrooms", "_ReadyOffPlan", "p7Guide_Page")
+
+
+def _selection(v: dict) -> dict:
+    props = v["visual"].get("objects", {}).get("selection", [{}])[0].get("properties", {})
+    return {k: pbir.literal_value(p) for k, p in props.items()}
+
+
+def test_single_select_slicers_require_one_value():
+    """Regression (gate 2): a Year slicer must not allow several years."""
+    checked = 0
+    for page, v in visuals():
+        if v["visual"]["visualType"] != "slicer":
+            continue
+        sel = _selection(v)
+        if v["name"].endswith(SINGLE_SELECT):
+            checked += 1
+            assert sel.get("singleSelect") is True and sel.get("strictSingleSelect") is True, (
+                page,
+                v["name"],
+                sel,
+            )
+        else:
+            assert v["name"].endswith(MULTI_SELECT), (
+                page,
+                v["name"],
+                "add it to SINGLE_ or MULTI_SELECT",
+            )
+            assert sel.get("singleSelect") is False, (page, v["name"], sel)
+    assert checked >= 6 + 3  # a Year slicer on each report page, plus page 3, 5 and 6 controls
+
+
+def test_date_slicers_offer_only_years_with_data():
+    """dim_date runs to the end of the forecast horizon: slicers stop at the snapshot year."""
+    for page, v in visuals():
+        if v["visual"]["visualType"] != "slicer":
+            continue
+        fields = [r for r in pbir.field_refs(v["visual"]["query"]) if r.entity == "Date"]
+        if not fields:
+            continue
+        assert [f.prop for f in fields] == ["Year Label"], (page, v["name"])
+        filters = v.get("filterConfig", {}).get("filters", [])
+        cond = [f["filter"]["Where"][0]["Condition"]["In"] for f in filters
+                if f["field"]["Column"]["Property"] == "Is Data Year"]  # fmt: skip
+        assert cond and cond[0]["Values"] == [[{"Literal": {"Value": "true"}}]], (page, v["name"])

@@ -64,6 +64,13 @@
                   "Value": "true"
                 }
               }
+            },
+            "selectAllCheckboxEnabled": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
             }
           }
         }

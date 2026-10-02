@@ -133,6 +133,24 @@ table Date
 
 		annotation SummarizationSetBy = User
 
+	column 'Year Label'
+		dataType: string
+		lineageTag: 1d73243b-0948-5d98-802e-ca1917bca963
+		summarizeBy: none
+		sourceColumn: Year Label
+		sortByColumn: Year
+
+		annotation SummarizationSetBy = User
+
+	column 'Is Data Year'
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: 2cb3331e-7e1c-5ae0-94cc-d200b974e431
+		summarizeBy: none
+		sourceColumn: Is Data Year
+
+		annotation SummarizationSetBy = User
+
 	partition Date = m
 		mode: import
 		source =

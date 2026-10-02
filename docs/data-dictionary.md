@@ -1,6 +1,6 @@
 # Data dictionary
 
-Generated 2026-10-02 16:30 UTC by `quality/data_dictionary.py` from the dbt manifest (descriptions, tests) and the database catalogue (columns, types). Regenerate with `make dictionary` (after `make dbt`). Rules C1-C22 are in docs/04 §2; the star schema in docs/04 §3. Bronze is raw text (docs/04 §1) and not listed.
+Generated 2026-10-02 16:44 UTC by `quality/data_dictionary.py` from the dbt manifest (descriptions, tests) and the database catalogue (columns, types). Regenerate with `make dictionary` (after `make dbt`). Rules C1-C22 are in docs/04 §2; the star schema in docs/04 §3. Bronze is raw text (docs/04 §1) and not listed.
 
 ## Silver: seeds, staging views and intermediate tables (typed, cleaned, flagged)
 
@@ -862,7 +862,7 @@ Every DLD transaction line (Sales, Gifts, Mortgages; 1.79M) with dimension keys 
 | [`rpt.avm_score`](#rptavm_score) | view | rpt.avm_score. AVM value, error and gap per clean residential market sale valued out of sample (validation 2024, test 2025+); the in-sample training rows stay in ml. The review flag marks \|gap\| > 25% as a statistical anomaly for collateral review, not an accusation. Transaction ID only on flagged rows. |
 | [`rpt.dim_area`](#rptdim_area) | view | rpt.dim_area. Areas with zone, a short zone label for narrow columns, and the OpenStreetMap centroid (NULL where not located; reports/area_centroids.md). |
 | [`rpt.dim_bedrooms`](#rptdim_bedrooms) | view | rpt.dim_bedrooms. Shared Bedrooms slicer: key -1 (unknown) to 20, labels Unknown / Studio / 1-6 BR / 7+ BR, with a sort order. |
-| [`rpt.dim_date`](#rptdim_date) | view | rpt.dim_date. Calendar; mark as the date table on "Date". |
+| [`rpt.dim_date`](#rptdim_date) | view | rpt.dim_date. Calendar; mark as the date table on "Date". "Year Label" marks the snapshot year as partial ("2026 (to 25 Sep)") and "Is Data Year" limits year slicers to years with data (dim_date runs on to the end of the forecast horizon). |
 | [`rpt.dim_procedure`](#rptdim_procedure) | view | rpt.dim_procedure. DLD procedures and categories. |
 | [`rpt.dim_project`](#rptdim_project) | view | rpt.dim_project. DLD projects (no developer yet). |
 | [`rpt.dim_property_type`](#rptdim_property_type) | view | rpt.dim_property_type. Conformed usage group x property class. |
@@ -996,7 +996,7 @@ rpt.dim_bedrooms. Shared Bedrooms slicer: key -1 (unknown) to 20, labels Unknown
 
 dbt model `rpt_dim_date`.
 
-rpt.dim_date. Calendar; mark as the date table on "Date".
+rpt.dim_date. Calendar; mark as the date table on "Date". "Year Label" marks the snapshot year as partial ("2026 (to 25 Sep)") and "Is Data Year" limits year slicers to years with data (dim_date runs on to the end of the forecast horizon).
 
 | Column | Type | Description | Tests |
 |---|---|---|---|
@@ -1014,6 +1014,8 @@ rpt.dim_date. Calendar; mark as the date table on "Date".
 | `Day Name` | text |  |  |
 | `Is Month Start` | boolean |  |  |
 | `Is After Snapshot` | boolean |  |  |
+| `Year Label` | text |  |  |
+| `Is Data Year` | boolean |  |  |
 
 <a id="rptdim_procedure"></a>
 ### `rpt.dim_procedure`
