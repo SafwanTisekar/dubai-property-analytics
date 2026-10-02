@@ -580,3 +580,14 @@ def test_date_slicers_offer_only_years_with_data():
         cond = [f["filter"]["Where"][0]["Condition"]["In"] for f in filters
                 if f["field"]["Column"]["Property"] == "Is Data Year"]  # fmt: skip
         assert cond and cond[0]["Values"] == [[{"Literal": {"Value": "true"}}]], (page, v["name"])
+
+
+def test_reset_buttons_style_every_state():
+    """Service: the Reset button did not show; every state is now styled the same."""
+    resets = [v for _, v in visuals() if v["name"].endswith("_hdr_reset")]
+    assert resets
+    for v in resets:
+        objs = v["visual"]["objects"]
+        for obj in ("text", "icon", "fill"):
+            states = {e.get("selector", {}).get("id") for e in objs[obj]}
+            assert states == {"default", "hover", "selected", "disabled"}, (v["name"], obj, states)
