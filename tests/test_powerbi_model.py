@@ -7,12 +7,13 @@ a what-if table that no longer matches the stress grid, before Desktop does.
 
 from __future__ import annotations
 
+import json
 import re
 
 import pytest
 
 from dubai_property import config
-from dubai_property.powerbi import tmdl
+from dubai_property.powerbi import pbir, tmdl
 
 REPORTING = config.DBT_DIR / "models" / "reporting"
 
@@ -197,3 +198,131 @@ def test_format_value_decoding():
     assert tmdl_format_value('"""AED ""#,0"') == '"AED "#,0'
     assert tmdl_format_value("0.0%") == "0.0%"
     assert re.search(r",(?![0#])", re.sub(r'"[^"]*"', "", '"AED "#,0.0,,,"bn"'))
+
+
+# --- Report (PBIR): pages and visuals --------------------------------------------------
+
+CANVAS = (1280, 720)
+MAX_DATA_VISUALS = 8  # docs/06 §5: 6-8 visuals per page (header / footer / slicers excluded)
+SYNCED_SLICERS = {"Year", "Area", "PropertyType", "Bedrooms", "ReadyOffPlan"}
+
+
+def visuals() -> list[tuple[str, dict]]:
+    return [
+        (p.parent.parent.parent.name, json.loads(p.read_text("utf-8"))) for p in pbir.visual_files()
+    ]
+
+
+def test_report_files_validate_against_the_official_schemas():
+    files = [
+        pbir.REPORT_DEFINITION / "report.json",
+        pbir.REPORT_DEFINITION / "pages" / "pages.json",
+        *pbir.page_files(),
+        *pbir.visual_files(),
+    ]
+    for path in files:
+        assert pbir.schema_errors(path) == [], path.relative_to(pbir.REPORT_DEFINITION)
+
+
+def test_every_field_a_visual_uses_exists_in_the_model(model):
+    columns = {(t.name, c.name) for t in model.tables.values() for c in t.columns}
+    measures = {(t, m.name) for t, m in model.measures()}
+    for page, v in visuals():
+        for ref in pbir.field_refs(v):
+            known = columns if ref.kind == "Column" else measures
+            assert (ref.entity, ref.prop) in known, (page, v["name"], ref)
+
+
+def test_visual_formatting_matches_the_theme_schema():
+    index = json.loads(pbir.VISUAL_OBJECTS.read_text("utf-8"))["visuals"]
+    for page, v in visuals():
+        assert pbir.object_errors(v["visual"], index) == [], (page, v["name"])
+
+
+def test_slicer_selections_are_valid_filters():
+    for page, v in visuals():
+        for entry in v["visual"].get("objects", {}).get("general", []):
+            saved = entry.get("properties", {}).get("filter")
+            if saved:
+                assert pbir.filter_errors(saved["filter"]) == [], (page, v["name"])
+
+
+def test_visuals_fit_the_canvas_have_alt_text_and_respect_the_cap():
+    per_page: dict[str, int] = {}
+    for page, v in visuals():
+        pos = v["position"]
+        assert pos["x"] >= 0 and pos["y"] >= 0, v["name"]
+        assert pos["x"] + pos["width"] <= CANVAS[0] and pos["y"] + pos["height"] <= CANVAS[1], v[
+            "name"
+        ]
+        general = v["visual"].get("visualContainerObjects", {}).get("general", [{}])
+        assert pbir.literal_value(general[0].get("properties", {}).get("altText")), v["name"]
+        layout = "_hdr_" in v["name"] or "_ftr_" in v["name"]
+        if v["visual"]["visualType"] not in pbir.NON_DATA_VISUALS and not layout:
+            per_page[page] = per_page.get(page, 0) + 1
+        folder = next(p for p in pbir.visual_files() if p.parent.name == v["name"])
+        assert folder.parent.name == v["name"]
+    assert per_page and max(per_page.values()) <= MAX_DATA_VISUALS, per_page
+
+
+def test_built_pages_carry_the_synced_slicer_panel():
+    groups: dict[str, set[str]] = {}
+    for page, v in visuals():
+        sync = v["visual"].get("syncGroup")
+        if sync:
+            groups.setdefault(page, set()).add(sync["groupName"])
+    built = {page for page, _ in visuals()}
+    for page in built:
+        assert groups.get(page) == SYNCED_SLICERS, page
+
+
+def test_visual_interactions_name_existing_visuals():
+    names: dict[str, set[str]] = {}
+    for page, v in visuals():
+        names.setdefault(page, set()).add(v["name"])
+    for path in pbir.page_files():
+        doc = json.loads(path.read_text("utf-8"))
+        for i in doc.get("visualInteractions", []):
+            assert {i["source"], i["target"]} <= names.get(doc["name"], set()), (doc["name"], i)
+
+
+def test_theme_is_registered_in_the_report():
+    report = json.loads((pbir.REPORT_DEFINITION / "report.json").read_text("utf-8"))
+    custom = report["themeCollection"]["customTheme"]
+    package = next(p for p in report["resourcePackages"] if p["type"] == "RegisteredResources")
+    item = next(i for i in package["items"] if i["type"] == "CustomTheme")
+    assert custom["name"] == item["name"] and custom["type"] == "RegisteredResources"
+    registered = (
+        pbir.REPORT_DEFINITION.parent / "StaticResources" / "RegisteredResources" / item["path"]
+    )
+    source = config.PROJECT_ROOT / "powerbi" / "theme.json"
+    assert json.loads(registered.read_text("utf-8")) == json.loads(source.read_text("utf-8")), (
+        "the registered theme differs from powerbi/theme.json: copy it over"
+    )
+
+
+def test_pbir_checks_catch_mistakes():
+    bad = {
+        "visualType": "cardVisual",
+        "objects": {
+            "value": [
+                {
+                    "properties": {
+                        "labelDisplayUnits": {"expr": {"Literal": {"Value": "7D"}}},
+                        "displayUnitz": {"expr": {"Literal": {"Value": "1D"}}},
+                    }
+                }
+            ],
+            "nope": [{"properties": {}}],
+        },
+    }
+    errors = pbir.object_errors(bad)
+    assert any("displayUnitz" in e for e in errors) and any("nope" in e for e in errors)
+    assert any("labelDisplayUnits: 7" in e for e in errors)
+    assert pbir.literal_value({"expr": {"Literal": {"Value": "'Dropdown'"}}}) == "Dropdown"
+    assert pbir.literal_value({"expr": {"Literal": {"Value": "1000000000D"}}}) == 1_000_000_000
+    assert pbir.filter_errors({"Version": 2, "From": []}) != []  # no Where
+    refs = list(pbir.field_refs({"From": [{"Name": "a", "Entity": "Area"}],
+                                 "Where": [{"Column": {"Expression": {"SourceRef": {"Source": "a"}},
+                                                       "Property": "Zone"}}]}))  # fmt: skip
+    assert refs == [pbir.FieldRef("Area", "Zone", "Column")]

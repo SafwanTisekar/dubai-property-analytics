@@ -4,5 +4,12 @@
   "displayName": "1 Executive Overview",
   "displayOption": "FitToPage",
   "height": 720,
-  "width": 1280
+  "width": 1280,
+  "visualInteractions": [
+    {
+      "source": "p1_Year",
+      "target": "p1_value_by_month",
+      "type": "NoFilter"
+    }
+  ]
 }

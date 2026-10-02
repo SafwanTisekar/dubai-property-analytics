@@ -1,0 +1,178 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
+  "name": "p1_kpis",
+  "position": {
+    "x": 16,
+    "y": 112,
+    "z": 10000,
+    "width": 1036,
+    "height": 88,
+    "tabOrder": 10000
+  },
+  "visual": {
+    "visualType": "cardVisual",
+    "query": {
+      "queryState": {
+        "Data": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_Measures"
+                    }
+                  },
+                  "Property": "Market Sales Value"
+                }
+              },
+              "queryRef": "_Measures.Market Sales Value",
+              "nativeQueryRef": "Market Sales Value",
+              "displayName": "Sales value"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_Measures"
+                    }
+                  },
+                  "Property": "Market Sales"
+                }
+              },
+              "queryRef": "_Measures.Market Sales",
+              "nativeQueryRef": "Market Sales",
+              "displayName": "Market sales"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_Measures"
+                    }
+                  },
+                  "Property": "Median Price per Sq M"
+                }
+              },
+              "queryRef": "_Measures.Median Price per Sq M",
+              "nativeQueryRef": "Median Price per Sq M",
+              "displayName": "Median AED / sq m"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_Measures"
+                    }
+                  },
+                  "Property": "Index YoY"
+                }
+              },
+              "queryRef": "_Measures.Index YoY",
+              "nativeQueryRef": "Index YoY",
+              "displayName": "Prices YoY (like for like)"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_Measures"
+                    }
+                  },
+                  "Property": "Off-Plan Share (Value)"
+                }
+              },
+              "queryRef": "_Measures.Off-Plan Share (Value)",
+              "nativeQueryRef": "Off-Plan Share (Value)",
+              "displayName": "Off-plan share of value"
+            }
+          ]
+        }
+      }
+    },
+    "objects": {
+      "value": [
+        {
+          "properties": {
+            "fontSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "20D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "id": "default"
+          }
+        },
+        {
+          "properties": {
+            "labelDisplayUnits": {
+              "expr": {
+                "Literal": {
+                  "Value": "1000000000D"
+                }
+              }
+            },
+            "labelPrecision": {
+              "expr": {
+                "Literal": {
+                  "Value": "1L"
+                }
+              }
+            }
+          },
+          "selector": {
+            "metadata": "_Measures.Market Sales Value"
+          }
+        }
+      ]
+    },
+    "visualContainerObjects": {
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "subTitle": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "general": [
+        {
+          "properties": {
+            "altText": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Five headline numbers for the selected year: sales value, number of market sales, median price per square metre, like-for-like price change, off-plan share of value.'"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

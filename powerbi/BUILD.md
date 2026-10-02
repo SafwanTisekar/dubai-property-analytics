@@ -4,11 +4,11 @@ A step-by-step guide to the six pages of docs/06 §4 on the semantic model in `D
 
 ## 0. Setup (once)
 
-1. **Power BI Service, Admin portal → Tenant settings → Integration settings → enable "Use Azure Maps visual"** (the map visual on pages 3, 4 and 6). **Publish to web** is already on (docs/03 §9). Desktop: File → Options → Global → Security → *Use Azure Maps visual* ticked as well.
+1. **No maps in v1** (owner decision, 2026-10-02): the Azure Maps visual needs a tenant admin to enable it, so every geographic view is a **bar chart by zone or area, top N, sorted by the same measure**. `'Area'[Latitude]` / `[Longitude]` stay in the model (OpenStreetMap centroids) for a map later. **Publish to web** is already on (docs/03 §9).
 2. Close Desktop. On the Mac: start Parallels, then `make pbi-ready` (docs/03 §8).
 3. If the model changed since the last open, delete `powerbi/DubaiProperty.SemanticModel/.pbi/cache.abf` (stale imported data; gitignored, rebuilt by the refresh).
 4. Open `powerbi/DubaiProperty.pbip` → **Refresh**. Parameters (Transform data → Manage parameters): `PgServer` = `10.211.55.2:5432`, `PgDatabase` = `dubai_property`.
-5. **View → Themes → Browse for themes → `powerbi/theme.json`.** The palette is the one the figures and the website use: blue = ready / apartments, orange = off-plan / villas, aqua = a third series, in that fixed order (colour follows the entity, never the rank). Text is `#0b0b0b` (19.2:1 on the background) and `#52514e` (7.7:1) for axis labels and subtitles; `#8a8984` is for gridlines only. Aqua, yellow and magenta are under 3:1 on the background, so **any visual that shows them also shows data labels or a legend**.
+5. **The theme is registered in the PBIP** (`StaticResources/RegisteredResources/DubaiPropertyAnalytics.json`, referenced from `report.json`), so it applies on open: no manual import. The source is `powerbi/theme.json`; after editing it, copy it over the registered file (a test fails if they differ). The palette is the one the figures and the website use: blue = ready / apartments, orange = off-plan / villas, aqua = a third series, in that fixed order (colour follows the entity, never the rank). Text is `#0b0b0b` (19.2:1 on the background) and `#52514e` (7.7:1) for axis labels and subtitles; `#8a8984` is for gridlines only. Aqua, yellow and magenta are under 3:1 on the background, so **any visual that shows them also shows data labels or a legend**.
 6. Canvas: every page is 16:9, **1280 × 720** (already set on the six empty pages).
 7. **Money formats.** Every AED measure is formatted `"AED "#,0`. For bn / M, set the visual's **display units explicitly** (Billions or Millions, 1 decimal): *Auto* switches to Trillions on all-time totals (the Phase 5 gate showed "AED 3.6…T"). Never type Excel-style scaling commas (`#,0.0,,,"bn"`) into a format string: Power BI renders them literally, and a test rejects them.
 
@@ -18,10 +18,10 @@ Units are pixels on the 1280 × 720 canvas; 16 px margins, 8 px gutters.
 
 | Band | y | Height | Content |
 |---|---|---|---|
-| Header | 8 | 40 | Page title text box (x 16, w 860; the page's insight title measure where given, else static); `[Data As Of Label]` card at x 900, w 364, right-aligned, label off |
+| Header | 4 | 48 | Page title: a one-value card bound to the page's title measure (x 16, w 876, 16 pt bold); `[Data As Of Label]` card at x 900, y 8, w 364, h 40, right-aligned. Both: category label off, no padding, no text wrap, so one full line shows without clipping |
 | Slicers | 56 | 48 | Synced slicer panel (below) |
-| Content | 112 | 572 | The page's visuals (≤ 8 data visuals; header, slicers and footer don't count) |
-| Footer | 692 | 24 | Text box from `[Footer Attribution]` ("Source: Dubai Land Department, CC BY 4.0 · Area locations © OpenStreetMap contributors (ODbL)"), 9 pt, `#52514e` |
+| Content | 112 | 568 | KPI cards y 112–200, first row of visuals y 208–520, second row y 528–680. At most 8 data visuals (header, slicers, footer and text boxes don't count) |
+| Footer | 684 | 32 | One-value card bound to `[Footer Attribution]`, directly under the content (no gap) ("Source: Dubai Land Department, CC BY 4.0 · Area locations © OpenStreetMap contributors (ODbL)"), 9 pt, `#52514e` |
 
 **Synced slicer panel** (View → Sync slicers: sync and show on all six pages), dropdown style, single row:
 
@@ -37,7 +37,9 @@ Remaining width (x 1066–1264) is free for a page-specific control.
 
 **Time-series rule.** Trend visuals show history, so for each one: Format → Edit interactions → the **Year** slicer = *None*, and a visual-level filter `'Date'[Year]` ≥ 2010 (or the start given below). Cards keep the Year filter.
 
-**Every visual**: title on (left, 12 pt), the insight title where given, **alt text** as given (Format → General → Alt text), no borders or shadows (the theme does this). Line charts use 2 px lines; one y-axis per chart, never a secondary axis.
+**Built as PBIR.** The pages are written as PBIR JSON under `DubaiProperty.Report/definition/pages/` (Phase 5): the header title, data-as-of and footer are one-value Card visuals bound to the text measures; slicers are dropdowns in sync groups (`Year`, `Area`, `PropertyType`, `Bedrooms`, `ReadyOffPlan`); "Year slicer = None" is stored as a page `visualInteractions` entry. `tests/test_powerbi_model.py` validates every file against the official schemas, every field against the model and every formatting property against Microsoft's theme schema. Edit visuals in Desktop afterwards as usual.
+
+**Every visual**: title on (left, 12 pt), the insight title where given, **alt text** as given (Format → General → Alt text), no borders or shadows (the theme does this), and **subtitle off** unless one is specified (newer charts add an automatic subtitle). New-card formatting is set on the card's default series (`$id = default`; in PBIR a `selector: {id: default}`), or Desktop ignores it; per-callout settings (display units) select the measure. Top-N bar charts use small category padding (inner padding 20%, 9 pt labels) so every bar fits without a scrollbar. Line charts use 2 px lines; one y-axis per chart, never a secondary axis.
 
 ---
 
@@ -47,10 +49,11 @@ Title: `[Title Executive]` (e.g. "Dubai recorded 211,007 market sales worth AED 
 
 | # | Visual | Position (x, y, w, h) | Fields | Settings |
 |---|---|---|---|---|
-| 1 | Card (new), 6 callouts | 16, 112, 1248, 96 | `[Market Sales Value]` (display units Billions, 1 dp), `[Market Sales]`, `[Median Price per Sq M]`, `[Index YoY]`, `[Purchase Mortgage Share]`, `[Off-Plan Share (Value)]` | Labels: "Sales value", "Market sales", "Median AED / sq m", "Prices YoY (like for like)", "Ready purchases with a mortgage (lower bound)", "Off-plan share of value" |
-| 2 | Line chart | 16, 216, 820, 300 | X `'Date'[Month Start]` (continuous), Y `[Market Sales Value]` (Billions) | Time-series rule from 2004. X-axis constant lines with labels: 2008-09 "Global crisis", 2014-06 "2014 peak", 2020-04 "COVID", 2021-06 "2021+ boom". Title: "Market sales value by month, AED" |
-| 3 | Bar chart (horizontal) | 844, 216, 420, 300 | Y `'Area'[Area]`, X `[Market Sales Value]` (Billions) | Filter: Top N 10 by `[Market Sales Value]`. Title: "Top 10 areas by sales value" |
-| 4–6 | Three text boxes | 16 / 432 / 848, 524, 408, 160 | Insights from `reports/findings.md` | (4) `[Title Off-Plan]` + "Off-plan is most sales but not most value: buyers of off-plan units pay developers in instalments." (5) "2026 has slowed, led by ready homes: Jan–Aug −19% on 2025 (ready −37%, off-plan −7%); registration-lag checks show it is not late data." (6) "The 2009 'spike' was paperwork: 93.5% of 2009 off-plan registrations were applied for in earlier years (Law No. 13 of 2008)." |
+| 1 | Card (new), 5 callouts | 16, 112, 1036, 88 | `[Market Sales Value]` (display units Billions, 1 dp), `[Market Sales]`, `[Median Price per Sq M]`, `[Index YoY]`, `[Off-Plan Share (Value)]` | Labels: "Sales value", "Market sales", "Median AED / sq m", "Prices YoY (like for like)", "Off-plan share of value" |
+| 1b | Card (new), 1 callout | 1060, 112, 204, 88 | `[Purchase Mortgage Share]` labelled **"Mortgage share (ready)"** | Subtitle **"at least – matched loans only"**: a lower bound (2025: 28% matched, up to 48% counting every ready-unit mortgage; findings §5). Own card so the caveat sits with the number |
+| 2 | Line chart | 16, 208, 820, 312 | X `'Date'[Month Start]` (continuous), Y `[Market Sales Value]` (Billions) | Not filtered by Year (intentional), subtitle **"All years; not filtered by Year"**. X-axis constant lines (dashed, labels = name, above the line): 2008-09 "Global crisis", 2014-06 "2014 peak", 2020-04 "COVID" (label left), 2021-06 "2021+ boom" (label **right**, so it doesn't collide with COVID). Title: "Market sales value by month, AED" |
+| 3 | Bar chart (horizontal) | 844, 208, 420, 312 | Y `'Area'[Area]`, X `[Market Sales Value]` (labels in Billions, 1 dp) | Filter: Top N 10 by `[Market Sales Value]`, sorted descending, all 10 bars visible (no scrollbar). Title: "Top 10 areas by sales value" |
+| 4–6 | Three text boxes | 16 / 432 / 848, 528, 410, 152 | Insights from `reports/findings.md` (static text, bold headline + one sentence) | (4) "Off-plan is most sales but not most value: 63% of 2025 market sales but 44% of their value (69% / 50% in 2026 to date); buyers pay developers in instalments." (5) "2026 has slowed, led by ready homes: Jan–Aug −19% on 2025 (ready −37%, off-plan −7%); registration-lag checks show it is not late data." (6) "The 2009 'spike' was paperwork: 93.5% of 2009 off-plan registrations were applied for in earlier years (Law No. 13 of 2008)." |
 
 Alt text: (1) "Six headline numbers for the selected year: sales value, number of market sales, median price per square metre, like-for-like price change, share of ready purchases with a matched mortgage, off-plan share of value." (2) "Line chart of monthly market sales value since 2004, with the 2008, 2014, 2020 and 2021 cycle points marked." (3) "Bar chart of the ten areas with the highest sales value in the selected period."
 
@@ -79,11 +82,11 @@ Title: `[Title Prices]`. Page control at x 1066: slicer `'Price Index'[Segment]`
 | 1 | Card (new), 5 callouts | 16, 112, 1248, 80 | `[Index Value (Latest Complete)]`, `[Index YoY]`, `[Drawdown from Peak]`, `[Max Drawdown]`, `[Area-Weighted Price per Sq M (Homes)]` | `[Max Drawdown]`: Year slicer = None (whole history) |
 | 2 | Line chart | 16, 200, 620, 240 | X `'Date'[Month Start]`, Y `[Index Value]`, `[DLD Index Value]` | Time-series rule from 2011. Legend: "Hedonic index (this project)" / "DLD official index (ends May 2024)". Title: "Like-for-like prices vs DLD's index (Jan 2019 = 100); ours leads by ~6 months" |
 | 3 | Line chart | 644, 200, 620, 240 | X `'Date'[Month Start]`, Y `[Index Value (Apartments)]`, `[Raw Median Rebased (Apartments)]` | Time-series rule from 2015. Title: "Raw medians misread growth both ways: 2023 apartments +1% raw vs +17% like for like" |
-| 4 | Azure map (bubble) | 16, 448, 400, 236 | Latitude `'Area'[Latitude]`, Longitude `'Area'[Longitude]`, size `[Market Sales]`, bubble colour `[Median Price per Sq M]` (gradient `#cde2fb` → `#184f95`) | Tooltip: `'Area'[Area]`, `'Area'[Zone]`. Title: "Median AED per sq m by area" |
+| 4 | Bar chart (horizontal) | 16, 448, 400, 236 | Y `'Area'[Area]`, X `[Median Price per Sq M]` | Top N 15 by `[Median Price per Sq M]`, sorted descending (areas under min-n are blank, so they drop out). Tooltip `'Area'[Zone]`, `[Market Sales]`. Title: "Highest median AED per sq m, top 15 areas" |
 | 5 | Matrix | 424, 448, 440, 236 | Rows `'Bedrooms'[Bedrooms]`, columns `'Area'[Zone]`, values `[Median Price per Sq M]` | Visual filter `'Property Type'[Usage Group]` = Residential. Background conditional format, blue ramp. Blank = under min-n. Title: "Median AED per sq m: bedrooms × zone" |
 | 6 | Area chart | 872, 448, 392, 236 | X `'Date'[Month Start]`, Y `[Index Drawdown]` | Time-series rule from 2011. Title: "Fall from the previous peak (2014→2020: −24% Dubai-wide)" |
 
-Alt text: (2) "Line chart comparing this project's like-for-like price index with DLD's official index since 2011, both rebased to January 2019." (3) "Apartment price index against the raw median price per square metre, both rebased to January 2019: the gap is the mix shift." (4) "Map of Dubai areas: bubble size is the number of sales, colour the median price per square metre." (5) "Table of median price per square metre by bedrooms and zone; blank cells have fewer than 20 sales." (6) "Drawdown of the price index from its running peak."
+Alt text: (2) "Line chart comparing this project's like-for-like price index with DLD's official index since 2011, both rebased to January 2019." (3) "Apartment price index against the raw median price per square metre, both rebased to January 2019: the gap is the mix shift." (4) "Bar chart of the 15 areas with the highest median price per square metre." (5) "Table of median price per square metre by bedrooms and zone; blank cells have fewer than 20 sales." (6) "Drawdown of the price index from its running peak."
 
 ## Page 4. Rental Yields (Q4)
 
@@ -93,12 +96,12 @@ Title: `[Title Yields]`. Yields use the **last four complete quarters** and igno
 |---|---|---|---|---|
 | 1 | Card (new), 3 callouts | 16, 112, 1248, 80 | `[Gross Yield (Latest 4 Quarters)]`, `[New Market Rents]`, `[Area-Weighted New Rent per Sq M (Homes)]` | Card subtitle: "Gross: before service charges, vacancy and fees" |
 | 2 | Clustered bar | 16, 200, 500, 484 | Y `'Area'[Zone]`, X `[Gross Yield (Latest 4 Quarters)]`, legend `'Property Type'[Property Type]` | Visual filter Property Type ∈ {Residential · Apartment, Residential · Villa / Townhouse}. Data labels on. Title: "Gross yield by zone, last four quarters" |
-| 3 | Azure map (bubble) | 524, 200, 360, 240 | Lat / long from `'Area'`, colour `[Gross Yield by Area (Latest 4 Quarters)]`, size `[Market Sales]` | Title: "Area yields (only areas with 20+ rents and sales per cell)" |
+| 3 | Bar chart (horizontal) | 524, 200, 360, 240 | Y `'Area'[Area]`, X `[Gross Yield by Area (Latest 4 Quarters)]` | Top N 15 by the same measure, sorted descending. Data labels on. Title: "Highest area yields (areas with 20+ rents and sales per cell)" |
 | 4 | Scatter | 892, 200, 372, 240 | Values `'Area'[Zone]`, X `[Index Growth 3Y (Zone)]`, Y `[Gross Yield (Latest 4 Quarters)]`, size `[Market Sales]` | Visual filter Property Type = Residential · Apartment (one type). Analytics: X median line and Y median line (quadrants). Data labels (zone) on. Title: "Income vs growth: top right has both" |
 | 5 | Line chart | 524, 448, 360, 236 | X `'Date'[Quarter Start]`, Y `[Gross Yield by Quarter]`, legend `'Property Type'[Property Type]` | Same type filter as #2; time-series rule from 2012. Title: "Yields fell to a 2021 low and partly recovered" |
 | 6 | Column chart | 892, 448, 372, 236 | X `'Bedrooms'[Bedrooms]`, Y `[New Rent per Sq M]` | Visual filter Property Type = Residential · Apartment. Title: "New-contract rent per sq m by bedrooms (apartments)" |
 
-Alt text: (2) "Gross rental yield by zone for apartments and villas over the last four complete quarters." (3) "Map of area-level gross yields where both rents and sales reach 20 per cell." (4) "Scatter of zones: three-year price growth against gross yield, bubble size is sales." (5) "Quarterly gross yield for apartments and villas." (6) "Annual rent per square metre of new contracts by number of bedrooms."
+Alt text: (2) "Gross rental yield by zone for apartments and villas over the last four complete quarters." (3) "Bar chart of the 15 areas with the highest gross yield, where both rents and sales reach 20 per cell." (4) "Scatter of zones: three-year price growth against gross yield, bubble size is sales." (5) "Quarterly gross yield for apartments and villas." (6) "Annual rent per square metre of new contracts by number of bedrooms."
 
 ## Page 5. Valuation Model (AVM) (Q5)
 
@@ -131,19 +134,19 @@ Page controls (not synced), in the slicer band from x 1066 and in a left rail if
 |---|---|---|---|---|
 | 1 | Card (new), 6 callouts | 16, 112, 1248, 80 | `[Negative Equity Share]`, `[Negative Equity AED]` (Billions), `[Stress Purchases]`, `[Negative Equity Share (CBUAE Cap)]`, `[Negative Equity Share (Registered Loans)]`, `[Replay Negative Equity Share]` | |
 | 2 | Matrix (heatmap) | 16, 200, 400, 240 | Rows `'Price Shock %'[Price Shock %]`, columns `'LTV %'[LTV Label]`, values `[Negative Equity Share]` | Edit interactions: Shock and LTV slicers = None on this visual (it shows the whole grid). Background colour scale `#fcfcfb` → `#184f95`. Title: "Negative equity: shock × LTV (recent buyers, loans at origination)" |
-| 3 | Azure map (bubble) | 424, 200, 400, 240 | Lat / long from `'Area'`, colour `[Negative Equity Share by Area]`, size `[Market Sales]` | Property type from the synced slicer (apartments when none). Title: "Negative equity by area at the selected shock and LTV" |
+| 3 | Bar chart (horizontal) | 424, 200, 400, 240 | Y `'Area'[Area]`, X `[Negative Equity Share by Area]` | Top N 15 by the same measure, sorted descending; property type from the synced slicer (apartments when none). Title: "Most exposed areas at the selected shock and LTV" |
 | 4 | Bar chart | 832, 200, 432, 240 | Y `'Stress Replay'[Segment]`, X `[Replay Drawdown]` | Visual filter Used In Replay = true. Title: "2014→2020 replay: the fall each index series took (zone series overstate it)" |
 | 5 | Bar chart | 16, 448, 400, 236 | Y `'Project'[Master Project]`, X `[Master Project Share (Off-Plan)]` | Top N 10 by `[Off-Plan Market Sales (Lines)]`; filter Master Project ≠ Unknown. Title: `[Title Concentration]`. Footnote: "Proxy: developer names need the DLD projects file (Q9 deferred)" |
 | 6 | Line chart (fan) | 424, 448, 840, 236 | X `'Forecast'[Month]`, Y `[Forecast Actual]`, `[Forecast Central]` | Visual filter Month ≥ 2021-01-01. Analytics → Error bars on `[Forecast Central]`: upper `[Forecast Upper 80]`, lower `[Forecast Lower 80]`, shaded band (a second band for 95% if legible). Title: `[Title Outlook]` |
 
-Alt text: (2) "Heatmap of the share of recent buyers in negative equity for price falls of 0 to 50% and loan-to-values of 50 to 85%." (3) "Map of the negative-equity share by area at the selected price shock and loan-to-value." (4) "Bar chart of each index series' fall in the 2014 to 2020 downturn." (5) "Top ten master projects' shares of off-plan sales, a proxy for developer concentration." (6) "Price index history since 2021 and the 12-month forecast with its 80% interval for the selected rate scenario."
+Alt text: (2) "Heatmap of the share of recent buyers in negative equity for price falls of 0 to 50% and loan-to-values of 50 to 85%." (3) "Bar chart of the 15 areas with the highest negative-equity share at the selected price shock and loan-to-value." (4) "Bar chart of each index series' fall in the 2014 to 2020 downturn." (5) "Top ten master projects' shares of off-plan sales, a proxy for developer concentration." (6) "Price index history since 2021 and the 12-month forecast with its 80% interval for the selected rate scenario."
 
 ---
 
 ## Checks before publishing
 
 1. **Cards**: tick every row of `reports/kpi_reconciliation.md` §7 (regenerate with `make kpi` after any rebuild). Defaults: Year 2025, shock −20, LTV 80, Ready, Rates flat, AVM page on Test. A last-digit difference is rounding; anything more is a bug to report.
-2. **Performance Analyzer** (Optimize → Performance analyzer → Refresh visuals): every visual under 1 s. The likely slow ones are the DAX medians over Transactions (page 1 card, page 3 maps / matrix, page 5 medians); if one is over, record it and ask for a pre-aggregated rpt view rather than tuning DAX.
+2. **Performance Analyzer** (Optimize → Performance analyzer → Refresh visuals): every visual under 1 s. The likely slow ones are the DAX medians over Transactions (page 1 card, page 3 area bar / matrix, page 5 medians); if one is over, record it and ask for a pre-aggregated rpt view rather than tuning DAX.
 3. **Model size**: DAX Studio → Advanced → View Metrics (VertiPaq Analyzer); record the total and the top three tables in docs/06 §1 (estimate ≈ 45–65 MB).
 4. **Accessibility**: alt text on every visual; tab order top-left to bottom-right (View → Selection → Tab order); identity never by colour alone (legends or labels).
 5. **Attribution**: the footer on every page shows DLD CC BY 4.0 and OpenStreetMap ODbL.
