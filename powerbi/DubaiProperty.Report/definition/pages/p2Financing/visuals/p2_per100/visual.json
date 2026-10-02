@@ -3,10 +3,10 @@
   "name": "p2_per100",
   "position": {
     "x": 16,
-    "y": 428,
+    "y": 452,
     "z": 15000,
     "width": 404,
-    "height": 252,
+    "height": 228,
     "tabOrder": 15000
   },
   "visual": {
@@ -59,7 +59,28 @@
             "axisType": {
               "expr": {
                 "Literal": {
-                  "Value": "'Categorical'"
+                  "Value": "'Scalar'"
+                }
+              }
+            },
+            "start": {
+              "expr": {
+                "Literal": {
+                  "Value": "2010D"
+                }
+              }
+            },
+            "end": {
+              "expr": {
+                "Literal": {
+                  "Value": "2026D"
+                }
+              }
+            },
+            "fontSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "8D"
                 }
               }
             }

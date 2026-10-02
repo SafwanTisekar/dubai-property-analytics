@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
   "name": "p3_mix_shift",
   "position": {
-    "x": 428,
-    "y": 208,
+    "x": 404,
+    "y": 224,
     "z": 13000,
-    "width": 404,
-    "height": 236,
+    "width": 380,
+    "height": 228,
     "tabOrder": 13000
   },
   "visual": {
@@ -134,25 +134,7 @@
             "show": {
               "expr": {
                 "Literal": {
-                  "Value": "true"
-                }
-              }
-            },
-            "text": {
-              "expr": {
-                "Literal": {
-                  "Value": "'2023: +1% raw vs +17% like for like'"
-                }
-              }
-            },
-            "fontColor": {
-              "solid": {
-                "color": {
-                  "expr": {
-                    "Literal": {
-                      "Value": "'#52514e'"
-                    }
-                  }
+                  "Value": "false"
                 }
               }
             }

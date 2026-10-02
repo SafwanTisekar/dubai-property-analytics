@@ -3,10 +3,10 @@
   "name": "p6_areas",
   "position": {
     "x": 424,
-    "y": 256,
+    "y": 268,
     "z": 12000,
     "width": 400,
-    "height": 208,
+    "height": 200,
     "tabOrder": 12000
   },
   "visual": {
@@ -139,7 +139,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'Most exposed areas (illustrative)'"
+                  "Value": "'Most exposed areas, top 5 (illustrative)'"
                 }
               }
             }
@@ -152,25 +152,7 @@
             "show": {
               "expr": {
                 "Literal": {
-                  "Value": "true"
-                }
-              }
-            },
-            "text": {
-              "expr": {
-                "Literal": {
-                  "Value": "'Selected shock and LTV'"
-                }
-              }
-            },
-            "fontColor": {
-              "solid": {
-                "color": {
-                  "expr": {
-                    "Literal": {
-                      "Value": "'#52514e'"
-                    }
-                  }
+                  "Value": "false"
                 }
               }
             }

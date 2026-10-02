@@ -60,6 +60,11 @@ def test_candidates_spellings_then_alias_then_parent():
     assert [c.query_name for c in g.candidates("Island 2")] == ["Island 2"]
     assert g.clean_name("Al-Riqqa  East") == "Al Riqqa East"
     assert g.clean_name("Al Layan1") == "Al Layan 1"
+    # Brackets qualify DLD places ("(Deira)") and are kept; a renamed area uses ALIASES.
+    assert g.clean_name("Al-Souq Al Kabeer (Deira)") == "Al Souq Al Kabeer (Deira)"
+    assert ("Island 2", g.SOURCE_ALIAS) in [
+        (c.query_name, c.source) for c in g.candidates("Island 2 (Jumeira Bay)")
+    ]
 
 
 def test_name_must_match_and_lie_in_dubai():

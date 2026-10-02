@@ -43,7 +43,7 @@
 [Title Stress] = "At " & [Selected LTV] & "% LTV, a " & ABS ( [Selected Shock] ) & "% fall puts " & FORMAT ( [Negative Equity Share], "0%" ) & " of recent " & LOWER ( [Selected Ready / Off-Plan] ) & " buyers in negative equity – " & [Selected Stress Segment]
 
 // Concentration proxy headline (master projects, not developers).
-[Title Concentration] = "Top 10 master projects: " & FORMAT ( [Top 10 Master Project Share (Off-Plan)], "0%" ) & " of off-plan (HHI " & FORMAT ( [Master Project HHI (Off-Plan)], "#,0" ) & ")"
+[Title Concentration] = "Top 5 shown; top 10 hold " & FORMAT ( [Top 10 Master Project Share (Off-Plan)], "0%" ) & " of off-plan (HHI " & FORMAT ( [Master Project HHI (Off-Plan)], "#,0" ) & ")"
 
 // Outlook headline for the selected segment and scenario (reports/forecast.md).
 [Title Outlook] = SELECTEDVALUE ( 'Forecast Scenario'[Scenario], "Rates flat" ) & ": " & FORMAT ( [Forecast 12M Change], "+0.0%;-0.0%" ) & " in 12m (80%: " & [Forecast 12M Band 80% Label] & ")"
@@ -95,8 +95,8 @@
             )
         )
 
-// Median AED per sq m in thousands, for tables where "AED 18K" reads better than AED 18,000 (a measure, not a scaling format string: those render literally).
-// Format: """AED ""#,0""K"""
+// Median AED per sq m in thousands ("18K"; the visual title says AED), so all bedroom columns of the zone matrix fit. A measure, not a scaling format string: those render literally.
+// Format: #,0"K"
 [Median Price per Sq M (K)] = DIVIDE ( [Median Price per Sq M], 1000 )
 
 // Σ AED / Σ sq m over clean sales of residential apartments and villas / townhouses within the class area cap (docs/01 §4). Only meaningful within these classes.

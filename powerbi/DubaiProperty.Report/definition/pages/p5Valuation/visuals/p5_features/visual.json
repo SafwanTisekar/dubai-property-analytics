@@ -6,7 +6,7 @@
     "y": 208,
     "z": 12000,
     "width": 404,
-    "height": 260,
+    "height": 232,
     "tabOrder": 12000
   },
   "visual": {
@@ -119,7 +119,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'What drives the valuation (mean |SHAP|)'"
+                  "Value": "'Top 6 drivers of the valuation (mean |SHAP|)'"
                 }
               }
             }
@@ -145,7 +145,7 @@
             "altText": {
               "expr": {
                 "Literal": {
-                  "Value": "'Top eight features by mean absolute SHAP value, in log points of the predicted price.'"
+                  "Value": "'Top six features by mean absolute SHAP value, in log points of the predicted price.'"
                 }
               }
             }
@@ -157,7 +157,7 @@
   "filterConfig": {
     "filters": [
       {
-        "name": "p5Top8",
+        "name": "p5Top6",
         "field": {
           "Column": {
             "Expression": {
@@ -195,7 +195,7 @@
                   },
                   "Right": {
                     "Literal": {
-                      "Value": "8L"
+                      "Value": "6L"
                     }
                   }
                 }

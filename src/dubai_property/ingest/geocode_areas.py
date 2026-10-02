@@ -101,6 +101,8 @@ ALIASES: dict[str, tuple[str, ...]] = {
     "Palm Jabal Ali": ("Palm Jebel Ali",),
     "Mena Jabal Ali": ("Mina Jebel Ali",),
     "Al Khairan First": ("Dubai Creek Harbour",),
+    # Seed clarification of DLD's "Island 2" (its master project is Jumeira Bay).
+    "Island 2 (Jumeira Bay)": ("Island 2", "Jumeira Bay"),
 }
 _SUFFIX = re.compile(
     r"\s+(?:" + "|".join(ORDINALS) + r"|\d+)$",
@@ -128,7 +130,11 @@ class Hit:
 
 
 def clean_name(name: str) -> str:
-    """Collapse whitespace and write ``Al-X`` as ``Al X`` (DLD mixes both)."""
+    """Collapse whitespace and write ``Al-X`` as ``Al X`` (DLD mixes both).
+
+    Brackets stay: in DLD names they qualify the place ("Al-Souq Al Kabeer (Deira)" is not
+    the Bur Dubai souk), so they are never stripped; see ``ALIASES`` for renamed areas.
+    """
     name = re.sub(r"\s+", " ", name.strip())
     name = re.sub(r"\b(al)-", r"\1 ", name, flags=re.IGNORECASE)
     return re.sub(r"([^\d\s])(\d+)$", r"\1 \2", name)  # "Al Layan1" -> "Al Layan 1"

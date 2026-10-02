@@ -141,7 +141,7 @@
                           [
                             {
                               "Literal": {
-                                "Value": "'Property Type'"
+                                "Value": "'Property Type (same sales)'"
                               }
                             }
                           ]
@@ -242,21 +242,14 @@
                     [
                       {
                         "Literal": {
-                          "Value": "'Property Type'"
+                          "Value": "'Property Type (same sales)'"
                         }
                       }
                     ],
                     [
                       {
                         "Literal": {
-                          "Value": "'Reg Type'"
-                        }
-                      }
-                    ],
-                    [
-                      {
-                        "Literal": {
-                          "Value": "'Price Band'"
+                          "Value": "'Reg Type (same sales)'"
                         }
                       }
                     ]

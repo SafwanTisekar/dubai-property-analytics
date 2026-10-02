@@ -6,7 +6,7 @@
     "y": 208,
     "z": 11000,
     "width": 404,
-    "height": 260,
+    "height": 232,
     "tabOrder": 11000
   },
   "visual": {
@@ -139,7 +139,25 @@
             "show": {
               "expr": {
                 "Literal": {
-                  "Value": "false"
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Same sales for both models (model card)'"
+                }
+              }
+            },
+            "fontColor": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#52514e'"
+                    }
+                  }
                 }
               }
             }
@@ -152,7 +170,7 @@
             "altText": {
               "expr": {
                 "Literal": {
-                  "Value": "'Median absolute percentage error by segment for the AVM and the comparable-sales baseline on the 2025-26 test set.'"
+                  "Value": "'Median absolute percentage error by segment for the AVM and the comparable-sales baseline on the 2025-26 test sales both can value (the model card''s head-to-head).'"
                 }
               }
             }

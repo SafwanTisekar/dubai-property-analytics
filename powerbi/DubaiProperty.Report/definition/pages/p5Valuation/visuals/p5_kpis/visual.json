@@ -28,7 +28,7 @@
               },
               "queryRef": "_Measures.AVM Test MdAPE",
               "nativeQueryRef": "AVM Test MdAPE",
-              "displayName": "AVM median error"
+              "displayName": "AVM median error (test)"
             },
             {
               "field": {
@@ -199,14 +199,7 @@
             "show": {
               "expr": {
                 "Literal": {
-                  "Value": "true"
-                }
-              }
-            },
-            "text": {
-              "expr": {
-                "Literal": {
-                  "Value": "'AVM accuracy (model card)'"
+                  "Value": "false"
                 }
               }
             }
@@ -219,25 +212,7 @@
             "show": {
               "expr": {
                 "Literal": {
-                  "Value": "true"
-                }
-              }
-            },
-            "text": {
-              "expr": {
-                "Literal": {
-                  "Value": "'Test set 2025 to snapshot; ignores slicers'"
-                }
-              }
-            },
-            "fontColor": {
-              "solid": {
-                "color": {
-                  "expr": {
-                    "Literal": {
-                      "Value": "'#52514e'"
-                    }
-                  }
+                  "Value": "false"
                 }
               }
             }
@@ -250,7 +225,7 @@
             "altText": {
               "expr": {
                 "Literal": {
-                  "Value": "'AVM accuracy on the 2025-26 out-of-time test set against the comparable-sales baseline: median absolute error and the shares valued within 10% and 20%.'"
+                  "Value": "'AVM accuracy on the 2025-26 out-of-time test set against the comparable-sales baseline (the model card''s numbers; not filtered by slicers): median absolute error and the shares valued within 10% and 20%.'"
                 }
               }
             }

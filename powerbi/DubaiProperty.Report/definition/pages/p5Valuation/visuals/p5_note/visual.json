@@ -3,10 +3,10 @@
   "name": "p5_note",
   "position": {
     "x": 1024,
-    "y": 476,
+    "y": 448,
     "z": 15000,
     "width": 240,
-    "height": 204,
+    "height": 232,
     "tabOrder": 15000
   },
   "visual": {

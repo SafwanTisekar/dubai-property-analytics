@@ -3,10 +3,10 @@
   "name": "p6_replay",
   "position": {
     "x": 832,
-    "y": 256,
+    "y": 268,
     "z": 13000,
     "width": 432,
-    "height": 208,
+    "height": 200,
     "tabOrder": 13000
   },
   "visual": {
@@ -139,7 +139,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'2014→2020 fall, 5 deepest series'"
+                  "Value": "'2014→2020 fall, 5 deepest series (illustrative)'"
                 }
               }
             }
@@ -152,25 +152,7 @@
             "show": {
               "expr": {
                 "Literal": {
-                  "Value": "true"
-                }
-              }
-            },
-            "text": {
-              "expr": {
-                "Literal": {
-                  "Value": "'Zone series overstate it. Illustrative, not a regulatory stress test'"
-                }
-              }
-            },
-            "fontColor": {
-              "solid": {
-                "color": {
-                  "expr": {
-                    "Literal": {
-                      "Value": "'#52514e'"
-                    }
-                  }
+                  "Value": "false"
                 }
               }
             }
@@ -183,7 +165,7 @@
             "altText": {
               "expr": {
                 "Literal": {
-                  "Value": "'Bar chart of the five index series with the deepest fall in the 2014 to 2020 downturn.'"
+                  "Value": "'Bar chart of the five index series with the deepest fall in the 2014 to 2020 downturn; zone series are noisier and overstate it.'"
                 }
               }
             }

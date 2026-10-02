@@ -3,10 +3,10 @@
   "name": "p3_drawdown",
   "position": {
     "x": 16,
-    "y": 452,
+    "y": 460,
     "z": 14000,
-    "width": 404,
-    "height": 228,
+    "width": 380,
+    "height": 220,
     "tabOrder": 14000
   },
   "visual": {

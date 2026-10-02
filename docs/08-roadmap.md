@@ -246,7 +246,9 @@ Then, in Power BI Desktop (Parallels), connect to PostgreSQL as pbi_reader (impo
 - [x] Page 1 (Executive Overview) + synced slicer panel built as PBIR → **gate passed (owner, 2026-10-02)**: renders, Sales value and Market sales match §7. Fixes: new-card formatting needs `$id = default` selectors (label / padding were ignored), one-line header and footer, no auto subtitles, mortgage share as its own lower-bound card, staggered reference-line labels, bars without scrollbar, "not filtered by Year" notes
 - [x] Pages 2–6 built as PBIR, checkpoint `4df7b62`
 - [x] Final-gate fixes (owner review 2026-10-02): render minimum 240 × 180 (page 2 panels side by side), heatmap with all 11 shock rows / short LTV labels / no totals, CBUAE-cap vs registered-loan cards verified as distinct rows (20.69% vs 20.73% Dubai-wide), rpt ratios at 6 decimals (±10% shows 65.0%), page 3 residential-only + explicit min-n + "AED 18K" + no Unknown bedrooms, yield aggregates exclude out-of-band cells (apartments 7.1%), taller slicers, shorter titles and labels, top-N bars sized to fit, mortgage-share subtitle shown (title on), readable SHAP feature names, axes ending at the snapshot, outlook axis from 150, scatter and rent-by-bedrooms tidied; guards added to the tests; `powerbi/VISUALS.md` generated (`make pbi-inventory`)
-- [ ] **Gate (owner): final check after the fixes**
+- [x] Round 1 committed as checkpoint `d31ef86`
+- [x] Round 2 (owner review 2026-10-02): size model recalibrated on Desktop's rendered sizes (cards, bars, tables; BUILD.md rule), KPI rows label + value only, single cards 100 px, page 2 year axes 2010–2026, every top-N chart and the flags table sized to show all N with matching titles, page 3 matrix fits all bedroom columns ("18K"), AVM segment chart on the same sales as the model card (villas 8.66%), page 1 footer gap closed, "Island 2 (Jumeira Bay)"
+- [ ] **Gate (owner): final check after round 2**
 
 **Phase 5 checklist (owner, Power BI Desktop)**
 - [ ] Review the generated pages against `powerbi/BUILD.md`

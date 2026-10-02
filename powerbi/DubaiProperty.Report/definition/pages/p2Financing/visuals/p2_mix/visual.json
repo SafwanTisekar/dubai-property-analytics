@@ -3,10 +3,10 @@
   "name": "p2_mix",
   "position": {
     "x": 428,
-    "y": 428,
+    "y": 452,
     "z": 16000,
     "width": 404,
-    "height": 252,
+    "height": 228,
     "tabOrder": 16000
   },
   "visual": {
@@ -85,6 +85,40 @@
               "expr": {
                 "Literal": {
                   "Value": "0L"
+                }
+              }
+            },
+            "fontSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "7D"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "categoryAxis": [
+        {
+          "properties": {
+            "axisType": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Scalar'"
+                }
+              }
+            },
+            "start": {
+              "expr": {
+                "Literal": {
+                  "Value": "2010D"
+                }
+              }
+            },
+            "end": {
+              "expr": {
+                "Literal": {
+                  "Value": "2026D"
                 }
               }
             },

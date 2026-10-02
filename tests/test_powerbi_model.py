@@ -336,9 +336,12 @@ def test_pbir_checks_catch_mistakes():
     assert refs == [pbir.FieldRef("Area", "Zone", "Column")]
 
 
-# Render limits found at the final gate (Phase 5): below them Power BI draws a placeholder
-# icon instead of the chart, and a top-N bar chart scrolls once bars are thinner than ~24 px.
+# Render limits calibrated on what Power BI Desktop drew at the final gates (Phase 5), not on
+# the nominal PBIR sizes: below 240 x 180 a chart becomes a placeholder icon; a bar chart
+# needs ~72 px of chrome + 24 px per bar (+36 with a subtitle); a table 72 + 32 per row
+# (header included); a card the sum of its rendered lines (point size x ~1.73 px) + padding.
 MIN_CHART = (240, 180)
+PX_PER_PT = 1.73
 CHART_TYPES = {
     "lineChart",
     "areaChart",
@@ -371,13 +374,42 @@ def test_charts_meet_the_minimum_render_size():
             assert pos["width"] >= MIN_CHART[0] and pos["height"] >= MIN_CHART[1], (page, v["name"])
 
 
-def test_top_n_bars_fit_without_scrolling():
+def test_top_n_bars_and_rows_fit_without_scrolling():
     for page, v in visuals():
         n = _top_n(v)
-        if n and v["visual"]["visualType"] == "clusteredBarChart":
-            subtitle = _shown(v["visual"]["visualContainerObjects"], "subTitle")
-            needed = 64 + 24 * n + (20 if subtitle else 0)
-            assert v["position"]["height"] >= needed, (page, v["name"], n, needed)
+        vtype = v["visual"]["visualType"]
+        subtitle = 36 if _shown(v["visual"]["visualContainerObjects"], "subTitle") else 0
+        if n and vtype == "clusteredBarChart":
+            needed = 72 + 24 * n + subtitle
+        elif n and vtype == "tableEx":
+            needed = 72 + 32 * (n + 1) + subtitle
+        else:
+            continue
+        assert v["position"]["height"] >= needed, (page, v["name"], n, needed)
+
+
+def _default_prop(entries: list, prop: str):
+    for e in entries:
+        if e.get("selector", {}).get("id") == "default" and prop in e["properties"]:
+            return pbir.literal_value(e["properties"][prop])
+    return None
+
+
+def test_cards_fit_their_rendered_lines():
+    """Title + subtitle + label + value must fit (gate 3: grouped cards clipped values)."""
+    for page, v in visuals():
+        vis = v["visual"]
+        if vis["visualType"] != "cardVisual":
+            continue
+        objs, vco = vis.get("objects", {}), vis.get("visualContainerObjects", {})
+        value_pt = _default_prop(objs.get("value", []), "fontSize") or 18
+        label_shown = _default_prop(objs.get("label", []), "show") is not False
+        label_pt = (_default_prop(objs.get("label", []), "fontSize") or 9) if label_shown else 0
+        padded = _default_prop(objs.get("cardCalloutArea", []), "paddingUniform") != 0
+        needed = (16 if padded else 0) + PX_PER_PT * value_pt + 8
+        needed += PX_PER_PT * label_pt + 2 if label_pt else 0
+        needed += (24 if _shown(vco, "title") else 0) + (20 if _shown(vco, "subTitle") else 0)
+        assert v["position"]["height"] >= needed, (page, v["name"], round(needed))
 
 
 def test_titles_fit_and_subtitles_have_a_title():

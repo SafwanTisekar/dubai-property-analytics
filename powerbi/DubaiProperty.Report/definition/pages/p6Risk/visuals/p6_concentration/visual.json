@@ -3,10 +3,10 @@
   "name": "p6_concentration",
   "position": {
     "x": 424,
-    "y": 472,
+    "y": 476,
     "z": 14000,
     "width": 400,
-    "height": 208,
+    "height": 204,
     "tabOrder": 14000
   },
   "visual": {
@@ -177,7 +177,7 @@
             "altText": {
               "expr": {
                 "Literal": {
-                  "Value": "'Top six master projects'' shares of off-plan sales in the selected year, a proxy for developer concentration.'"
+                  "Value": "'Top five master projects'' shares of off-plan sales in the selected year, a proxy for developer concentration.'"
                 }
               }
             }
@@ -250,7 +250,7 @@
                         }
                       }
                     ],
-                    "Top": 6
+                    "Top": 5
                   }
                 }
               },

@@ -146,7 +146,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'Highest area yields, top 7'"
+                  "Value": "'Highest area yields, top 6'"
                 }
               }
             }
@@ -172,7 +172,7 @@
             "altText": {
               "expr": {
                 "Literal": {
-                  "Value": "'Bar chart of the seven areas with the highest gross yield, where both rents and sales reach 20 per cell.'"
+                  "Value": "'Bar chart of the six areas with the highest gross yield, where both rents and sales reach 20 per cell.'"
                 }
               }
             }
@@ -245,7 +245,7 @@
                         }
                       }
                     ],
-                    "Top": 7
+                    "Top": 6
                   }
                 }
               },

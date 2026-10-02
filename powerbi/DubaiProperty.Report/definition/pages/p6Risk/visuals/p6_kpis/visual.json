@@ -6,7 +6,7 @@
     "y": 180,
     "z": 10000,
     "width": 1248,
-    "height": 72,
+    "height": 80,
     "tabOrder": 10000
   },
   "visual": {
@@ -28,7 +28,7 @@
               },
               "queryRef": "_Measures.Negative Equity Share",
               "nativeQueryRef": "Negative Equity Share",
-              "displayName": "In negative equity"
+              "displayName": "Negative equity (illustrative)"
             },
             {
               "field": {
@@ -178,14 +178,7 @@
             "show": {
               "expr": {
                 "Literal": {
-                  "Value": "true"
-                }
-              }
-            },
-            "text": {
-              "expr": {
-                "Literal": {
-                  "Value": "'Stress result'"
+                  "Value": "false"
                 }
               }
             }
@@ -198,25 +191,7 @@
             "show": {
               "expr": {
                 "Literal": {
-                  "Value": "true"
-                }
-              }
-            },
-            "text": {
-              "expr": {
-                "Literal": {
-                  "Value": "'Illustrative, not a regulatory stress test; loans at origination'"
-                }
-              }
-            },
-            "fontColor": {
-              "solid": {
-                "color": {
-                  "expr": {
-                    "Literal": {
-                      "Value": "'#52514e'"
-                    }
-                  }
+                  "Value": "false"
                 }
               }
             }
@@ -229,7 +204,7 @@
             "altText": {
               "expr": {
                 "Literal": {
-                  "Value": "'Stress test results for the selected segment, price shock and loan-to-value: share of recent buyers in negative equity, the shortfall in AED, the number of purchases, the same share at the CBUAE cap and for registered loans, and under a repeat of the 2014 to 2020 fall.'"
+                  "Value": "'Stress test results (illustrative, not a regulatory stress test; loans held at origination) for the selected segment, price shock and loan-to-value: share of recent buyers in negative equity, the shortfall in AED, the number of purchases, the same share at the CBUAE cap and for registered loans, and under a repeat of the 2014 to 2020 fall.'"
                 }
               }
             }

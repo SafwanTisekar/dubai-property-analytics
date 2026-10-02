@@ -28,7 +28,7 @@
               },
               "queryRef": "_Measures.Gross Yield (Latest 4 Quarters)",
               "nativeQueryRef": "Gross Yield (Latest 4 Quarters)",
-              "displayName": "Gross yield (last 4 quarters)"
+              "displayName": "Gross yield, last 4 quarters (before costs)"
             },
             {
               "field": {
@@ -112,14 +112,7 @@
             "show": {
               "expr": {
                 "Literal": {
-                  "Value": "true"
-                }
-              }
-            },
-            "text": {
-              "expr": {
-                "Literal": {
-                  "Value": "'Yields and rents'"
+                  "Value": "false"
                 }
               }
             }
@@ -132,25 +125,7 @@
             "show": {
               "expr": {
                 "Literal": {
-                  "Value": "true"
-                }
-              }
-            },
-            "text": {
-              "expr": {
-                "Literal": {
-                  "Value": "'Gross: before service charges, vacancy and fees'"
-                }
-              }
-            },
-            "fontColor": {
-              "solid": {
-                "color": {
-                  "expr": {
-                    "Literal": {
-                      "Value": "'#52514e'"
-                    }
-                  }
+                  "Value": "false"
                 }
               }
             }
@@ -163,7 +138,7 @@
             "altText": {
               "expr": {
                 "Literal": {
-                  "Value": "'Yield headline numbers: gross yield over the last four complete quarters, number of new market rent contracts in the selected year, and the area-weighted annual rent per square metre of new contracts for homes.'"
+                  "Value": "'Yield headline numbers: gross yield over the last four complete quarters (before service charges, vacancy and fees), number of new market rent contracts in the selected year, and the area-weighted annual rent per square metre of new contracts for homes.'"
                 }
               }
             }

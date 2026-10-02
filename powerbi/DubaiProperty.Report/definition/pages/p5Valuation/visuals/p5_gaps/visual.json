@@ -3,10 +3,10 @@
   "name": "p5_gaps",
   "position": {
     "x": 16,
-    "y": 476,
+    "y": 448,
     "z": 14000,
     "width": 1000,
-    "height": 204,
+    "height": 232,
     "tabOrder": 14000
   },
   "visual": {
@@ -125,6 +125,21 @@
         "isDefaultSort": false
       }
     },
+    "objects": {
+      "values": [
+        {
+          "properties": {
+            "wordWrap": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
     "visualContainerObjects": {
       "title": [
         {
@@ -139,7 +154,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'Where sales sit furthest from the AVM: 6 projects with most flags'"
+                  "Value": "'Where sales sit furthest from the AVM: 4 projects with most flags'"
                 }
               }
             }
@@ -165,7 +180,7 @@
             "altText": {
               "expr": {
                 "Literal": {
-                  "Value": "'Table of the six projects with the most sales flagged for review, with their area and median gap to the AVM.'"
+                  "Value": "'Table of the four projects with the most sales flagged for review, with their area and median gap to the AVM.'"
                 }
               }
             }
@@ -238,7 +253,7 @@
                         }
                       }
                     ],
-                    "Top": 6
+                    "Top": 4
                   }
                 }
               },

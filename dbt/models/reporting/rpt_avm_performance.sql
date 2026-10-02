@@ -16,7 +16,13 @@ select
     end as "Model Name",
     p.is_champion as "Is Champion",
     initcap(p.split) as "Split",
-    initcap(replace(p.breakdown, '_', ' ')) as "Breakdown",
+    -- "_common" breakdowns compare the models on the same sales (the ones every model can
+    -- value): the model card's head-to-head. Labelled so a chart can't mix the two.
+    case
+        when p.breakdown like '%\_common' escape '\'
+            then initcap(replace(left(p.breakdown, -7), '_', ' ')) || ' (same sales)'
+        else initcap(replace(p.breakdown, '_', ' '))
+    end as "Breakdown",
     p.segment as "Segment",
     p.n_total as "Sales in Segment",
     p.n_scored as "Sales Valued",

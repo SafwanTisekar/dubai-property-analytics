@@ -3,10 +3,10 @@
   "name": "p6_heatmap",
   "position": {
     "x": 16,
-    "y": 256,
+    "y": 268,
     "z": 11000,
     "width": 400,
-    "height": 424,
+    "height": 412,
     "tabOrder": 11000
   },
   "visual": {
@@ -193,7 +193,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'Negative equity: shock × LTV'"
+                  "Value": "'Negative equity: shock × LTV (85%* = UAE national cap)'"
                 }
               }
             }
@@ -206,25 +206,7 @@
             "show": {
               "expr": {
                 "Literal": {
-                  "Value": "true"
-                }
-              }
-            },
-            "text": {
-              "expr": {
-                "Literal": {
-                  "Value": "'85%* = UAE national first-home cap. Illustrative, not a regulatory stress test'"
-                }
-              }
-            },
-            "fontColor": {
-              "solid": {
-                "color": {
-                  "expr": {
-                    "Literal": {
-                      "Value": "'#52514e'"
-                    }
-                  }
+                  "Value": "false"
                 }
               }
             }
@@ -237,7 +219,7 @@
             "altText": {
               "expr": {
                 "Literal": {
-                  "Value": "'Heatmap of the share of recent buyers in negative equity for price falls of 0 to 50% and loan-to-values of 50 to 85%.'"
+                  "Value": "'Heatmap of the share of recent buyers in negative equity (illustrative) for price falls of 0 to 50% and loan-to-values of 50 to 85%; 85% is the UAE national first-home cap, the worst case.'"
                 }
               }
             }

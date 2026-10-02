@@ -95,3 +95,5 @@ The mechanics are the same as any Publish-to-web report: a work/school account, 
 | 2026-10-02 | Model-output rpt views keep ratios at 6 decimals (`rpt_ratio` macro) | Power BI rounds half up: 0.650478 stored as 0.6505 showed 65.1% against the model card's 65.0% |
 | 2026-10-02 | Yield aggregates leave out cells outside the 2–15% sanity band | Two flagged Al Barsha cells drove a 14.1% zone yield; apartments 7.2% → 7.1% (docs/05 §8) |
 | 2026-10-02 | AVM features shown with readable names (`seed_avm_feature_label`, tested to cover every feature) | "proj_rel_12m" means nothing to a reader; "Project price level (12m)" does |
+| 2026-10-02 | AVM segment chart compares the models on the same sales (breakdowns "… (same sales)" in `rpt.avm_performance`) | Own coverage put LightGBM's villas at 8.91% (21,810) beside the model card's 8.66% head-to-head (20,527) |
+| 2026-10-02 | Card and top-N sizes assume Desktop's rendered sizes (≈ 1.73 px per point, ≈ 24 px per bar, 32 px per table row), not the nominal PBIR ones | Gate 3: files passed nominal checks yet grouped cards and bar charts clipped on screen |

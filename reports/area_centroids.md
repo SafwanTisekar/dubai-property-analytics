@@ -1,15 +1,15 @@
 # Area centroids
 
-Generated 2026-10-01 19:40 UTC by `ingest/geocode_areas.py` (`make centroids`), 33 new Nominatim requests (the rest from the cache in `data/raw/osm/`). Centroids feed the Power BI bubble map (docs/06 §4). **Area locations © OpenStreetMap contributors (ODbL).**
+Generated 2026-10-02 11:52 UTC by `ingest/geocode_areas.py` (`make centroids`), 1 new Nominatim requests (the rest from the cache in `data/raw/osm/`). Centroids feed the Power BI bubble map (docs/06 §4). **Area locations © OpenStreetMap contributors (ODbL).**
 
 **194 of 265 areas located.** Only results whose OSM address is in the emirate of Dubai (AE-DU) and inside the Dubai box are accepted. Not-found areas have no bubble; there is no fallback to a zone centroid. To fix one, type its coordinates into `dbt/seeds/seed_area.csv` with `centroid_source = manual` (never overwritten), then `make dbt`.
 
 | Outcome | Areas |
 |---|---|
-| osm_nominatim | 184 |
+| osm_nominatim | 183 |
 | not found | 71 |
 | osm_nominatim_approx | 6 |
-| osm_nominatim_alias | 4 |
+| osm_nominatim_alias | 5 |
 
 ## Not found: fill in by hand (71)
 
@@ -102,7 +102,7 @@ Found only without the sub-area suffix, so sub-areas share one point.
 | 528 | Al Yufrah 3 | Dubailand | Al Yufrah | Al Yufrah 1 | 25.003250 | 55.439521 |
 | 529 | Al Yufrah 4 | Dubailand | Al Yufrah | Al Yufrah 1 | 25.003250 | 55.439521 |
 
-## Found under an alias, please review (4)
+## Found under an alias, please review (5)
 
 Located under the better-known name in `ALIASES`.
 
@@ -112,3 +112,4 @@ Located under the better-known name in `ALIASES`.
 | 333 | Madinat Dubai Almelaheyah | Bur Dubai & Karama | Port Rashid | Port Rashid | 25.271108 | 55.265932 |
 | 412 | Al Merkadh | MBR City, Meydan & Dubai Hills | Al Merkad | MBR- Al Merkad | 25.169213 | 55.292473 |
 | 447 | Al Khairan First | Creek Harbour, Jaddaf & Festival City | Dubai Creek Harbour | Dubai Creek Harbour | 25.197978 | 55.360380 |
+| 527 | Island 2 (Jumeira Bay) | Palm & Islands | Island 2 | Jumeirah Island 2 | 25.197624 | 55.225824 |

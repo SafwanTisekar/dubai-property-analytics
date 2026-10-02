@@ -3,10 +3,10 @@
   "name": "p2_ready_financed",
   "position": {
     "x": 16,
-    "y": 208,
+    "y": 224,
     "z": 12000,
     "width": 404,
-    "height": 212,
+    "height": 220,
     "tabOrder": 12000
   },
   "visual": {

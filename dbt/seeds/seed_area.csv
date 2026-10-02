@@ -260,7 +260,7 @@ area_id,area_name_en,zone,latitude,longitude,centroid_source
 524,Muragab,Outer Dubai & Hatta,,,
 525,Hatta,Outer Dubai & Hatta,24.797557,56.120638,osm_nominatim
 526,Business Bay,Downtown & Business Bay,25.179456,55.268371,osm_nominatim
-527,Island 2,Palm & Islands,25.197624,55.225824,osm_nominatim
+527,Island 2 (Jumeira Bay),Palm & Islands,25.197624,55.225824,osm_nominatim_alias
 528,Al Yufrah 3,Dubailand,25.003250,55.439521,osm_nominatim_approx
 529,Al Yufrah 4,Dubailand,25.003250,55.439521,osm_nominatim_approx
 531,Al Hebiah Sixth,Dubailand,25.020287,55.269776,osm_nominatim
