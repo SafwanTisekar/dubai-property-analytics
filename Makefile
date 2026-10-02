@@ -29,7 +29,7 @@ BRONZE_FLAGS ?=
 
 .PHONY: help setup db dbt-deps dbt-debug lint test \
         download bronze reconcile profile sample fixtures dbt dq kpi dictionary unzoned centroids \
-        pbi-ready pbi-measures eda train score model-reports update pipeline
+        pbi-ready pbi-measures pbi-inventory eda train score model-reports update pipeline
 
 help:  ## List targets
 	@grep -hE '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | \
@@ -142,6 +142,9 @@ pbi-ready:  ## Restart Postgres, then check Power BI's login (pbi_reader @ PBI_H
 
 pbi-measures:  ## Export the semantic model's measures (TMDL) -> powerbi/measures.dax, a review copy
 	$(PY).powerbi.tmdl
+
+pbi-inventory:  ## Every report page and visual (PBIR) -> powerbi/VISUALS.md, a review copy
+	$(PY).powerbi.pbir
 
 # --- Phase 3: exploratory analysis (docs/08) -----------------------------------------
 # Needs the gold tables and rpt views on the full data (make dbt). Notebooks only call

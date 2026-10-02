@@ -5,8 +5,8 @@
     "x": 16,
     "y": 208,
     "z": 12000,
-    "width": 620,
-    "height": 236,
+    "width": 404,
+    "height": 212,
     "tabOrder": 12000
   },
   "visual": {
@@ -46,7 +46,7 @@
               },
               "queryRef": "_Measures.Purchase Mortgages",
               "nativeQueryRef": "Purchase Mortgages",
-              "displayName": "Matched purchase mortgage"
+              "displayName": "Matched mortgage"
             },
             {
               "field": {
@@ -61,7 +61,7 @@
               },
               "queryRef": "_Measures.Ready Sales Not Bank-Financed",
               "nativeQueryRef": "Ready Sales Not Bank-Financed",
-              "displayName": "Not bank-financed at registration"
+              "displayName": "Not bank-financed"
             }
           ]
         }
@@ -121,7 +121,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'Ready sales: bank-financed at registration vs not'"
+                  "Value": "'Ready sales: mortgage-financed or not'"
                 }
               }
             }
@@ -141,7 +141,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'All years from 2010; not filtered by Year'"
+                  "Value": "'From 2010; not filtered by Year'"
                 }
               }
             },
@@ -177,7 +177,7 @@
   "filterConfig": {
     "filters": [
       {
-        "name": "p2From2010a",
+        "name": "p2Froma",
         "field": {
           "Column": {
             "Expression": {
@@ -218,6 +218,59 @@
                       "Value": "2010L"
                     }
                   }
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "p2Snapa",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "Date"
+              }
+            },
+            "Property": "Is After Snapshot"
+          }
+        },
+        "type": "Categorical",
+        "filter": {
+          "Version": 2,
+          "From": [
+            {
+              "Name": "d",
+              "Entity": "Date",
+              "Type": 0
+            }
+          ],
+          "Where": [
+            {
+              "Condition": {
+                "In": {
+                  "Expressions": [
+                    {
+                      "Column": {
+                        "Expression": {
+                          "SourceRef": {
+                            "Source": "d"
+                          }
+                        },
+                        "Property": "Is After Snapshot"
+                      }
+                    }
+                  ],
+                  "Values": [
+                    [
+                      {
+                        "Literal": {
+                          "Value": "false"
+                        }
+                      }
+                    ]
+                  ]
                 }
               }
             }

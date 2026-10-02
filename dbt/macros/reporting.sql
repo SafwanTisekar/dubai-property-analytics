@@ -26,3 +26,12 @@
 {% macro rpt_ready_offplan(col) -%}
     case when {{ col }} then 'Off-Plan' else 'Ready' end
 {%- endmacro %}
+
+{# Ratios of the model outputs (shares, rates of change, yields, errors) keep 6 decimals.
+   Power BI rounds half up when it formats 0.0%: a value already rounded to 4 decimals can
+   flip the shown digit (0.650478 -> 0.6505 -> "65.1%", while the model card says 65.0%).
+   Six decimals cost nothing in these small tables. Row-level detail views (avm_score,
+   transactions) keep 4 to stay small. #}
+{% macro rpt_ratio(col) -%}
+    round({{ col }}, 6)
+{%- endmacro %}

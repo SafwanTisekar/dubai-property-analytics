@@ -82,3 +82,16 @@ The mechanics are the same as any Publish-to-web report: a work/school account, 
 2. Put the embed URL in `website/config.js` and record it, with the licence expiry date, in docs/08.
 3. Monthly refresh: `make update` → refresh in Desktop → republish (the embed URL stays the same). This is a nice "living dashboard" talking point.
 4. Everything in the model becomes public. That's fine for DLD open data under CC BY 4.0, with attribution shown.
+
+## 7. Decisions (Phase 5)
+
+| Date | Decision | Why |
+|---|---|---|
+| 2026-10-01 | Semantic model hand-written as TMDL; model outputs disconnected and bridged with TREATAS | §2. Their Dubai / zone rows have NULL area keys, so a relationship would let an area slicer drop them |
+| 2026-10-02 | AED formats are `"AED "#,0` only; bn / M via display units; thousands via a measure formatted `"AED "#,0"K"` | Scaling commas (`#,0.0,,,"bn"`) render literally in Power BI ("AED 3.6,,,Tbn", gate 0) |
+| 2026-10-02 | No maps in v1: bar charts by area, top N | Azure Maps needs a tenant admin (owner); centroids kept for later |
+| 2026-10-02 | Report pages built as PBIR JSON and validated offline (official schemas, model fields, theme-schema formatting index, query expressions); `powerbi/VISUALS.md` generated from them | Reproducible, reviewable report definition; Desktop remains the final check (owner gates) |
+| 2026-10-02 | Render rules: charts ≥ 240 × 180 px, top-N bars ≥ 24 px each, subtitles only under a title, card formatting on `$id = default` | Final gate: tiny panels drew a placeholder icon, bar charts scrolled, subtitles and label settings were silently ignored |
+| 2026-10-02 | Model-output rpt views keep ratios at 6 decimals (`rpt_ratio` macro) | Power BI rounds half up: 0.650478 stored as 0.6505 showed 65.1% against the model card's 65.0% |
+| 2026-10-02 | Yield aggregates leave out cells outside the 2–15% sanity band | Two flagged Al Barsha cells drove a 14.1% zone yield; apartments 7.2% → 7.1% (docs/05 §8) |
+| 2026-10-02 | AVM features shown with readable names (`seed_avm_feature_label`, tested to cover every feature) | "proj_rel_12m" means nothing to a reader; "Project price level (12m)" does |

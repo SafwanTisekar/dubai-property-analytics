@@ -24,7 +24,7 @@ select
     round(r.peak_index, 2) as "Peak Index",
     r.trough_period as "Trough",
     round(r.trough_index, 2) as "Trough Index",
-    round(r.drawdown, 4) as "Drawdown",
+    {{ rpt_ratio("r.drawdown") }} as "Drawdown",
     r.is_used as "Used In Replay",
     r.note as "Note",
     r.model_version as "Model Version"

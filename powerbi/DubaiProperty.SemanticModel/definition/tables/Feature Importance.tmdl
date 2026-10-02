@@ -10,6 +10,14 @@ table 'Feature Importance'
 
 		annotation SummarizationSetBy = User
 
+	column 'Feature Label'
+		dataType: string
+		lineageTag: 40d6cc9c-ce79-5f04-9cca-006297399545
+		summarizeBy: none
+		sourceColumn: Feature Label
+
+		annotation SummarizationSetBy = User
+
 	column 'Feature Group'
 		dataType: string
 		lineageTag: df12baa3-80d6-5fa1-a198-b59c5303ea08

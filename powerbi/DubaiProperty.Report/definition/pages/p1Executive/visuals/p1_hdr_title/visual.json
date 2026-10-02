@@ -6,7 +6,7 @@
     "y": 4,
     "z": 1000,
     "width": 876,
-    "height": 48,
+    "height": 44,
     "tabOrder": 1000
   },
   "visual": {
@@ -40,7 +40,7 @@
             "fontSize": {
               "expr": {
                 "Literal": {
-                  "Value": "16D"
+                  "Value": "14D"
                 }
               }
             },

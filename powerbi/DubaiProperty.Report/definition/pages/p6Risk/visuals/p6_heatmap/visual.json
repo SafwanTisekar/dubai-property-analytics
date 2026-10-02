@@ -6,7 +6,7 @@
     "y": 256,
     "z": 11000,
     "width": 400,
-    "height": 208,
+    "height": 424,
     "tabOrder": 11000
   },
   "visual": {
@@ -41,11 +41,11 @@
                       "Entity": "LTV %"
                     }
                   },
-                  "Property": "LTV Label"
+                  "Property": "LTV Short"
                 }
               },
-              "queryRef": "LTV %.LTV Label",
-              "nativeQueryRef": "LTV Label"
+              "queryRef": "LTV %.LTV Short",
+              "nativeQueryRef": "LTV Short"
             }
           ]
         },
@@ -132,13 +132,33 @@
           }
         }
       ],
+      "subTotals": [
+        {
+          "properties": {
+            "rowSubtotals": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            },
+            "columnSubtotals": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ],
       "rowHeaders": [
         {
           "properties": {
             "fontSize": {
               "expr": {
                 "Literal": {
-                  "Value": "8D"
+                  "Value": "9D"
                 }
               }
             }
@@ -151,14 +171,7 @@
             "fontSize": {
               "expr": {
                 "Literal": {
-                  "Value": "8D"
-                }
-              }
-            },
-            "wordWrap": {
-              "expr": {
-                "Literal": {
-                  "Value": "true"
+                  "Value": "9D"
                 }
               }
             }
@@ -180,7 +193,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'Negative equity: shock × LTV (recent buyers)'"
+                  "Value": "'Negative equity: shock × LTV'"
                 }
               }
             }
@@ -200,7 +213,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'Illustrative, not a regulatory stress test'"
+                  "Value": "'85%* = UAE national first-home cap. Illustrative, not a regulatory stress test'"
                 }
               }
             },

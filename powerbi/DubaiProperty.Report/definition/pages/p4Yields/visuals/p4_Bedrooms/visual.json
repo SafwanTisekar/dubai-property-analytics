@@ -3,10 +3,10 @@
   "name": "p4_Bedrooms",
   "position": {
     "x": 710,
-    "y": 56,
+    "y": 52,
     "z": 6000,
     "width": 160,
-    "height": 48,
+    "height": 58,
     "tabOrder": 6000
   },
   "visual": {
@@ -82,6 +82,26 @@
               "expr": {
                 "Literal": {
                   "Value": "'Bedrooms'"
+                }
+              }
+            },
+            "textSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "9D"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "items": [
+        {
+          "properties": {
+            "textSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "10D"
                 }
               }
             }

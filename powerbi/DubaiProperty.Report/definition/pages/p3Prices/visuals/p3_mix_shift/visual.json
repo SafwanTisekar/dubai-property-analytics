@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
   "name": "p3_mix_shift",
   "position": {
-    "x": 644,
+    "x": 428,
     "y": 208,
     "z": 13000,
-    "width": 620,
-    "height": 220,
+    "width": 404,
+    "height": 236,
     "tabOrder": 13000
   },
   "visual": {
@@ -46,7 +46,7 @@
               },
               "queryRef": "_Measures.Index Value (Apartments)",
               "nativeQueryRef": "Index Value (Apartments)",
-              "displayName": "Apartment index (like for like)"
+              "displayName": "Like for like"
             },
             {
               "field": {
@@ -61,7 +61,7 @@
               },
               "queryRef": "_Measures.Raw Median Rebased (Apartments)",
               "nativeQueryRef": "Raw Median Rebased (Apartments)",
-              "displayName": "Raw median AED / sq m (rebased)"
+              "displayName": "Raw median"
             }
           ]
         }
@@ -121,7 +121,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'Raw medians misread growth both ways: 2023 apartments +1% raw vs +17% like for like'"
+                  "Value": "'Apartments: raw median vs like for like'"
                 }
               }
             }
@@ -141,7 +141,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'All years from 2015; not filtered by Year'"
+                  "Value": "'2023: +1% raw vs +17% like for like'"
                 }
               }
             },
@@ -177,7 +177,7 @@
   "filterConfig": {
     "filters": [
       {
-        "name": "p3From2015",
+        "name": "p3Fromb",
         "field": {
           "Column": {
             "Expression": {
@@ -218,6 +218,59 @@
                       "Value": "2015L"
                     }
                   }
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "p3Snapb",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "Date"
+              }
+            },
+            "Property": "Is After Snapshot"
+          }
+        },
+        "type": "Categorical",
+        "filter": {
+          "Version": 2,
+          "From": [
+            {
+              "Name": "d",
+              "Entity": "Date",
+              "Type": 0
+            }
+          ],
+          "Where": [
+            {
+              "Condition": {
+                "In": {
+                  "Expressions": [
+                    {
+                      "Column": {
+                        "Expression": {
+                          "SourceRef": {
+                            "Source": "d"
+                          }
+                        },
+                        "Property": "Is After Snapshot"
+                      }
+                    }
+                  ],
+                  "Values": [
+                    [
+                      {
+                        "Literal": {
+                          "Value": "false"
+                        }
+                      }
+                    ]
+                  ]
                 }
               }
             }

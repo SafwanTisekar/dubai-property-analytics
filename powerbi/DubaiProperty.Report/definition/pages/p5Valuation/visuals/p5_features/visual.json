@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
   "name": "p5_features",
   "position": {
-    "x": 424,
+    "x": 428,
     "y": 208,
     "z": 12000,
-    "width": 400,
-    "height": 236,
+    "width": 404,
+    "height": 260,
     "tabOrder": 12000
   },
   "visual": {
@@ -23,11 +23,11 @@
                       "Entity": "Feature Importance"
                     }
                   },
-                  "Property": "Feature"
+                  "Property": "Feature Label"
                 }
               },
-              "queryRef": "Feature Importance.Feature",
-              "nativeQueryRef": "Feature"
+              "queryRef": "Feature Importance.Feature Label",
+              "nativeQueryRef": "Feature Label"
             }
           ]
         },
@@ -119,7 +119,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'What drives the valuation (mean |SHAP|, log points)'"
+                  "Value": "'What drives the valuation (mean |SHAP|)'"
                 }
               }
             }
@@ -145,7 +145,7 @@
             "altText": {
               "expr": {
                 "Literal": {
-                  "Value": "'Top ten features by mean absolute SHAP value.'"
+                  "Value": "'Top eight features by mean absolute SHAP value, in log points of the predicted price.'"
                 }
               }
             }
@@ -157,7 +157,7 @@
   "filterConfig": {
     "filters": [
       {
-        "name": "p5Top10",
+        "name": "p5Top8",
         "field": {
           "Column": {
             "Expression": {
@@ -195,7 +195,7 @@
                   },
                   "Right": {
                     "Literal": {
-                      "Value": "10L"
+                      "Value": "8L"
                     }
                   }
                 }

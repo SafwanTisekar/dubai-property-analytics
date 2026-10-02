@@ -3,10 +3,10 @@
   "name": "p3_Year",
   "position": {
     "x": 16,
-    "y": 56,
+    "y": 52,
     "z": 3000,
     "width": 150,
-    "height": 48,
+    "height": 58,
     "tabOrder": 3000
   },
   "visual": {
@@ -82,6 +82,26 @@
               "expr": {
                 "Literal": {
                   "Value": "'Year'"
+                }
+              }
+            },
+            "textSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "9D"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "items": [
+        {
+          "properties": {
+            "textSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "10D"
                 }
               }
             }

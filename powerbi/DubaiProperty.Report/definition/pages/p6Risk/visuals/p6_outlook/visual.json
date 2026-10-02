@@ -2,10 +2,10 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
   "name": "p6_outlook",
   "position": {
-    "x": 424,
+    "x": 832,
     "y": 472,
     "z": 15000,
-    "width": 840,
+    "width": 432,
     "height": 208,
     "tabOrder": 15000
   },
@@ -201,6 +201,19 @@
             "metadata": "_Measures.Forecast Upper 80"
           }
         }
+      ],
+      "valueAxis": [
+        {
+          "properties": {
+            "start": {
+              "expr": {
+                "Literal": {
+                  "Value": "150D"
+                }
+              }
+            }
+          }
+        }
       ]
     },
     "visualContainerObjects": {
@@ -242,7 +255,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'SARIMAX, rate scenarios via Fed Funds (EIBOR proxy); dashed = 80% interval'"
+                  "Value": "'Dashed = 80% interval; a baseline, not a call'"
                 }
               }
             },

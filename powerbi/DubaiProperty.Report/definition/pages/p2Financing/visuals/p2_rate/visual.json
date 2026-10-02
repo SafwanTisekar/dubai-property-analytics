@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
   "name": "p2_rate",
   "position": {
-    "x": 644,
-    "y": 330,
+    "x": 840,
+    "y": 208,
     "z": 14000,
-    "width": 620,
-    "height": 114,
+    "width": 424,
+    "height": 212,
     "tabOrder": 14000
   },
   "visual": {
@@ -106,7 +106,25 @@
             "show": {
               "expr": {
                 "Literal": {
-                  "Value": "false"
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Same time range as the mortgage share'"
+                }
+              }
+            },
+            "fontColor": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#52514e'"
+                    }
+                  }
                 }
               }
             }
@@ -119,7 +137,7 @@
             "altText": {
               "expr": {
                 "Literal": {
-                  "Value": "'Line chart of the reference interest rate by month, aligned under the mortgage share.'"
+                  "Value": "'Line chart of the reference interest rate by month since 2010, beside the mortgage share on the same time range.'"
                 }
               }
             }
@@ -131,7 +149,7 @@
   "filterConfig": {
     "filters": [
       {
-        "name": "p2From2010c",
+        "name": "p2Fromc",
         "field": {
           "Column": {
             "Expression": {
@@ -172,6 +190,59 @@
                       "Value": "2010L"
                     }
                   }
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "p2Snapc",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "Date"
+              }
+            },
+            "Property": "Is After Snapshot"
+          }
+        },
+        "type": "Categorical",
+        "filter": {
+          "Version": 2,
+          "From": [
+            {
+              "Name": "d",
+              "Entity": "Date",
+              "Type": 0
+            }
+          ],
+          "Where": [
+            {
+              "Condition": {
+                "In": {
+                  "Expressions": [
+                    {
+                      "Column": {
+                        "Expression": {
+                          "SourceRef": {
+                            "Source": "d"
+                          }
+                        },
+                        "Property": "Is After Snapshot"
+                      }
+                    }
+                  ],
+                  "Values": [
+                    [
+                      {
+                        "Literal": {
+                          "Value": "false"
+                        }
+                      }
+                    ]
+                  ]
                 }
               }
             }

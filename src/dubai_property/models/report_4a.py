@@ -989,7 +989,11 @@ def weighted(df: pl.DataFrame, by: list[str]) -> pl.DataFrame:
 def yield_report(yl: pl.DataFrame, index: pl.DataFrame, snapshot: date) -> tuple[str, dict]:
     """The markdown for reports/yields.md and its figures."""
     figs: dict[str, Path] = {}
-    zone = yl.filter(pl.col("geo_level") == "zone")
+    # Aggregates leave out cells outside the 2-15% sanity band (owner, Phase 5): two such
+    # Al Barsha cells (25%, 23%) with heavy sales weights pushed that zone to 14% and the
+    # apartment headline from 7.1% to 7.2%. The cells stay in ml / rpt, flagged, and are
+    # listed in the sanity section below; the Power BI yield measures exclude them too.
+    zone = yl.filter((pl.col("geo_level") == "zone") & ~pl.col("is_outside_sanity"))
     complete = zone.filter(~pl.col("is_partial_period"))
     last_q = complete["quarter_start"].max()
     first_q = h.add_months(last_q, -9)
@@ -1130,7 +1134,9 @@ def yield_report(yl: pl.DataFrame, index: pl.DataFrame, snapshot: date) -> tuple
         "min-n are not published. Sample sizes are on every row.",
         "- **Aggregates in this report** (zone, Dubai, trend) are sales-weighted means of "
         "the published **zone** cells, so every rent is compared with a price of the same "
-        "bedrooms and quarter.",
+        "bedrooms and quarter. Cells **outside the 2–15% sanity band are left out** of every "
+        "aggregate (they stay in the data, flagged; see the sanity check), so one implausible "
+        "cell can't move a zone or the headline.",
         "",
         "## Coverage",
         "",
@@ -1271,7 +1277,8 @@ def yield_report(yl: pl.DataFrame, index: pl.DataFrame, snapshot: date) -> tuple
         if outside.height
         else "None.",  # fmt: skip
         "",
-        "They are kept (and flagged `is_outside_sanity`) because each passes min-n; a high "
+        "They are kept in the data (flagged `is_outside_sanity`) because each passes min-n, "
+        "but **left out of every aggregate above** and of the Power BI yield measures. A high "
         "yield in a cell usually means its ready sales are a cheaper sub-market than its new "
         "lets (e.g. older buildings sold, newer ones let) rather than an error.",
         "",

@@ -3,10 +3,10 @@
   "name": "p6_ForecastSegment",
   "position": {
     "x": 1066,
-    "y": 56,
+    "y": 52,
     "z": 9000,
     "width": 198,
-    "height": 48,
+    "height": 58,
     "tabOrder": 9000
   },
   "visual": {
@@ -82,6 +82,26 @@
               "expr": {
                 "Literal": {
                   "Value": "'Outlook segment'"
+                }
+              }
+            },
+            "textSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "9D"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "items": [
+        {
+          "properties": {
+            "textSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "10D"
                 }
               }
             }

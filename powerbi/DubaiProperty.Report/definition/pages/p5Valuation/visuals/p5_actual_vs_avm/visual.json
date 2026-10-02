@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
   "name": "p5_actual_vs_avm",
   "position": {
-    "x": 832,
+    "x": 840,
     "y": 208,
     "z": 13000,
-    "width": 432,
-    "height": 236,
+    "width": 424,
+    "height": 260,
     "tabOrder": 13000
   },
   "visual": {
@@ -46,7 +46,7 @@
               },
               "queryRef": "_Measures.Median Sale Price (AVM Sample)",
               "nativeQueryRef": "Median Sale Price (AVM Sample)",
-              "displayName": "Median sale price"
+              "displayName": "Median price"
             },
             {
               "field": {
@@ -137,7 +137,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'Out of sample: median price vs median AVM value'"
+                  "Value": "'Median price vs median AVM value'"
                 }
               }
             }
@@ -157,7 +157,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'Test period; not filtered by Year'"
+                  "Value": "'Out of sample, by month; not filtered by Year'"
                 }
               }
             },

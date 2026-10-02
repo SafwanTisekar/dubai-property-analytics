@@ -3,10 +3,10 @@
   "name": "p3_Area",
   "position": {
     "x": 174,
-    "y": 56,
+    "y": 52,
     "z": 4000,
     "width": 260,
-    "height": 48,
+    "height": 58,
     "tabOrder": 4000
   },
   "visual": {
@@ -97,6 +97,26 @@
               "expr": {
                 "Literal": {
                   "Value": "'Zone / area'"
+                }
+              }
+            },
+            "textSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "9D"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "items": [
+        {
+          "properties": {
+            "textSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "10D"
                 }
               }
             }

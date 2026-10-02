@@ -16,7 +16,7 @@ select
     y.n_sale as "Sales",
     {{ rpt_aed('y.median_annual_rent_aed') }} as "Median Annual Rent AED",
     {{ rpt_aed('y.median_price_aed') }} as "Median Price AED",
-    round(y.gross_yield, 4) as "Gross Yield",
+    {{ rpt_ratio("y.gross_yield") }} as "Gross Yield",
     y.is_outside_sanity as "Is Outside Sanity Band",
     y.areas_rolled_up as "Areas Rolled Up",
     y.is_partial_period as "Is Partial Period"

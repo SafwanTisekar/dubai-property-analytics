@@ -84,7 +84,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'Yields fell to a 2021 low and partly recovered'"
+                  "Value": "'Yields: 2021 low, partly recovered'"
                 }
               }
             }
@@ -104,7 +104,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'All years from 2012; not filtered by Year'"
+                  "Value": "'From 2012; not filtered by Year'"
                 }
               }
             },
@@ -128,7 +128,7 @@
             "altText": {
               "expr": {
                 "Literal": {
-                  "Value": "'Quarterly gross yield for apartments and villas.'"
+                  "Value": "'Quarterly gross yield for apartments and villas since 2012.'"
                 }
               }
             }
@@ -241,6 +241,59 @@
                       "Value": "2012L"
                     }
                   }
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "p4Snap",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "Date"
+              }
+            },
+            "Property": "Is After Snapshot"
+          }
+        },
+        "type": "Categorical",
+        "filter": {
+          "Version": 2,
+          "From": [
+            {
+              "Name": "d",
+              "Entity": "Date",
+              "Type": 0
+            }
+          ],
+          "Where": [
+            {
+              "Condition": {
+                "In": {
+                  "Expressions": [
+                    {
+                      "Column": {
+                        "Expression": {
+                          "SourceRef": {
+                            "Source": "d"
+                          }
+                        },
+                        "Property": "Is After Snapshot"
+                      }
+                    }
+                  ],
+                  "Values": [
+                    [
+                      {
+                        "Literal": {
+                          "Value": "false"
+                        }
+                      }
+                    ]
+                  ]
                 }
               }
             }

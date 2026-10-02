@@ -139,7 +139,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'2014→2020: the fall each index series took'"
+                  "Value": "'2014→2020 fall, 5 deepest series'"
                 }
               }
             }
@@ -159,7 +159,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'Zone series are noisier and overstate it. Illustrative, not a regulatory stress test'"
+                  "Value": "'Zone series overstate it. Illustrative, not a regulatory stress test'"
                 }
               }
             },
@@ -183,7 +183,7 @@
             "altText": {
               "expr": {
                 "Literal": {
-                  "Value": "'Bar chart of the ten index series with the deepest fall in the 2014 to 2020 downturn.'"
+                  "Value": "'Bar chart of the five index series with the deepest fall in the 2014 to 2020 downturn.'"
                 }
               }
             }
@@ -256,7 +256,7 @@
                         }
                       }
                     ],
-                    "Top": 10
+                    "Top": 5
                   }
                 }
               },

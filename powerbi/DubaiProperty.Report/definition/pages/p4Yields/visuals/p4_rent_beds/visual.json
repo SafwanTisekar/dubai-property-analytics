@@ -62,6 +62,13 @@
                   "Value": "true"
                 }
               }
+            },
+            "fontSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "8D"
+                }
+              }
             }
           }
         }
@@ -73,6 +80,19 @@
               "expr": {
                 "Literal": {
                   "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "categoryAxis": [
+        {
+          "properties": {
+            "fontSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "8D"
                 }
               }
             }
@@ -94,7 +114,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'New-contract rent per sq m by bedrooms (apartments)'"
+                  "Value": "'New rent per sq m by bedrooms'"
                 }
               }
             }
@@ -107,7 +127,25 @@
             "show": {
               "expr": {
                 "Literal": {
-                  "Value": "false"
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Apartments, new contracts'"
+                }
+              }
+            },
+            "fontColor": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#52514e'"
+                    }
+                  }
                 }
               }
             }
@@ -120,7 +158,7 @@
             "altText": {
               "expr": {
                 "Literal": {
-                  "Value": "'Annual rent per square metre of new contracts by number of bedrooms, apartments.'"
+                  "Value": "'Annual rent per square metre of new apartment contracts by number of bedrooms.'"
                 }
               }
             }
@@ -178,6 +216,63 @@
                       }
                     ]
                   ]
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "p4Beds",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "Bedrooms"
+              }
+            },
+            "Property": "Bedrooms"
+          }
+        },
+        "type": "Categorical",
+        "filter": {
+          "Version": 2,
+          "From": [
+            {
+              "Name": "b",
+              "Entity": "Bedrooms",
+              "Type": 0
+            }
+          ],
+          "Where": [
+            {
+              "Condition": {
+                "Not": {
+                  "Expression": {
+                    "In": {
+                      "Expressions": [
+                        {
+                          "Column": {
+                            "Expression": {
+                              "SourceRef": {
+                                "Source": "b"
+                              }
+                            },
+                            "Property": "Bedrooms"
+                          }
+                        }
+                      ],
+                      "Values": [
+                        [
+                          {
+                            "Literal": {
+                              "Value": "'Unknown'"
+                            }
+                          }
+                        ]
+                      ]
+                    }
+                  }
                 }
               }
             }

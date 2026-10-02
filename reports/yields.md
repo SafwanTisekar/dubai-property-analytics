@@ -7,8 +7,8 @@ Phase 4a (docs/05 §3). Gross yield = **median annual rent of new contracts ÷ m
 
 ## Summary
 
-1. **Apartments yield 7.2% gross** over Q3 2025 – Q2 2026 (sales-weighted across zone × bedroom cells), villas 5.2%. ([chart](figures/yields_by_zone.png))
-2. **Yields over the cycle** (calendar years): apartments 8.5% in 2016 → 5.9% in 2021 → 7.2% in 2025; villas / townhouses 7.3% in 2019 → 5.3% in 2021 → 5.4% in 2025. Prices outran new rents into the 2021–22 surge; rents then caught up. ([chart](figures/yield_trend.png))
+1. **Apartments yield 7.1% gross** over Q3 2025 – Q2 2026 (sales-weighted across zone × bedroom cells), villas 5.2%. ([chart](figures/yields_by_zone.png))
+2. **Yields over the cycle** (calendar years): apartments 8.5% in 2016 → 5.9% in 2021 → 7.2% in 2025; villas / townhouses 7.2% in 2016 → 5.3% in 2021 → 5.4% in 2025. Prices outran new rents into the 2021–22 surge; rents then caught up. ([chart](figures/yield_trend.png))
 3. **Smaller apartments yield more:** studios 8.4% down to 5.4% for 4-beds; villas range 4.9%–8.0% (table below).
 4. **Sanity:** 8 of 5,919 published cells fall outside 2–15% (flagged, kept; listed below).
 
@@ -18,7 +18,7 @@ Phase 4a (docs/05 §3). Gross yield = **median annual rent of new contracts ÷ m
 - **Sale side:** `is_clean_market_sale` and **ready** (not off-plan). An off-plan price buys a unit that can't be let yet, often on a payment plan, so it isn't the price a landlord pays for today's rent. Price = AED per unit, so the villa plot vs built-up area question doesn't arise.
 - **Cells:** quarter (rent: contract start; sale: registration date) × area × property type (apartment, villa / townhouse) × bedrooms. Medians with `percentile_cont` in Postgres; the 3.5M rent lines never leave the database.
 - **Min-n:** ≥ 20 observations on **both** sides. Thin area cells **roll up to the zone**, where medians are recomputed from the rows (not averaged). Zone cells under min-n are not published. Sample sizes are on every row.
-- **Aggregates in this report** (zone, Dubai, trend) are sales-weighted means of the published **zone** cells, so every rent is compared with a price of the same bedrooms and quarter.
+- **Aggregates in this report** (zone, Dubai, trend) are sales-weighted means of the published **zone** cells, so every rent is compared with a price of the same bedrooms and quarter. Cells **outside the 2–15% sanity band are left out** of every aggregate (they stay in the data, flagged; see the sanity check), so one implausible cell can't move a zone or the headline.
 
 ## Coverage
 
@@ -50,12 +50,12 @@ Area-level cells need 20 ready sales of one bedroom count in one area in one qua
 
 | Zone | Type | Gross yield | Sales | New contracts | Cells |
 | --- | --- | ---: | ---: | ---: | ---: |
-| Al Barsha, Al Quoz & Tecom | Apartments | 14.1% | 442 | 5,663 | 9 |
 | Silicon Oasis, International City & Academic City | Apartments | 10.0% | 2,076 | 18,725 | 14 |
 | Industrial | Apartments | 8.8% | 149 | 1,331 | 3 |
 | Jebel Ali, Dubai South & Waterfront | Apartments | 8.0% | 2,893 | 14,542 | 16 |
 | Dubailand | Apartments | 7.7% | 7,992 | 21,694 | 16 |
 | JVC, JVT & Arjan | Apartments | 7.6% | 6,614 | 25,895 | 16 |
+| Al Barsha, Al Quoz & Tecom | Apartments | 7.1% | 261 | 4,833 | 7 |
 | Emirates Hills, Meadows & Greens | Apartments | 6.5% | 420 | 1,399 | 8 |
 | MBR City, Meydan & Dubai Hills | Apartments | 6.4% | 3,179 | 12,039 | 16 |
 | Downtown & Business Bay | Apartments | 6.2% | 4,065 | 14,943 | 17 |
@@ -77,8 +77,8 @@ Area-level cells need 20 ready sales of one bedroom count in one area in one qua
 | --- | --- | ---: | ---: | ---: | ---: | ---: |
 | Apartments | Studio | 8.4% | 51,500 | 659,000 | 8,054 | 37,252 |
 | Apartments | 1 | 7.2% | 80,000 | 1,400,000 | 15,015 | 66,954 |
-| Apartments | 2 | 6.4% | 133,000 | 2,437,500 | 9,277 | 37,741 |
-| Apartments | 3 | 6.1% | 205,000 | 3,725,000 | 2,405 | 6,450 |
+| Apartments | 2 | 6.2% | 133,500 | 2,443,750 | 9,159 | 36,999 |
+| Apartments | 3 | 5.6% | 210,000 | 3,750,000 | 2,342 | 6,362 |
 | Apartments | 4 | 5.4% | 313,750 | 5,493,510 | 120 | 228 |
 | Villas / townhouses | 1 | 8.0% | 70,000 | 970,000 | 131 | 317 |
 | Villas / townhouses | 2 | 5.1% | 145,000 | 2,940,750 | 380 | 864 |
@@ -102,8 +102,8 @@ Median rent and price here are the medians of the cell medians, for orientation.
 | 2016 | 8.5% | 7.2% |
 | 2017 | 7.9% | 6.9% |
 | 2018 | 8.0% | 7.1% |
-| 2019 | 7.9% | 7.3% |
-| 2020 | 7.0% | 6.0% |
+| 2019 | 7.9% | 7.0% |
+| 2020 | 6.9% | 6.0% |
 | 2021 | 5.9% | 5.3% |
 | 2022 | 6.5% | 5.5% |
 | 2023 | 7.2% | 6.0% |
@@ -148,7 +148,7 @@ Zones with a published hedonic index: latest four-quarter gross yield against th
 | Q1 2019 | area | JVC, JVT & Arjan | 441 | Villas / townhouses | 4 | 17.3% | 47 | 21 |
 | Q1 2019 | zone | JVC, JVT & Arjan | – | Villas / townhouses | 4 | 18.7% | 65 | 21 |
 
-They are kept (and flagged `is_outside_sanity`) because each passes min-n; a high yield in a cell usually means its ready sales are a cheaper sub-market than its new lets (e.g. older buildings sold, newer ones let) rather than an error.
+They are kept in the data (flagged `is_outside_sanity`) because each passes min-n, but **left out of every aggregate above** and of the Power BI yield measures. A high yield in a cell usually means its ready sales are a cheaper sub-market than its new lets (e.g. older buildings sold, newer ones let) rather than an error.
 
 ## Caveats
 

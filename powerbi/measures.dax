@@ -28,25 +28,25 @@
 [Title Off-Plan] = "Off-plan was " & FORMAT ( [Off-Plan Share (Count)], "0%" ) & " of market sales but " & FORMAT ( [Off-Plan Share (Value)], "0%" ) & " of their value in " & [Selected Year Label]
 
 // Bank financing of ready purchases (findings 5).
-[Title Financing] = "At least " & FORMAT ( [Purchase Mortgage Share], "0.0%" ) & " of ready purchases in " & [Selected Year Label] & " were bank-financed at registration (matched lower bound)"
+[Title Financing] = "At least " & FORMAT ( [Purchase Mortgage Share], "0.0%" ) & " of ready purchases in " & [Selected Year Label] & " had a matched mortgage"
 
 // Like-for-like price change of the selected index segment.
-[Title Prices] = [Selected Index Segment] & ": like-for-like prices " & FORMAT ( [Index YoY], "+0.0%;-0.0%" ) & " on a year earlier (" & FORMAT ( [Index Latest Complete Period], "mmm yyyy" ) & ")"
+[Title Prices] = [Selected Index Segment] & ": prices " & FORMAT ( [Index YoY], "+0.0%;-0.0%" ) & " like for like on a year earlier (" & FORMAT ( [Index Latest Complete Period], "mmm yyyy" ) & ")"
 
 // Headline gross yields (reports/yields.md).
-[Title Yields] = "Apartments yield " & FORMAT ( CALCULATE ( [Gross Yield (Latest 4 Quarters)], 'Property Type'[Property Type Key] = 101 ), "0.0%" ) & " gross, villas " & FORMAT ( CALCULATE ( [Gross Yield (Latest 4 Quarters)], 'Property Type'[Property Type Key] = 102 ), "0.0%" ) & " (last four complete quarters)"
+[Title Yields] = "Gross yields, last four quarters: apartments " & FORMAT ( CALCULATE ( [Gross Yield (Latest 4 Quarters)], 'Property Type'[Property Type Key] = 101 ), "0.0%" ) & ", villas " & FORMAT ( CALCULATE ( [Gross Yield (Latest 4 Quarters)], 'Property Type'[Property Type Key] = 102 ), "0.0%" )
 
 // AVM vs the comparable-sales baseline (model card).
-[Title Valuation] = "The AVM values test-period sales with a median error of " & FORMAT ( [AVM Test MdAPE], "0.0%" ) & ", against " & FORMAT ( [AVM Test MdAPE (Baseline)], "0.0%" ) & " for comparable sales"
+[Title Valuation] = "AVM median error " & FORMAT ( [AVM Test MdAPE], "0.0%" ) & " vs " & FORMAT ( [AVM Test MdAPE (Baseline)], "0.0%" ) & " for comparable sales (2025-26 test)"
 
 // Stress headline for the slicer state (findings F4c.1).
-[Title Stress] = "At " & [Selected LTV] & "% LTV, a " & ABS ( [Selected Shock] ) & "% fall puts " & FORMAT ( [Negative Equity Share], "0%" ) & " of recent " & LOWER ( [Selected Ready / Off-Plan] ) & " buyers (" & [Selected Stress Segment] & ") in negative equity"
+[Title Stress] = "At " & [Selected LTV] & "% LTV, a " & ABS ( [Selected Shock] ) & "% fall puts " & FORMAT ( [Negative Equity Share], "0%" ) & " of recent " & LOWER ( [Selected Ready / Off-Plan] ) & " buyers in negative equity – " & [Selected Stress Segment]
 
 // Concentration proxy headline (master projects, not developers).
-[Title Concentration] = "Proxy for developer concentration: the top 10 master projects took " & FORMAT ( [Top 10 Master Project Share (Off-Plan)], "0%" ) & " of off-plan sales in " & [Selected Year Label] & " (HHI " & FORMAT ( [Master Project HHI (Off-Plan)], "#,0" ) & ")"
+[Title Concentration] = "Top 10 master projects: " & FORMAT ( [Top 10 Master Project Share (Off-Plan)], "0%" ) & " of off-plan (HHI " & FORMAT ( [Master Project HHI (Off-Plan)], "#,0" ) & ")"
 
 // Outlook headline for the selected segment and scenario (reports/forecast.md).
-[Title Outlook] = "12-month outlook (" & SELECTEDVALUE ( 'Forecast Scenario'[Scenario], "Rates flat" ) & "): " & FORMAT ( [Forecast 12M Change], "+0.0%;-0.0%" ) & " central, 80% band " & [Forecast 12M Band 80% Label] & ". A statistical baseline, not a call"
+[Title Outlook] = SELECTEDVALUE ( 'Forecast Scenario'[Scenario], "Rates flat" ) & ": " & FORMAT ( [Forecast 12M Change], "+0.0%;-0.0%" ) & " in 12m (80%: " & [Forecast 12M Band 80% Label] & ")"
 
 // ---------- Market ----------
 
@@ -94,6 +94,10 @@
                 KEEPFILTERS ( 'Transactions'[Is Clean Market Sale] = TRUE () )
             )
         )
+
+// Median AED per sq m in thousands, for tables where "AED 18K" reads better than AED 18,000 (a measure, not a scaling format string: those render literally).
+// Format: """AED ""#,0""K"""
+[Median Price per Sq M (K)] = DIVIDE ( [Median Price per Sq M], 1000 )
 
 // Σ AED / Σ sq m over clean sales of residential apartments and villas / townhouses within the class area cap (docs/01 §4). Only meaningful within these classes.
 // Format: """AED ""#,0"
@@ -178,7 +182,7 @@
 [Reference Rate Label] =
     IF (
         ISBLANK ( CALCULATE ( [EIBOR 3M], REMOVEFILTERS ( 'Date' ) ) ),
-        "Fed Funds rate (EIBOR proxy: the AED is pegged to the USD)",
+        "Fed Funds rate (EIBOR proxy)",
         "EIBOR 3M"
     )
 
@@ -292,7 +296,7 @@
 
 // ---------- Yields ----------
 
-// Headline gross yield: sales-weighted mean of zone x type x bedroom cells over the last four complete quarters (reports/yields.md). Follows the Zone, Property Type and Bedrooms slicers; ignores Year.
+// Headline gross yield: sales-weighted mean of zone x type x bedroom cells over the last four complete quarters (reports/yields.md); cells outside the 2-15% sanity band are left out (Phase 5). Follows the Zone, Property Type and Bedrooms slicers; ignores Year.
 // Format: 0.0%
 [Gross Yield (Latest 4 Quarters)] =
     VAR _lastQ =
@@ -305,6 +309,7 @@
         CALCULATETABLE (
             'Yield Quarter',
             'Yield Quarter'[Geo Level] = "Zone",
+            'Yield Quarter'[Is Outside Sanity Band] = FALSE (),
             'Yield Quarter'[Is Partial Period] = FALSE (),
             'Yield Quarter'[Quarter Start] > EDATE ( _lastQ, -12 ),
             'Yield Quarter'[Quarter Start] <= _lastQ,
@@ -328,6 +333,7 @@
         CALCULATETABLE (
             'Yield Quarter',
             'Yield Quarter'[Geo Level] = "Area",
+            'Yield Quarter'[Is Outside Sanity Band] = FALSE (),
             'Yield Quarter'[Is Partial Period] = FALSE (),
             'Yield Quarter'[Quarter Start] > EDATE ( _lastQ, -12 ),
             'Yield Quarter'[Quarter Start] <= _lastQ,
@@ -347,6 +353,7 @@
             SUM ( 'Yield Quarter'[Sales] )
         ),
         'Yield Quarter'[Geo Level] = "Zone",
+        'Yield Quarter'[Is Outside Sanity Band] = FALSE (),
         'Yield Quarter'[Is Partial Period] = FALSE (),
         TREATAS ( VALUES ( 'Date'[Date] ), 'Yield Quarter'[Quarter Start] ),
         TREATAS ( VALUES ( 'Area'[Zone] ), 'Yield Quarter'[Zone] ),

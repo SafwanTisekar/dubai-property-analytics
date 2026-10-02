@@ -3,10 +3,10 @@
   "name": "p4_kpis",
   "position": {
     "x": 16,
-    "y": 112,
+    "y": 116,
     "z": 10000,
     "width": 1248,
-    "height": 88,
+    "height": 84,
     "tabOrder": 10000
   },
   "visual": {
@@ -28,7 +28,7 @@
               },
               "queryRef": "_Measures.Gross Yield (Latest 4 Quarters)",
               "nativeQueryRef": "Gross Yield (Latest 4 Quarters)",
-              "displayName": "Gross yield, last 4 quarters"
+              "displayName": "Gross yield (last 4 quarters)"
             },
             {
               "field": {
@@ -43,7 +43,7 @@
               },
               "queryRef": "_Measures.New Market Rents",
               "nativeQueryRef": "New Market Rents",
-              "displayName": "New market rent contracts"
+              "displayName": "New rent contracts"
             },
             {
               "field": {
@@ -58,7 +58,7 @@
               },
               "queryRef": "_Measures.Area-Weighted New Rent per Sq M (Homes)",
               "nativeQueryRef": "Area-Weighted New Rent per Sq M (Homes)",
-              "displayName": "New rent AED / sq m / year (homes)"
+              "displayName": "New rent / sq m / year (homes)"
             }
           ]
         }
@@ -71,7 +71,30 @@
             "fontSize": {
               "expr": {
                 "Literal": {
-                  "Value": "20D"
+                  "Value": "18D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "id": "default"
+          }
+        }
+      ],
+      "label": [
+        {
+          "properties": {
+            "fontSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "9D"
+                }
+              }
+            },
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
                 }
               }
             }
@@ -89,7 +112,14 @@
             "show": {
               "expr": {
                 "Literal": {
-                  "Value": "false"
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Yields and rents'"
                 }
               }
             }
@@ -109,7 +139,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'Gross: before service charges, vacancy and fees. Yields use the last four complete quarters'"
+                  "Value": "'Gross: before service charges, vacancy and fees'"
                 }
               }
             },

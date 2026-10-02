@@ -190,8 +190,8 @@ def test_no_format_string_uses_comma_scaling():
                 # Literal text inside quotes ("AED ", "bn") may contain anything.
                 code = re.sub(r'"[^"]*"', "", value)
                 assert not scaling.search(code), f"{path.name}:{n}: {value}"
-                if "AED" in value:
-                    assert value == '"AED "#,0', f"{path.name}:{n}: {value}"
+                if "AED" in value:  # plain amounts, or thousands as a literal "K" suffix
+                    assert value in ('"AED "#,0', '"AED "#,0"K"'), f"{path.name}:{n}: {value}"
 
 
 def test_format_value_decoding():
@@ -334,3 +334,64 @@ def test_pbir_checks_catch_mistakes():
                                  "Where": [{"Column": {"Expression": {"SourceRef": {"Source": "a"}},
                                                        "Property": "Zone"}}]}))  # fmt: skip
     assert refs == [pbir.FieldRef("Area", "Zone", "Column")]
+
+
+# Render limits found at the final gate (Phase 5): below them Power BI draws a placeholder
+# icon instead of the chart, and a top-N bar chart scrolls once bars are thinner than ~24 px.
+MIN_CHART = (240, 180)
+CHART_TYPES = {
+    "lineChart",
+    "areaChart",
+    "columnChart",
+    "clusteredColumnChart",
+    "clusteredBarChart",
+    "hundredPercentStackedColumnChart",
+    "scatterChart",
+    "pivotTable",
+    "tableEx",
+}
+
+
+def _shown(vco: dict, key: str) -> bool:
+    entries = vco.get(key, [])
+    return bool(entries) and pbir.literal_value(entries[0]["properties"].get("show")) is True
+
+
+def _top_n(v: dict) -> int | None:
+    for f in v.get("filterConfig", {}).get("filters", []):
+        if f.get("type") == "TopN":
+            return f["filter"]["From"][0]["Expression"]["Subquery"]["Query"]["Top"]
+    return None
+
+
+def test_charts_meet_the_minimum_render_size():
+    for page, v in visuals():
+        if v["visual"]["visualType"] in CHART_TYPES:
+            pos = v["position"]
+            assert pos["width"] >= MIN_CHART[0] and pos["height"] >= MIN_CHART[1], (page, v["name"])
+
+
+def test_top_n_bars_fit_without_scrolling():
+    for page, v in visuals():
+        n = _top_n(v)
+        if n and v["visual"]["visualType"] == "clusteredBarChart":
+            subtitle = _shown(v["visual"]["visualContainerObjects"], "subTitle")
+            needed = 64 + 24 * n + (20 if subtitle else 0)
+            assert v["position"]["height"] >= needed, (page, v["name"], n, needed)
+
+
+def test_titles_fit_and_subtitles_have_a_title():
+    for page, v in visuals():
+        vco = v["visual"].get("visualContainerObjects", {})
+        if _shown(vco, "subTitle"):
+            assert _shown(vco, "title"), (page, v["name"], "a subtitle only shows under a title")
+        if _shown(vco, "title"):
+            text = pbir.literal_value(vco["title"][0]["properties"].get("text"))
+            if isinstance(text, str):  # measure-bound titles are checked by eye
+                assert len(text) <= v["position"]["width"] / 7, (page, v["name"], text)
+
+
+def test_visual_inventory_is_current():
+    assert pbir.VISUALS_MD.read_text(encoding="utf-8") == pbir.inventory_markdown(), (
+        "powerbi/VISUALS.md is stale: run `make pbi-inventory`"
+    )

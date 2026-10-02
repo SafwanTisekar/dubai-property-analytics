@@ -3,10 +3,10 @@
   "name": "p3_kpis",
   "position": {
     "x": 16,
-    "y": 112,
+    "y": 116,
     "z": 10000,
     "width": 1036,
-    "height": 88,
+    "height": 84,
     "tabOrder": 10000
   },
   "visual": {
@@ -43,7 +43,7 @@
               },
               "queryRef": "_Measures.Index YoY",
               "nativeQueryRef": "Index YoY",
-              "displayName": "Prices YoY (like for like)"
+              "displayName": "Prices YoY"
             },
             {
               "field": {
@@ -73,7 +73,7 @@
               },
               "queryRef": "_Measures.Area-Weighted Price per Sq M (Homes)",
               "nativeQueryRef": "Area-Weighted Price per Sq M (Homes)",
-              "displayName": "AED / sq m (homes, area-weighted)"
+              "displayName": "AED / sq m (homes)"
             }
           ]
         }
@@ -86,7 +86,7 @@
             "fontSize": {
               "expr": {
                 "Literal": {
-                  "Value": "20D"
+                  "Value": "18D"
                 }
               }
             }
@@ -107,6 +107,29 @@
           },
           "selector": {
             "metadata": "_Measures.Index Value (Latest Complete)"
+          }
+        }
+      ],
+      "label": [
+        {
+          "properties": {
+            "fontSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "9D"
+                }
+              }
+            },
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            }
+          },
+          "selector": {
+            "id": "default"
           }
         }
       ]

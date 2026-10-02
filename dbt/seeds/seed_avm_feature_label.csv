@@ -1,0 +1,36 @@
+feature,feature_label
+ln_area,Size (log sq m)
+proj_rel_12m,Project price level (12m)
+bldg_rel_24m,Building price level (24m)
+bedrooms,Bedrooms
+master_project,Master project
+area_key,Area
+zt_rel_12m,Zone price level (12m)
+is_offplan,Off-plan
+cell_rel_3m,Comparable sales price level (3m)
+fed_funds_prev,Fed Funds rate (last month)
+nearest_metro,Nearest metro station
+zt_n_12m,Zone sales count (12m)
+idx_chg_12m,Price index change (12m)
+at_rel_3m,Area price level (3m)
+proj_n_12m,Project sales count (12m)
+bldg_n_24m,Building sales count (24m)
+at_n_12m,Area sales count (12m)
+at_rel_12m,Area price level (12m)
+cell_n_12m,Comparable sales count (12m)
+cell_rel_6m,Comparable sales price level (6m)
+at_n_3m,Area sales count (3m)
+idx_chg_3m,Price index change (3m)
+comps_idx_n,Index-adjusted comparables count
+has_parking,Parking
+cell_n_6m,Comparable sales count (6m)
+cell_rel_12m,Comparable sales price level (12m)
+cell_n_3m,Comparable sales count (3m)
+property_type_key,Property type
+month_of_year,Month of year
+zone,Zone
+property_sub_type,DLD property sub-type
+comps_idx_rel,Index-adjusted comparables price level
+idx_source,Index series used
+ref_source,Reference price source
+is_penthouse,Penthouse

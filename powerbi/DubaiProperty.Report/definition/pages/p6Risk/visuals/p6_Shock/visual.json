@@ -3,10 +3,10 @@
   "name": "p6_Shock",
   "position": {
     "x": 324,
-    "y": 112,
+    "y": 116,
     "z": 9000,
     "width": 140,
-    "height": 48,
+    "height": 56,
     "tabOrder": 9000
   },
   "visual": {
@@ -82,6 +82,26 @@
               "expr": {
                 "Literal": {
                   "Value": "'Price shock %'"
+                }
+              }
+            },
+            "textSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "9D"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "items": [
+        {
+          "properties": {
+            "textSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "10D"
                 }
               }
             }

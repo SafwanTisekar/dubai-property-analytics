@@ -3,10 +3,10 @@
   "name": "p5_kpis",
   "position": {
     "x": 16,
-    "y": 112,
+    "y": 116,
     "z": 10000,
     "width": 1248,
-    "height": 88,
+    "height": 84,
     "tabOrder": 10000
   },
   "visual": {
@@ -73,7 +73,7 @@
               },
               "queryRef": "_Measures.AVM Test MdAPE (Baseline)",
               "nativeQueryRef": "AVM Test MdAPE (Baseline)",
-              "displayName": "Comparable sales: median error"
+              "displayName": "Comps median error"
             },
             {
               "field": {
@@ -88,7 +88,7 @@
               },
               "queryRef": "_Measures.AVM Test Hit Rate 10% (Baseline)",
               "nativeQueryRef": "AVM Test Hit Rate 10% (Baseline)",
-              "displayName": "Comparable sales: within ±10%"
+              "displayName": "Comps within ±10%"
             },
             {
               "field": {
@@ -103,7 +103,7 @@
               },
               "queryRef": "_Measures.AVM MdAPE Gain vs Baseline",
               "nativeQueryRef": "AVM MdAPE Gain vs Baseline",
-              "displayName": "Median error saved (pp)"
+              "displayName": "Error saved (pp)"
             }
           ]
         }
@@ -116,7 +116,7 @@
             "fontSize": {
               "expr": {
                 "Literal": {
-                  "Value": "20D"
+                  "Value": "18D"
                 }
               }
             }
@@ -167,6 +167,29 @@
             "metadata": "_Measures.AVM MdAPE Gain vs Baseline"
           }
         }
+      ],
+      "label": [
+        {
+          "properties": {
+            "fontSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "9D"
+                }
+              }
+            },
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            }
+          },
+          "selector": {
+            "id": "default"
+          }
+        }
       ]
     },
     "visualContainerObjects": {
@@ -176,7 +199,14 @@
             "show": {
               "expr": {
                 "Literal": {
-                  "Value": "false"
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'AVM accuracy (model card)'"
                 }
               }
             }
@@ -196,7 +226,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'Out-of-time test set, 2025 to the snapshot (model card); not filtered by slicers'"
+                  "Value": "'Test set 2025 to snapshot; ignores slicers'"
                 }
               }
             },

@@ -1,12 +1,13 @@
 # Data dictionary
 
-Generated 2026-10-01 19:49 UTC by `quality/data_dictionary.py` from the dbt manifest (descriptions, tests) and the database catalogue (columns, types). Regenerate with `make dictionary` (after `make dbt`). Rules C1-C22 are in docs/04 §2; the star schema in docs/04 §3. Bronze is raw text (docs/04 §1) and not listed.
+Generated 2026-10-02 10:50 UTC by `quality/data_dictionary.py` from the dbt manifest (descriptions, tests) and the database catalogue (columns, types). Regenerate with `make dictionary` (after `make dbt`). Rules C1-C22 are in docs/04 §2; the star schema in docs/04 §3. Bronze is raw text (docs/04 §1) and not listed.
 
 ## Silver: seeds, staging views and intermediate tables (typed, cleaned, flagged)
 
 | Object | Type | Description |
 |---|---|---|
 | [`silver.seed_area`](#silverseed_area) | seed | C8: every DLD area_id seen in transactions or rents (265 IDs; Phase 1's "266" counted the blank area_id on 3 rent lines as a value) -> canonical name and zone. Zones group areas into markets for the min-n roll-up. Every area has a zone; `make unzoned` (reports/unzoned_areas.md) lists any that don't, e.g. a new area in a later snapshot. |
+| [`silver.seed_avm_feature_label`](#silverseed_avm_feature_label) | seed | Business-readable name for every AVM feature (rpt.feature_importance "Feature Label", the SHAP chart). "price level" = the median price per sq m of those sales relative to the index (a ratio), "sales count" = how many there were; (12m) = the trailing window before the sale month (docs/05 §1). |
 | [`silver.seed_ltv_rules`](#silverseed_ltv_rules) | seed | CBUAE mortgage loan-to-value caps for the Phase 4 stress test (docs/05 §4), one row per rule (borrower x property status x home number x value band) per regulatory period. Current regime: CBUAE Regulations Regarding Mortgage Loans, Art. 3(2), as amended by Board Resolution 31/2/2020 (effective 2020-04-08). Earlier regime: Circular No. 31/2013 (2013-10-28 to 2020-04-07). Every row verified by the owner against the CBUAE rulebook (2026-09-30). The stress test is illustrative and must say which LTVs it assumed. |
 | [`silver.seed_phase1_reconciliation`](#silverseed_phase1_reconciliation) | seed | The Phase 1 figures (reports/phase1_findings.md, phase1_evidence.md) that silver must reproduce. The reconciliation tests check them only when bronze holds exactly the Phase 1 snapshot (the `bronze_rows` gate), so they are skipped on the CI fixtures. |
 | [`silver.seed_procedure_category`](#silverseed_procedure_category) | seed | The procedure categories used by seed_procedure_map, with the market-sale flag each implies. `inheritance` is kept although no procedure maps to it in the 2026-09 extract (phase1_findings §1), so a future snapshot has a place to land. |
@@ -41,6 +42,16 @@ C8: every DLD area_id seen in transactions or rents (265 IDs; Phase 1's "266" co
 | `latitude` | numeric | Area centroid latitude (WGS84) for the Power BI bubble map, from OpenStreetMap Nominatim (`make centroids`, reports/area_centroids.md) or typed in by the owner. NULL = not located (no bubble; never a zone centroid). © OpenStreetMap contributors (ODbL). | between |
 | `longitude` | numeric | Area centroid longitude (WGS84); see latitude. | between |
 | `centroid_source` | text | Where the centroid came from: osm_nominatim (the DLD name or a spelling of it), osm_nominatim_alias (a better-known name for the place), osm_nominatim_approx (the parent community only), manual (owner; never overwritten), or NULL (not located). | accepted_values |
+
+<a id="silverseed_avm_feature_label"></a>
+### `silver.seed_avm_feature_label`
+
+Business-readable name for every AVM feature (rpt.feature_importance "Feature Label", the SHAP chart). "price level" = the median price per sq m of those sales relative to the index (a ratio), "sales count" = how many there were; (12m) = the trailing window before the sale month (docs/05 §1).
+
+| Column | Type | Description | Tests |
+|---|---|---|---|
+| `feature` | text |  | not_null, unique |
+| `feature_label` | text |  | not_null, unique |
 
 <a id="silverseed_ltv_rules"></a>
 ### `silver.seed_ltv_rules`
@@ -926,21 +937,19 @@ rpt.avm_score. AVM value, error and gap per clean residential market sale valued
 | `Date` | date |  |  |
 | `Area Key` | integer |  |  |
 | `Property Type Key` | integer |  |  |
+| `Project Key` | integer |  |  |
 | `Bedrooms` | smallint |  |  |
+| `Bedrooms Key` | smallint |  |  |
 | `Is Off-Plan` | boolean |  |  |
+| `Ready / Off-Plan` | text |  |  |
 | `Area Sq M` | numeric |  |  |
 | `Model Set` | text |  |  |
-| `Is Out of Sample` | boolean |  |  |
 | `Price AED` | bigint |  |  |
 | `AVM Value AED` | bigint |  |  |
-| `AVM Value per Sq M AED` | bigint |  |  |
-| `Comparable Sales Value AED` | bigint |  |  |
 | `Absolute Error Pct` | numeric |  |  |
 | `Gap Pct` | numeric |  |  |
 | `Review Flag` | text |  |  |
 | `Transaction ID` | text |  |  |
-| `Model` | text |  |  |
-| `Model Version` | text |  |  |
 
 <a id="rptdim_area"></a>
 ### `rpt.dim_area`
@@ -1083,6 +1092,7 @@ rpt.feature_importance. AVM feature importance (mean |SHAP|, split gain), ranked
 | Column | Type | Description | Tests |
 |---|---|---|---|
 | `Feature` | text |  |  |
+| `Feature Label` | text |  |  |
 | `Feature Group` | text |  |  |
 | `Mean Abs SHAP` | numeric |  |  |
 | `Split Gain` | numeric |  |  |
@@ -1226,7 +1236,31 @@ dbt model `rpt_stress_grid`.
 
 rpt.stress_grid. Collateral stress test (illustrative, not a regulatory stress test): negative equity of the last 36 months' clean residential buyers, marked to market with the hedonic index, per segment (Dubai / type / zone / area) x ready or off-plan x scenario (price shock 0 to -50%, or the 2014-2020 replay at two depths: Dubai-wide -24%, and each buyer's own series as the upper range) x loan basis (assumed LTV 50-85%, CBUAE cap, registered loan of matched purchases). Loans held at origination. Share, count and AED blank under min_n purchases.
 
-_Not built in this database._
+| Column | Type | Description | Tests |
+|---|---|---|---|
+| `Segment Level` | text |  |  |
+| `Segment` | text |  |  |
+| `Property Type Key` | integer |  |  |
+| `Zone` | text |  |  |
+| `Area Key` | integer |  |  |
+| `Ready / Off-Plan` | text |  |  |
+| `Scenario` | text |  |  |
+| `Shock Pct` | integer |  |  |
+| `Applied Shock` | numeric |  |  |
+| `Loan Basis` | text |  |  |
+| `LTV Pct` | integer |  |  |
+| `LTV Label` | text |  |  |
+| `Purchases` | integer |  |  |
+| `Negative Equity Count` | integer |  |  |
+| `Negative Equity Share` | numeric |  |  |
+| `Negative Equity AED` | numeric |  |  |
+| `Loan AED` | numeric |  |  |
+| `Current Value AED` | numeric |  |  |
+| `Zone Index Share` | numeric |  |  |
+| `Is Published` | boolean |  |  |
+| `Purchases From` | date |  |  |
+| `Purchases To` | date |  |  |
+| `Model Version` | text |  |  |
 
 <a id="rptstress_replay"></a>
 ### `rpt.stress_replay`

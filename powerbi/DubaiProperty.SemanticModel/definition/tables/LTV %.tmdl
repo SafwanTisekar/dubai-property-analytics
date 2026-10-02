@@ -20,18 +20,28 @@ table 'LTV %'
 
 		annotation SummarizationSetBy = User
 
+	column 'LTV Short'
+		lineageTag: a24b478c-89de-5f5c-ba39-00d2eb2e0165
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [LTV Short]
+		sortByColumn: 'LTV %'
+
+		annotation SummarizationSetBy = User
+
 	partition 'LTV %' = calculated
 		mode: import
 		source =
 				DATATABLE (
 					"LTV %", INTEGER,
 					"LTV Label", STRING,
+					"LTV Short", STRING,
 					{
-						{ 50, "50%" },
-						{ 60, "60%" },
-						{ 70, "70%" },
-						{ 80, "80%" },
-						{ 85, "85% UAE national first home cap (worst case)" }
+						{ 50, "50%", "50%" },
+						{ 60, "60%", "60%" },
+						{ 70, "70%", "70%" },
+						{ 80, "80%", "80%" },
+						{ 85, "85% UAE national first home cap (worst case)", "85%*" }
 					}
 				)
 

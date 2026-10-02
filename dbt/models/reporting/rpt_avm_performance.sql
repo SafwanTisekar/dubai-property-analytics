@@ -20,12 +20,12 @@ select
     p.segment as "Segment",
     p.n_total as "Sales in Segment",
     p.n_scored as "Sales Valued",
-    round(p.coverage, 4) as "Coverage",
-    round(p.mdape, 4) as "MdAPE",
-    round(p.hit10, 4) as "Hit Rate 10 Pct",
-    round(p.hit20, 4) as "Hit Rate 20 Pct",
-    round(p.mape, 4) as "MAPE",
-    round(p.r2_log_price, 4) as "R2 Log Price",
+    {{ rpt_ratio("p.coverage") }} as "Coverage",
+    {{ rpt_ratio("p.mdape") }} as "MdAPE",
+    {{ rpt_ratio("p.hit10") }} as "Hit Rate 10 Pct",
+    {{ rpt_ratio("p.hit20") }} as "Hit Rate 20 Pct",
+    {{ rpt_ratio("p.mape") }} as "MAPE",
+    {{ rpt_ratio("p.r2_log_price") }} as "R2 Log Price",
     p.model_version as "Model Version"
 from {{ source('ml', 'avm_performance') }} as p
 where p.model_version = '{{ var("avm_model_version") }}'

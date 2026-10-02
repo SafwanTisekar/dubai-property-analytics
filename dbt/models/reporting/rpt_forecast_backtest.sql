@@ -19,10 +19,10 @@ select
     end as "Model",
     b.horizon as "Horizon Months",
     b.n_origins as "Origins Scored",
-    round(b.mape, 4) as "MAPE",
-    round(b.mdape, 4) as "MdAPE",
-    round(b.coverage_80, 4) as "Coverage 80",
-    round(b.coverage_95, 4) as "Coverage 95",
+    {{ rpt_ratio("b.mape") }} as "MAPE",
+    {{ rpt_ratio("b.mdape") }} as "MdAPE",
+    {{ rpt_ratio("b.coverage_80") }} as "Coverage 80",
+    {{ rpt_ratio("b.coverage_95") }} as "Coverage 95",
     b.is_baseline as "Is Baseline",
     b.model_version as "Model Version"
 from {{ source('ml', 'forecast_backtest') }} as b

@@ -3,10 +3,10 @@
   "name": "p6_StressSegment",
   "position": {
     "x": 16,
-    "y": 112,
+    "y": 116,
     "z": 8000,
     "width": 300,
-    "height": 48,
+    "height": 56,
     "tabOrder": 8000
   },
   "visual": {
@@ -82,6 +82,26 @@
               "expr": {
                 "Literal": {
                   "Value": "'Stress segment'"
+                }
+              }
+            },
+            "textSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "9D"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "items": [
+        {
+          "properties": {
+            "textSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "10D"
                 }
               }
             }

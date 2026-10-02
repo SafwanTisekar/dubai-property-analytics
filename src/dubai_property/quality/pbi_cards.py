@@ -17,6 +17,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from dataclasses import dataclass
+from decimal import ROUND_HALF_UP, Decimal
 from typing import Any
 
 import psycopg
@@ -54,14 +55,22 @@ class Card:
 # --- Formatting (as the measures' format strings display them) --------------------------
 
 
+def _half_up(x: Any, digits: int) -> Decimal:
+    """Round like Power BI's format strings: half away from zero, on the exact decimal."""
+    return Decimal(str(x)).quantize(Decimal(1).scaleb(-digits), rounding=ROUND_HALF_UP)
+
+
 def pct(x: Any, digits: int = 1) -> str:
-    """0.2794 -> '27.9%' (blank stays blank)."""
-    return "(blank)" if x is None else f"{100 * float(x):.{digits}f}%"
+    """0.2794 -> '27.9%' (blank stays blank); 0.6505 -> '65.1%', as Power BI shows it."""
+    return "(blank)" if x is None else f"{_half_up(Decimal(str(x)) * 100, digits)}%"
 
 
 def signed_pct(x: Any) -> str:
     """0.046 -> '+4.6%'."""
-    return "(blank)" if x is None else f"{100 * float(x):+.1f}%"
+    if x is None:
+        return "(blank)"
+    v = _half_up(Decimal(str(x)) * 100, 1)
+    return f"{'+' if v >= 0 else ''}{v}%"
 
 
 def aed_bn(x: Any) -> str:
@@ -178,11 +187,12 @@ limit 1
 MAX_DRAWDOWN_SQL = """
 select min("Drawdown") from rpt.price_index where "Segment" = %(segment)s
 """
-# [Gross Yield]: sales-weighted mean over zone cells of the last four complete quarters
-# (reports/yields.md headline).
+# [Gross Yield]: sales-weighted mean over zone cells of the last four complete quarters,
+# cells outside the 2-15% sanity band left out (reports/yields.md headline, Phase 5).
 YIELD_SQL = """
 with zone as (
-    select * from rpt.yield_quarter where "Geo Level" = 'Zone' and not "Is Partial Period"
+    select * from rpt.yield_quarter
+    where "Geo Level" = 'Zone' and not "Is Partial Period" and not "Is Outside Sanity Band"
 ),
 last_q as (select max("Quarter Start") as q from zone)
 select sum("Gross Yield" * "Sales") / sum("Sales"),
@@ -342,25 +352,28 @@ def post_ml_cards(conn: psycopg.Connection, year: str) -> list[Card]:
                     "rpt.stress_grid",
                 )
             )
-    for basis, card in (
-        ("CBUAE cap (expatriate, first home)", "Negative Equity Share (CBUAE Cap)"),
-        ("Registered loan (matched purchases)", "Negative Equity Share (Registered Loans)"),
-    ):
-        (share, _) = _one(
-            conn,
-            STRESS_SQL,
-            {"scenario": "Price shock", "basis": basis, "segment": "Apartments",
-             "shock": DEFAULT_SHOCK, "ltv": None},
-        )  # fmt: skip
-        out.append(
-            Card(
-                "6 Risk",
-                card,
-                f"Stress segment = Apartments; Ready; Shock {DEFAULT_SHOCK}",
-                pct(share),
-                "rpt.stress_grid",
+    # Dubai-wide the two references nearly coincide (20.69% vs 20.73%, both "20.7%"): the
+    # two decimals show they are different rows; apartments separate them clearly.
+    for segment in ("Dubai (all residential)", "Apartments"):
+        for basis, card in (
+            ("CBUAE cap (expatriate, first home)", "Negative Equity Share (CBUAE Cap)"),
+            ("Registered loan (matched purchases)", "Negative Equity Share (Registered Loans)"),
+        ):
+            (share, _) = _one(
+                conn,
+                STRESS_SQL,
+                {"scenario": "Price shock", "basis": basis, "segment": segment,
+                 "shock": DEFAULT_SHOCK, "ltv": None},
+            )  # fmt: skip
+            out.append(
+                Card(
+                    "6 Risk",
+                    card,
+                    f"Stress segment = {segment}; Ready; Shock {DEFAULT_SHOCK}",
+                    f"{pct(share)} ({pct(share, 2)})",
+                    "rpt.stress_grid",
+                )
             )
-        )
 
     for segment in ("Dubai (all residential)", "Apartments", "Villas / Townhouses"):
         central, lo, hi = _one(

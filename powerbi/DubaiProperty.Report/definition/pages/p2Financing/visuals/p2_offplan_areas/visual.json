@@ -3,10 +3,10 @@
   "name": "p2_offplan_areas",
   "position": {
     "x": 840,
-    "y": 452,
+    "y": 428,
     "z": 17000,
     "width": 424,
-    "height": 228,
+    "height": 252,
     "tabOrder": 17000
   },
   "visual": {
@@ -139,7 +139,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'Off-plan share, 10 busiest areas'"
+                  "Value": "'Off-plan share, 7 busiest areas'"
                 }
               }
             }
@@ -165,7 +165,7 @@
             "altText": {
               "expr": {
                 "Literal": {
-                  "Value": "'Off-plan share of sales in the ten areas with the most market sales.'"
+                  "Value": "'Off-plan share of sales in the seven areas with the most market sales.'"
                 }
               }
             }
@@ -238,7 +238,7 @@
                         }
                       }
                     ],
-                    "Top": 10
+                    "Top": 7
                   }
                 }
               },

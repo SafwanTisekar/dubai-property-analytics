@@ -139,7 +139,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'Most exposed areas at the selected shock and LTV'"
+                  "Value": "'Most exposed areas (illustrative)'"
                 }
               }
             }
@@ -159,7 +159,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'Illustrative, not a regulatory stress test'"
+                  "Value": "'Selected shock and LTV'"
                 }
               }
             },
@@ -183,7 +183,7 @@
             "altText": {
               "expr": {
                 "Literal": {
-                  "Value": "'Bar chart of the ten areas with the highest negative-equity share at the selected price shock and loan-to-value.'"
+                  "Value": "'Bar chart of the five areas with the highest negative-equity share at the selected price shock and loan-to-value.'"
                 }
               }
             }
@@ -256,7 +256,7 @@
                         }
                       }
                     ],
-                    "Top": 10
+                    "Top": 5
                   }
                 }
               },

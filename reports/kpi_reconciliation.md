@@ -1,6 +1,6 @@
 # KPI reconciliation
 
-Generated 2026-10-02 09:46 UTC by `quality/kpi_reconciliation.py` from database `dubai_property`. Regenerate with `make kpi` (after `make dbt`); `tests/test_kpi_reconciliation.py` fails if any check below fails.
+Generated 2026-10-02 10:51 UTC by `quality/kpi_reconciliation.py` from database `dubai_property`. Regenerate with `make kpi` (after `make dbt`); `tests/test_kpi_reconciliation.py` fails if any check below fails.
 
 These are the numbers the Power BI cards must match (docs/06 §3). Every KPI in docs/01 §4 that exists before the models is computed from silver (canonical, below) and again from the rpt views Power BI imports, at three grains (all time, year, month). **Data snapshot: 2026-09-25** (the latest transaction date; `rpt.report_info` "Data As Of"). Scope: 2004-01-01 to the snapshot; rent contracts starting after it are excluded. **All checks pass.**
 
@@ -144,7 +144,7 @@ Model cards. Defaults: shock -20%, LTV 80%, Ready, scenario Rates flat, AVM page
 | 1 Executive | Index YoY | Year = 2025; index segment = Dubai (all residential) (Dec 2025) | +15.0% | rpt.price_index (latest complete month) |
 | 1 Executive | Index YoY | no Year selected; index segment = Dubai (all residential) (Aug 2026) | +1.0% | rpt.price_index (latest complete month) |
 | 3 Prices | Max Drawdown | no Year selected; index segment = Dubai (all residential) | -23.6% | rpt.price_index (latest complete month) |
-| 3 Prices | Index YoY | no Year selected; index segment = Apartments (Aug 2026) | -0.1% | rpt.price_index (latest complete month) |
+| 3 Prices | Index YoY | no Year selected; index segment = Apartments (Aug 2026) | -0.2% | rpt.price_index (latest complete month) |
 | 3 Prices | Index Value (Latest Complete) | no Year selected; index segment = Apartments (Aug 2026) | 176.3 | rpt.price_index (latest complete month) |
 | 3 Prices | Drawdown from Peak | no Year selected; index segment = Apartments (Aug 2026) | -5.0% | rpt.price_index (latest complete month) |
 | 3 Prices | Max Drawdown | no Year selected; index segment = Apartments | -25.4% | rpt.price_index (latest complete month) |
@@ -152,7 +152,7 @@ Model cards. Defaults: shock -20%, LTV 80%, Ready, scenario Rates flat, AVM page
 | 3 Prices | Index Value (Latest Complete) | no Year selected; index segment = Villas / Townhouses (Aug 2026) | 220.8 | rpt.price_index (latest complete month) |
 | 3 Prices | Drawdown from Peak | no Year selected; index segment = Villas / Townhouses (Aug 2026) | -9.3% | rpt.price_index (latest complete month) |
 | 3 Prices | Max Drawdown | no Year selected; index segment = Villas / Townhouses | -30.4% | rpt.price_index (latest complete month) |
-| 4 Yields | Gross Yield (Latest 4 Quarters) | Property Type = Residential · Apartment; 2025-07 to 2026-04 quarter starts | 7.2% | rpt.yield_quarter, zone cells, sales-weighted (yields.md) |
+| 4 Yields | Gross Yield (Latest 4 Quarters) | Property Type = Residential · Apartment; 2025-07 to 2026-04 quarter starts | 7.1% | rpt.yield_quarter, zone cells, sales-weighted (yields.md) |
 | 4 Yields | Gross Yield (Latest 4 Quarters) | Property Type = Residential · Villa / Townhouse; 2025-07 to 2026-04 quarter starts | 5.2% | rpt.yield_quarter, zone cells, sales-weighted (yields.md) |
 | 5 Valuation | AVM Test MdAPE | none | 6.83% | rpt.avm_performance, LightGBM, Test / Overall |
 | 5 Valuation | AVM Test Hit Rate 10% | none | 65.0% | rpt.avm_performance, LightGBM, Test / Overall |
@@ -179,8 +179,10 @@ Model cards. Defaults: shock -20%, LTV 80%, Ready, scenario Rates flat, AVM page
 | 6 Risk | Negative Equity Share | Stress segment = Villas / Townhouses; Ready; Shock -30; LTV 80 | 63.7% | rpt.stress_grid |
 | 6 Risk | Replay Negative Equity Share | Stress segment = Villas / Townhouses; Ready; LTV 80; Replay Depth = Dubai-wide (lower range) | 34.1% | rpt.stress_grid |
 | 6 Risk | Replay Negative Equity Share | Stress segment = Villas / Townhouses; Ready; LTV 80; Replay Depth = Own series (upper range) | 64.3% | rpt.stress_grid |
-| 6 Risk | Negative Equity Share (CBUAE Cap) | Stress segment = Apartments; Ready; Shock -20 | 21.7% | rpt.stress_grid |
-| 6 Risk | Negative Equity Share (Registered Loans) | Stress segment = Apartments; Ready; Shock -20 | 22.8% | rpt.stress_grid |
+| 6 Risk | Negative Equity Share (CBUAE Cap) | Stress segment = Dubai (all residential); Ready; Shock -20 | 20.7% (20.69%) | rpt.stress_grid |
+| 6 Risk | Negative Equity Share (Registered Loans) | Stress segment = Dubai (all residential); Ready; Shock -20 | 20.7% (20.73%) | rpt.stress_grid |
+| 6 Risk | Negative Equity Share (CBUAE Cap) | Stress segment = Apartments; Ready; Shock -20 | 21.7% (21.70%) | rpt.stress_grid |
+| 6 Risk | Negative Equity Share (Registered Loans) | Stress segment = Apartments; Ready; Shock -20 | 22.8% (22.80%) | rpt.stress_grid |
 | 6 Risk | Forecast 12M Change | Forecast segment = Dubai (all residential); Scenario = Rates flat | +4.6% | rpt.forecast |
 | 6 Risk | Forecast 12M Band 80% Label | Forecast segment = Dubai (all residential); Scenario = Rates flat | -5.1% to +15.4% | rpt.forecast (forecast.md) |
 | 6 Risk | Forecast 12M Change | Forecast segment = Apartments; Scenario = Rates flat | +4.4% | rpt.forecast |

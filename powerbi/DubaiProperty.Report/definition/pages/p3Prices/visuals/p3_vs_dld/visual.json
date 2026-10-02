@@ -5,8 +5,8 @@
     "x": 16,
     "y": 208,
     "z": 12000,
-    "width": 620,
-    "height": 220,
+    "width": 404,
+    "height": 236,
     "tabOrder": 12000
   },
   "visual": {
@@ -46,7 +46,7 @@
               },
               "queryRef": "_Measures.Index Value",
               "nativeQueryRef": "Index Value",
-              "displayName": "Hedonic index (this project)"
+              "displayName": "Hedonic index"
             },
             {
               "field": {
@@ -61,7 +61,7 @@
               },
               "queryRef": "_Measures.DLD Index Value",
               "nativeQueryRef": "DLD Index Value",
-              "displayName": "DLD official index (ends May 2024)"
+              "displayName": "DLD index (to May 2024)"
             }
           ]
         }
@@ -137,7 +137,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'Like-for-like prices vs DLD''s index (Jan 2019 = 100); ours leads by ~6 months'"
+                  "Value": "'Like for like vs DLD''s index (2019 = 100)'"
                 }
               }
             }
@@ -157,7 +157,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'All years from 2011; not filtered by Year'"
+                  "Value": "'Ours leads by ~6 months; not filtered by Year'"
                 }
               }
             },
@@ -193,7 +193,7 @@
   "filterConfig": {
     "filters": [
       {
-        "name": "p3From2011a",
+        "name": "p3Froma",
         "field": {
           "Column": {
             "Expression": {
@@ -234,6 +234,59 @@
                       "Value": "2011L"
                     }
                   }
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "p3Snapa",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "Date"
+              }
+            },
+            "Property": "Is After Snapshot"
+          }
+        },
+        "type": "Categorical",
+        "filter": {
+          "Version": 2,
+          "From": [
+            {
+              "Name": "d",
+              "Entity": "Date",
+              "Type": 0
+            }
+          ],
+          "Where": [
+            {
+              "Condition": {
+                "In": {
+                  "Expressions": [
+                    {
+                      "Column": {
+                        "Expression": {
+                          "SourceRef": {
+                            "Source": "d"
+                          }
+                        },
+                        "Property": "Is After Snapshot"
+                      }
+                    }
+                  ],
+                  "Values": [
+                    [
+                      {
+                        "Literal": {
+                          "Value": "false"
+                        }
+                      }
+                    ]
+                  ]
                 }
               }
             }

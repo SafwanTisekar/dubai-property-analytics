@@ -3,10 +3,10 @@
   "name": "p2_per100",
   "position": {
     "x": 16,
-    "y": 452,
+    "y": 428,
     "z": 15000,
     "width": 404,
-    "height": 228,
+    "height": 252,
     "tabOrder": 15000
   },
   "visual": {
@@ -101,7 +101,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'Incl. refinancing; secondary indicator. Not filtered by Year'"
+                  "Value": "'Incl. refinancing; not filtered by Year'"
                 }
               }
             },
@@ -137,7 +137,7 @@
   "filterConfig": {
     "filters": [
       {
-        "name": "p2From2010d",
+        "name": "p2Fromd",
         "field": {
           "Column": {
             "Expression": {
@@ -178,6 +178,59 @@
                       "Value": "2010L"
                     }
                   }
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "p2Snapd",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "Date"
+              }
+            },
+            "Property": "Is After Snapshot"
+          }
+        },
+        "type": "Categorical",
+        "filter": {
+          "Version": 2,
+          "From": [
+            {
+              "Name": "d",
+              "Entity": "Date",
+              "Type": 0
+            }
+          ],
+          "Where": [
+            {
+              "Condition": {
+                "In": {
+                  "Expressions": [
+                    {
+                      "Column": {
+                        "Expression": {
+                          "SourceRef": {
+                            "Source": "d"
+                          }
+                        },
+                        "Property": "Is After Snapshot"
+                      }
+                    }
+                  ],
+                  "Values": [
+                    [
+                      {
+                        "Literal": {
+                          "Value": "false"
+                        }
+                      }
+                    ]
+                  ]
                 }
               }
             }

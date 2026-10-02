@@ -93,6 +93,18 @@ seeds:
       - name: ejari_property_sub_type_en
         tests: [unique, not_null]
 
+  - name: seed_avm_feature_label
+    description: >
+      Business-readable name for every AVM feature (rpt.feature_importance "Feature Label",
+      the SHAP chart). "price level" = the median price per sq m of those sales relative to
+      the index (a ratio), "sales count" = how many there were; (12m) = the trailing window
+      before the sale month (docs/05 §1).
+    columns:
+      - name: feature
+        tests: [unique, not_null]
+      - name: feature_label
+        tests: [unique, not_null]
+
   - name: seed_area
     description: >
       C8: every DLD area_id seen in transactions or rents (265 IDs; Phase 1's "266" counted

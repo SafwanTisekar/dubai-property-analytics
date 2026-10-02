@@ -2,12 +2,12 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
   "name": "p3_bed_zone",
   "position": {
-    "x": 424,
-    "y": 436,
-    "z": 15000,
-    "width": 440,
-    "height": 244,
-    "tabOrder": 15000
+    "x": 840,
+    "y": 208,
+    "z": 16000,
+    "width": 424,
+    "height": 472,
+    "tabOrder": 16000
   },
   "visual": {
     "visualType": "pivotTable",
@@ -59,11 +59,11 @@
                       "Entity": "_Measures"
                     }
                   },
-                  "Property": "Median Price per Sq M"
+                  "Property": "Median Price per Sq M (K)"
                 }
               },
-              "queryRef": "_Measures.Median Price per Sq M",
-              "nativeQueryRef": "Median Price per Sq M",
+              "queryRef": "_Measures.Median Price per Sq M (K)",
+              "nativeQueryRef": "Median Price per Sq M (K)",
               "displayName": "Median AED / sq m"
             }
           ]
@@ -86,7 +86,7 @@
                               "Entity": "_Measures"
                             }
                           },
-                          "Property": "Median Price per Sq M"
+                          "Property": "Median Price per Sq M (K)"
                         }
                       },
                       "FillRule": {
@@ -128,7 +128,27 @@
                 }
               }
             ],
-            "metadata": "_Measures.Median Price per Sq M"
+            "metadata": "_Measures.Median Price per Sq M (K)"
+          }
+        }
+      ],
+      "subTotals": [
+        {
+          "properties": {
+            "rowSubtotals": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            },
+            "columnSubtotals": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
           }
         }
       ],
@@ -139,6 +159,13 @@
               "expr": {
                 "Literal": {
                   "Value": "8D"
+                }
+              }
+            },
+            "wordWrap": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
                 }
               }
             }
@@ -173,7 +200,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'Median AED per sq m: zone × bedrooms (residential)'"
+                  "Value": "'Median AED per sq m: zone × bedrooms'"
                 }
               }
             }
@@ -186,7 +213,25 @@
             "show": {
               "expr": {
                 "Literal": {
-                  "Value": "false"
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Residential; AED thousands; blank = under 20 sales'"
+                }
+              }
+            },
+            "fontColor": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#52514e'"
+                    }
+                  }
                 }
               }
             }
@@ -199,7 +244,7 @@
             "altText": {
               "expr": {
                 "Literal": {
-                  "Value": "'Table of median price per square metre by zone and bedrooms; blank cells have fewer than 20 sales.'"
+                  "Value": "'Table of the residential median price per square metre in thousands of AED by zone and bedrooms; blank cells have fewer than 20 sales.'"
                 }
               }
             }
@@ -211,7 +256,7 @@
   "filterConfig": {
     "filters": [
       {
-        "name": "p3Residential",
+        "name": "p3ResB",
         "field": {
           "Column": {
             "Expression": {
@@ -257,6 +302,111 @@
                       }
                     ]
                   ]
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "p3Beds",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "Bedrooms"
+              }
+            },
+            "Property": "Bedrooms"
+          }
+        },
+        "type": "Categorical",
+        "filter": {
+          "Version": 2,
+          "From": [
+            {
+              "Name": "b",
+              "Entity": "Bedrooms",
+              "Type": 0
+            }
+          ],
+          "Where": [
+            {
+              "Condition": {
+                "Not": {
+                  "Expression": {
+                    "In": {
+                      "Expressions": [
+                        {
+                          "Column": {
+                            "Expression": {
+                              "SourceRef": {
+                                "Source": "b"
+                              }
+                            },
+                            "Property": "Bedrooms"
+                          }
+                        }
+                      ],
+                      "Values": [
+                        [
+                          {
+                            "Literal": {
+                              "Value": "'Unknown'"
+                            }
+                          }
+                        ]
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "p3MinNB",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "_Measures"
+              }
+            },
+            "Property": "Clean Sales"
+          }
+        },
+        "type": "Advanced",
+        "filter": {
+          "Version": 2,
+          "From": [
+            {
+              "Name": "m",
+              "Entity": "_Measures",
+              "Type": 0
+            }
+          ],
+          "Where": [
+            {
+              "Condition": {
+                "Comparison": {
+                  "ComparisonKind": 2,
+                  "Left": {
+                    "Measure": {
+                      "Expression": {
+                        "SourceRef": {
+                          "Source": "m"
+                        }
+                      },
+                      "Property": "Clean Sales"
+                    }
+                  },
+                  "Right": {
+                    "Literal": {
+                      "Value": "20L"
+                    }
+                  }
                 }
               }
             }

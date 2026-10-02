@@ -105,6 +105,13 @@
                   "Value": "1L"
                 }
               }
+            },
+            "fontSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "8D"
+                }
+              }
             }
           }
         }
@@ -163,7 +170,25 @@
             "show": {
               "expr": {
                 "Literal": {
-                  "Value": "false"
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Cells outside 2-15% left out (see yields.md)'"
+                }
+              }
+            },
+            "fontColor": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#52514e'"
+                    }
+                  }
                 }
               }
             }
@@ -176,7 +201,7 @@
             "altText": {
               "expr": {
                 "Literal": {
-                  "Value": "'Gross rental yield by zone for apartments and villas over the last four complete quarters.'"
+                  "Value": "'Gross rental yield by zone for apartments and villas over the last four complete quarters, out-of-band cells left out.'"
                 }
               }
             }

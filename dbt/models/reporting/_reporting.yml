@@ -257,6 +257,15 @@ models:
       tags: [post_ml]
     columns:
       - name: '"Feature"'
+        tests:
+          - not_null
+          - unique
+          # every feature has a readable label (a new feature fails until it gets one)
+          - relationships:
+              arguments:
+                to: ref('seed_avm_feature_label')
+                field: feature
+      - name: '"Feature Label"'
         tests: [not_null, unique]
       - name: '"Rank"'
         tests: [not_null, unique]

@@ -3,10 +3,10 @@
   "name": "p5_gaps",
   "position": {
     "x": 16,
-    "y": 452,
+    "y": 476,
     "z": 14000,
     "width": 1000,
-    "height": 228,
+    "height": 204,
     "tabOrder": 14000
   },
   "visual": {
@@ -139,7 +139,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'Where sales sit furthest from the AVM (10 projects with most flags)'"
+                  "Value": "'Where sales sit furthest from the AVM: 6 projects with most flags'"
                 }
               }
             }
@@ -165,7 +165,7 @@
             "altText": {
               "expr": {
                 "Literal": {
-                  "Value": "'Table of areas and projects with the most sales flagged for review, with their median gap to the AVM.'"
+                  "Value": "'Table of the six projects with the most sales flagged for review, with their area and median gap to the AVM.'"
                 }
               }
             }
@@ -238,7 +238,7 @@
                         }
                       }
                     ],
-                    "Top": 10
+                    "Top": 6
                   }
                 }
               },

@@ -34,7 +34,7 @@ select
         when 'replay_2014_2020_dubai' then 'Replay: 2014-2020, Dubai-wide'
     end as "Scenario",
     g.shock_pct as "Shock Pct",
-    round(g.applied_shock, 4) as "Applied Shock",
+    {{ rpt_ratio("g.applied_shock") }} as "Applied Shock",
     case g.ltv_basis
         when 'grid' then 'Assumed LTV'
         when 'cbuae_cap' then 'CBUAE cap (expatriate, first home)'
@@ -47,11 +47,11 @@ select
     end as "LTV Label",
     g.purchases as "Purchases",
     g.negative_equity_count as "Negative Equity Count",
-    round(g.negative_equity_share, 4) as "Negative Equity Share",
+    {{ rpt_ratio("g.negative_equity_share") }} as "Negative Equity Share",
     round(g.negative_equity_aed, 0) as "Negative Equity AED",
     round(g.loan_aed, 0) as "Loan AED",
     round(g.current_value_aed, 0) as "Current Value AED",
-    round(g.index_zone_share, 4) as "Zone Index Share",
+    {{ rpt_ratio("g.index_zone_share") }} as "Zone Index Share",
     g.is_published as "Is Published",
     g.window_start as "Purchases From",
     g.window_end as "Purchases To",

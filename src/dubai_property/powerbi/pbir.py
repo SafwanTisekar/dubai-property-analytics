@@ -206,3 +206,113 @@ def visual_files() -> list[Path]:
 def page_files() -> list[Path]:
     """Every page.json."""
     return sorted(REPORT_DEFINITION.glob("pages/*/page.json"))
+
+
+# --- Visual inventory (powerbi/VISUALS.md) -------------------------------------------
+
+VISUALS_MD = POWERBI_DIR / "VISUALS.md"
+
+
+def _field_label(field: dict) -> str:
+    for kind in ("Measure", "Column"):
+        if kind in field:
+            entity = field[kind]["Expression"]["SourceRef"].get("Entity", "?")
+            prop = field[kind]["Property"]
+            return f"[{prop}]" if kind == "Measure" else f"'{entity}'[{prop}]"
+    return "?"
+
+
+def _filter_label(f: dict) -> str:
+    """A one-line reading of a filter (TopN, comparison, in / not in)."""
+    field = _field_label(f.get("field", {}))
+    if f.get("type") == "TopN":
+        q = f["filter"]["From"][0]["Expression"]["Subquery"]["Query"]
+        by = q["OrderBy"][0]["Expression"]
+        by_name = by.get("Measure", by.get("Column", {})).get("Property", "?")
+        order = "bottom" if q["OrderBy"][0]["Direction"] == 1 else "top"
+        return f"{order} {q['Top']} {field} by [{by_name}]"
+    cond = f.get("filter", {}).get("Where", [{}])[0].get("Condition", {})
+    negate = "Not" in cond
+    cond = cond.get("Not", {}).get("Expression", cond)
+    if "Comparison" in cond:
+        ops = {0: "=", 1: ">", 2: ">=", 3: "<", 4: "<="}
+        c = cond["Comparison"]
+        value = c["Right"]["Literal"]["Value"]
+        return f"{field} {ops[c['ComparisonKind']]} {value}"
+    if "In" in cond:
+        values = [v[0]["Literal"]["Value"] for v in cond["In"].get("Values", [])]
+        return f"{field} {'not in' if negate else 'in'} {', '.join(values)}"
+    return field
+
+
+def inventory_markdown() -> str:
+    """Every page and visual: type, position, fields, filters, title and alt text."""
+    out = [
+        "# Report visuals (generated)",
+        "",
+        "Generated from the PBIR files by `make pbi-inventory` (`powerbi/pbir.py`); "
+        "`tests/test_powerbi_model.py` fails when it is stale. Positions are x, y, width, "
+        "height on the 1280 × 720 canvas. Intent, decisions and checks: `powerbi/BUILD.md`.",
+        "",
+    ]
+    for page_path in page_files():
+        page = json.loads(page_path.read_text(encoding="utf-8"))
+        out += [f"## {page['displayName']}", ""]
+        filters = [_filter_label(f) for f in page.get("filterConfig", {}).get("filters", [])]
+        if filters:
+            out += [f"Page filters: {'; '.join(filters)}.", ""]
+        no_filter = [f"{i['source']} → {i['target']}" for i in page.get("visualInteractions", [])]
+        if no_filter:
+            out += [f"Interactions set to none: {'; '.join(no_filter)}.", ""]
+        out += [
+            "| Visual | Type | Position | Fields | Filters | Title | Alt text |",
+            "|---|---|---|---|---|---|---|",
+        ]
+        vdir = page_path.parent / "visuals"
+        rows = []
+        for vpath in sorted(vdir.glob("*/visual.json")):
+            v = json.loads(vpath.read_text(encoding="utf-8"))
+            vis = v["visual"]
+            pos = v["position"]
+            fields = []
+            for role, state in (vis.get("query", {}).get("queryState", {})).items():
+                names = [
+                    p.get("displayName")
+                    and f'{_field_label(p["field"])} as "{p["displayName"]}"'
+                    or _field_label(p["field"])
+                    for p in state.get("projections", [])
+                ]
+                fields.append(f"{role}: {', '.join(names)}")
+            vfilters = [_filter_label(f) for f in v.get("filterConfig", {}).get("filters", [])]
+            vco = vis.get("visualContainerObjects", {})
+            title = ""
+            if vco.get("title") and literal_value(vco["title"][0]["properties"].get("show")):
+                text = vco["title"][0]["properties"].get("text", {})
+                title = literal_value(text) or _field_label(text.get("expr", {}))
+            sub = vco.get("subTitle", [{}])[0].get("properties", {})
+            if literal_value(sub.get("show")):
+                title = f"{title} / {literal_value(sub.get('text'))}"
+            alt = literal_value(vco.get("general", [{}])[0].get("properties", {}).get("altText"))
+            rows.append(
+                (
+                    pos.get("tabOrder", 0),
+                    f"| `{v['name']}` | {vis['visualType']} | "
+                    f"{pos['x']:.0f}, {pos['y']:.0f}, {pos['width']:.0f}, {pos['height']:.0f} | "
+                    f"{'; '.join(fields)} | {'; '.join(vfilters)} | {title or ''} | {alt or ''} |",
+                )
+            )
+        out += [r for _, r in sorted(rows)] + [""]
+    return "\n".join(out).replace("\n\n\n", "\n\n")
+
+
+def main() -> int:
+    """CLI: write powerbi/VISUALS.md."""
+    VISUALS_MD.write_text(inventory_markdown(), encoding="utf-8")
+    print(f"wrote {VISUALS_MD.relative_to(config.PROJECT_ROOT)}")
+    return 0
+
+
+if __name__ == "__main__":
+    import sys
+
+    sys.exit(main())

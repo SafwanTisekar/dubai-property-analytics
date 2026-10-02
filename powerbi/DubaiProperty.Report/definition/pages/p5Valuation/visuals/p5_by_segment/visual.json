@@ -5,8 +5,8 @@
     "x": 16,
     "y": 208,
     "z": 11000,
-    "width": 400,
-    "height": 236,
+    "width": 404,
+    "height": 260,
     "tabOrder": 11000
   },
   "visual": {
@@ -87,6 +87,13 @@
                   "Value": "1L"
                 }
               }
+            },
+            "fontSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "8D"
+                }
+              }
             }
           }
         }
@@ -119,7 +126,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'Median error by segment: AVM vs comparable sales'"
+                  "Value": "'Median error by segment: AVM vs comps'"
                 }
               }
             }

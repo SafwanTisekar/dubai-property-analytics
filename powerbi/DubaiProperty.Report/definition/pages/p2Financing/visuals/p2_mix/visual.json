@@ -3,10 +3,10 @@
   "name": "p2_mix",
   "position": {
     "x": 428,
-    "y": 452,
+    "y": 428,
     "z": 16000,
     "width": 404,
-    "height": 228,
+    "height": 252,
     "tabOrder": 16000
   },
   "visual": {
@@ -87,6 +87,13 @@
                   "Value": "0L"
                 }
               }
+            },
+            "fontSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "8D"
+                }
+              }
             }
           }
         }
@@ -126,7 +133,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'Not filtered by Year'"
+                  "Value": "'2010-2026 (2026 partial); not filtered by Year'"
                 }
               }
             },
@@ -150,7 +157,7 @@
             "altText": {
               "expr": {
                 "Literal": {
-                  "Value": "'Share of market sales that were off-plan or ready, by year.'"
+                  "Value": "'Share of market sales that were off-plan or ready, by year, 2010 to 2026.'"
                 }
               }
             }
@@ -162,7 +169,7 @@
   "filterConfig": {
     "filters": [
       {
-        "name": "p2From2010e",
+        "name": "p2Frome",
         "field": {
           "Column": {
             "Expression": {
@@ -203,6 +210,59 @@
                       "Value": "2010L"
                     }
                   }
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "p2Snape",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "Date"
+              }
+            },
+            "Property": "Is After Snapshot"
+          }
+        },
+        "type": "Categorical",
+        "filter": {
+          "Version": 2,
+          "From": [
+            {
+              "Name": "d",
+              "Entity": "Date",
+              "Type": 0
+            }
+          ],
+          "Where": [
+            {
+              "Condition": {
+                "In": {
+                  "Expressions": [
+                    {
+                      "Column": {
+                        "Expression": {
+                          "SourceRef": {
+                            "Source": "d"
+                          }
+                        },
+                        "Property": "Is After Snapshot"
+                      }
+                    }
+                  ],
+                  "Values": [
+                    [
+                      {
+                        "Literal": {
+                          "Value": "false"
+                        }
+                      }
+                    ]
+                  ]
                 }
               }
             }

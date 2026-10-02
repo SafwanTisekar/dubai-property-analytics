@@ -3,10 +3,10 @@
   "name": "p3_maxdd",
   "position": {
     "x": 1060,
-    "y": 112,
+    "y": 116,
     "z": 11000,
     "width": 204,
-    "height": 88,
+    "height": 84,
     "tabOrder": 11000
   },
   "visual": {
@@ -28,7 +28,7 @@
               },
               "queryRef": "_Measures.Max Drawdown",
               "nativeQueryRef": "Max Drawdown",
-              "displayName": "Deepest fall since 2011"
+              "displayName": "Deepest fall"
             }
           ]
         }
@@ -41,7 +41,30 @@
             "fontSize": {
               "expr": {
                 "Literal": {
-                  "Value": "20D"
+                  "Value": "18D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "id": "default"
+          }
+        }
+      ],
+      "label": [
+        {
+          "properties": {
+            "fontSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "9D"
+                }
+              }
+            },
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
                 }
               }
             }
@@ -59,7 +82,14 @@
             "show": {
               "expr": {
                 "Literal": {
-                  "Value": "false"
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Deepest fall'"
                 }
               }
             }
@@ -79,7 +109,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'All years'"
+                  "Value": "'Since 2011; all years'"
                 }
               }
             },
