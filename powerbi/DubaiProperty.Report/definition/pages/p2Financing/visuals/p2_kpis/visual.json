@@ -1,0 +1,156 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
+  "name": "p2_kpis",
+  "position": {
+    "x": 16,
+    "y": 112,
+    "z": 10000,
+    "width": 1036,
+    "height": 88,
+    "tabOrder": 10000
+  },
+  "visual": {
+    "visualType": "cardVisual",
+    "query": {
+      "queryState": {
+        "Data": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_Measures"
+                    }
+                  },
+                  "Property": "Ready Market Sales"
+                }
+              },
+              "queryRef": "_Measures.Ready Market Sales",
+              "nativeQueryRef": "Ready Market Sales",
+              "displayName": "Ready market sales"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_Measures"
+                    }
+                  },
+                  "Property": "Purchase Mortgages"
+                }
+              },
+              "queryRef": "_Measures.Purchase Mortgages",
+              "nativeQueryRef": "Purchase Mortgages",
+              "displayName": "Matched purchase mortgages"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_Measures"
+                    }
+                  },
+                  "Property": "New Mortgages per 100 Sales"
+                }
+              },
+              "queryRef": "_Measures.New Mortgages per 100 Sales",
+              "nativeQueryRef": "New Mortgages per 100 Sales",
+              "displayName": "New mortgages per 100 sales"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_Measures"
+                    }
+                  },
+                  "Property": "Off-Plan Share (Count)"
+                }
+              },
+              "queryRef": "_Measures.Off-Plan Share (Count)",
+              "nativeQueryRef": "Off-Plan Share (Count)",
+              "displayName": "Off-plan share of sales"
+            }
+          ]
+        }
+      }
+    },
+    "objects": {
+      "value": [
+        {
+          "properties": {
+            "fontSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "20D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "id": "default"
+          }
+        },
+        {
+          "properties": {
+            "labelPrecision": {
+              "expr": {
+                "Literal": {
+                  "Value": "1L"
+                }
+              }
+            }
+          },
+          "selector": {
+            "metadata": "_Measures.New Mortgages per 100 Sales"
+          }
+        }
+      ]
+    },
+    "visualContainerObjects": {
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "subTitle": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "general": [
+        {
+          "properties": {
+            "altText": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Financing headline numbers for the selected year: ready market sales, matched purchase mortgages, new mortgages per 100 market sales, off-plan share of sales.'"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

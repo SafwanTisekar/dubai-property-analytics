@@ -1,0 +1,145 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
+  "name": "p4_kpis",
+  "position": {
+    "x": 16,
+    "y": 112,
+    "z": 10000,
+    "width": 1248,
+    "height": 88,
+    "tabOrder": 10000
+  },
+  "visual": {
+    "visualType": "cardVisual",
+    "query": {
+      "queryState": {
+        "Data": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_Measures"
+                    }
+                  },
+                  "Property": "Gross Yield (Latest 4 Quarters)"
+                }
+              },
+              "queryRef": "_Measures.Gross Yield (Latest 4 Quarters)",
+              "nativeQueryRef": "Gross Yield (Latest 4 Quarters)",
+              "displayName": "Gross yield, last 4 quarters"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_Measures"
+                    }
+                  },
+                  "Property": "New Market Rents"
+                }
+              },
+              "queryRef": "_Measures.New Market Rents",
+              "nativeQueryRef": "New Market Rents",
+              "displayName": "New market rent contracts"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_Measures"
+                    }
+                  },
+                  "Property": "Area-Weighted New Rent per Sq M (Homes)"
+                }
+              },
+              "queryRef": "_Measures.Area-Weighted New Rent per Sq M (Homes)",
+              "nativeQueryRef": "Area-Weighted New Rent per Sq M (Homes)",
+              "displayName": "New rent AED / sq m / year (homes)"
+            }
+          ]
+        }
+      }
+    },
+    "objects": {
+      "value": [
+        {
+          "properties": {
+            "fontSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "20D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "id": "default"
+          }
+        }
+      ]
+    },
+    "visualContainerObjects": {
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "subTitle": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Gross: before service charges, vacancy and fees. Yields use the last four complete quarters'"
+                }
+              }
+            },
+            "fontColor": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#52514e'"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ],
+      "general": [
+        {
+          "properties": {
+            "altText": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Yield headline numbers: gross yield over the last four complete quarters, number of new market rent contracts in the selected year, and the area-weighted annual rent per square metre of new contracts for homes.'"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

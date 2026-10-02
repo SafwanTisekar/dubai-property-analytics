@@ -239,6 +239,11 @@ def test_visual_formatting_matches_the_theme_schema():
         assert pbir.object_errors(v["visual"], index) == [], (page, v["name"])
 
 
+def test_formatting_values_are_valid_query_expressions():
+    for page, v in visuals():
+        assert pbir.expression_errors(v["visual"]) == [], (page, v["name"])
+
+
 def test_slicer_selections_are_valid_filters():
     for page, v in visuals():
         for entry in v["visual"].get("objects", {}).get("general", []):
@@ -322,6 +327,9 @@ def test_pbir_checks_catch_mistakes():
     assert pbir.literal_value({"expr": {"Literal": {"Value": "'Dropdown'"}}}) == "Dropdown"
     assert pbir.literal_value({"expr": {"Literal": {"Value": "1000000000D"}}}) == 1_000_000_000
     assert pbir.filter_errors({"Version": 2, "From": []}) != []  # no Where
+    assert pbir.expression_errors(
+        {"objects": {"x": [{"properties": {"y": {"expr": {"Nope": 1}}}}]}}
+    )
     refs = list(pbir.field_refs({"From": [{"Name": "a", "Entity": "Area"}],
                                  "Where": [{"Column": {"Expression": {"SourceRef": {"Source": "a"}},
                                                        "Property": "Zone"}}]}))  # fmt: skip

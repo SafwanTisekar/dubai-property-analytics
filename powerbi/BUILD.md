@@ -59,34 +59,36 @@ Alt text: (1) "Six headline numbers for the selected year: sales value, number o
 
 ## Page 2. Financing & Market Mix (Q2)
 
-Title: `[Title Financing]`.
+Title: `[Title Financing]`. Trend visuals: not filtered by Year, from 2010 (subtitle says so).
 
 | # | Visual | Position | Fields | Settings |
 |---|---|---|---|---|
-| 1 | Card (new), 5 callouts | 16, 112, 1248, 80 | `[Ready Market Sales]`, `[Purchase Mortgages]`, `[Purchase Mortgage Share]`, `[New Mortgages per 100 Sales]`, `[Off-Plan Share (Count)]` | |
-| 2 | Stacked column | 16, 200, 620, 230 | X `'Date'[Month Start]`, Y `[Purchase Mortgages]` + `[Ready Sales Not Bank-Financed]` | Time-series rule from 2010. Legend renamed "Matched purchase mortgage" / "Not bank-financed at registration" (not "cash"). Title: "Ready sales: bank-financed at registration vs not" |
-| 3 | Line chart | 644, 200, 620, 150 | X `'Date'[Month Start]`, Y `[Purchase Mortgage Share]` | Time-series rule from 2010. **Top panel** of the stack: same x-range and width as #4 |
-| 4 | Line chart | 644, 354, 620, 150 | X `'Date'[Month Start]`, Y `[Reference Rate]` | **Bottom panel**, aligned with #3 (no dual axis). Title: `[Reference Rate Label]` (shows "Fed Funds rate (EIBOR proxy …)" until EIBOR is loaded) |
-| 5 | Line chart | 644, 512, 620, 172 | X `'Date'[Year]`, Y `[New Mortgages per 100 Sales]` | Time-series rule from 2010. Title: "New mortgages per 100 market sales (incl. refinancing; secondary indicator)" |
-| 6 | 100% stacked column | 16, 438, 300, 246 | X `'Date'[Year]`, Y `[Market Sales]`, legend `'Ready Off-Plan'[Ready / Off-Plan]` | Time-series rule from 2010. Data labels on (orange slot). Title: "Off-plan vs ready share of sales" |
-| 7 | Bar chart | 324, 438, 312, 246 | Y `'Area'[Area]`, X `[Off-Plan Share (Count)]` | Top N 15 by `[Market Sales]`. Title: "Off-plan share, 15 busiest areas" |
+| 1 | Card (new), 4 callouts | 16, 112, 1036, 88 | `[Ready Market Sales]`, `[Purchase Mortgages]`, `[New Mortgages per 100 Sales]` (1 dp), `[Off-Plan Share (Count)]` | |
+| 1b | Card (new), 1 callout | 1060, 112, 204, 88 | `[Purchase Mortgage Share]` "Mortgage share (ready)" | Subtitle "at least – matched loans only" (same card as page 1) |
+| 2 | Stacked column | 16, 208, 620, 236 | X `'Date'[Month Start]`, Y `[Purchase Mortgages]` ("Matched purchase mortgage", blue) + `[Ready Sales Not Bank-Financed]` ("Not bank-financed at registration", grey; not "cash") | Year ≥ 2010. Title: "Ready sales: bank-financed at registration vs not" |
+| 3 | Line chart | 644, 208, 620, 114 | X `'Date'[Month Start]`, Y `[Purchase Mortgage Share]` | **Top panel**, same x-range and width as #4. Title: "Mortgage share of ready sales (at least: matched loans only)" |
+| 4 | Line chart | 644, 330, 620, 114 | X `'Date'[Month Start]`, Y `[Reference Rate]` (grey) | **Bottom panel**, aligned with #3 (no dual axis). Title: `[Reference Rate Label]` ("Fed Funds rate (EIBOR proxy …)" until EIBOR is loaded) |
+| 5 | Line chart | 16, 452, 404, 228 | X `'Date'[Year]` (categorical), Y `[New Mortgages per 100 Sales]` | Subtitle "Incl. refinancing; secondary indicator. Not filtered by Year" |
+| 6 | 100% stacked column | 428, 452, 404, 228 | X `'Date'[Year]`, Y `[Market Sales]`, legend `'Ready Off-Plan'[Ready / Off-Plan]` | Data labels on. Title: "Off-plan vs ready share of sales" |
+| 7 | Bar chart | 840, 452, 424, 228 | Y `'Area'[Area]`, X `[Off-Plan Share (Count)]` | Top N 10 **by `[Market Sales]`** (the busiest areas; ranking by the share itself would be topped by one-sale areas), sorted by share. Title: "Off-plan share, 10 busiest areas" |
 
-Alt text: (2) "Monthly ready sales split into those matched to a same-day purchase mortgage and those not bank-financed at registration." (3–4) "Two aligned line charts: the matched purchase-mortgage share of ready sales above, the reference interest rate below." (5) "New mortgages per 100 market sales by year." (6) "Share of market sales that were off-plan or ready, by year." (7) "Off-plan share of sales in the 15 busiest areas."
+Alt text: (2) "Monthly ready sales split into those matched to a same-day purchase mortgage and those not bank-financed at registration." (3–4) "Two aligned line charts: the matched purchase-mortgage share of ready sales above, the reference interest rate below." (5) "New mortgages per 100 market sales by year." (6) "Share of market sales that were off-plan or ready, by year." (7) "Off-plan share of sales in the ten areas with the most market sales."
 
 ## Page 3. Prices & Index (Q3, Q6)
 
-Title: `[Title Prices]`. Page control at x 1066: slicer `'Price Index'[Segment]`, dropdown, single select, default "Dubai (all residential)" (not synced).
+Title: `[Title Prices]`. Page control at x 1066 (not synced): `'Price Index'[Segment]`, dropdown, single select, default "Dubai (all residential)".
 
 | # | Visual | Position | Fields | Settings |
 |---|---|---|---|---|
-| 1 | Card (new), 5 callouts | 16, 112, 1248, 80 | `[Index Value (Latest Complete)]`, `[Index YoY]`, `[Drawdown from Peak]`, `[Max Drawdown]`, `[Area-Weighted Price per Sq M (Homes)]` | `[Max Drawdown]`: Year slicer = None (whole history) |
-| 2 | Line chart | 16, 200, 620, 240 | X `'Date'[Month Start]`, Y `[Index Value]`, `[DLD Index Value]` | Time-series rule from 2011. Legend: "Hedonic index (this project)" / "DLD official index (ends May 2024)". Title: "Like-for-like prices vs DLD's index (Jan 2019 = 100); ours leads by ~6 months" |
-| 3 | Line chart | 644, 200, 620, 240 | X `'Date'[Month Start]`, Y `[Index Value (Apartments)]`, `[Raw Median Rebased (Apartments)]` | Time-series rule from 2015. Title: "Raw medians misread growth both ways: 2023 apartments +1% raw vs +17% like for like" |
-| 4 | Bar chart (horizontal) | 16, 448, 400, 236 | Y `'Area'[Area]`, X `[Median Price per Sq M]` | Top N 15 by `[Median Price per Sq M]`, sorted descending (areas under min-n are blank, so they drop out). Tooltip `'Area'[Zone]`, `[Market Sales]`. Title: "Highest median AED per sq m, top 15 areas" |
-| 5 | Matrix | 424, 448, 440, 236 | Rows `'Bedrooms'[Bedrooms]`, columns `'Area'[Zone]`, values `[Median Price per Sq M]` | Visual filter `'Property Type'[Usage Group]` = Residential. Background conditional format, blue ramp. Blank = under min-n. Title: "Median AED per sq m: bedrooms × zone" |
-| 6 | Area chart | 872, 448, 392, 236 | X `'Date'[Month Start]`, Y `[Index Drawdown]` | Time-series rule from 2011. Title: "Fall from the previous peak (2014→2020: −24% Dubai-wide)" |
+| 1 | Card (new), 4 callouts | 16, 112, 1036, 88 | `[Index Value (Latest Complete)]` (1 dp), `[Index YoY]`, `[Drawdown from Peak]`, `[Area-Weighted Price per Sq M (Homes)]` | Follow the Year slicer (latest complete month in the selection) |
+| 1b | Card (new), 1 callout | 1060, 112, 204, 88 | `[Max Drawdown]` "Deepest fall since 2011" | Not filtered by Year (subtitle "All years") |
+| 2 | Line chart | 16, 208, 620, 220 | X `'Date'[Month Start]`, Y `[Index Value]` (blue), `[DLD Index Value]` (grey, dashed) | Year ≥ 2011, not filtered by Year. Title: "Like-for-like prices vs DLD's index (Jan 2019 = 100); ours leads by ~6 months" |
+| 3 | Line chart | 644, 208, 620, 220 | X `'Date'[Month Start]`, Y `[Index Value (Apartments)]` (blue), `[Raw Median Rebased (Apartments)]` (orange) | Year ≥ 2015, not filtered by Year. Title: "Raw medians misread growth both ways: 2023 apartments +1% raw vs +17% like for like" |
+| 4 | Bar chart | 16, 436, 400, 244 | Y `'Area'[Area]`, X `[Median Price per Sq M]` | Top N 10 by the same measure, sorted descending (under-min-n areas are blank and drop out). Title: "Highest median AED per sq m, top 10 areas" |
+| 5 | Matrix | 424, 436, 440, 244 | Rows `'Area'[Zone]`, columns `'Bedrooms'[Bedrooms]`, values `[Median Price per Sq M]` | Visual filter Usage Group = Residential. Background colour scale `#fcfcfb` → `#9ec5f4` (light enough for black text). Blank = under min-n |
+| 6 | Area chart | 872, 436, 392, 244 | X `'Date'[Month Start]`, Y `[Index Drawdown]` (orange) | Year ≥ 2011, not filtered by Year. Title: "Fall from the previous peak (2014→2020: −24% Dubai-wide)" |
 
-Alt text: (2) "Line chart comparing this project's like-for-like price index with DLD's official index since 2011, both rebased to January 2019." (3) "Apartment price index against the raw median price per square metre, both rebased to January 2019: the gap is the mix shift." (4) "Bar chart of the 15 areas with the highest median price per square metre." (5) "Table of median price per square metre by bedrooms and zone; blank cells have fewer than 20 sales." (6) "Drawdown of the price index from its running peak."
+Alt text: (2) "Line chart comparing this project's like-for-like price index with DLD's official index since 2011, both rebased to January 2019." (3) "Apartment price index against the raw median price per square metre, both rebased to January 2019: the gap is the mix shift." (4) "Bar chart of the ten areas with the highest median price per square metre." (5) "Table of median price per square metre by zone and bedrooms; blank cells have fewer than 20 sales." (6) "Drawdown of the selected price index from its running peak since 2011."
 
 ## Page 4. Rental Yields (Q4)
 
@@ -94,52 +96,57 @@ Title: `[Title Yields]`. Yields use the **last four complete quarters** and igno
 
 | # | Visual | Position | Fields | Settings |
 |---|---|---|---|---|
-| 1 | Card (new), 3 callouts | 16, 112, 1248, 80 | `[Gross Yield (Latest 4 Quarters)]`, `[New Market Rents]`, `[Area-Weighted New Rent per Sq M (Homes)]` | Card subtitle: "Gross: before service charges, vacancy and fees" |
-| 2 | Clustered bar | 16, 200, 500, 484 | Y `'Area'[Zone]`, X `[Gross Yield (Latest 4 Quarters)]`, legend `'Property Type'[Property Type]` | Visual filter Property Type ∈ {Residential · Apartment, Residential · Villa / Townhouse}. Data labels on. Title: "Gross yield by zone, last four quarters" |
-| 3 | Bar chart (horizontal) | 524, 200, 360, 240 | Y `'Area'[Area]`, X `[Gross Yield by Area (Latest 4 Quarters)]` | Top N 15 by the same measure, sorted descending. Data labels on. Title: "Highest area yields (areas with 20+ rents and sales per cell)" |
-| 4 | Scatter | 892, 200, 372, 240 | Values `'Area'[Zone]`, X `[Index Growth 3Y (Zone)]`, Y `[Gross Yield (Latest 4 Quarters)]`, size `[Market Sales]` | Visual filter Property Type = Residential · Apartment (one type). Analytics: X median line and Y median line (quadrants). Data labels (zone) on. Title: "Income vs growth: top right has both" |
-| 5 | Line chart | 524, 448, 360, 236 | X `'Date'[Quarter Start]`, Y `[Gross Yield by Quarter]`, legend `'Property Type'[Property Type]` | Same type filter as #2; time-series rule from 2012. Title: "Yields fell to a 2021 low and partly recovered" |
-| 6 | Column chart | 892, 448, 372, 236 | X `'Bedrooms'[Bedrooms]`, Y `[New Rent per Sq M]` | Visual filter Property Type = Residential · Apartment. Title: "New-contract rent per sq m by bedrooms (apartments)" |
+| 1 | Card (new), 3 callouts | 16, 112, 1248, 88 | `[Gross Yield (Latest 4 Quarters)]`, `[New Market Rents]`, `[Area-Weighted New Rent per Sq M (Homes)]` | Subtitle: "Gross: before service charges, vacancy and fees. Yields use the last four complete quarters" |
+| 2 | Clustered bar | 16, 208, 500, 472 | Y `'Area'[Zone]`, X `[Gross Yield (Latest 4 Quarters)]`, legend `'Property Type'[Property Type]` | Visual filter Property Type ∈ {Residential · Apartment, Residential · Villa / Townhouse}; sorted descending; data labels 1 dp. Title: "Gross yield by zone, last four quarters" |
+| 3 | Bar chart | 524, 208, 360, 236 | Y `'Area'[Area]`, X `[Gross Yield by Area (Latest 4 Quarters)]` | Top N 10 by the same measure, sorted descending. Title: "Highest area yields (20+ rents and sales per cell)" |
+| 4 | Scatter | 892, 208, 372, 236 | Values `'Area'[Zone]`, X `[Index Growth 3Y (Zone)]`, Y `[Gross Yield (Latest 4 Quarters)]`, size `[Market Sales]` | Visual filter Property Type = Residential · Apartment; category labels on. **Manual step:** Analytics pane → X median line and Y median line (the quadrants; their PBIR binding can't be validated offline, so they aren't generated). Title: "Income vs growth (apartments): top right has both" |
+| 5 | Line chart | 524, 452, 360, 228 | X `'Date'[Quarter Start]`, Y `[Gross Yield by Quarter]`, legend `'Property Type'[Property Type]` | Same type filter as #2; Year ≥ 2012, not filtered by Year. Title: "Yields fell to a 2021 low and partly recovered" |
+| 6 | Column chart | 892, 452, 372, 228 | X `'Bedrooms'[Bedrooms]`, Y `[New Rent per Sq M]` | Visual filter Property Type = Residential · Apartment; data labels on. Title: "New-contract rent per sq m by bedrooms (apartments)" |
 
-Alt text: (2) "Gross rental yield by zone for apartments and villas over the last four complete quarters." (3) "Bar chart of the 15 areas with the highest gross yield, where both rents and sales reach 20 per cell." (4) "Scatter of zones: three-year price growth against gross yield, bubble size is sales." (5) "Quarterly gross yield for apartments and villas." (6) "Annual rent per square metre of new contracts by number of bedrooms."
+Alt text: (2) "Gross rental yield by zone for apartments and villas over the last four complete quarters." (3) "Bar chart of the ten areas with the highest gross yield, where both rents and sales reach 20 per cell." (4) "Scatter of zones: three-year price growth against gross yield for apartments, bubble size is sales." (5) "Quarterly gross yield for apartments and villas." (6) "Annual rent per square metre of new contracts by number of bedrooms, apartments."
 
 ## Page 5. Valuation Model (AVM) (Q5)
 
-Title: `[Title Valuation]`. Page filter: `'AVM Score'[Model Set]` = Test (2025+, out of time). Page control at x 1066: slicer `'AVM Performance'[Breakdown]`, single select, values Property Type / Reg Type / Price Band, default Property Type.
+Title: `[Title Valuation]`. Page filter: `'AVM Score'[Model Set]` = Test (2025+, out of time). Page control at x 1066 (not synced): `'AVM Performance'[Breakdown]`, single select, default "Property Type" (also Reg Type, Price Band, Area, Month).
 
 | # | Visual | Position | Fields | Settings |
 |---|---|---|---|---|
-| 1 | Card (new), 6 callouts | 16, 112, 1248, 80 | `[AVM Test MdAPE]`, `[AVM Test Hit Rate 10%]`, `[AVM Test Hit Rate 20%]`, `[AVM Test MdAPE (Baseline)]`, `[AVM Test Hit Rate 10% (Baseline)]`, `[AVM MdAPE Gain vs Baseline]` | Labels "AVM", "Comparable sales (baseline)"; these read the model card's numbers and ignore slicers |
-| 2 | Clustered bar | 16, 200, 400, 260 | Y `'AVM Performance'[Segment]`, X `[AVM Segment MdAPE]`, legend `'AVM Performance'[Model Name]` | Visual filters: Split = Test; Model ∈ {lightgbm, comps}. Title: "Median error by segment: AVM vs comparable sales" |
-| 3 | Bar chart | 424, 200, 400, 260 | Y `'Feature Importance'[Feature]`, X `[Mean Abs SHAP]` | Filter `'Feature Importance'[Rank]` ≤ 15; sort by value. Title: "What drives the valuation (mean \|SHAP\|, log points)" |
-| 4 | Line chart | 832, 200, 432, 260 | X `'Date'[Month Start]`, Y `[Median Sale Price (AVM Sample)]`, `[Median AVM Value]` | Year slicer = None. Title: "Out of sample: median price vs median AVM value by month" |
-| 5 | Table | 16, 468, 1000, 216 | `'Area'[Area]`, `'Project'[Project]`, `[Valued Sales]`, `[Median Gap %]`, `[Flagged for Review]`, `[Flagged Share]` | Top N 15 by `[Flagged for Review]`; `[Median Gap %]` diverging background (blue ↔ red, grey midpoint at 0). Title: "Where sales sit furthest from the AVM" |
-| 6 | Text box | 1024, 468, 240, 216 | | "Review flags mark sales more than 25% from their AVM value: statistical anomalies for a collateral review, **not** accusations of mispricing. The register records no floor, view, condition or sale circumstances." |
+| 1 | Card (new), 6 callouts | 16, 112, 1248, 88 | `[AVM Test MdAPE]` (2 dp), `[AVM Test Hit Rate 10%]`, `[AVM Test Hit Rate 20%]`, `[AVM Test MdAPE (Baseline)]` (2 dp), `[AVM Test Hit Rate 10% (Baseline)]`, `[AVM MdAPE Gain vs Baseline]` (2 dp) | Subtitle: "Out-of-time test set, 2025 to the snapshot (model card); not filtered by slicers" |
+| 2 | Clustered bar | 16, 208, 400, 236 | Y `'AVM Performance'[Segment]`, X `[AVM Segment MdAPE]`, legend `'AVM Performance'[Model Name]` | Visual filters: Split = Test; Model ∈ {lightgbm, comps}. Title: "Median error by segment: AVM vs comparable sales" |
+| 3 | Bar chart | 424, 208, 400, 236 | Y `'Feature Importance'[Feature]`, X `[Mean Abs SHAP]` | Filter Rank ≤ 10, sorted descending. Title: "What drives the valuation (mean \|SHAP\|, log points)" |
+| 4 | Line chart | 832, 208, 432, 236 | X `'Date'[Month Start]`, Y `[Median Sale Price (AVM Sample)]` (blue), `[Median AVM Value]` (orange, dashed) | Not filtered by Year. Title: "Out of sample: median price vs median AVM value" |
+| 5 | Table | 16, 452, 1000, 228 | `'Area'[Area]`, `'Project'[Project]`, `[Valued Sales]`, `[Median Gap %]`, `[Flagged for Review]`, `[Flagged Share]` | Top N 10 projects by `[Flagged for Review]`, sorted descending. Title: "Where sales sit furthest from the AVM (10 projects with most flags)" |
+| 6 | Text box | 1024, 452, 240, 228 | | "Review flags are not accusations": flags mark sales more than 25% from their AVM value, statistical anomalies for a collateral review, not evidence of mispricing |
 
-Alt text: (2) "Median absolute percentage error by segment for the AVM and the comparable-sales baseline on the 2025–26 test set." (3) "Top 15 features by mean absolute SHAP value." (4) "Median sale price and median AVM value of out-of-sample sales by month." (5) "Table of areas and projects with the most sales flagged for review, with their median gap to the AVM."
+Alt text: (2) "Median absolute percentage error by segment for the AVM and the comparable-sales baseline on the 2025–26 test set." (3) "Top ten features by mean absolute SHAP value." (4) "Median sale price and median AVM value of out-of-sample sales by month." (5) "Table of areas and projects with the most sales flagged for review, with their median gap to the AVM."
 
 ## Page 6. Risk & Stress Test (Q6, Q7, Q9)
 
-Title: `[Title Stress]`; subtitle text box under it: `[Stress Disclaimer]` ("Illustrative, not a regulatory stress test…"). **Every stress visual carries that label** (subtitle or footnote).
+Title: `[Title Stress]`. **Every stress visual carries "Illustrative, not a regulatory stress test"** (subtitle).
 
-Page controls (not synced), in the slicer band from x 1066 and in a left rail if needed:
-- `'Price Shock %'[Price Shock %]`: slider, single value, default **−20**.
-- `'LTV %'[LTV Label]`: buttons, single select, default **80%** (85% = "UAE national first home cap (worst case)").
-- `'Stress Grid'[Segment]`: dropdown, single select, visual filter Segment Level ∈ {Dubai, Type, Zone}, default "Dubai (all residential)".
-- `'Replay Depth'[Replay Depth]`: buttons, default "Dubai-wide (lower range)".
-- `'Forecast Scenario'[Scenario]` and `'Forecast'[Segment]`: dropdowns, defaults "Rates flat", "Dubai (all residential)"; also filter `'Forecast'[Target]` = Price index on the page.
-- The synced Ready / off-plan slicer picks Ready or Off-Plan (Ready when none). Off-plan is never pooled with ready.
+Page controls (not synced), dropdowns, single select:
+
+| Control | Field | Position | Default |
+|---|---|---|---|
+| Stress segment | `'Stress Grid'[Segment]` (visual filter Segment Level ∈ Dubai / Type / Zone; area names repeat) | 16, 112, 300, 48 | Dubai (all residential) |
+| Price shock % | `'Price Shock %'[Price Shock %]` | 324, 112, 140, 48 | −20 |
+| Loan-to-value | `'LTV %'[LTV Label]` | 472, 112, 300, 48 | 80% (85% = "UAE national first home cap (worst case)") |
+| Replay depth | `'Replay Depth'[Replay Depth]` | 780, 112, 240, 48 | Dubai-wide (lower range) |
+| Rate scenario | `'Forecast Scenario'[Scenario]` | 1028, 112, 236, 48 | Rates flat |
+| Outlook segment | `'Forecast'[Segment]` | 1066, 56, 198, 48 | Dubai (all residential) |
+
+Page filter `'Forecast'[Target]` = Price index. The synced Ready / off-plan slicer picks Ready or Off-Plan (Ready when none); off-plan is never pooled with ready.
 
 | # | Visual | Position | Fields | Settings |
 |---|---|---|---|---|
-| 1 | Card (new), 6 callouts | 16, 112, 1248, 80 | `[Negative Equity Share]`, `[Negative Equity AED]` (Billions), `[Stress Purchases]`, `[Negative Equity Share (CBUAE Cap)]`, `[Negative Equity Share (Registered Loans)]`, `[Replay Negative Equity Share]` | |
-| 2 | Matrix (heatmap) | 16, 200, 400, 240 | Rows `'Price Shock %'[Price Shock %]`, columns `'LTV %'[LTV Label]`, values `[Negative Equity Share]` | Edit interactions: Shock and LTV slicers = None on this visual (it shows the whole grid). Background colour scale `#fcfcfb` → `#184f95`. Title: "Negative equity: shock × LTV (recent buyers, loans at origination)" |
-| 3 | Bar chart (horizontal) | 424, 200, 400, 240 | Y `'Area'[Area]`, X `[Negative Equity Share by Area]` | Top N 15 by the same measure, sorted descending; property type from the synced slicer (apartments when none). Title: "Most exposed areas at the selected shock and LTV" |
-| 4 | Bar chart | 832, 200, 432, 240 | Y `'Stress Replay'[Segment]`, X `[Replay Drawdown]` | Visual filter Used In Replay = true. Title: "2014→2020 replay: the fall each index series took (zone series overstate it)" |
-| 5 | Bar chart | 16, 448, 400, 236 | Y `'Project'[Master Project]`, X `[Master Project Share (Off-Plan)]` | Top N 10 by `[Off-Plan Market Sales (Lines)]`; filter Master Project ≠ Unknown. Title: `[Title Concentration]`. Footnote: "Proxy: developer names need the DLD projects file (Q9 deferred)" |
-| 6 | Line chart (fan) | 424, 448, 840, 236 | X `'Forecast'[Month]`, Y `[Forecast Actual]`, `[Forecast Central]` | Visual filter Month ≥ 2021-01-01. Analytics → Error bars on `[Forecast Central]`: upper `[Forecast Upper 80]`, lower `[Forecast Lower 80]`, shaded band (a second band for 95% if legible). Title: `[Title Outlook]` |
+| 1 | Card (new), 6 callouts | 16, 168, 1248, 80 | `[Negative Equity Share]`, `[Negative Equity AED]` (Billions, 2 dp), `[Stress Purchases]`, `[Negative Equity Share (CBUAE Cap)]`, `[Negative Equity Share (Registered Loans)]`, `[Replay Negative Equity Share]` | Subtitle: "Illustrative, not a regulatory stress test. Loans held at origination; ready and off-plan never pooled" |
+| 2 | Matrix (heatmap) | 16, 256, 400, 208 | Rows `'Price Shock %'[Price Shock %]`, columns `'LTV %'[LTV Label]`, values `[Negative Equity Share]` | Interactions: the Shock and LTV slicers don't filter it (it shows the whole grid). Colour scale `#fcfcfb` → `#9ec5f4`. Title: "Negative equity: shock × LTV (recent buyers)" |
+| 3 | Bar chart | 424, 256, 400, 208 | Y `'Area'[Area]`, X `[Negative Equity Share by Area]` | Top N 10 by the same measure, sorted descending; property type from the synced slicer (apartments when none). Title: "Most exposed areas at the selected shock and LTV" |
+| 4 | Bar chart | 832, 256, 432, 208 | Y `'Stress Replay'[Segment]`, X `[Replay Drawdown]` | Filter Used In Replay = true; the 10 deepest falls (sorted ascending). Subtitle: "Zone series are noisier and overstate it" |
+| 5 | Bar chart | 16, 472, 400, 208 | Y `'Project'[Master Project]`, X `[Master Project Share (Off-Plan)]` | Top N 10 by `[Off-Plan Market Sales (Lines)]`, Master Project ≠ Unknown. Title: `[Title Concentration]`; subtitle "Proxy: developer names need the DLD projects file (Q9 deferred)" |
+| 6 | Line chart (fan) | 424, 472, 840, 208 | X `'Forecast'[Month]`, Y `[Forecast Actual]` (blue), `[Forecast Central]` (orange), `[Forecast Lower 80]` and `[Forecast Upper 80]` (grey, dashed) | Month ≥ 2021-01. The 80% interval is drawn as two dashed lines, not error bars: their PBIR binding can't be validated offline (switch in Analytics → Error bars if wanted). Title: `[Title Outlook]` |
 
-Alt text: (2) "Heatmap of the share of recent buyers in negative equity for price falls of 0 to 50% and loan-to-values of 50 to 85%." (3) "Bar chart of the 15 areas with the highest negative-equity share at the selected price shock and loan-to-value." (4) "Bar chart of each index series' fall in the 2014 to 2020 downturn." (5) "Top ten master projects' shares of off-plan sales, a proxy for developer concentration." (6) "Price index history since 2021 and the 12-month forecast with its 80% interval for the selected rate scenario."
+Alt text: (2) "Heatmap of the share of recent buyers in negative equity for price falls of 0 to 50% and loan-to-values of 50 to 85%." (3) "Bar chart of the ten areas with the highest negative-equity share at the selected price shock and loan-to-value." (4) "Bar chart of the ten index series with the deepest fall in the 2014 to 2020 downturn." (5) "Top ten master projects' shares of off-plan sales in the selected year, a proxy for developer concentration." (6) "Price index history since 2021 and the 12-month forecast with its 80% interval for the selected rate scenario."
 
 ---
 

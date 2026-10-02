@@ -4,5 +4,32 @@
   "displayName": "2 Financing & Market Mix",
   "displayOption": "FitToPage",
   "height": 720,
-  "width": 1280
+  "width": 1280,
+  "visualInteractions": [
+    {
+      "source": "p2_Year",
+      "target": "p2_ready_financed",
+      "type": "NoFilter"
+    },
+    {
+      "source": "p2_Year",
+      "target": "p2_share",
+      "type": "NoFilter"
+    },
+    {
+      "source": "p2_Year",
+      "target": "p2_rate",
+      "type": "NoFilter"
+    },
+    {
+      "source": "p2_Year",
+      "target": "p2_per100",
+      "type": "NoFilter"
+    },
+    {
+      "source": "p2_Year",
+      "target": "p2_mix",
+      "type": "NoFilter"
+    }
+  ]
 }

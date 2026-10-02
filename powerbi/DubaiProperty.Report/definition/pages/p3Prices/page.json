@@ -4,5 +4,27 @@
   "displayName": "3 Prices & Index",
   "displayOption": "FitToPage",
   "height": 720,
-  "width": 1280
+  "width": 1280,
+  "visualInteractions": [
+    {
+      "source": "p3_Year",
+      "target": "p3_maxdd",
+      "type": "NoFilter"
+    },
+    {
+      "source": "p3_Year",
+      "target": "p3_vs_dld",
+      "type": "NoFilter"
+    },
+    {
+      "source": "p3_Year",
+      "target": "p3_mix_shift",
+      "type": "NoFilter"
+    },
+    {
+      "source": "p3_Year",
+      "target": "p3_drawdown",
+      "type": "NoFilter"
+    }
+  ]
 }

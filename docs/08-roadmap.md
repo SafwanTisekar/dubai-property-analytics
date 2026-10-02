@@ -243,8 +243,8 @@ Then, in Power BI Desktop (Parallels), connect to PostgreSQL as pbi_reader (impo
 
 - [x] Maps dropped for v1 (owner, 2026-10-02: Azure Maps needs a tenant admin): bar charts by area, top N by the same measure; centroids kept in the model
 - [x] Theme registered inside the PBIP (applies on open); PBIR schemas vendored (`powerbi/schemas/`), visuals validated offline (schema, model fields, formatting names and values: `tests/test_powerbi_model.py`)
-- [ ] Page 1 (Executive Overview) + synced slicer panel built as PBIR → **gate (owner): renders correctly in Desktop**
-- [ ] Pages 2–6 built as PBIR → **gate (owner): final check**
+- [x] Page 1 (Executive Overview) + synced slicer panel built as PBIR → **gate passed (owner, 2026-10-02)**: renders, Sales value and Market sales match §7. Fixes: new-card formatting needs `$id = default` selectors (label / padding were ignored), one-line header and footer, no auto subtitles, mortgage share as its own lower-bound card, staggered reference-line labels, bars without scrollbar, "not filtered by Year" notes
+- [ ] Pages 2–6 built as PBIR (96 visual containers in all; every page validated offline) → **gate (owner): final check**
 
 **Phase 5 checklist (owner, Power BI Desktop)**
 - [ ] Review the generated pages against `powerbi/BUILD.md`

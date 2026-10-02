@@ -1,0 +1,232 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
+  "name": "p5_kpis",
+  "position": {
+    "x": 16,
+    "y": 112,
+    "z": 10000,
+    "width": 1248,
+    "height": 88,
+    "tabOrder": 10000
+  },
+  "visual": {
+    "visualType": "cardVisual",
+    "query": {
+      "queryState": {
+        "Data": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_Measures"
+                    }
+                  },
+                  "Property": "AVM Test MdAPE"
+                }
+              },
+              "queryRef": "_Measures.AVM Test MdAPE",
+              "nativeQueryRef": "AVM Test MdAPE",
+              "displayName": "AVM median error"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_Measures"
+                    }
+                  },
+                  "Property": "AVM Test Hit Rate 10%"
+                }
+              },
+              "queryRef": "_Measures.AVM Test Hit Rate 10%",
+              "nativeQueryRef": "AVM Test Hit Rate 10%",
+              "displayName": "AVM within ±10%"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_Measures"
+                    }
+                  },
+                  "Property": "AVM Test Hit Rate 20%"
+                }
+              },
+              "queryRef": "_Measures.AVM Test Hit Rate 20%",
+              "nativeQueryRef": "AVM Test Hit Rate 20%",
+              "displayName": "AVM within ±20%"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_Measures"
+                    }
+                  },
+                  "Property": "AVM Test MdAPE (Baseline)"
+                }
+              },
+              "queryRef": "_Measures.AVM Test MdAPE (Baseline)",
+              "nativeQueryRef": "AVM Test MdAPE (Baseline)",
+              "displayName": "Comparable sales: median error"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_Measures"
+                    }
+                  },
+                  "Property": "AVM Test Hit Rate 10% (Baseline)"
+                }
+              },
+              "queryRef": "_Measures.AVM Test Hit Rate 10% (Baseline)",
+              "nativeQueryRef": "AVM Test Hit Rate 10% (Baseline)",
+              "displayName": "Comparable sales: within ±10%"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_Measures"
+                    }
+                  },
+                  "Property": "AVM MdAPE Gain vs Baseline"
+                }
+              },
+              "queryRef": "_Measures.AVM MdAPE Gain vs Baseline",
+              "nativeQueryRef": "AVM MdAPE Gain vs Baseline",
+              "displayName": "Median error saved (pp)"
+            }
+          ]
+        }
+      }
+    },
+    "objects": {
+      "value": [
+        {
+          "properties": {
+            "fontSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "20D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "id": "default"
+          }
+        },
+        {
+          "properties": {
+            "labelPrecision": {
+              "expr": {
+                "Literal": {
+                  "Value": "2L"
+                }
+              }
+            }
+          },
+          "selector": {
+            "metadata": "_Measures.AVM Test MdAPE"
+          }
+        },
+        {
+          "properties": {
+            "labelPrecision": {
+              "expr": {
+                "Literal": {
+                  "Value": "2L"
+                }
+              }
+            }
+          },
+          "selector": {
+            "metadata": "_Measures.AVM Test MdAPE (Baseline)"
+          }
+        },
+        {
+          "properties": {
+            "labelPrecision": {
+              "expr": {
+                "Literal": {
+                  "Value": "2L"
+                }
+              }
+            }
+          },
+          "selector": {
+            "metadata": "_Measures.AVM MdAPE Gain vs Baseline"
+          }
+        }
+      ]
+    },
+    "visualContainerObjects": {
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "subTitle": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Out-of-time test set, 2025 to the snapshot (model card); not filtered by slicers'"
+                }
+              }
+            },
+            "fontColor": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#52514e'"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ],
+      "general": [
+        {
+          "properties": {
+            "altText": {
+              "expr": {
+                "Literal": {
+                  "Value": "'AVM accuracy on the 2025-26 out-of-time test set against the comparable-sales baseline: median absolute error and the shares valued within 10% and 20%.'"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

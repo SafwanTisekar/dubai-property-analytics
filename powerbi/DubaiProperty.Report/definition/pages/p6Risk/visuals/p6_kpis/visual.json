@@ -1,0 +1,211 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
+  "name": "p6_kpis",
+  "position": {
+    "x": 16,
+    "y": 168,
+    "z": 10000,
+    "width": 1248,
+    "height": 80,
+    "tabOrder": 10000
+  },
+  "visual": {
+    "visualType": "cardVisual",
+    "query": {
+      "queryState": {
+        "Data": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_Measures"
+                    }
+                  },
+                  "Property": "Negative Equity Share"
+                }
+              },
+              "queryRef": "_Measures.Negative Equity Share",
+              "nativeQueryRef": "Negative Equity Share",
+              "displayName": "In negative equity"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_Measures"
+                    }
+                  },
+                  "Property": "Negative Equity AED"
+                }
+              },
+              "queryRef": "_Measures.Negative Equity AED",
+              "nativeQueryRef": "Negative Equity AED",
+              "displayName": "Shortfall"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_Measures"
+                    }
+                  },
+                  "Property": "Stress Purchases"
+                }
+              },
+              "queryRef": "_Measures.Stress Purchases",
+              "nativeQueryRef": "Stress Purchases",
+              "displayName": "Recent purchases"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_Measures"
+                    }
+                  },
+                  "Property": "Negative Equity Share (CBUAE Cap)"
+                }
+              },
+              "queryRef": "_Measures.Negative Equity Share (CBUAE Cap)",
+              "nativeQueryRef": "Negative Equity Share (CBUAE Cap)",
+              "displayName": "At the CBUAE cap"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_Measures"
+                    }
+                  },
+                  "Property": "Negative Equity Share (Registered Loans)"
+                }
+              },
+              "queryRef": "_Measures.Negative Equity Share (Registered Loans)",
+              "nativeQueryRef": "Negative Equity Share (Registered Loans)",
+              "displayName": "Registered loans"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_Measures"
+                    }
+                  },
+                  "Property": "Replay Negative Equity Share"
+                }
+              },
+              "queryRef": "_Measures.Replay Negative Equity Share",
+              "nativeQueryRef": "Replay Negative Equity Share",
+              "displayName": "2014-2020 replay"
+            }
+          ]
+        }
+      }
+    },
+    "objects": {
+      "value": [
+        {
+          "properties": {
+            "fontSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "20D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "id": "default"
+          }
+        },
+        {
+          "properties": {
+            "labelDisplayUnits": {
+              "expr": {
+                "Literal": {
+                  "Value": "1000000000D"
+                }
+              }
+            },
+            "labelPrecision": {
+              "expr": {
+                "Literal": {
+                  "Value": "2L"
+                }
+              }
+            }
+          },
+          "selector": {
+            "metadata": "_Measures.Negative Equity AED"
+          }
+        }
+      ]
+    },
+    "visualContainerObjects": {
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "subTitle": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Illustrative, not a regulatory stress test. Loans held at origination; ready and off-plan never pooled'"
+                }
+              }
+            },
+            "fontColor": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#52514e'"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ],
+      "general": [
+        {
+          "properties": {
+            "altText": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Stress test results for the selected segment, price shock and loan-to-value: share of recent buyers in negative equity, the shortfall in AED, the number of purchases, the same share at the CBUAE cap and for registered loans, and under a repeat of the 2014 to 2020 fall.'"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

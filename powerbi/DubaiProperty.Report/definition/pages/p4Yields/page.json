@@ -4,5 +4,12 @@
   "displayName": "4 Rental Yields",
   "displayOption": "FitToPage",
   "height": 720,
-  "width": 1280
+  "width": 1280,
+  "visualInteractions": [
+    {
+      "source": "p4_Year",
+      "target": "p4_trend",
+      "type": "NoFilter"
+    }
+  ]
 }

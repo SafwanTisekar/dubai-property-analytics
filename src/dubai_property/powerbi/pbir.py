@@ -79,6 +79,39 @@ def filter_errors(definition: dict) -> list[str]:
     return [f"{e.json_path}: {e.message[:200]}" for e in validator.iter_errors(definition)]
 
 
+def _exprs(node: Any, path: str = "") -> Iterator[tuple[str, dict]]:
+    """Every ``{"expr": {...}}`` value inside formatting objects (with its JSON path)."""
+    if isinstance(node, dict):
+        if isinstance(node.get("expr"), dict):
+            yield path, node["expr"]
+        for key, value in node.items():
+            if key != "expr":
+                yield from _exprs(value, f"{path}.{key}")
+    elif isinstance(node, list):
+        for i, item in enumerate(node):
+            yield from _exprs(item, f"{path}[{i}]")
+
+
+def expression_errors(visual: dict) -> list[str]:
+    """Formatting values that are not valid query expressions.
+
+    Covers ``objects`` and ``visualContainerObjects``: literals, measure-bound titles and
+    FillRule colour scales alike.
+    """
+    global _REGISTRY
+    _REGISTRY = _REGISTRY or _registry()
+    ref = {
+        "$ref": SCHEMA_BASE
+        + "semanticQuery/1.4.0/schema.json#/definitions/QueryExpressionContainer"
+    }
+    validator = Draft7Validator(ref, registry=_REGISTRY)
+    errors = []
+    for part in ("objects", "visualContainerObjects"):
+        for path, expr in _exprs(visual.get(part) or {}, part):
+            errors += [f"{path}: {e.message[:160]}" for e in validator.iter_errors(expr)]
+    return errors
+
+
 @dataclass(frozen=True)
 class FieldRef:
     """A model field a visual uses: ``kind`` is Column, Measure or Aggregation(Column)."""
