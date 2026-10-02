@@ -2,12 +2,12 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
   "name": "p6_concentration",
   "position": {
-    "x": 424,
-    "y": 472,
-    "z": 14000,
-    "width": 400,
-    "height": 208,
-    "tabOrder": 14000
+    "x": 554,
+    "y": 494,
+    "z": 45000,
+    "width": 346,
+    "height": 182,
+    "tabOrder": 45000
   },
   "visual": {
     "visualType": "clusteredBarChart",
@@ -145,13 +145,8 @@
             },
             "text": {
               "expr": {
-                "Measure": {
-                  "Expression": {
-                    "SourceRef": {
-                      "Entity": "_Measures"
-                    }
-                  },
-                  "Property": "Title Concentration"
+                "Literal": {
+                  "Value": "'Top 4 master projects (off-plan share)'"
                 }
               }
             }
@@ -177,7 +172,7 @@
             "altText": {
               "expr": {
                 "Literal": {
-                  "Value": "'Top five master projects'' shares of off-plan sales in the selected year, a proxy for developer concentration.'"
+                  "Value": "'The four master projects with the largest shares of off-plan sales in the selected year, a proxy for developer concentration.'"
                 }
               }
             }
@@ -250,7 +245,7 @@
                         }
                       }
                     ],
-                    "Top": 5
+                    "Top": 4
                   }
                 }
               },

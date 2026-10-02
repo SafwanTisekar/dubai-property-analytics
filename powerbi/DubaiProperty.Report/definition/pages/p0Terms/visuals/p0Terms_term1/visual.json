@@ -6,7 +6,7 @@
     "y": 84,
     "z": 21000,
     "width": 346,
-    "height": 124,
+    "height": 112,
     "tabOrder": 21000
   },
   "visual": {
@@ -31,7 +31,7 @@
               {
                 "textRuns": [
                   {
-                    "value": "Off-plan means buying a home before it is built, usually paying the developer in stages. Ready means it is finished and you can move in.",
+                    "value": "Off-plan: bought before it is built, paid to the developer in stages. Ready: finished, you can move in.",
                     "textStyle": {
                       "fontSize": "9pt",
                       "color": "#1b2a4a"
@@ -42,7 +42,7 @@
               {
                 "textRuns": [
                   {
-                    "value": "Example: a flat bought in 2025 for handover in 2028 is off-plan.",
+                    "value": "Example: bought in 2025, handover in 2028: off-plan.",
                     "textStyle": {
                       "fontSize": "9pt",
                       "color": "#5f6673",
@@ -89,7 +89,7 @@
             "altText": {
               "expr": {
                 "Literal": {
-                  "Value": "'Term: Off-plan and ready. Off-plan means buying a home before it is built, usually paying the developer in stages. Ready means it is finished and you can move in. Example: a flat bought in 2025 for handover in 2028 is off-plan.'"
+                  "Value": "'Term: Off-plan and ready. Off-plan: bought before it is built, paid to the developer in stages. Ready: finished, you can move in. Example: bought in 2025, handover in 2028: off-plan.'"
                 }
               }
             }

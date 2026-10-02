@@ -2,12 +2,12 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
   "name": "p2_per100",
   "position": {
-    "x": 16,
-    "y": 452,
-    "z": 15000,
-    "width": 404,
-    "height": 228,
-    "tabOrder": 15000
+    "x": 198,
+    "y": 494,
+    "z": 45000,
+    "width": 346,
+    "height": 182,
+    "tabOrder": 45000
   },
   "visual": {
     "visualType": "lineChart",
@@ -86,6 +86,26 @@
             }
           }
         }
+      ],
+      "dataPoint": [
+        {
+          "properties": {
+            "fill": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#1b2a4a'"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "selector": {
+            "metadata": "_Measures.New Mortgages per 100 Sales"
+          }
+        }
       ]
     },
     "visualContainerObjects": {
@@ -158,7 +178,7 @@
   "filterConfig": {
     "filters": [
       {
-        "name": "p2Fromd",
+        "name": "p2dFrom",
         "field": {
           "Column": {
             "Expression": {
@@ -206,7 +226,7 @@
         }
       },
       {
-        "name": "p2Snapd",
+        "name": "p2dSnap",
         "field": {
           "Column": {
             "Expression": {

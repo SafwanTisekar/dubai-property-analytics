@@ -1,0 +1,26 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/bookmarksMetadata/1.0.0/schema.json",
+  "items": [
+    {
+      "name": "bmP1ExecutiveReset"
+    },
+    {
+      "name": "bmP2FinancingReset"
+    },
+    {
+      "name": "bmP3PricesReset"
+    },
+    {
+      "name": "bmP4YieldsReset"
+    },
+    {
+      "name": "bmP5ValuationReset"
+    },
+    {
+      "name": "bmP6RiskReset"
+    },
+    {
+      "name": "bmP7GuideReset"
+    }
+  ]
+}

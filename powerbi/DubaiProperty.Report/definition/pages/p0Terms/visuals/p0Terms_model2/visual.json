@@ -3,10 +3,10 @@
   "name": "p0Terms_model2",
   "position": {
     "x": 465,
-    "y": 372,
+    "y": 350,
     "z": 33000,
     "width": 257,
-    "height": 120,
+    "height": 106,
     "tabOrder": 33000
   },
   "visual": {
@@ -31,7 +31,7 @@
               {
                 "textRuns": [
                   {
-                    "value": "It learned how size, location, bedrooms and recent nearby prices relate to price, then estimates what a home is worth.",
+                    "value": "Learns how size, location, bedrooms and nearby prices relate to price, then estimates a home's value.",
                     "textStyle": {
                       "fontSize": "9pt",
                       "color": "#1b2a4a"
@@ -77,7 +77,7 @@
             "altText": {
               "expr": {
                 "Literal": {
-                  "Value": "'Model: AVM: an automated valuer. It learned how size, location, bedrooms and recent nearby prices relate to price, then estimates what a home is worth.'"
+                  "Value": "'Model: AVM: an automated valuer. Learns how size, location, bedrooms and nearby prices relate to price, then estimates a home''s value.'"
                 }
               }
             }

@@ -2,12 +2,12 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
   "name": "p3_vs_dld",
   "position": {
-    "x": 16,
-    "y": 224,
-    "z": 12000,
-    "width": 380,
-    "height": 228,
-    "tabOrder": 12000
+    "x": 198,
+    "y": 282,
+    "z": 42000,
+    "width": 320,
+    "height": 180,
+    "tabOrder": 42000
   },
   "visual": {
     "visualType": "lineChart",
@@ -76,7 +76,7 @@
                 "color": {
                   "expr": {
                     "Literal": {
-                      "Value": "'#2a78d6'"
+                      "Value": "'#1b2a4a'"
                     }
                   }
                 }
@@ -94,7 +94,7 @@
                 "color": {
                   "expr": {
                     "Literal": {
-                      "Value": "'#8a8984'"
+                      "Value": "'#6b7280'"
                     }
                   }
                 }
@@ -157,7 +157,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'Ours leads by ~6 months; not filtered by Year'"
+                  "Value": "'Ours leads by ~6 months'"
                 }
               }
             },
@@ -193,7 +193,7 @@
   "filterConfig": {
     "filters": [
       {
-        "name": "p3Froma",
+        "name": "p3aFrom",
         "field": {
           "Column": {
             "Expression": {
@@ -241,7 +241,7 @@
         }
       },
       {
-        "name": "p3Snapa",
+        "name": "p3aSnap",
         "field": {
           "Column": {
             "Expression": {

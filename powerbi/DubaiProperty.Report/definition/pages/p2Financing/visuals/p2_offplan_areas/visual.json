@@ -2,12 +2,12 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
   "name": "p2_offplan_areas",
   "position": {
-    "x": 840,
-    "y": 452,
-    "z": 17000,
-    "width": 424,
-    "height": 228,
-    "tabOrder": 17000
+    "x": 910,
+    "y": 494,
+    "z": 47000,
+    "width": 348,
+    "height": 182,
+    "tabOrder": 47000
   },
   "visual": {
     "visualType": "clusteredBarChart",
@@ -139,7 +139,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'Off-plan share, 6 busiest areas'"
+                  "Value": "'Off-plan share, 4 busiest areas'"
                 }
               }
             }
@@ -165,7 +165,7 @@
             "altText": {
               "expr": {
                 "Literal": {
-                  "Value": "'Off-plan share of sales in the six areas with the most market sales.'"
+                  "Value": "'Off-plan share of sales in the four areas with the most market sales.'"
                 }
               }
             }
@@ -238,7 +238,7 @@
                         }
                       }
                     ],
-                    "Top": 6
+                    "Top": 4
                   }
                 }
               },

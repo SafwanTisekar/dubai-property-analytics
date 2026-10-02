@@ -2,12 +2,12 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
   "name": "p5_gaps",
   "position": {
-    "x": 16,
-    "y": 448,
-    "z": 14000,
-    "width": 1000,
-    "height": 232,
-    "tabOrder": 14000
+    "x": 728,
+    "y": 474,
+    "z": 45000,
+    "width": 530,
+    "height": 202,
+    "tabOrder": 45000
   },
   "visual": {
     "visualType": "tableEx",
@@ -56,7 +56,7 @@
               },
               "queryRef": "_Measures.Valued Sales",
               "nativeQueryRef": "Valued Sales",
-              "displayName": "Valued sales"
+              "displayName": "Valued"
             },
             {
               "field": {
@@ -71,7 +71,7 @@
               },
               "queryRef": "_Measures.Median Gap %",
               "nativeQueryRef": "Median Gap %",
-              "displayName": "Median gap to AVM"
+              "displayName": "Median gap"
             },
             {
               "field": {
@@ -87,21 +87,6 @@
               "queryRef": "_Measures.Flagged for Review",
               "nativeQueryRef": "Flagged for Review",
               "displayName": "Flagged"
-            },
-            {
-              "field": {
-                "Measure": {
-                  "Expression": {
-                    "SourceRef": {
-                      "Entity": "_Measures"
-                    }
-                  },
-                  "Property": "Flagged Share"
-                }
-              },
-              "queryRef": "_Measures.Flagged Share",
-              "nativeQueryRef": "Flagged Share",
-              "displayName": "Flagged share"
             }
           ]
         }
@@ -135,6 +120,13 @@
                   "Value": "false"
                 }
               }
+            },
+            "fontSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "8D"
+                }
+              }
             }
           }
         }
@@ -154,7 +146,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'Where sales sit furthest from the AVM: 4 projects with most flags'"
+                  "Value": "'Most review flags (anomalies, not accusations)'"
                 }
               }
             }
@@ -180,7 +172,7 @@
             "altText": {
               "expr": {
                 "Literal": {
-                  "Value": "'Table of the four projects with the most sales flagged for review, with their area and median gap to the AVM.'"
+                  "Value": "'Table of the three projects with the most sales flagged for review (more than 25% from the AVM), with their area and median gap; project Unknown excluded.'"
                 }
               }
             }
@@ -253,7 +245,7 @@
                         }
                       }
                     ],
-                    "Top": 4
+                    "Top": 3
                   }
                 }
               },

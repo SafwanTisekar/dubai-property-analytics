@@ -3,10 +3,10 @@
   "name": "p0Terms_term4",
   "position": {
     "x": 198,
-    "y": 216,
+    "y": 204,
     "z": 24000,
     "width": 346,
-    "height": 124,
+    "height": 112,
     "tabOrder": 24000
   },
   "visual": {
@@ -31,7 +31,7 @@
               {
                 "textRuns": [
                   {
-                    "value": "The loan as a share of the home's value. The higher it is, the smaller the buyer's cushion.",
+                    "value": "The loan as a share of the home's value. Higher means a thinner cushion.",
                     "textStyle": {
                       "fontSize": "9pt",
                       "color": "#1b2a4a"
@@ -42,7 +42,7 @@
               {
                 "textRuns": [
                   {
-                    "value": "Example: AED 1,200,000 borrowed on a AED 1,500,000 home is an LTV of 80%.",
+                    "value": "Example: AED 1,200,000 on a AED 1,500,000 home is 80%.",
                     "textStyle": {
                       "fontSize": "9pt",
                       "color": "#5f6673",
@@ -89,7 +89,7 @@
             "altText": {
               "expr": {
                 "Literal": {
-                  "Value": "'Term: Loan-to-value (LTV). The loan as a share of the home''s value. The higher it is, the smaller the buyer''s cushion. Example: AED 1,200,000 borrowed on a AED 1,500,000 home is an LTV of 80%.'"
+                  "Value": "'Term: Loan-to-value (LTV). The loan as a share of the home''s value. Higher means a thinner cushion. Example: AED 1,200,000 on a AED 1,500,000 home is 80%.'"
                 }
               }
             }

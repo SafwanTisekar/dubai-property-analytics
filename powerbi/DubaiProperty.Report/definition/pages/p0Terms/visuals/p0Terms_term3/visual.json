@@ -6,7 +6,7 @@
     "y": 84,
     "z": 23000,
     "width": 346,
-    "height": 124,
+    "height": 112,
     "tabOrder": 23000
   },
   "visual": {
@@ -31,7 +31,7 @@
               {
                 "textRuns": [
                   {
-                    "value": "A bank loan to buy a home. The home is the bank's security: if the loan is not repaid, the bank can sell it.",
+                    "value": "A bank loan to buy a home. If it isn't repaid, the bank can sell the home.",
                     "textStyle": {
                       "fontSize": "9pt",
                       "color": "#1b2a4a"
@@ -42,7 +42,7 @@
               {
                 "textRuns": [
                   {
-                    "value": "Example: a buyer pays AED 300,000 and borrows AED 1,200,000 for a AED 1,500,000 home.",
+                    "value": "Example: pay AED 300,000, borrow AED 1,200,000.",
                     "textStyle": {
                       "fontSize": "9pt",
                       "color": "#5f6673",
@@ -89,7 +89,7 @@
             "altText": {
               "expr": {
                 "Literal": {
-                  "Value": "'Term: Mortgage. A bank loan to buy a home. The home is the bank''s security: if the loan is not repaid, the bank can sell it. Example: a buyer pays AED 300,000 and borrows AED 1,200,000 for a AED 1,500,000 home.'"
+                  "Value": "'Term: Mortgage. A bank loan to buy a home. If it isn''t repaid, the bank can sell the home. Example: pay AED 300,000, borrow AED 1,200,000.'"
                 }
               }
             }

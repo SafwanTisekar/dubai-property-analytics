@@ -2,12 +2,12 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
   "name": "p6_Shock",
   "position": {
-    "x": 324,
-    "y": 116,
-    "z": 9000,
-    "width": 140,
+    "x": 1068,
+    "y": 60,
+    "z": 17000,
+    "width": 85,
     "height": 56,
-    "tabOrder": 9000
+    "tabOrder": 17000
   },
   "visual": {
     "visualType": "slicer",
@@ -81,7 +81,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'Price shock %'"
+                  "Value": "'Shock %'"
                 }
               }
             },
@@ -189,7 +189,7 @@
             "altText": {
               "expr": {
                 "Literal": {
-                  "Value": "'Slicer: Price shock %'"
+                  "Value": "'Slicer: Shock %'"
                 }
               }
             }

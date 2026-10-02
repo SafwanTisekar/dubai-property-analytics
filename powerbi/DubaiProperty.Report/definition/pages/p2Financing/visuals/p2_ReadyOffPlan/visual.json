@@ -2,12 +2,12 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
   "name": "p2_ReadyOffPlan",
   "position": {
-    "x": 878,
-    "y": 52,
-    "z": 7000,
-    "width": 180,
-    "height": 58,
-    "tabOrder": 7000
+    "x": 1058,
+    "y": 60,
+    "z": 14000,
+    "width": 196,
+    "height": 56,
+    "tabOrder": 14000
   },
   "visual": {
     "visualType": "slicer",

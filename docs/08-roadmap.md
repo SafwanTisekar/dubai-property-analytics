@@ -253,8 +253,10 @@ Then, in Power BI Desktop (Parallels), connect to PostgreSQL as pbi_reader (impo
 
 **Phase 5b: redesign (owner request 2026-10-02)**
 - [x] Gate 1 built: navy / magenta theme (validated against the theme schema; WCAG AA text), figures regenerated in the same palette, side bar with page navigator, header bar (Data as of, Reset all filters = Clear all slicers, ⓘ to the KPI guide), white-card sections, Introduction and Key terms & methods (numbers from measures), page 1 with KPI split strips and data-driven insights
-- [ ] **Gate 1 (owner): check in Desktop**
-- [ ] Gate 2: pages 2–6 in the new layout, KPI guide generated from the measure descriptions (+ test)
+- [x] Gate 1 checkpoint `01be58b` (owner: panel, titles, headings, padding and side bar confirmed)
+- [x] Gate 1 round 2: dynamic text in wrapping one-column tables (cards cut it to one line), headings inside the insight and data cards, strips ≤ 26 characters at 7.5 pt, "Mortgage share (ready)", symmetric frame, panel `#e8ebf0`
+- [x] Gate 2 built: pages 2–6 in the new frame (KPI tiles with strips, section headings, 180 px chart cards, top-N sized to fit), KPI guide page generated from structured measure descriptions (25 KPI descriptions rewritten in plain English; `'KPI Guide'` table; tests), card checklist (§7) aligned
+- [x] **Gate 2 (owner): checked in Desktop 2026-10-02**; final fixes: KPI guide shows all 27 KPIs with a page column and a no-default page filter, page 3 matrix fits (short zone labels, 400 px), Key terms text fits without scrolling, page 5 segment labels outside the bars, **Reset all filters = per-page bookmarks** restoring the defaults (owner to confirm they load in Desktop; fallback: recreate by hand, BUILD.md)
 
 **Phase 5 checklist (owner, Power BI Desktop)**
 - [x] Six pages built (PBIR, generated and validated offline) and reviewed in Desktop over three gates (2026-10-02); `powerbi/VISUALS.md` lists every visual

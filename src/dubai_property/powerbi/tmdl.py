@@ -294,10 +294,140 @@ def export_measures(model: Model) -> str:
     return "\n".join(out)
 
 
+# --- KPI guide (a calculated table generated from the measure descriptions) -----------------
+
+KPI_GUIDE_TABLE = "KPI Guide"
+KPI_GUIDE_TMDL = DEFINITION / "tables" / f"{KPI_GUIDE_TABLE}.tmdl"
+_PARTS = ("Calculation:", "Source:", "Caveat:")
+
+
+@dataclass
+class KpiEntry:
+    """One KPI tile of the report, explained from its measure's description."""
+
+    page: str
+    page_order: int
+    kpi: str
+    kpi_order: int
+    measure: str
+    meaning: str
+    calculation: str
+    source: str
+    caveat: str
+
+
+def split_description(text: str) -> dict[str, str]:
+    """``Meaning. Calculation: … Source: … Caveat: …`` -> its parts ('' when absent)."""
+    out = {"meaning": "", "calculation": "", "source": "", "caveat": ""}
+    pattern = r"\s*(" + "|".join(re.escape(p) for p in _PARTS) + r")\s*"
+    pieces = re.split(pattern, text.strip())
+    out["meaning"] = pieces[0].strip()
+    for key, value in zip(pieces[1::2], pieces[2::2], strict=True):
+        out[key.rstrip(":").lower()] = value.strip()
+    return out
+
+
+def kpi_entries(model: Model | None = None) -> list[KpiEntry]:
+    """Every KPI tile on the report pages, in page and tile order (PBIR ``*_t<n>_kpi`` cards)."""
+    import json
+
+    from dubai_property.powerbi import pbir
+
+    model = model or load()
+    descriptions = {m.name: m.description for _, m in model.measures()}
+    pages_meta = json.loads(
+        (pbir.REPORT_DEFINITION / "pages" / "pages.json").read_text(encoding="utf-8")
+    )
+    out: list[KpiEntry] = []
+    order = 0
+    for page_name in pages_meta["pageOrder"]:
+        page_dir = pbir.REPORT_DEFINITION / "pages" / page_name
+        page = json.loads((page_dir / "page.json").read_text(encoding="utf-8"))
+        tiles = []
+        for path in sorted((page_dir / "visuals").glob("*/visual.json")):
+            m = re.search(r"_t(\d+)_kpi$", path.parent.name)
+            if not m:
+                continue
+            v = json.loads(path.read_text(encoding="utf-8"))
+            proj = v["visual"]["query"]["queryState"]["Data"]["projections"][0]
+            tiles.append(
+                (int(m.group(1)), proj["field"]["Measure"]["Property"], proj.get("displayName"))
+            )
+        if not tiles:
+            continue
+        order += 1
+        for n, measure, label in sorted(tiles):
+            parts = split_description(descriptions.get(measure, ""))
+            out.append(KpiEntry(page["displayName"], order, label or measure, n, measure, **parts))
+    return out
+
+
+def _dax_string(text: str) -> str:
+    return '"' + text.replace('"', '""') + '"'
+
+
+def kpi_guide_tmdl(entries: list[KpiEntry]) -> str:
+    """The 'KPI Guide' calculated table (DATATABLE), in TMDL with CRLF line endings."""
+    columns = [
+        ("Page", "STRING", False, "Page Order"),
+        ("Page Order", "INTEGER", True, None),
+        # KPI names repeat across pages (e.g. "Prices YoY"), so KPI can't sort by a per-row
+        # column (Power BI rejects it); the visual sorts by the global order "#" instead.
+        ("KPI", "STRING", False, None),
+        ("KPI Sort", "INTEGER", False, None),
+        ("Meaning", "STRING", False, None),
+        ("How it is calculated", "STRING", False, None),
+        ("Source table", "STRING", False, None),
+        ("Caveats", "STRING", False, None),
+    ]
+    lines = [
+        "/// The KPI guide page: every KPI tile of the report with its meaning, calculation,",
+        "/// source table and caveats. Generated from the _Measures descriptions by",
+        "/// `make pbi-measures` (dubai_property.powerbi.tmdl); do not edit by hand.",
+        f"table '{KPI_GUIDE_TABLE}'",
+        "",
+    ]
+    for name, _, hidden, sort in columns:
+        lines.append(f"\tcolumn '{name}'" if " " in name else f"\tcolumn {name}")
+        if hidden:
+            lines.append("\t\tisHidden")
+        lines += ["\t\tsummarizeBy: none", "\t\tisNameInferred", f"\t\tsourceColumn: [{name}]"]
+        if sort:
+            lines.append(f"\t\tsortByColumn: '{sort}'")
+        lines += ["", "\t\tannotation SummarizationSetBy = User", ""]
+    lines += [
+        f"\tpartition '{KPI_GUIDE_TABLE}' = calculated",
+        "\t\tmode: import",
+        "\t\tsource =",
+        "\t\t\t\tDATATABLE (",
+    ]
+    lines += [f"\t\t\t\t\t{_dax_string(name)}, {dtype}," for name, dtype, _, _ in columns]
+    lines.append("\t\t\t\t\t{")
+    rows = []
+    for i, e in enumerate(entries):
+        values = [
+            _dax_string(e.page),
+            str(e.page_order),
+            _dax_string(e.kpi),
+            str(i + 1),
+            _dax_string(e.meaning),
+            _dax_string(e.calculation),
+            _dax_string(e.source),
+            _dax_string(e.caveat),
+        ]
+        rows.append("\t\t\t\t\t\t{ " + ", ".join(values) + " }")
+    lines.append(",\r\n".join(rows))
+    lines += ["\t\t\t\t\t}", "\t\t\t\t)", ""]
+    return "\r\n".join(lines)
+
+
 def main() -> int:
-    """CLI: write powerbi/measures.dax from the TMDL."""
-    MEASURES_DAX.write_text(export_measures(load()), encoding="utf-8")
+    """CLI: write powerbi/measures.dax and the KPI Guide table from the TMDL and PBIR."""
+    model = load()
+    MEASURES_DAX.write_text(export_measures(model), encoding="utf-8")
     print(f"wrote {MEASURES_DAX.relative_to(config.PROJECT_ROOT)}")
+    KPI_GUIDE_TMDL.write_bytes(kpi_guide_tmdl(kpi_entries(model)).encode())
+    print(f"wrote {KPI_GUIDE_TMDL.relative_to(config.PROJECT_ROOT)}")
     return 0
 
 

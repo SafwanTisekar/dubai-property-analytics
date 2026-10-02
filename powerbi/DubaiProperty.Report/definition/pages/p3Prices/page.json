@@ -8,11 +8,6 @@
   "visualInteractions": [
     {
       "source": "p3_Year",
-      "target": "p3_maxdd",
-      "type": "NoFilter"
-    },
-    {
-      "source": "p3_Year",
       "target": "p3_vs_dld",
       "type": "NoFilter"
     },

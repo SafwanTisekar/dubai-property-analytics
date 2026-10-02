@@ -2,12 +2,12 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
   "name": "p2_share",
   "position": {
-    "x": 428,
-    "y": 224,
-    "z": 13000,
-    "width": 404,
-    "height": 220,
-    "tabOrder": 13000
+    "x": 554,
+    "y": 282,
+    "z": 42000,
+    "width": 346,
+    "height": 180,
+    "tabOrder": 42000
   },
   "visual": {
     "visualType": "lineChart",
@@ -51,6 +51,28 @@
           ]
         }
       }
+    },
+    "objects": {
+      "dataPoint": [
+        {
+          "properties": {
+            "fill": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#1b2a4a'"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "selector": {
+            "metadata": "_Measures.Purchase Mortgage Share"
+          }
+        }
+      ]
     },
     "visualContainerObjects": {
       "title": [
@@ -122,7 +144,7 @@
   "filterConfig": {
     "filters": [
       {
-        "name": "p2Fromb",
+        "name": "p2bFrom",
         "field": {
           "Column": {
             "Expression": {
@@ -170,7 +192,7 @@
         }
       },
       {
-        "name": "p2Snapb",
+        "name": "p2bSnap",
         "field": {
           "Column": {
             "Expression": {

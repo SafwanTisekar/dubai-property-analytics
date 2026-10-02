@@ -2,12 +2,12 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
   "name": "p6_LTV",
   "position": {
-    "x": 472,
-    "y": 116,
-    "z": 9000,
-    "width": 300,
+    "x": 1163,
+    "y": 60,
+    "z": 18000,
+    "width": 85,
     "height": 56,
-    "tabOrder": 9000
+    "tabOrder": 18000
   },
   "visual": {
     "visualType": "slicer",
@@ -23,11 +23,11 @@
                       "Entity": "LTV %"
                     }
                   },
-                  "Property": "LTV Label"
+                  "Property": "LTV Short"
                 }
               },
-              "queryRef": "LTV %.LTV Label",
-              "nativeQueryRef": "LTV Label",
+              "queryRef": "LTV %.LTV Short",
+              "nativeQueryRef": "LTV Short",
               "active": true
             }
           ]
@@ -81,7 +81,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'Loan-to-value'"
+                  "Value": "'LTV'"
                 }
               }
             },
@@ -133,7 +133,7 @@
                                   "Source": "l"
                                 }
                               },
-                              "Property": "LTV Label"
+                              "Property": "LTV Short"
                             }
                           }
                         ],
@@ -189,7 +189,7 @@
             "altText": {
               "expr": {
                 "Literal": {
-                  "Value": "'Slicer: Loan-to-value'"
+                  "Value": "'Slicer: LTV'"
                 }
               }
             }

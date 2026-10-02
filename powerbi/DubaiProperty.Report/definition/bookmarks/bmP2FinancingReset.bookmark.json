@@ -1,0 +1,134 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/bookmark/2.1.0/schema.json",
+  "displayName": "Reset 2 Financing",
+  "name": "bmP2FinancingReset",
+  "options": {
+    "targetVisualNames": [
+      "p2_Area",
+      "p2_Bedrooms",
+      "p2_PropertyType",
+      "p2_ReadyOffPlan",
+      "p2_Year"
+    ],
+    "applyOnlyToTargetVisuals": true,
+    "suppressDisplay": true
+  },
+  "explorationState": {
+    "version": "1.3",
+    "activeSection": "p2Financing",
+    "sections": {
+      "p2Financing": {
+        "visualContainers": {
+          "p2_Year": {
+            "singleVisual": {
+              "visualType": "slicer",
+              "objects": {
+                "merge": {
+                  "general": [
+                    {
+                      "properties": {
+                        "filter": {
+                          "filter": {
+                            "Version": 2,
+                            "From": [
+                              {
+                                "Name": "d",
+                                "Entity": "Date",
+                                "Type": 0
+                              }
+                            ],
+                            "Where": [
+                              {
+                                "Condition": {
+                                  "In": {
+                                    "Expressions": [
+                                      {
+                                        "Column": {
+                                          "Expression": {
+                                            "SourceRef": {
+                                              "Source": "d"
+                                            }
+                                          },
+                                          "Property": "Year"
+                                        }
+                                      }
+                                    ],
+                                    "Values": [
+                                      [
+                                        {
+                                          "Literal": {
+                                            "Value": "2025L"
+                                          }
+                                        }
+                                      ]
+                                    ]
+                                  }
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "p2_Area": {
+            "singleVisual": {
+              "visualType": "slicer",
+              "objects": {
+                "remove": [
+                  {
+                    "object": "general",
+                    "property": "filter"
+                  }
+                ]
+              }
+            }
+          },
+          "p2_PropertyType": {
+            "singleVisual": {
+              "visualType": "slicer",
+              "objects": {
+                "remove": [
+                  {
+                    "object": "general",
+                    "property": "filter"
+                  }
+                ]
+              }
+            }
+          },
+          "p2_Bedrooms": {
+            "singleVisual": {
+              "visualType": "slicer",
+              "objects": {
+                "remove": [
+                  {
+                    "object": "general",
+                    "property": "filter"
+                  }
+                ]
+              }
+            }
+          },
+          "p2_ReadyOffPlan": {
+            "singleVisual": {
+              "visualType": "slicer",
+              "objects": {
+                "remove": [
+                  {
+                    "object": "general",
+                    "property": "filter"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -6,7 +6,7 @@
     "y": 84,
     "z": 22000,
     "width": 346,
-    "height": 124,
+    "height": 112,
     "tabOrder": 22000
   },
   "visual": {
@@ -31,7 +31,7 @@
               {
                 "textRuns": [
                   {
-                    "value": "The price divided by the floor area. It lets you compare homes of different sizes.",
+                    "value": "The price divided by the floor area, so homes of different sizes can be compared.",
                     "textStyle": {
                       "fontSize": "9pt",
                       "color": "#1b2a4a"
@@ -42,7 +42,7 @@
               {
                 "textRuns": [
                   {
-                    "value": "Example: a 70 sq m flat sold for AED 1,400,000 costs AED 20,000 per sq m.",
+                    "value": "Example: AED 1,400,000 for 70 sq m is AED 20,000 per sq m.",
                     "textStyle": {
                       "fontSize": "9pt",
                       "color": "#5f6673",
@@ -89,7 +89,7 @@
             "altText": {
               "expr": {
                 "Literal": {
-                  "Value": "'Term: AED per sq m. The price divided by the floor area. It lets you compare homes of different sizes. Example: a 70 sq m flat sold for AED 1,400,000 costs AED 20,000 per sq m.'"
+                  "Value": "'Term: AED per sq m. The price divided by the floor area, so homes of different sizes can be compared. Example: AED 1,400,000 for 70 sq m is AED 20,000 per sq m.'"
                 }
               }
             }

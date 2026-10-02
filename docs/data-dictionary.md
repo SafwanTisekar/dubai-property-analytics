@@ -1,6 +1,6 @@
 # Data dictionary
 
-Generated 2026-10-02 12:01 UTC by `quality/data_dictionary.py` from the dbt manifest (descriptions, tests) and the database catalogue (columns, types). Regenerate with `make dictionary` (after `make dbt`). Rules C1-C22 are in docs/04 §2; the star schema in docs/04 §3. Bronze is raw text (docs/04 §1) and not listed.
+Generated 2026-10-02 16:30 UTC by `quality/data_dictionary.py` from the dbt manifest (descriptions, tests) and the database catalogue (columns, types). Regenerate with `make dictionary` (after `make dbt`). Rules C1-C22 are in docs/04 §2; the star schema in docs/04 §3. Bronze is raw text (docs/04 §1) and not listed.
 
 ## Silver: seeds, staging views and intermediate tables (typed, cleaned, flagged)
 
@@ -17,6 +17,7 @@ Generated 2026-10-02 12:01 UTC by `quality/data_dictionary.py` from the dbt mani
 | [`silver.seed_property_usage_map`](#silverseed_property_usage_map) | seed | Source usage label -> conformed usage group, per source (DLD and Ejari use different labels, e.g. Hospitality vs Tourist origin). usage_group_id is the hundreds digit of property_type_key; 9 = Unknown (blank usage in the source, 15,050 rent lines). Mixed-use, education, health and agricultural labels share "Mixed & other" so no group is too thin to publish (min-n rule). |
 | [`silver.seed_rent_subtype_map`](#silverseed_rent_subtype_map) | seed | C22: Ejari residential sub-type label -> bedrooms (Studio = 0). Other sub-types have no bedrooms. |
 | [`silver.seed_rooms_map`](#silverseed_rooms_map) | seed | C7: DLD `rooms_en` label -> bedrooms (Studio = 0) and unit-type flags. |
+| [`silver.seed_zone_label`](#silverseed_zone_label) | seed | Short zone label (16 characters or fewer) for narrow report columns such as the page 3 zone x bedrooms matrix (rpt.dim_area "Zone Short"). One row per zone in seed_area plus Unknown. |
 | [`silver.int_data_snapshot`](#silverint_data_snapshot) | table | One row: data_snapshot_date = the latest valid transaction date. Ends the reporting scope, is the report's "Data As Of" date and anchors "last 12 months". Rent contracts starting later are flagged is_start_after_snapshot (C18). |
 | [`silver.int_market_sales`](#silverint_market_sales) | table | Ownership transfers: every Sales- and Gifts-group line with the price-quality flags (C3-C6, C16-C19). Nothing is removed. is_market_sale picks arm's-length sales; is_clean_market_sale also drops every flagged row and is the population for prices, indices, yields and the AVM. Gifts, development transfers and the Sales leg of lease-to-own deals stay for volume counts only. |
 | [`silver.int_mortgages`](#silverint_mortgages) | table | Financing: every Mortgages-group line (C10, C16-C18), analysed separately from prices. mortgage_amount_aed is set only where actual_worth is a verified loan amount (Mortgage Registration, Delayed Mortgage); every other procedure counts as volume only. |
@@ -175,6 +176,16 @@ C7: DLD `rooms_en` label -> bedrooms (Studio = 0) and unit-type flags.
 | `room_class` | text |  |  |
 | `is_penthouse` | boolean |  |  |
 | `is_commercial_unit` | boolean |  |  |
+
+<a id="silverseed_zone_label"></a>
+### `silver.seed_zone_label`
+
+Short zone label (16 characters or fewer) for narrow report columns such as the page 3 zone x bedrooms matrix (rpt.dim_area "Zone Short"). One row per zone in seed_area plus Unknown.
+
+| Column | Type | Description | Tests |
+|---|---|---|---|
+| `zone` | text |  | not_null, unique |
+| `zone_short` | text |  | expect_column_value_lengths_to_be_between, not_null, unique |
 
 <a id="silverint_data_snapshot"></a>
 ### `silver.int_data_snapshot`
@@ -849,7 +860,7 @@ Every DLD transaction line (Sales, Gifts, Mortgages; 1.79M) with dimension keys 
 | [`rpt.area_month`](#rptarea_month) | view | rpt.area_month. Monthly sales and financing aggregate. |
 | [`rpt.avm_performance`](#rptavm_performance) | view | rpt.avm_performance. AVM accuracy (MdAPE, hit rates, MAPE, R², coverage) per model, split, breakdown and segment; segments with fewer than min_n valued sales left out. |
 | [`rpt.avm_score`](#rptavm_score) | view | rpt.avm_score. AVM value, error and gap per clean residential market sale valued out of sample (validation 2024, test 2025+); the in-sample training rows stay in ml. The review flag marks \|gap\| > 25% as a statistical anomaly for collateral review, not an accusation. Transaction ID only on flagged rows. |
-| [`rpt.dim_area`](#rptdim_area) | view | rpt.dim_area. Areas with zone and OpenStreetMap centroid (NULL where not located; reports/area_centroids.md). |
+| [`rpt.dim_area`](#rptdim_area) | view | rpt.dim_area. Areas with zone, a short zone label for narrow columns, and the OpenStreetMap centroid (NULL where not located; reports/area_centroids.md). |
 | [`rpt.dim_bedrooms`](#rptdim_bedrooms) | view | rpt.dim_bedrooms. Shared Bedrooms slicer: key -1 (unknown) to 20, labels Unknown / Studio / 1-6 BR / 7+ BR, with a sort order. |
 | [`rpt.dim_date`](#rptdim_date) | view | rpt.dim_date. Calendar; mark as the date table on "Date". |
 | [`rpt.dim_procedure`](#rptdim_procedure) | view | rpt.dim_procedure. DLD procedures and categories. |
@@ -956,13 +967,14 @@ rpt.avm_score. AVM value, error and gap per clean residential market sale valued
 
 dbt model `rpt_dim_area`.
 
-rpt.dim_area. Areas with zone and OpenStreetMap centroid (NULL where not located; reports/area_centroids.md).
+rpt.dim_area. Areas with zone, a short zone label for narrow columns, and the OpenStreetMap centroid (NULL where not located; reports/area_centroids.md).
 
 | Column | Type | Description | Tests |
 |---|---|---|---|
 | `Area Key` | integer |  |  |
 | `Area` | text |  |  |
 | `Zone` | text |  |  |
+| `Zone Short` | text |  |  |
 | `Latitude` | numeric |  |  |
 | `Longitude` | numeric |  |  |
 

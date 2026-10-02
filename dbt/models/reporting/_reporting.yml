@@ -10,8 +10,11 @@ models:
     description: rpt.dim_date. Calendar; mark as the date table on "Date".
   - name: rpt_dim_area
     description: >
-      rpt.dim_area. Areas with zone and OpenStreetMap centroid (NULL where not located;
-      reports/area_centroids.md).
+      rpt.dim_area. Areas with zone, a short zone label for narrow columns, and the
+      OpenStreetMap centroid (NULL where not located; reports/area_centroids.md).
+    columns:
+      - name: '"Zone Short"'
+        tests: [not_null]
   - name: rpt_dim_bedrooms
     description: >
       rpt.dim_bedrooms. Shared Bedrooms slicer: key -1 (unknown) to 20, labels Unknown /

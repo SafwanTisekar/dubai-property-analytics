@@ -2,12 +2,12 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
   "name": "p6_outlook",
   "position": {
-    "x": 832,
-    "y": 472,
-    "z": 15000,
-    "width": 432,
-    "height": 208,
-    "tabOrder": 15000
+    "x": 910,
+    "y": 494,
+    "z": 46000,
+    "width": 348,
+    "height": 182,
+    "tabOrder": 46000
   },
   "visual": {
     "visualType": "lineChart",
@@ -106,7 +106,7 @@
                 "color": {
                   "expr": {
                     "Literal": {
-                      "Value": "'#2a78d6'"
+                      "Value": "'#1b2a4a'"
                     }
                   }
                 }
@@ -124,7 +124,7 @@
                 "color": {
                   "expr": {
                     "Literal": {
-                      "Value": "'#eb6834'"
+                      "Value": "'#d6247f'"
                     }
                   }
                 }
@@ -142,7 +142,7 @@
                 "color": {
                   "expr": {
                     "Literal": {
-                      "Value": "'#8a8984'"
+                      "Value": "'#6b7280'"
                     }
                   }
                 }
@@ -160,7 +160,7 @@
                 "color": {
                   "expr": {
                     "Literal": {
-                      "Value": "'#8a8984'"
+                      "Value": "'#6b7280'"
                     }
                   }
                 }
@@ -229,13 +229,8 @@
             },
             "text": {
               "expr": {
-                "Measure": {
-                  "Expression": {
-                    "SourceRef": {
-                      "Entity": "_Measures"
-                    }
-                  },
-                  "Property": "Title Outlook"
+                "Literal": {
+                  "Value": "'Price index outlook, 12 months'"
                 }
               }
             }
@@ -255,7 +250,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'Dashed = 80% interval; a baseline, not a call'"
+                  "Value": "'Rates flat; dashed = 80% range'"
                 }
               }
             },
@@ -279,7 +274,7 @@
             "altText": {
               "expr": {
                 "Literal": {
-                  "Value": "'Price index history since 2021 and the 12-month forecast with its 80% interval for the selected rate scenario.'"
+                  "Value": "'Dubai price index since 2021 and the 12-month forecast with its 80% interval, rates flat.'"
                 }
               }
             }

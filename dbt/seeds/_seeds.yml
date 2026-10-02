@@ -93,6 +93,22 @@ seeds:
       - name: ejari_property_sub_type_en
         tests: [unique, not_null]
 
+  - name: seed_zone_label
+    description: >
+      Short zone label (16 characters or fewer) for narrow report columns such as the page 3
+      zone x bedrooms matrix (rpt.dim_area "Zone Short"). One row per zone in seed_area plus
+      Unknown.
+    columns:
+      - name: zone
+        tests: [unique, not_null]
+      - name: zone_short
+        tests:
+          - unique
+          - not_null
+          - dbt_expectations.expect_column_value_lengths_to_be_between:
+              arguments:
+                max_value: 16
+
   - name: seed_avm_feature_label
     description: >
       Business-readable name for every AVM feature (rpt.feature_importance "Feature Label",

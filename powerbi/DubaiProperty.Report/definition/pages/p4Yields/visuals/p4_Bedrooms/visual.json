@@ -2,12 +2,12 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
   "name": "p4_Bedrooms",
   "position": {
-    "x": 710,
-    "y": 52,
-    "z": 6000,
-    "width": 160,
-    "height": 58,
-    "tabOrder": 6000
+    "x": 878,
+    "y": 60,
+    "z": 13000,
+    "width": 170,
+    "height": 56,
+    "tabOrder": 13000
   },
   "visual": {
     "visualType": "slicer",

@@ -216,6 +216,7 @@ def visuals() -> list[tuple[str, dict]]:
 
 def test_report_files_validate_against_the_official_schemas():
     files = [
+        *sorted((pbir.REPORT_DEFINITION / "bookmarks").glob("*.json")),
         pbir.REPORT_DEFINITION / "report.json",
         pbir.REPORT_DEFINITION / "pages" / "pages.json",
         *pbir.page_files(),
@@ -263,7 +264,7 @@ def test_visuals_fit_the_canvas_have_alt_text_and_respect_the_cap():
         ]
         general = v["visual"].get("visualContainerObjects", {}).get("general", [{}])
         assert pbir.literal_value(general[0].get("properties", {}).get("altText")), v["name"]
-        if v["visual"]["visualType"] in CHART_TYPES:
+        if v["visual"]["visualType"] in CHART_TYPES and not v["name"].endswith("_text"):
             per_page[page] = per_page.get(page, 0) + 1
         folder = next(p for p in pbir.visual_files() if p.parent.name == v["name"])
         assert folder.parent.name == v["name"]
@@ -372,7 +373,8 @@ def _top_n(v: dict) -> int | None:
 
 def test_charts_meet_the_minimum_render_size():
     for page, v in visuals():
-        if v["visual"]["visualType"] in CHART_TYPES:
+        # "_text" tables are dynamic-text cards (one wrapped sentence), sized by their lines.
+        if v["visual"]["visualType"] in CHART_TYPES and not v["name"].endswith("_text"):
             pos = v["position"]
             assert pos["width"] >= MIN_CHART[0] and pos["height"] >= MIN_CHART[1], (page, v["name"])
 
@@ -430,3 +432,100 @@ def test_visual_inventory_is_current():
     assert pbir.VISUALS_MD.read_text(encoding="utf-8") == pbir.inventory_markdown(), (
         "powerbi/VISUALS.md is stale: run `make pbi-inventory`"
     )
+
+
+def test_dynamic_text_tables_wrap_at_a_fixed_width():
+    """Gate 1: card visuals cut dynamic text to one line; "_text" tables wrap it instead."""
+    found = 0
+    for _page, v in visuals():
+        if not v["name"].endswith("_text"):
+            continue
+        found += 1
+        objs = v["visual"]["objects"]
+        assert pbir.literal_value(objs["values"][0]["properties"]["wordWrap"]) is True, v["name"]
+        width = pbir.literal_value(objs["columnWidth"][0]["properties"]["value"])
+        assert 0 < width <= v["position"]["width"] - 24, (v["name"], width)
+        assert len(v["visual"]["query"]["queryState"]["Values"]["projections"]) == 1, v["name"]
+    assert found
+
+
+def test_every_kpi_tile_measure_is_explained():
+    """The KPI guide comes from descriptions: each KPI tile needs meaning, calculation, source."""
+    entries = tmdl.kpi_entries()
+    assert {e.page for e in entries} >= {"1 Executive", "6 Risk"}
+    for e in entries:
+        assert e.meaning and e.calculation and e.source, (e.page, e.kpi, e.measure)
+
+
+def test_kpi_guide_table_is_current():
+    expected = tmdl.kpi_guide_tmdl(tmdl.kpi_entries())
+    assert tmdl.KPI_GUIDE_TMDL.read_bytes().decode() == expected, (
+        "the KPI Guide table is stale: run `make pbi-measures`"
+    )
+
+
+def test_split_description():
+    parts = tmdl.split_description(
+        "It is X. Calculation: a / b. Source: Area Month. Caveat: a lower bound: y."
+    )
+    assert parts == {"meaning": "It is X.", "calculation": "a / b.", "source": "Area Month.",
+                     "caveat": "a lower bound: y."}  # fmt: skip
+
+
+# --- Reset bookmarks ---------------------------------------------------------------------
+
+BOOKMARKS_DIR = pbir.REPORT_DEFINITION / "bookmarks"
+
+
+def test_bookmarks_validate_and_are_listed():
+    files = sorted(BOOKMARKS_DIR.glob("*.bookmark.json"))
+    assert files
+    for path in [*files, BOOKMARKS_DIR / "bookmarks.json"]:
+        assert pbir.schema_errors(path) == [], path.name
+    listed = {
+        i["name"]
+        for i in json.loads((BOOKMARKS_DIR / "bookmarks.json").read_text("utf-8"))["items"]
+    }
+    assert listed == {p.name.removesuffix(".bookmark.json") for p in files}
+
+
+def test_reset_buttons_restore_their_page_slicers():
+    """Each Reset button opens its own page's bookmark, which sets every slicer on the page:
+    defaults where a slicer has one (Year 2025, shock -20, LTV 80%, ...), cleared otherwise."""
+    by_page: dict[str, list[dict]] = {}
+    for page, v in visuals():
+        by_page.setdefault(page, []).append(v)
+    for page, vs in by_page.items():
+        resets = [v for v in vs if v["name"].endswith("_hdr_reset")]
+        slicers = {v["name"]: v for v in vs if v["visual"]["visualType"] == "slicer"}
+        if not slicers:
+            assert not resets, (page, "a reset button without filters to reset")
+            continue
+        assert len(resets) == 1, page
+        link = resets[0]["visual"]["visualContainerObjects"]["visualLink"][0]["properties"]
+        assert pbir.literal_value(link["type"]) == "Bookmark", page
+        bm = json.loads(
+            (BOOKMARKS_DIR / f"{pbir.literal_value(link['bookmark'])}.bookmark.json").read_text(
+                "utf-8"
+            )
+        )
+        state = bm["explorationState"]
+        assert state["activeSection"] == page and set(state["sections"]) == {page}
+        assert (
+            bm["options"]["suppressDisplay"] is True
+            and bm["options"]["applyOnlyToTargetVisuals"] is True
+        )
+        containers = state["sections"][page]["visualContainers"]
+        assert set(containers) == set(slicers) == set(bm["options"]["targetVisualNames"]), page
+        for name, st in containers.items():
+            objs = st["singleVisual"]["objects"]
+            default = slicers[name]["visual"].get("objects", {}).get("general")
+            if default:
+                saved = objs["merge"]["general"][0]["properties"]["filter"]
+                assert saved == default[0]["properties"]["filter"], (page, name)
+                assert pbir.filter_errors(saved["filter"]) == [], (page, name)
+            else:
+                assert objs == {"remove": [{"object": "general", "property": "filter"}]}, (
+                    page,
+                    name,
+                )

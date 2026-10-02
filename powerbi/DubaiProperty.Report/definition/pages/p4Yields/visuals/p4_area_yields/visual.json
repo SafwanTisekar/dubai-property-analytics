@@ -2,12 +2,12 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
   "name": "p4_area_yields",
   "position": {
-    "x": 524,
-    "y": 208,
-    "z": 12000,
-    "width": 360,
-    "height": 236,
-    "tabOrder": 12000
+    "x": 628,
+    "y": 282,
+    "z": 43000,
+    "width": 310,
+    "height": 180,
+    "tabOrder": 43000
   },
   "visual": {
     "visualType": "clusteredBarChart",
@@ -146,7 +146,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'Highest area yields, top 6'"
+                  "Value": "'Top 4 area yields'"
                 }
               }
             }
@@ -172,7 +172,7 @@
             "altText": {
               "expr": {
                 "Literal": {
-                  "Value": "'Bar chart of the six areas with the highest gross yield, where both rents and sales reach 20 per cell.'"
+                  "Value": "'Bar chart of the four areas with the highest gross yield, where both rents and sales reach 20 per cell.'"
                 }
               }
             }
@@ -245,7 +245,7 @@
                         }
                       }
                     ],
-                    "Top": 6
+                    "Top": 4
                   }
                 }
               },

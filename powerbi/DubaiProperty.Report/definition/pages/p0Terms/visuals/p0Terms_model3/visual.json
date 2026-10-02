@@ -3,10 +3,10 @@
   "name": "p0Terms_model3",
   "position": {
     "x": 732,
-    "y": 372,
+    "y": 350,
     "z": 35000,
     "width": 257,
-    "height": 120,
+    "height": 106,
     "tabOrder": 35000
   },
   "visual": {
@@ -31,7 +31,7 @@
               {
                 "textRuns": [
                   {
-                    "value": "It applies a price fall of X% to every recent purchase and counts who would owe more than the home is worth. It is illustrative, not a regulatory test.",
+                    "value": "Applies a price fall to every recent purchase and counts who would owe more than the home is worth.",
                     "textStyle": {
                       "fontSize": "9pt",
                       "color": "#1b2a4a"
@@ -77,7 +77,7 @@
             "altText": {
               "expr": {
                 "Literal": {
-                  "Value": "'Model: Stress test: a what-if calculator. It applies a price fall of X% to every recent purchase and counts who would owe more than the home is worth. It is illustrative, not a regulatory test.'"
+                  "Value": "'Model: Stress test: a what-if calculator. Applies a price fall to every recent purchase and counts who would owe more than the home is worth.'"
                 }
               }
             }

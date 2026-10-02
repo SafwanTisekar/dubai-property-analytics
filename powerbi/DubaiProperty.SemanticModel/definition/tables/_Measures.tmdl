@@ -28,13 +28,13 @@ table _Measures
 		displayFolder: Report
 		lineageTag: fe83e813-1f4e-5190-b4d6-f07d974f991c
 
-	/// Arm's-length market sales (is_market_sale; every market sale, quality flags only exclude rows from price statistics). From Area Month, which reconciles to Transactions.
+	/// How many property sales happened on the open market. Calculation: count of market sales. Source: Area Month. Caveat: excludes gifts, inheritances, grants and mortgage registrations.
 	measure 'Market Sales' = SUM ( 'Area Month'[Market Sales] )
 		formatString: #,0
 		displayFolder: Market
 		lineageTag: e8664477-a996-52fb-a380-b87cf8c5ffea
 
-	/// Market sales value, AED counted once per deal (C16).
+	/// The total money spent on homes and other property bought on the open market. Calculation: sum of sale prices, each deal counted once (a deal that covers many units is not repeated). Source: Area Month. Caveat: gifts, inheritances and mortgages are not sales and are left out; amounts are not adjusted for inflation.
 	measure 'Market Sales Value' = SUM ( 'Area Month'[Market Sales Value AED] )
 		formatString: """AED ""#,0"
 		displayFolder: Market
@@ -72,7 +72,7 @@ table _Measures
 		displayFolder: Market
 		lineageTag: 5b037bb5-a349-5be9-a86e-b5e4f3098bd4
 
-	/// Median AED per sq m over clean market sales, blank under min-n. A median of lines, so it is computed on Transactions (cell medians can't be combined).
+	/// The middle price per square metre: half of sales were cheaper, half dearer. Calculation: median of AED per sq m over clean market sales; blank if fewer than 20 sales. Source: Transactions. Caveat: mixes property types; compare like with like using the price index.
 	measure 'Median Price per Sq M' =
 			VAR _n = CALCULATE ( COUNTROWS ( 'Transactions' ), KEEPFILTERS ( 'Transactions'[Is Clean Market Sale] = TRUE () ) )
 			RETURN
@@ -93,7 +93,7 @@ table _Measures
 		displayFolder: Market
 		lineageTag: cc7e2244-2f47-5467-9dd0-2f7cd436e6b0
 
-	/// Σ AED / Σ sq m over clean sales of residential apartments and villas / townhouses within the class area cap (docs/01 §4). Only meaningful within these classes.
+	/// The average price per square metre of apartments and villas, weighting big homes by their size. Calculation: total sale value divided by total floor area of clean apartment and villa sales. Source: Area Month. Caveat: only meaningful for homes; land and whole buildings are left out.
 	measure 'Area-Weighted Price per Sq M (Homes)' =
 			CALCULATE (
 				DIVIDE ( SUM ( 'Area Month'[Clean Sales Value AED] ), SUM ( 'Area Month'[Clean Sales Area Sq M] ) ),
@@ -109,19 +109,19 @@ table _Measures
 		displayFolder: Market
 		lineageTag: 3654d5b8-2385-573f-9576-859db933e280
 
-	/// Off-plan share of market sales by count.
+	/// The share of sales that were homes bought before they were built. Calculation: off-plan market sales divided by all market sales. Source: Area Month.
 	measure 'Off-Plan Share (Count)' = DIVIDE ( [Off-Plan Sales], [Market Sales] )
 		formatString: 0.0%
 		displayFolder: Market
 		lineageTag: 12c89a3f-87f3-5ed2-9492-5477be67def2
 
-	/// Off-plan share of market sales value.
+	/// The share of money spent on homes bought before they were built. Calculation: off-plan sales value divided by all market sales value. Source: Area Month.
 	measure 'Off-Plan Share (Value)' = DIVIDE ( CALCULATE ( [Market Sales Value], KEEPFILTERS ( 'Area Month'[Is Off-Plan] = TRUE () ) ), [Market Sales Value] )
 		formatString: 0.0%
 		displayFolder: Market
 		lineageTag: 52249209-66a3-529d-bf1a-17d2a7c91c66
 
-	/// Ready (not off-plan) market sales: the denominator of the purchase-mortgage share.
+	/// How many finished homes were sold on the open market. Calculation: count of market sales that are not off-plan. Source: Area Month.
 	measure 'Ready Market Sales' = CALCULATE ( [Market Sales], KEEPFILTERS ( 'Area Month'[Is Off-Plan] = FALSE () ) )
 		formatString: #,0
 		displayFolder: Financing
@@ -133,7 +133,7 @@ table _Measures
 		displayFolder: Financing
 		lineageTag: a2dca5ab-3ba6-58b4-9ba8-ef4d67fa0117
 
-	/// Headline (docs/01 §4): matched purchase mortgages / ready market sales. A lower bound.
+	/// The share of finished-home purchases paid for partly with a bank loan. Calculation: ready sales matched to a mortgage on the same unit the same day, divided by all ready sales. Source: Area Month. Caveat: a lower bound: loans registered later or not matched are missed (in 2025 between 28% matched and 48% for all ready-unit mortgages).
 	measure 'Purchase Mortgage Share' = DIVIDE ( [Purchase Mortgages], [Ready Market Sales] )
 		formatString: 0.0%
 		displayFolder: Financing
@@ -151,7 +151,7 @@ table _Measures
 		displayFolder: Financing
 		lineageTag: 167e8d16-dc7a-5e7b-a419-2549cc101a15
 
-	/// Secondary indicator: new mortgages per 100 market sales.
+	/// How many new home loans were registered for every 100 market sales. Calculation: new individual mortgages (including refinancing) times 100, divided by market sales. Source: Area Month. Caveat: a secondary indicator; refinancing and off-plan loans are included.
 	measure 'New Mortgages per 100 Sales' = DIVIDE ( [New Mortgages], [Market Sales] ) * 100
 		formatString: #,0.0
 		displayFolder: Financing
@@ -193,7 +193,7 @@ table _Measures
 		displayFolder: Rates
 		lineageTag: 913ec2e4-20af-5c80-996d-21bd84d7e639
 
-	/// EIBOR 3M where loaded, else the Fed Funds rate as its proxy (the AED is pegged to the USD).
+	/// The interest rate that drives mortgage costs. Calculation: monthly average of EIBOR 3 months when loaded, otherwise the US Fed Funds rate. Source: Rates Monthly. Caveat: EIBOR is not loaded yet, so the Fed Funds rate stands in for it (the dirham is pegged to the dollar).
 	measure 'Reference Rate' =
 			VAR _eibor = [EIBOR 3M]
 			RETURN
@@ -244,7 +244,7 @@ table _Measures
 		displayFolder: Prices
 		lineageTag: 1be9a159-6df7-5286-a269-5f1af6b5e178
 
-	/// Card: index level at the latest complete period.
+	/// The level of like-for-like prices, with January 2019 set to 100. Calculation: the hedonic price index of the chosen segment at the latest complete month. Source: Price Index. Caveat: 150 means prices are 50% above January 2019 for comparable homes.
 	measure 'Index Value (Latest Complete)' =
 			VAR _seg = [Selected Index Segment]
 			VAR _p = [Index Latest Complete Period]
@@ -254,7 +254,7 @@ table _Measures
 		displayFolder: Prices
 		lineageTag: 8b039bfb-ddb5-514d-ac48-ee51d2d59a39
 
-	/// Card and line: like-for-like price change on a year earlier at the latest complete period in the selection.
+	/// How much prices changed over a year for comparable homes. Calculation: the hedonic price index at the latest complete month against the same month a year earlier. Source: Price Index. Caveat: the newest months are revised as late sales arrive.
 	measure 'Index YoY' =
 			VAR _seg = [Selected Index Segment]
 			VAR _p = [Index Latest Complete Period]
@@ -264,7 +264,7 @@ table _Measures
 		displayFolder: Prices
 		lineageTag: 2749679f-4dd4-51e3-ada0-565f7f167525
 
-	/// Card: fall from the running peak at the latest complete period (0 = at a peak).
+	/// How far prices are below their previous high. Calculation: the index at the latest complete month divided by its running peak, minus 1. Source: Price Index. Caveat: 0% means prices are at a peak.
 	measure 'Drawdown from Peak' =
 			VAR _seg = [Selected Index Segment]
 			VAR _p = [Index Latest Complete Period]
@@ -342,7 +342,7 @@ table _Measures
 		displayFolder: Prices
 		lineageTag: 5b1cf497-53ef-5ef9-b5e7-41974f0d2a66
 
-	/// Headline gross yield: sales-weighted mean of zone x type x bedroom cells over the last four complete quarters (reports/yields.md); cells outside the 2-15% sanity band are left out (Phase 5). Follows the Zone, Property Type and Bedrooms slicers; ignores Year.
+	/// The yearly rent a home earns as a share of its price. Calculation: median new rent divided by median price for matching groups of homes, averaged by sales over the last four complete quarters. Source: Yield Quarter. Caveat: before service charges, empty months and fees; groups with fewer than 20 rents or sales, or outside 2% to 15%, are left out.
 	measure 'Gross Yield (Latest 4 Quarters)' =
 			VAR _lastQ =
 				CALCULATE (
@@ -434,13 +434,13 @@ table _Measures
 		displayFolder: Yields
 		lineageTag: f0552d4e-33a2-5aab-a21d-548be32f7391
 
-	/// New comparable rent contracts (the default market rent; renewals lag the market).
+	/// How many new rent contracts were signed. Calculation: count of new, comparable rent contracts. Source: Rent Month. Caveat: renewals are left out because they lag the market.
 	measure 'New Market Rents' = SUM ( 'Rent Month'[Market Rent Contracts] )
 		formatString: #,0
 		displayFolder: Yields
 		lineageTag: 078fc928-7e2d-5bce-a823-bb9be4aaf053
 
-	/// Σ annual rent / Σ sq m over new comparable contracts of residential apartments and villas with a plausible area (C21 caps). Rule C11 is applied upstream.
+	/// The yearly rent per square metre of new apartment and villa leases. Calculation: total annual rent divided by total floor area of new contracts with a plausible size. Source: Rent Month.
 	measure 'Area-Weighted New Rent per Sq M (Homes)' =
 			CALCULATE (
 				DIVIDE ( SUM ( 'Rent Month'[Comparable Rent with Area AED] ), SUM ( 'Rent Month'[Comparable Area Sq M] ) ),
@@ -461,7 +461,7 @@ table _Measures
 		displayFolder: Yields
 		lineageTag: 87c0c09e-c234-5aa5-bd42-eabc11fddb56
 
-	/// Champion (LightGBM) median absolute % error on the out-of-time test set (2025+), from AVM Performance (model card headline).
+	/// How far the automated valuation typically is from the real price. Calculation: median absolute error, as a share of the price, on 2025 to 2026 sales the model never saw. Source: AVM Performance. Caveat: compare with the comparable-sales baseline shown underneath.
 	measure 'AVM Test MdAPE' =
 			CALCULATE (
 				MAX ( 'AVM Performance'[MdAPE] ),
@@ -473,7 +473,7 @@ table _Measures
 		displayFolder: Valuation
 		lineageTag: 690a4ad0-1ea2-5f14-99b1-6ccfd9c10eca
 
-	/// Share of test sales valued within ±10%.
+	/// The share of homes the automated valuation got within 10% of the real price. Calculation: test sales with an error of 10% or less, divided by all test sales valued. Source: AVM Performance.
 	measure 'AVM Test Hit Rate 10%' =
 			CALCULATE (
 				MAX ( 'AVM Performance'[Hit Rate 10 Pct] ),
@@ -485,7 +485,7 @@ table _Measures
 		displayFolder: Valuation
 		lineageTag: ef426b40-ec92-5e1f-b793-2372b7b3ce26
 
-	/// Share of test sales valued within ±20%.
+	/// The share of homes the automated valuation got within 20% of the real price. Calculation: test sales with an error of 20% or less, divided by all test sales valued. Source: AVM Performance.
 	measure 'AVM Test Hit Rate 20%' =
 			CALCULATE (
 				MAX ( 'AVM Performance'[Hit Rate 20 Pct] ),
@@ -629,7 +629,7 @@ table _Measures
 		displayFolder: Risk
 		lineageTag: d732f09d-3154-5b6f-a5e0-cd7eaf489b98
 
-	/// Share of recent buyers (last 36 complete months) whose loan, held at origination, exceeds the shocked current value, for the selected segment, shock and LTV. Pre-computed per segment and blank under min-n: read, never re-averaged. Illustrative.
+	/// The share of recent buyers who would owe more than their home is worth after the chosen price fall. Calculation: purchases of the last three years whose loan exceeds the home's value after the shock, at the chosen loan-to-value. Source: Stress Grid. Caveat: illustrative, not a regulatory stress test; loans are kept at their starting size.
 	measure 'Negative Equity Share' =
 			VAR _seg = [Selected Stress Segment]
 			VAR _ro = [Selected Ready / Off-Plan]
@@ -713,7 +713,7 @@ table _Measures
 		displayFolder: Risk
 		lineageTag: 09488116-c228-5649-97e8-e535fff82696
 
-	/// Reference: the loan at the CBUAE cap in force on each sale date (expatriate, first home), at the selected shock.
+	/// The same negative-equity share if every buyer had borrowed the most the central bank allows. Calculation: as Negative Equity Share, with each loan at the CBUAE cap on its sale date (expatriate, first home). Source: Stress Grid. Caveat: illustrative; nationality and first or second home are not in the data.
 	measure 'Negative Equity Share (CBUAE Cap)' =
 			VAR _seg = [Selected Stress Segment]
 			VAR _ro = [Selected Ready / Off-Plan]
@@ -751,7 +751,7 @@ table _Measures
 		displayFolder: Risk
 		lineageTag: d993dd68-0cd0-56b2-ae27-2ffb710f8aa5
 
-	/// A repeat of the 2014-2020 fall at the selected LTV. Replay Depth picks the lower range (Dubai-wide -24% for everyone) or the upper range (each buyer's own zone series, noisier and deeper).
+	/// The share of recent buyers who would owe more than their home is worth if the 2014 to 2020 fall happened again. Calculation: each purchase marked down by the 2014 to 2020 fall (Dubai-wide by default), at the chosen loan-to-value. Source: Stress Grid. Caveat: illustrative; the own-series version (in the strip) is the upper range.
 	measure 'Replay Negative Equity Share' =
 			VAR _seg = [Selected Stress Segment]
 			VAR _ro = [Selected Ready / Off-Plan]
@@ -820,7 +820,7 @@ table _Measures
 		displayFolder: Risk\Concentration
 		lineageTag: eef65ae9-c95f-5cee-806c-0d6f176a22eb
 
-	/// PROXY for developer concentration (Q9 needs the DLD projects file): the ten largest master projects' share of off-plan market sales.
+	/// How concentrated off-plan sales are in the largest master projects. Calculation: off-plan sales of the 10 biggest master projects divided by all off-plan sales with a known master project. Source: Transactions and Project. Caveat: a proxy for developer concentration; developer names need the DLD projects file.
 	measure 'Top 10 Master Project Share (Off-Plan)' =
 			VAR _mp =
 				ADDCOLUMNS (
@@ -950,7 +950,7 @@ table _Measures
 		displayFolder: Risk\Outlook
 		lineageTag: 33e65d1d-9c41-530f-a0a3-35e1dd3aa8c0
 
-	/// Card: central path at the end of the 12-month horizon vs the last actual month.
+	/// Where like-for-like prices could be in 12 months on the central path. Calculation: SARIMAX forecast at the end of the horizon against the last actual month, rates flat. Source: Forecast. Caveat: a statistical baseline, not a call; the range in the strip matters as much.
 	measure 'Forecast 12M Change' =
 			VAR _seg = SELECTEDVALUE ( 'Forecast'[Segment], "Dubai (all residential)" )
 			VAR _target = SELECTEDVALUE ( 'Forecast'[Target], "Price index" )
@@ -1063,12 +1063,12 @@ table _Measures
 		displayFolder: Report
 		lineageTag: 053ef151-b15c-5a53-a9e1-9872d46e34b3
 
-	/// Grey strip under Sales value: the same total split into ready and off-plan sales, in AED billions. Calculation: Market Sales Value with Is Off-Plan = false / true. Source: Area Month.
+	/// Grey strip under Sales value: the same total split into ready and off-plan sales, in AED billions (the tile label says so). Calculation: Market Sales Value with Is Off-Plan = false / true. Source: Area Month.
 	measure 'Sales Value Split' =
 			VAR _ready = CALCULATE ( [Market Sales Value], KEEPFILTERS ( 'Area Month'[Is Off-Plan] = FALSE () ) )
 			VAR _off = CALCULATE ( [Market Sales Value], KEEPFILTERS ( 'Area Month'[Is Off-Plan] = TRUE () ) )
 			RETURN
-				"Ready " & FORMAT ( _ready / 1e9, "#,0" ) & "bn · Off-plan " & FORMAT ( _off / 1e9, "#,0" ) & "bn"
+				"Ready " & FORMAT ( _ready / 1e9, "#,0" ) & " · Off-plan " & FORMAT ( _off / 1e9, "#,0" )
 		displayFolder: Market
 		lineageTag: 759ac2db-26ff-5984-8612-584612ed5040
 
@@ -1100,8 +1100,8 @@ table _Measures
 		displayFolder: Market
 		lineageTag: ab320701-e163-58ed-a389-fb7db2ea9892
 
-	/// Grey strip under Mortgage share: the matched loans and the ready sales behind the share. Calculation: Purchase Mortgages and Ready Market Sales. Source: Area Month.
-	measure 'Mortgage Share Split' = FORMAT ( [Purchase Mortgages] / 1000, "#,0.0" ) & "k of " & FORMAT ( [Ready Market Sales] / 1000, "#,0.0" ) & "k ready sales"
+	/// Grey strip under Mortgage share: the matched purchase loans and the ready sales behind the share. Calculation: Purchase Mortgages and Ready Market Sales. Source: Area Month.
+	measure 'Mortgage Share Split' = FORMAT ( [Purchase Mortgages] / 1000, "#,0.0" ) & "k loans · " & FORMAT ( [Ready Market Sales] / 1000, "#,0.0" ) & "k sales"
 		displayFolder: Financing
 		lineageTag: fe715a13-3d2e-5aae-8cbe-6912e957d9e3
 
@@ -1137,7 +1137,7 @@ table _Measures
 		displayFolder: Report
 		lineageTag: 147c3338-5f67-50f3-bc17-a740bf4bbc3e
 
-	/// Number of 2025-26 test sales the AVM valued (it never saw them in training). Calculation: Sales Valued of LightGBM, Split = Test, Breakdown = Overall. Source: AVM Performance.
+	/// How many 2025 to 2026 sales the automated valuation was tested on. Calculation: count of test sales the model could value. Source: AVM Performance. Caveat: these sales were never used to train the model.
 	measure 'AVM Test Sales Valued' =
 			CALCULATE (
 				MAX ( 'AVM Performance'[Sales Valued] ),
@@ -1157,7 +1157,7 @@ table _Measures
 			RETURN
 				"Every property sale and rent contract registered with the Dubai Land Department from 2004 to "
 					& FORMAT ( _asOf, "d mmmm yyyy" ) & ": " & FORMAT ( _sales, "#,0" ) & " market sales and "
-					& FORMAT ( _rents, "#,0" ) & " new rent contracts. It is public open data (CC BY 4.0)."
+					& FORMAT ( _rents, "#,0" ) & " new rent contracts. Public open data (CC BY 4.0)."
 		displayFolder: Report\Guide
 		lineageTag: 5f15524e-a12e-588a-863c-56483ade55f7
 
@@ -1166,16 +1166,14 @@ table _Measures
 			VAR _yoy = CALCULATE ( [Index YoY], REMOVEFILTERS ( 'Date' ), 'Price Index'[Segment] = "Dubai (all residential)" )
 			VAR _period = CALCULATE ( [Index Latest Complete Period], REMOVEFILTERS ( 'Date' ), 'Price Index'[Segment] = "Dubai (all residential)" )
 			RETURN
-				"Right now: like-for-like prices in Dubai are " & FORMAT ( _yoy, "+0.0%;-0.0%" ) & " on a year earlier ("
-					& FORMAT ( _period, "mmmm yyyy" ) & ")."
+				"Like-for-like prices in Dubai: " & FORMAT ( _yoy, "+0.0%;-0.0%" ) & " on a year earlier (" & FORMAT ( _period, "mmmm yyyy" ) & ")."
 		displayFolder: Report\Guide
 		lineageTag: 858d8859-ba9d-5c93-92f2-6094865b4b7b
 
 	/// Key terms: how the AVM was tested and how accurate it was, from the model card numbers.
 	measure 'Guide AVM Line' =
-			"It learned from past Dubai sales (2011 to 2023), then valued " & FORMAT ( [AVM Test Sales Valued], "#,0" )
-				& " sales from 2025 and 2026 that it had never seen. Its typical error was " & FORMAT ( [AVM Test MdAPE], "0.0%" )
-				& ", against " & FORMAT ( [AVM Test MdAPE (Baseline)], "0.0%" ) & " for a simple comparison with recent nearby sales."
+			"Learned from 2011 to 2023 sales, then valued " & FORMAT ( [AVM Test Sales Valued], "#,0" ) & " sales from 2025 to 2026 it never saw. Typical error "
+				& FORMAT ( [AVM Test MdAPE], "0.0%" ) & ", against " & FORMAT ( [AVM Test MdAPE (Baseline)], "0.0%" ) & " for recent nearby sales."
 		displayFolder: Report\Guide
 		lineageTag: 68ff262c-3b27-5425-9cfd-e38334d7a3e2
 
@@ -1193,18 +1191,143 @@ table _Measures
 					'Stress Grid'[LTV Pct] = 80
 				)
 			RETURN
-				"Example: if prices fell 20%, about " & FORMAT ( _share, "0%" )
-					& " of recent buyers of a ready home with an 80% loan would owe more than it is worth."
+				"If prices fell 20%, about " & FORMAT ( _share, "0%" )
+					& " of recent ready buyers with an 80% loan would owe more than the home is worth."
 		displayFolder: Report\Guide
 		lineageTag: 225e1d82-7e73-5369-966e-8f7b437fcb88
 
 	/// Key terms: the 12-month outlook for Dubai prices with its 80% range (rates flat), as a live example.
 	measure 'Guide Forecast Line' =
-			"For Dubai prices over the next 12 months the central path is " & FORMAT ( [Forecast 12M Change], "+0%;-0%" )
-				& ", but the likely range (80%) runs from " & FORMAT ( [Forecast 12M Lower 80], "+0%;-0%" ) & " to "
-				& FORMAT ( [Forecast 12M Upper 80], "+0%;-0%" ) & "."
+			"Dubai prices over the next 12 months: " & FORMAT ( [Forecast 12M Change], "+0%;-0%" ) & " on the central path, 80% range "
+				& FORMAT ( [Forecast 12M Lower 80], "+0%;-0%" ) & " to " & FORMAT ( [Forecast 12M Upper 80], "+0%;-0%" ) & "."
 		displayFolder: Report\Guide
 		lineageTag: e2e37b23-4f41-54b2-9fde-6bb13c6d2e9e
+
+	/// Grey strip under Ready sales: how many had no matched mortgage at registration (thousands).
+	measure 'Ready Sales Split' = "Not bank-financed " & FORMAT ( [Ready Sales Not Bank-Financed] / 1000, "#,0.0" ) & "k"
+		displayFolder: Financing
+		lineageTag: fe0442d2-65da-5f61-8bd1-a55b587449a1
+
+	/// Grey strip under New mortgages per 100 sales: the number of new mortgages (thousands).
+	measure 'New Mortgages Split' = FORMAT ( [New Mortgages] / 1000, "#,0.0" ) & "k new mortgages"
+		displayFolder: Financing
+		lineageTag: 590f39e7-8451-5c9f-b36b-d384bc38b7de
+
+	/// Grey strip under Off-plan share (count): the share by value, lower because off-plan homes are cheaper on average.
+	measure 'Off-Plan Value Split' = "By value " & FORMAT ( [Off-Plan Share (Value)], "0%" )
+		displayFolder: Market
+		lineageTag: 811003c2-f1c9-51d6-90f4-5f41ac3eea70
+
+	/// Grey strip under Reference rate: which series is shown (EIBOR, or Fed Funds as its proxy).
+	measure 'Reference Rate Split' = IF ( ISBLANK ( CALCULATE ( [EIBOR 3M], REMOVEFILTERS ( 'Date' ) ) ), "Fed Funds (EIBOR proxy)", "EIBOR 3 months" )
+		displayFolder: Rates
+		lineageTag: 012fcb4a-ec45-5f68-a76c-b48c1f206c98
+
+	/// Grey strip under Index: the latest complete month the index value refers to.
+	measure 'Index Period Split' = "Latest complete month: " & FORMAT ( [Index Latest Complete Period], "mmm yyyy" )
+		displayFolder: Prices
+		lineageTag: 0740c1a2-7c28-5672-8335-42cbaa9af860
+
+	/// Grey strip under Below previous peak: the deepest fall of the selected index since 2011 (all years, Year slicer ignored).
+	measure 'Max Drawdown Split' = "Deepest since 2011 " & FORMAT ( CALCULATE ( [Max Drawdown], REMOVEFILTERS ( 'Date' ) ), "0.0%" )
+		displayFolder: Prices
+		lineageTag: 54ee8920-8874-553e-9e23-6469485b0c70
+
+	/// Grey strip under AED / sq m (homes): the same area-weighted price for apartments and for villas (thousands).
+	measure 'Area-Weighted Price Split' =
+			VAR _apt = CALCULATE ( [Area-Weighted Price per Sq M (Homes)], REMOVEFILTERS ( 'Property Type' ), 'Property Type'[Property Type Key] = 101 )
+			VAR _villa = CALCULATE ( [Area-Weighted Price per Sq M (Homes)], REMOVEFILTERS ( 'Property Type' ), 'Property Type'[Property Type Key] = 102 )
+			RETURN
+				"Apt " & FORMAT ( _apt / 1000, "#,0.0" ) & "k · Villa " & FORMAT ( _villa / 1000, "#,0.0" ) & "k"
+		displayFolder: Market
+		lineageTag: 0cda1a7e-e156-5e42-a8b6-7e3f1c959c71
+
+	/// Grey strip under Gross yield: the same yield for apartments and for villas / townhouses.
+	measure 'Yield Split' =
+			VAR _apt = CALCULATE ( [Gross Yield (Latest 4 Quarters)], REMOVEFILTERS ( 'Property Type' ), 'Property Type'[Property Type Key] = 101 )
+			VAR _villa = CALCULATE ( [Gross Yield (Latest 4 Quarters)], REMOVEFILTERS ( 'Property Type' ), 'Property Type'[Property Type Key] = 102 )
+			RETURN
+				"Apt " & FORMAT ( _apt, "0.0%" ) & " · Villa " & FORMAT ( _villa, "0.0%" )
+		displayFolder: Yields
+		lineageTag: 7a7fa058-03f4-523b-a4b3-40730d554b52
+
+	/// Grey strip under New rent contracts: apartments and villas / townhouses (thousands).
+	measure 'New Rents Split' =
+			VAR _apt = CALCULATE ( [New Market Rents], REMOVEFILTERS ( 'Property Type' ), 'Property Type'[Property Type Key] = 101 )
+			VAR _villa = CALCULATE ( [New Market Rents], REMOVEFILTERS ( 'Property Type' ), 'Property Type'[Property Type Key] = 102 )
+			RETURN
+				"Apt " & FORMAT ( _apt / 1000, "#,0" ) & "k · Villa " & FORMAT ( _villa / 1000, "#,0" ) & "k"
+		displayFolder: Yields
+		lineageTag: d93e363a-ca65-5676-951c-bbc19a14de98
+
+	/// Grey strip under New rent per sq m (homes): apartments and villas / townhouses (AED per sq m per year).
+	measure 'Rent per Sq M Split' =
+			VAR _apt = CALCULATE ( [Area-Weighted New Rent per Sq M (Homes)], REMOVEFILTERS ( 'Property Type' ), 'Property Type'[Property Type Key] = 101 )
+			VAR _villa = CALCULATE ( [Area-Weighted New Rent per Sq M (Homes)], REMOVEFILTERS ( 'Property Type' ), 'Property Type'[Property Type Key] = 102 )
+			RETURN
+				"Apt " & FORMAT ( _apt, "#,0" ) & " · Villa " & FORMAT ( _villa, "#,0" )
+		displayFolder: Yields
+		lineageTag: e0face3a-ed82-5f26-a06f-558b933e9f02
+
+	/// Grey strip under AVM median error: the comparable-sales baseline on the same test set.
+	measure 'AVM MdAPE Split' = "Comparables " & FORMAT ( [AVM Test MdAPE (Baseline)], "0.00%" )
+		displayFolder: Valuation
+		lineageTag: a8e8baed-5663-5ad5-8917-3cc38b98bb30
+
+	/// Grey strip under Within 10%: the comparable-sales baseline.
+	measure 'AVM Hit 10 Split' = "Comparables " & FORMAT ( [AVM Test Hit Rate 10% (Baseline)], "0.0%" )
+		displayFolder: Valuation
+		lineageTag: f6dd5b35-8275-5b86-a92b-b984a179232f
+
+	/// Grey strip under Within 20%: the comparable-sales baseline.
+	measure 'AVM Hit 20 Split' = "Comparables " & FORMAT ( [AVM Test Hit Rate 20% (Baseline)], "0.0%" )
+		displayFolder: Valuation
+		lineageTag: aa59b0eb-ca46-5bb7-853a-51e7da05afda
+
+	/// Grey strip under Test sales valued: the share flagged for review (more than 25% from the AVM; anomalies, not accusations).
+	measure 'AVM Flagged Split' = "Flagged for review " & FORMAT ( [Flagged Share], "0.0%" )
+		displayFolder: Valuation
+		lineageTag: 9df6eb76-1ce3-5638-9846-f6cc147ed337
+
+	/// Grey strip under In negative equity: the shortfall in AED billions (loans above the shocked value).
+	measure 'Negative Equity Split' = "Shortfall AED " & FORMAT ( [Negative Equity AED] / 1e9, "#,0.0" ) & "bn"
+		displayFolder: Risk
+		lineageTag: 84c08294-04da-5e54-9dec-efec7fde9bf0
+
+	/// Grey strip under At the CBUAE cap: the same share for the registered loans of matched purchases.
+	measure 'CBUAE Cap Split' = "Registered loans " & FORMAT ( [Negative Equity Share (Registered Loans)], "0.0%" )
+		displayFolder: Risk
+		lineageTag: 25b5e992-b1bb-545b-bed7-e5c1b1c880ae
+
+	/// Grey strip under 2014-20 replay: the upper range, each buyer's own zone series.
+	measure 'Replay Split' =
+			VAR _seg = [Selected Stress Segment]
+			VAR _ro = [Selected Ready / Off-Plan]
+			VAR _ltv = [Selected LTV]
+			VAR _own =
+				CALCULATE (
+					SELECTEDVALUE ( 'Stress Grid'[Negative Equity Share] ),
+					REMOVEFILTERS ( 'Stress Grid' ),
+					'Stress Grid'[Segment] = _seg,
+					'Stress Grid'[Ready / Off-Plan] = _ro,
+					'Stress Grid'[Scenario] = "Replay: 2014-2020, own series",
+					'Stress Grid'[Loan Basis] = "Assumed LTV",
+					'Stress Grid'[LTV Pct] = _ltv
+				)
+			RETURN
+				"Own series (upper) " & FORMAT ( _own, "0%" )
+		displayFolder: Risk
+		lineageTag: 39f21d72-f570-5912-8b86-2b5907fef7c4
+
+	/// Grey strip under Outlook: the 80% range of the 12-month change.
+	measure 'Forecast Split' = "80%: " & [Forecast 12M Band 80% Label]
+		displayFolder: Risk\Outlook
+		lineageTag: 5c28af59-63c1-5092-bf1f-5d1bab6009ee
+
+	/// Grey strip under Top-10 master projects: the HHI over master projects (a proxy).
+	measure 'Concentration Split' = "HHI " & FORMAT ( [Master Project HHI (Off-Plan)], "#,0" ) & " (proxy)"
+		displayFolder: Risk\Concentration
+		lineageTag: 30474eac-54b5-5dae-8c5d-dbe15b6b30e7
 
 	column Value
 		isHidden

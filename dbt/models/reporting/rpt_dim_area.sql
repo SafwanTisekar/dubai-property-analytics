@@ -4,9 +4,11 @@
 -- OpenStreetMap (seed_area.centroid_source, reports/area_centroids.md); NULL where an area
 -- wasn't located, so it has no bubble. Map credit: rpt.report_info "Map Attribution".
 select
-    area_key as "Area Key",
-    area_name as "Area",
-    zone as "Zone",
-    latitude as "Latitude",
-    longitude as "Longitude"
-from {{ ref('dim_area') }}
+    a.area_key as "Area Key",
+    a.area_name as "Area",
+    a.zone as "Zone",
+    z.zone_short as "Zone Short",
+    a.latitude as "Latitude",
+    a.longitude as "Longitude"
+from {{ ref('dim_area') }} as a
+left join {{ ref('seed_zone_label') }} as z on z.zone = a.zone

@@ -1,0 +1,105 @@
+/// The KPI guide page: every KPI tile of the report with its meaning, calculation,
+/// source table and caveats. Generated from the _Measures descriptions by
+/// `make pbi-measures` (dubai_property.powerbi.tmdl); do not edit by hand.
+table 'KPI Guide'
+
+	column Page
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Page]
+		sortByColumn: 'Page Order'
+
+		annotation SummarizationSetBy = User
+
+	column 'Page Order'
+		isHidden
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Page Order]
+
+		annotation SummarizationSetBy = User
+
+	column KPI
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [KPI]
+
+		annotation SummarizationSetBy = User
+
+	column 'KPI Sort'
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [KPI Sort]
+
+		annotation SummarizationSetBy = User
+
+	column Meaning
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Meaning]
+
+		annotation SummarizationSetBy = User
+
+	column 'How it is calculated'
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [How it is calculated]
+
+		annotation SummarizationSetBy = User
+
+	column 'Source table'
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Source table]
+
+		annotation SummarizationSetBy = User
+
+	column Caveats
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Caveats]
+
+		annotation SummarizationSetBy = User
+
+	partition 'KPI Guide' = calculated
+		mode: import
+		source =
+				DATATABLE (
+					"Page", STRING,
+					"Page Order", INTEGER,
+					"KPI", STRING,
+					"KPI Sort", INTEGER,
+					"Meaning", STRING,
+					"How it is calculated", STRING,
+					"Source table", STRING,
+					"Caveats", STRING,
+					{
+						{ "1 Executive", 1, "Sales value (AED bn)", 1, "The total money spent on homes and other property bought on the open market.", "sum of sale prices, each deal counted once (a deal that covers many units is not repeated).", "Area Month.", "gifts, inheritances and mortgages are not sales and are left out; amounts are not adjusted for inflation." },
+						{ "1 Executive", 1, "Market sales", 2, "How many property sales happened on the open market.", "count of market sales.", "Area Month.", "excludes gifts, inheritances, grants and mortgage registrations." },
+						{ "1 Executive", 1, "Median AED / sq m", 3, "The middle price per square metre: half of sales were cheaper, half dearer.", "median of AED per sq m over clean market sales; blank if fewer than 20 sales.", "Transactions.", "mixes property types; compare like with like using the price index." },
+						{ "1 Executive", 1, "Prices YoY (like for like)", 4, "How much prices changed over a year for comparable homes.", "the hedonic price index at the latest complete month against the same month a year earlier.", "Price Index.", "the newest months are revised as late sales arrive." },
+						{ "1 Executive", 1, "Off-plan share (value)", 5, "The share of money spent on homes bought before they were built.", "off-plan sales value divided by all market sales value.", "Area Month.", "" },
+						{ "1 Executive", 1, "Mortgage share (ready)", 6, "The share of finished-home purchases paid for partly with a bank loan.", "ready sales matched to a mortgage on the same unit the same day, divided by all ready sales.", "Area Month.", "a lower bound: loans registered later or not matched are missed (in 2025 between 28% matched and 48% for all ready-unit mortgages)." },
+						{ "2 Financing", 2, "Ready sales", 7, "How many finished homes were sold on the open market.", "count of market sales that are not off-plan.", "Area Month.", "" },
+						{ "2 Financing", 2, "Mortgage share (ready)", 8, "The share of finished-home purchases paid for partly with a bank loan.", "ready sales matched to a mortgage on the same unit the same day, divided by all ready sales.", "Area Month.", "a lower bound: loans registered later or not matched are missed (in 2025 between 28% matched and 48% for all ready-unit mortgages)." },
+						{ "2 Financing", 2, "New mortgages / 100 sales", 9, "How many new home loans were registered for every 100 market sales.", "new individual mortgages (including refinancing) times 100, divided by market sales.", "Area Month.", "a secondary indicator; refinancing and off-plan loans are included." },
+						{ "2 Financing", 2, "Off-plan share (count)", 10, "The share of sales that were homes bought before they were built.", "off-plan market sales divided by all market sales.", "Area Month.", "" },
+						{ "2 Financing", 2, "Reference rate", 11, "The interest rate that drives mortgage costs.", "monthly average of EIBOR 3 months when loaded, otherwise the US Fed Funds rate.", "Rates Monthly.", "EIBOR is not loaded yet, so the Fed Funds rate stands in for it (the dirham is pegged to the dollar)." },
+						{ "3 Prices", 3, "Index (Jan 2019 = 100)", 12, "The level of like-for-like prices, with January 2019 set to 100.", "the hedonic price index of the chosen segment at the latest complete month.", "Price Index.", "150 means prices are 50% above January 2019 for comparable homes." },
+						{ "3 Prices", 3, "Prices YoY (like for like)", 13, "How much prices changed over a year for comparable homes.", "the hedonic price index at the latest complete month against the same month a year earlier.", "Price Index.", "the newest months are revised as late sales arrive." },
+						{ "3 Prices", 3, "Below previous peak", 14, "How far prices are below their previous high.", "the index at the latest complete month divided by its running peak, minus 1.", "Price Index.", "0% means prices are at a peak." },
+						{ "3 Prices", 3, "AED / sq m (homes)", 15, "The average price per square metre of apartments and villas, weighting big homes by their size.", "total sale value divided by total floor area of clean apartment and villa sales.", "Area Month.", "only meaningful for homes; land and whole buildings are left out." },
+						{ "4 Yields", 4, "Gross yield, last 4 quarters", 16, "The yearly rent a home earns as a share of its price.", "median new rent divided by median price for matching groups of homes, averaged by sales over the last four complete quarters.", "Yield Quarter.", "before service charges, empty months and fees; groups with fewer than 20 rents or sales, or outside 2% to 15%, are left out." },
+						{ "4 Yields", 4, "New rent contracts", 17, "How many new rent contracts were signed.", "count of new, comparable rent contracts.", "Rent Month.", "renewals are left out because they lag the market." },
+						{ "4 Yields", 4, "New rent / sq m / year (homes)", 18, "The yearly rent per square metre of new apartment and villa leases.", "total annual rent divided by total floor area of new contracts with a plausible size.", "Rent Month.", "" },
+						{ "5 Valuation", 5, "AVM median error", 19, "How far the automated valuation typically is from the real price.", "median absolute error, as a share of the price, on 2025 to 2026 sales the model never saw.", "AVM Performance.", "compare with the comparable-sales baseline shown underneath." },
+						{ "5 Valuation", 5, "Within ±10%", 20, "The share of homes the automated valuation got within 10% of the real price.", "test sales with an error of 10% or less, divided by all test sales valued.", "AVM Performance.", "" },
+						{ "5 Valuation", 5, "Within ±20%", 21, "The share of homes the automated valuation got within 20% of the real price.", "test sales with an error of 20% or less, divided by all test sales valued.", "AVM Performance.", "" },
+						{ "5 Valuation", 5, "Test sales valued", 22, "How many 2025 to 2026 sales the automated valuation was tested on.", "count of test sales the model could value.", "AVM Performance.", "these sales were never used to train the model." },
+						{ "6 Risk", 6, "In negative equity", 23, "The share of recent buyers who would owe more than their home is worth after the chosen price fall.", "purchases of the last three years whose loan exceeds the home's value after the shock, at the chosen loan-to-value.", "Stress Grid.", "illustrative, not a regulatory stress test; loans are kept at their starting size." },
+						{ "6 Risk", 6, "At the CBUAE cap", 24, "The same negative-equity share if every buyer had borrowed the most the central bank allows.", "as Negative Equity Share, with each loan at the CBUAE cap on its sale date (expatriate, first home).", "Stress Grid.", "illustrative; nationality and first or second home are not in the data." },
+						{ "6 Risk", 6, "2014-20 replay (Dubai-wide)", 25, "The share of recent buyers who would owe more than their home is worth if the 2014 to 2020 fall happened again.", "each purchase marked down by the 2014 to 2020 fall (Dubai-wide by default), at the chosen loan-to-value.", "Stress Grid.", "illustrative; the own-series version (in the strip) is the upper range." },
+						{ "6 Risk", 6, "Price outlook, 12 months", 26, "Where like-for-like prices could be in 12 months on the central path.", "SARIMAX forecast at the end of the horizon against the last actual month, rates flat.", "Forecast.", "a statistical baseline, not a call; the range in the strip matters as much." },
+						{ "6 Risk", 6, "Top-10 master projects", 27, "How concentrated off-plan sales are in the largest master projects.", "off-plan sales of the 10 biggest master projects divided by all off-plan sales with a known master project.", "Transactions and Project.", "a proxy for developer concentration; developer names need the DLD projects file." }
+					}
+				)

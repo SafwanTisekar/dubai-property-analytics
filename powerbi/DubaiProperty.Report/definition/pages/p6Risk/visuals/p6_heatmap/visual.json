@@ -2,12 +2,12 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
   "name": "p6_heatmap",
   "position": {
-    "x": 16,
-    "y": 268,
-    "z": 11000,
-    "width": 400,
-    "height": 412,
-    "tabOrder": 11000
+    "x": 198,
+    "y": 282,
+    "z": 42000,
+    "width": 346,
+    "height": 394,
+    "tabOrder": 42000
   },
   "visual": {
     "visualType": "pivotTable",
@@ -101,7 +101,7 @@
                           "max": {
                             "color": {
                               "Literal": {
-                                "Value": "'#9ec5f4'"
+                                "Value": "'#9aaacd'"
                               }
                             }
                           },
@@ -193,7 +193,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'Negative equity: shock × LTV (85%* = UAE national cap)'"
+                  "Value": "'Negative equity (85%* = UAE national cap)'"
                 }
               }
             }

@@ -2,12 +2,12 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
   "name": "p6_replay",
   "position": {
-    "x": 832,
-    "y": 268,
-    "z": 13000,
-    "width": 432,
-    "height": 196,
-    "tabOrder": 13000
+    "x": 910,
+    "y": 282,
+    "z": 44000,
+    "width": 348,
+    "height": 180,
+    "tabOrder": 44000
   },
   "visual": {
     "visualType": "clusteredBarChart",
@@ -139,7 +139,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'2014→2020 fall, 5 deepest series (illustrative)'"
+                  "Value": "'2014-20 fall, 4 deepest series'"
                 }
               }
             }
@@ -165,7 +165,7 @@
             "altText": {
               "expr": {
                 "Literal": {
-                  "Value": "'Bar chart of the five index series with the deepest fall in the 2014 to 2020 downturn; zone series are noisier and overstate it.'"
+                  "Value": "'Bar chart of the four index series with the deepest fall in the 2014 to 2020 downturn; zone series are noisier and overstate it.'"
                 }
               }
             }
@@ -238,7 +238,7 @@
                         }
                       }
                     ],
-                    "Top": 5
+                    "Top": 4
                   }
                 }
               },

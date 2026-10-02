@@ -3,10 +3,10 @@
   "name": "p0Terms_term5",
   "position": {
     "x": 554,
-    "y": 216,
+    "y": 204,
     "z": 25000,
     "width": 346,
-    "height": 124,
+    "height": 112,
     "tabOrder": 25000
   },
   "visual": {
@@ -31,7 +31,7 @@
               {
                 "textRuns": [
                   {
-                    "value": "A year's rent as a share of the price, before costs such as service charges and empty months.",
+                    "value": "A year's rent as a share of the price, before service charges and empty months.",
                     "textStyle": {
                       "fontSize": "9pt",
                       "color": "#1b2a4a"
@@ -42,7 +42,7 @@
               {
                 "textRuns": [
                   {
-                    "value": "Example: AED 90,000 a year of rent on a AED 1,500,000 flat is a 6% gross yield.",
+                    "value": "Example: AED 90,000 rent on AED 1,500,000 is 6%.",
                     "textStyle": {
                       "fontSize": "9pt",
                       "color": "#5f6673",
@@ -89,7 +89,7 @@
             "altText": {
               "expr": {
                 "Literal": {
-                  "Value": "'Term: Gross rental yield. A year''s rent as a share of the price, before costs such as service charges and empty months. Example: AED 90,000 a year of rent on a AED 1,500,000 flat is a 6% gross yield.'"
+                  "Value": "'Term: Gross rental yield. A year''s rent as a share of the price, before service charges and empty months. Example: AED 90,000 rent on AED 1,500,000 is 6%.'"
                 }
               }
             }

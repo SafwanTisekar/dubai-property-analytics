@@ -28,7 +28,7 @@
               },
               "queryRef": "_Measures.Purchase Mortgage Share",
               "nativeQueryRef": "Purchase Mortgage Share",
-              "displayName": "Mortgage share (ready, at least)"
+              "displayName": "Mortgage share (ready)"
             }
           ]
         }
@@ -108,7 +108,7 @@
             "altText": {
               "expr": {
                 "Literal": {
-                  "Value": "'KPI: Mortgage share (ready, at least) for the selected filters, with a split underneath.'"
+                  "Value": "'KPI: Mortgage share (ready) for the selected filters, with a split underneath.'"
                 }
               }
             }

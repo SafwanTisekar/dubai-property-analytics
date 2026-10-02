@@ -2,12 +2,12 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
   "name": "p4_hdr_asof",
   "position": {
-    "x": 900,
-    "y": 8,
-    "z": 2000,
-    "width": 364,
-    "height": 36,
-    "tabOrder": 2000
+    "x": 826,
+    "y": 20,
+    "z": 5000,
+    "width": 226,
+    "height": 28,
+    "tabOrder": 5000
   },
   "visual": {
     "visualType": "cardVisual",
@@ -40,7 +40,7 @@
             "fontSize": {
               "expr": {
                 "Literal": {
-                  "Value": "11D"
+                  "Value": "9D"
                 }
               }
             },
@@ -70,7 +70,7 @@
                 "color": {
                   "expr": {
                     "Literal": {
-                      "Value": "'#52514e'"
+                      "Value": "'#5f6673'"
                     }
                   }
                 }
@@ -212,6 +212,45 @@
               "expr": {
                 "Literal": {
                   "Value": "0L"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "border": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "dropShadow": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "visualHeader": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
                 }
               }
             }

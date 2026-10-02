@@ -3,10 +3,10 @@
   "name": "p0Terms_term6",
   "position": {
     "x": 910,
-    "y": 216,
+    "y": 204,
     "z": 26000,
     "width": 346,
-    "height": 124,
+    "height": 112,
     "tabOrder": 26000
   },
   "visual": {
@@ -31,7 +31,7 @@
               {
                 "textRuns": [
                   {
-                    "value": "When a home is worth less than the loan on it. Selling it would not repay the bank in full.",
+                    "value": "The home is worth less than the loan, so selling it would not repay the bank.",
                     "textStyle": {
                       "fontSize": "9pt",
                       "color": "#1b2a4a"
@@ -42,7 +42,7 @@
               {
                 "textRuns": [
                   {
-                    "value": "Example: bought for AED 1,500,000 with a AED 1,200,000 loan, now worth AED 1,100,000: AED 100,000 short.",
+                    "value": "Example: AED 1,200,000 loan, home now worth 1,100,000.",
                     "textStyle": {
                       "fontSize": "9pt",
                       "color": "#5f6673",
@@ -89,7 +89,7 @@
             "altText": {
               "expr": {
                 "Literal": {
-                  "Value": "'Term: Negative equity. When a home is worth less than the loan on it. Selling it would not repay the bank in full. Example: bought for AED 1,500,000 with a AED 1,200,000 loan, now worth AED 1,100,000: AED 100,000 short.'"
+                  "Value": "'Term: Negative equity. The home is worth less than the loan, so selling it would not repay the bank. Example: AED 1,200,000 loan, home now worth 1,100,000.'"
                 }
               }
             }

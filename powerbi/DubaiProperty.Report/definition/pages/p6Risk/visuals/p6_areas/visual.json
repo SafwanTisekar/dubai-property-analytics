@@ -2,12 +2,12 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
   "name": "p6_areas",
   "position": {
-    "x": 424,
-    "y": 268,
-    "z": 12000,
-    "width": 400,
-    "height": 196,
-    "tabOrder": 12000
+    "x": 554,
+    "y": 282,
+    "z": 43000,
+    "width": 346,
+    "height": 180,
+    "tabOrder": 43000
   },
   "visual": {
     "visualType": "clusteredBarChart",
@@ -139,7 +139,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'Most exposed areas, top 5 (illustrative)'"
+                  "Value": "'Most exposed areas (illustrative)'"
                 }
               }
             }
@@ -165,7 +165,7 @@
             "altText": {
               "expr": {
                 "Literal": {
-                  "Value": "'Bar chart of the five areas with the highest negative-equity share at the selected price shock and loan-to-value.'"
+                  "Value": "'Bar chart of the four areas with the highest negative-equity share at the selected price shock and loan-to-value.'"
                 }
               }
             }
@@ -238,7 +238,7 @@
                         }
                       }
                     ],
-                    "Top": 5
+                    "Top": 4
                   }
                 }
               },

@@ -3,10 +3,10 @@
   "name": "p0Terms_model4",
   "position": {
     "x": 999,
-    "y": 372,
+    "y": 350,
     "z": 37000,
     "width": 257,
-    "height": 120,
+    "height": 106,
     "tabOrder": 37000
   },
   "visual": {
@@ -31,7 +31,7 @@
               {
                 "textRuns": [
                   {
-                    "value": "It extends past patterns over the next 12 months. It is not a promise, and the range matters as much as the central line.",
+                    "value": "Extends past patterns 12 months ahead. Not a promise: the range matters as much as the line.",
                     "textStyle": {
                       "fontSize": "9pt",
                       "color": "#1b2a4a"
@@ -77,7 +77,7 @@
             "altText": {
               "expr": {
                 "Literal": {
-                  "Value": "'Model: Forecast: a baseline with a range. It extends past patterns over the next 12 months. It is not a promise, and the range matters as much as the central line.'"
+                  "Value": "'Model: Forecast: a baseline with a range. Extends past patterns 12 months ahead. Not a promise: the range matters as much as the line.'"
                 }
               }
             }

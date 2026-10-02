@@ -2,12 +2,12 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
   "name": "p4_by_zone",
   "position": {
-    "x": 16,
-    "y": 208,
-    "z": 11000,
-    "width": 500,
-    "height": 472,
-    "tabOrder": 11000
+    "x": 198,
+    "y": 282,
+    "z": 42000,
+    "width": 420,
+    "height": 394,
+    "tabOrder": 42000
   },
   "visual": {
     "visualType": "clusteredBarChart",
@@ -23,11 +23,11 @@
                       "Entity": "Area"
                     }
                   },
-                  "Property": "Zone"
+                  "Property": "Zone Short"
                 }
               },
-              "queryRef": "Area.Zone",
-              "nativeQueryRef": "Zone"
+              "queryRef": "Area.Zone Short",
+              "nativeQueryRef": "Zone Short"
             }
           ]
         },
@@ -135,7 +135,14 @@
             "fontSize": {
               "expr": {
                 "Literal": {
-                  "Value": "9D"
+                  "Value": "8D"
+                }
+              }
+            },
+            "innerPadding": {
+              "expr": {
+                "Literal": {
+                  "Value": "20L"
                 }
               }
             }
@@ -157,7 +164,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'Gross yield by zone, last four quarters'"
+                  "Value": "'Gross yield, 10 busiest zones'"
                 }
               }
             }
@@ -170,25 +177,7 @@
             "show": {
               "expr": {
                 "Literal": {
-                  "Value": "true"
-                }
-              }
-            },
-            "text": {
-              "expr": {
-                "Literal": {
-                  "Value": "'Cells outside 2-15% left out (see yields.md)'"
-                }
-              }
-            },
-            "fontColor": {
-              "solid": {
-                "color": {
-                  "expr": {
-                    "Literal": {
-                      "Value": "'#52514e'"
-                    }
-                  }
+                  "Value": "false"
                 }
               }
             }
@@ -201,7 +190,7 @@
             "altText": {
               "expr": {
                 "Literal": {
-                  "Value": "'Gross rental yield by zone for apartments and villas over the last four complete quarters, out-of-band cells left out.'"
+                  "Value": "'Gross rental yield of the ten zones with the most sales, apartments and villas, over the last four complete quarters; out-of-band cells left out.'"
                 }
               }
             }
@@ -213,7 +202,7 @@
   "filterConfig": {
     "filters": [
       {
-        "name": "p4Homes0",
+        "name": "p4HomesA",
         "field": {
           "Column": {
             "Expression": {
@@ -266,6 +255,107 @@
                       }
                     ]
                   ]
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "p4TopZones",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "Area"
+              }
+            },
+            "Property": "Zone Short"
+          }
+        },
+        "type": "TopN",
+        "filter": {
+          "Version": 2,
+          "From": [
+            {
+              "Name": "subquery",
+              "Expression": {
+                "Subquery": {
+                  "Query": {
+                    "Version": 2,
+                    "From": [
+                      {
+                        "Name": "d",
+                        "Entity": "Area",
+                        "Type": 0
+                      },
+                      {
+                        "Name": "m",
+                        "Entity": "_Measures",
+                        "Type": 0
+                      }
+                    ],
+                    "Select": [
+                      {
+                        "Column": {
+                          "Expression": {
+                            "SourceRef": {
+                              "Source": "d"
+                            }
+                          },
+                          "Property": "Zone Short"
+                        },
+                        "Name": "field"
+                      }
+                    ],
+                    "OrderBy": [
+                      {
+                        "Direction": 2,
+                        "Expression": {
+                          "Measure": {
+                            "Expression": {
+                              "SourceRef": {
+                                "Source": "m"
+                              }
+                            },
+                            "Property": "Market Sales"
+                          }
+                        }
+                      }
+                    ],
+                    "Top": 10
+                  }
+                }
+              },
+              "Type": 2
+            },
+            {
+              "Name": "d",
+              "Entity": "Area",
+              "Type": 0
+            }
+          ],
+          "Where": [
+            {
+              "Condition": {
+                "In": {
+                  "Expressions": [
+                    {
+                      "Column": {
+                        "Expression": {
+                          "SourceRef": {
+                            "Source": "d"
+                          }
+                        },
+                        "Property": "Zone Short"
+                      }
+                    }
+                  ],
+                  "Table": {
+                    "SourceRef": {
+                      "Source": "subquery"
+                    }
+                  }
                 }
               }
             }

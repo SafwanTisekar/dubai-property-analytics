@@ -41,5 +41,6 @@ ref table 'LTV %'
 ref table 'Replay Depth'
 ref table 'Forecast Scenario'
 ref table _Measures
+ref table 'KPI Guide'
 
 ref cultureInfo en-US

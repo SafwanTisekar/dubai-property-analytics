@@ -28,6 +28,14 @@ table Area
 
 		annotation SummarizationSetBy = User
 
+	column 'Zone Short'
+		dataType: string
+		lineageTag: 54afee53-25bd-5927-91c4-7a59ddec66b0
+		summarizeBy: none
+		sourceColumn: Zone Short
+
+		annotation SummarizationSetBy = User
+
 	column Latitude
 		dataType: double
 		dataCategory: Latitude

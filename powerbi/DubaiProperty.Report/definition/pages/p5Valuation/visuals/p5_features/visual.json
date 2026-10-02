@@ -2,12 +2,12 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
   "name": "p5_features",
   "position": {
-    "x": 428,
-    "y": 208,
-    "z": 12000,
-    "width": 404,
-    "height": 232,
-    "tabOrder": 12000
+    "x": 728,
+    "y": 282,
+    "z": 44000,
+    "width": 530,
+    "height": 180,
+    "tabOrder": 44000
   },
   "visual": {
     "visualType": "clusteredBarChart",
@@ -103,6 +103,26 @@
             }
           }
         }
+      ],
+      "dataPoint": [
+        {
+          "properties": {
+            "fill": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#1b2a4a'"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "selector": {
+            "metadata": "_Measures.Mean Abs SHAP"
+          }
+        }
       ]
     },
     "visualContainerObjects": {
@@ -119,7 +139,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'Top 6 drivers of the valuation (mean |SHAP|)'"
+                  "Value": "'Top 4 drivers of the valuation (mean |SHAP|)'"
                 }
               }
             }
@@ -145,7 +165,7 @@
             "altText": {
               "expr": {
                 "Literal": {
-                  "Value": "'Top six features by mean absolute SHAP value, in log points of the predicted price.'"
+                  "Value": "'Top four features by mean absolute SHAP value, in log points of the predicted price.'"
                 }
               }
             }
@@ -157,7 +177,7 @@
   "filterConfig": {
     "filters": [
       {
-        "name": "p5Top6",
+        "name": "p5Top4",
         "field": {
           "Column": {
             "Expression": {
@@ -195,7 +215,7 @@
                   },
                   "Right": {
                     "Literal": {
-                      "Value": "6L"
+                      "Value": "4L"
                     }
                   }
                 }

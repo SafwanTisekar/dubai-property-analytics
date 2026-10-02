@@ -2,12 +2,12 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
   "name": "p3_drawdown",
   "position": {
-    "x": 16,
-    "y": 460,
-    "z": 14000,
-    "width": 380,
-    "height": 220,
-    "tabOrder": 14000
+    "x": 198,
+    "y": 494,
+    "z": 45000,
+    "width": 320,
+    "height": 182,
+    "tabOrder": 45000
   },
   "visual": {
     "visualType": "areaChart",
@@ -61,7 +61,7 @@
                 "color": {
                   "expr": {
                     "Literal": {
-                      "Value": "'#eb6834'"
+                      "Value": "'#d6247f'"
                     }
                   }
                 }
@@ -108,7 +108,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'2014-2020: -24% Dubai-wide; not filtered by Year'"
+                  "Value": "'2014-2020: -24% Dubai-wide'"
                 }
               }
             },
@@ -144,7 +144,7 @@
   "filterConfig": {
     "filters": [
       {
-        "name": "p3Fromc",
+        "name": "p3cFrom",
         "field": {
           "Column": {
             "Expression": {
@@ -192,7 +192,7 @@
         }
       },
       {
-        "name": "p3Snapc",
+        "name": "p3cSnap",
         "field": {
           "Column": {
             "Expression": {

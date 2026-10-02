@@ -281,9 +281,9 @@ def post_ml_cards(conn: psycopg.Connection, year: str) -> list[Card]:
             out.append(
                 Card(
                     "3 Prices",
-                    "Max Drawdown",
-                    f"no Year selected; index segment = {segment}",
-                    pct(mdd),
+                    "Max Drawdown Split",
+                    f"strip under Below previous peak; index segment = {segment}",
+                    f"Deepest since 2011 {pct(mdd)}",
                     src_index,
                 )
             )
@@ -333,9 +333,9 @@ def post_ml_cards(conn: psycopg.Connection, year: str) -> list[Card]:
             out.append(Card("6 Risk", "Negative Equity Share", filters, pct(share), src))
             if shock == DEFAULT_SHOCK and segment.startswith("Dubai"):
                 out.append(Card("6 Risk", "Negative Equity AED", filters, aed_bn(ne_aed), src))
-        for scenario, depth in (
-            ("Replay: 2014-2020, Dubai-wide", "Dubai-wide (lower range)"),
-            ("Replay: 2014-2020, own series", "Own series (upper range)"),
+        for scenario, card, depth in (
+            ("Replay: 2014-2020, Dubai-wide", "Replay Negative Equity Share", "tile (Dubai-wide)"),
+            ("Replay: 2014-2020, own series", "Replay Split", "strip: own series (upper)"),
         ):
             (share, _) = _one(
                 conn,
@@ -346,9 +346,9 @@ def post_ml_cards(conn: psycopg.Connection, year: str) -> list[Card]:
             out.append(
                 Card(
                     "6 Risk",
-                    "Replay Negative Equity Share",
-                    f"Stress segment = {segment}; Ready; LTV {DEFAULT_LTV}; Replay Depth = {depth}",
-                    pct(share),
+                    card,
+                    f"Stress segment = {segment}; Ready; LTV {DEFAULT_LTV}; {depth}",
+                    pct(share) if card.endswith("Share") else f"Own series (upper) {pct(share, 0)}",
                     "rpt.stress_grid",
                 )
             )
@@ -375,18 +375,19 @@ def post_ml_cards(conn: psycopg.Connection, year: str) -> list[Card]:
                 )
             )
 
-    for segment in ("Dubai (all residential)", "Apartments", "Villas / Townhouses"):
+    # The outlook shows Dubai with rates flat (page 6 has no segment or scenario control).
+    for segment in ("Dubai (all residential)",):
         central, lo, hi = _one(
             conn, FORECAST_SQL, {"segment": segment, "scenario": DEFAULT_SCENARIO}
         )
-        filters = f"Forecast segment = {segment}; Scenario = {DEFAULT_SCENARIO}"
+        filters = f"Forecast segment = {segment} (default); Scenario = {DEFAULT_SCENARIO} (default)"
         out += [
             Card("6 Risk", "Forecast 12M Change", filters, signed_pct(central), "rpt.forecast"),
             Card(
                 "6 Risk",
-                "Forecast 12M Band 80% Label",
-                filters,
-                f"{signed_pct(lo)} to {signed_pct(hi)}",
+                "Forecast Split",
+                f"strip under Price outlook; {filters}",
+                f"80%: {signed_pct(lo)} to {signed_pct(hi)}",
                 "rpt.forecast (forecast.md)",
             ),
         ]

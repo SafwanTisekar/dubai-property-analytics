@@ -2,12 +2,12 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
   "name": "p3_bed_zone",
   "position": {
-    "x": 792,
-    "y": 224,
-    "z": 16000,
-    "width": 472,
-    "height": 456,
-    "tabOrder": 16000
+    "x": 858,
+    "y": 282,
+    "z": 47000,
+    "width": 400,
+    "height": 394,
+    "tabOrder": 47000
   },
   "visual": {
     "visualType": "pivotTable",
@@ -23,11 +23,11 @@
                       "Entity": "Area"
                     }
                   },
-                  "Property": "Zone"
+                  "Property": "Zone Short"
                 }
               },
-              "queryRef": "Area.Zone",
-              "nativeQueryRef": "Zone"
+              "queryRef": "Area.Zone Short",
+              "nativeQueryRef": "Zone Short"
             }
           ]
         },
@@ -101,7 +101,7 @@
                           "max": {
                             "color": {
                               "Literal": {
-                                "Value": "'#9ec5f4'"
+                                "Value": "'#9aaacd'"
                               }
                             }
                           },
@@ -211,7 +211,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'Median AED / sq m (K), zone × Studio–4 BR, residential'"
+                  "Value": "'Median AED / sq m (K), Studio to 4 BR'"
                 }
               }
             }

@@ -28,7 +28,7 @@
               },
               "queryRef": "_Measures.Market Sales Value",
               "nativeQueryRef": "Market Sales Value",
-              "displayName": "Sales value"
+              "displayName": "Sales value (AED bn)"
             }
           ]
         }
@@ -129,7 +129,7 @@
             "altText": {
               "expr": {
                 "Literal": {
-                  "Value": "'KPI: Sales value for the selected filters, with a split underneath.'"
+                  "Value": "'KPI: Sales value (AED bn) for the selected filters, with a split underneath.'"
                 }
               }
             }

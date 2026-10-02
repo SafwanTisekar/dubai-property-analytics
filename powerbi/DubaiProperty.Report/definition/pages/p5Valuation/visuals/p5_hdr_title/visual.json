@@ -2,131 +2,40 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
   "name": "p5_hdr_title",
   "position": {
-    "x": 16,
-    "y": 4,
-    "z": 1000,
-    "width": 876,
-    "height": 44,
-    "tabOrder": 1000
+    "x": 198,
+    "y": 16,
+    "z": 4000,
+    "width": 620,
+    "height": 36,
+    "tabOrder": 4000
   },
   "visual": {
-    "visualType": "cardVisual",
-    "query": {
-      "queryState": {
-        "Data": {
-          "projections": [
-            {
-              "field": {
-                "Measure": {
-                  "Expression": {
-                    "SourceRef": {
-                      "Entity": "_Measures"
+    "visualType": "textbox",
+    "objects": {
+      "general": [
+        {
+          "properties": {
+            "paragraphs": [
+              {
+                "textRuns": [
+                  {
+                    "value": "VALUATION",
+                    "textStyle": {
+                      "fontSize": "15pt",
+                      "color": "#1b2a4a",
+                      "fontWeight": "bold"
                     }
                   },
-                  "Property": "Title Valuation"
-                }
-              },
-              "queryRef": "_Measures.Title Valuation",
-              "nativeQueryRef": "Title Valuation"
-            }
-          ]
-        }
-      }
-    },
-    "objects": {
-      "value": [
-        {
-          "properties": {
-            "fontSize": {
-              "expr": {
-                "Literal": {
-                  "Value": "14D"
-                }
-              }
-            },
-            "bold": {
-              "expr": {
-                "Literal": {
-                  "Value": "true"
-                }
-              }
-            },
-            "textWrap": {
-              "expr": {
-                "Literal": {
-                  "Value": "false"
-                }
-              }
-            },
-            "horizontalAlignment": {
-              "expr": {
-                "Literal": {
-                  "Value": "'left'"
-                }
-              }
-            },
-            "fontColor": {
-              "solid": {
-                "color": {
-                  "expr": {
-                    "Literal": {
-                      "Value": "'#0b0b0b'"
+                  {
+                    "value": " MODEL (AVM)",
+                    "textStyle": {
+                      "fontSize": "15pt",
+                      "color": "#5f6673"
                     }
                   }
-                }
+                ]
               }
-            }
-          },
-          "selector": {
-            "id": "default"
-          }
-        }
-      ],
-      "label": [
-        {
-          "properties": {
-            "show": {
-              "expr": {
-                "Literal": {
-                  "Value": "false"
-                }
-              }
-            }
-          },
-          "selector": {
-            "id": "default"
-          }
-        }
-      ],
-      "padding": [
-        {
-          "properties": {
-            "paddingUniform": {
-              "expr": {
-                "Literal": {
-                  "Value": "0L"
-                }
-              }
-            }
-          },
-          "selector": {
-            "id": "default"
-          }
-        }
-      ],
-      "cardCalloutArea": [
-        {
-          "properties": {
-            "paddingUniform": {
-              "expr": {
-                "Literal": {
-                  "Value": "0L"
-                }
-              }
-            }
-          },
-          "selector": {
-            "id": "default"
+            ]
           }
         }
       ]
@@ -164,7 +73,7 @@
             "altText": {
               "expr": {
                 "Literal": {
-                  "Value": "'Page title with this page''s headline finding.'"
+                  "Value": "'Page title: VALUATION MODEL (AVM).'"
                 }
               }
             }
@@ -184,34 +93,39 @@
           }
         }
       ],
-      "padding": [
+      "border": [
         {
           "properties": {
-            "top": {
+            "show": {
               "expr": {
                 "Literal": {
-                  "Value": "0L"
+                  "Value": "false"
                 }
               }
-            },
-            "bottom": {
+            }
+          }
+        }
+      ],
+      "dropShadow": [
+        {
+          "properties": {
+            "show": {
               "expr": {
                 "Literal": {
-                  "Value": "0L"
+                  "Value": "false"
                 }
               }
-            },
-            "left": {
+            }
+          }
+        }
+      ],
+      "visualHeader": [
+        {
+          "properties": {
+            "show": {
               "expr": {
                 "Literal": {
-                  "Value": "0L"
-                }
-              }
-            },
-            "right": {
-              "expr": {
-                "Literal": {
-                  "Value": "0L"
+                  "Value": "false"
                 }
               }
             }

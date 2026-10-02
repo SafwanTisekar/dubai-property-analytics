@@ -2,12 +2,12 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
   "name": "p2_rate",
   "position": {
-    "x": 840,
-    "y": 224,
-    "z": 14000,
-    "width": 424,
-    "height": 220,
-    "tabOrder": 14000
+    "x": 910,
+    "y": 282,
+    "z": 43000,
+    "width": 348,
+    "height": 180,
+    "tabOrder": 43000
   },
   "visual": {
     "visualType": "lineChart",
@@ -61,7 +61,7 @@
                 "color": {
                   "expr": {
                     "Literal": {
-                      "Value": "'#8a8984'"
+                      "Value": "'#6b7280'"
                     }
                   }
                 }
@@ -113,7 +113,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'Same time range as the mortgage share'"
+                  "Value": "'Same time range; not filtered by Year'"
                 }
               }
             },
@@ -137,7 +137,7 @@
             "altText": {
               "expr": {
                 "Literal": {
-                  "Value": "'Line chart of the reference interest rate by month since 2010, beside the mortgage share on the same time range.'"
+                  "Value": "'Line chart of the reference interest rate by month since 2010, on the same time range as the mortgage share.'"
                 }
               }
             }
@@ -149,7 +149,7 @@
   "filterConfig": {
     "filters": [
       {
-        "name": "p2Fromc",
+        "name": "p2cFrom",
         "field": {
           "Column": {
             "Expression": {
@@ -197,7 +197,7 @@
         }
       },
       {
-        "name": "p2Snapc",
+        "name": "p2cSnap",
         "field": {
           "Column": {
             "Expression": {

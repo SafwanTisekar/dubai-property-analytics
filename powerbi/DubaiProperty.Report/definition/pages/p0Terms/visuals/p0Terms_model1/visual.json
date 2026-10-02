@@ -3,10 +3,10 @@
   "name": "p0Terms_model1",
   "position": {
     "x": 198,
-    "y": 372,
+    "y": 350,
     "z": 31000,
     "width": 257,
-    "height": 120,
+    "height": 106,
     "tabOrder": 31000
   },
   "visual": {
@@ -19,7 +19,7 @@
               {
                 "textRuns": [
                   {
-                    "value": "Price index: a fixed shopping basket",
+                    "value": "Price index: a shopping basket",
                     "textStyle": {
                       "fontSize": "11pt",
                       "color": "#1b2a4a",
@@ -31,7 +31,7 @@
               {
                 "textRuns": [
                   {
-                    "value": "Instead of averaging whatever sold this month, it compares similar homes over time. Prices don't look higher just because more expensive homes happened to sell.",
+                    "value": "Compares similar homes over time, so prices don't look higher just because pricier homes sold.",
                     "textStyle": {
                       "fontSize": "9pt",
                       "color": "#1b2a4a"
@@ -77,7 +77,7 @@
             "altText": {
               "expr": {
                 "Literal": {
-                  "Value": "'Model: Price index: a fixed shopping basket. Instead of averaging whatever sold this month, it compares similar homes over time. Prices don''t look higher just because more expensive homes happened to sell.'"
+                  "Value": "'Model: Price index: a shopping basket. Compares similar homes over time, so prices don''t look higher just because pricier homes sold.'"
                 }
               }
             }

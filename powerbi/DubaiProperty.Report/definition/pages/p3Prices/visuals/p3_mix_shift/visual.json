@@ -2,12 +2,12 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
   "name": "p3_mix_shift",
   "position": {
-    "x": 404,
-    "y": 224,
-    "z": 13000,
-    "width": 380,
-    "height": 228,
-    "tabOrder": 13000
+    "x": 528,
+    "y": 282,
+    "z": 43000,
+    "width": 320,
+    "height": 180,
+    "tabOrder": 43000
   },
   "visual": {
     "visualType": "lineChart",
@@ -76,7 +76,7 @@
                 "color": {
                   "expr": {
                     "Literal": {
-                      "Value": "'#2a78d6'"
+                      "Value": "'#1b2a4a'"
                     }
                   }
                 }
@@ -94,7 +94,7 @@
                 "color": {
                   "expr": {
                     "Literal": {
-                      "Value": "'#eb6834'"
+                      "Value": "'#d6247f'"
                     }
                   }
                 }
@@ -147,7 +147,7 @@
             "altText": {
               "expr": {
                 "Literal": {
-                  "Value": "'Apartment price index against the raw median price per square metre, both rebased to January 2019: the gap is the mix shift.'"
+                  "Value": "'Apartment price index against the raw median price per square metre, both rebased to January 2019: the gap is the mix shift (2023: +1% raw vs +17% like for like).'"
                 }
               }
             }
@@ -159,7 +159,7 @@
   "filterConfig": {
     "filters": [
       {
-        "name": "p3Fromb",
+        "name": "p3bFrom",
         "field": {
           "Column": {
             "Expression": {
@@ -207,7 +207,7 @@
         }
       },
       {
-        "name": "p3Snapb",
+        "name": "p3bSnap",
         "field": {
           "Column": {
             "Expression": {

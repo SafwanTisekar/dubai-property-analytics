@@ -2,12 +2,12 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
   "name": "p2_ready_financed",
   "position": {
-    "x": 16,
-    "y": 224,
-    "z": 12000,
-    "width": 404,
-    "height": 220,
-    "tabOrder": 12000
+    "x": 198,
+    "y": 282,
+    "z": 41000,
+    "width": 346,
+    "height": 180,
+    "tabOrder": 41000
   },
   "visual": {
     "visualType": "columnChart",
@@ -76,7 +76,7 @@
                 "color": {
                   "expr": {
                     "Literal": {
-                      "Value": "'#2a78d6'"
+                      "Value": "'#1b2a4a'"
                     }
                   }
                 }
@@ -94,7 +94,7 @@
                 "color": {
                   "expr": {
                     "Literal": {
-                      "Value": "'#8a8984'"
+                      "Value": "'#6b7280'"
                     }
                   }
                 }
@@ -177,7 +177,7 @@
   "filterConfig": {
     "filters": [
       {
-        "name": "p2Froma",
+        "name": "p2aFrom",
         "field": {
           "Column": {
             "Expression": {
@@ -225,7 +225,7 @@
         }
       },
       {
-        "name": "p2Snapa",
+        "name": "p2aSnap",
         "field": {
           "Column": {
             "Expression": {

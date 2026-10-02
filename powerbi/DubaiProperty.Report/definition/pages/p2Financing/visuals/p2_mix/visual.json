@@ -2,12 +2,12 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
   "name": "p2_mix",
   "position": {
-    "x": 428,
-    "y": 452,
-    "z": 16000,
-    "width": 404,
-    "height": 228,
-    "tabOrder": 16000
+    "x": 554,
+    "y": 494,
+    "z": 46000,
+    "width": 346,
+    "height": 182,
+    "tabOrder": 46000
   },
   "visual": {
     "visualType": "hundredPercentStackedColumnChart",
@@ -71,33 +71,6 @@
       }
     },
     "objects": {
-      "labels": [
-        {
-          "properties": {
-            "show": {
-              "expr": {
-                "Literal": {
-                  "Value": "true"
-                }
-              }
-            },
-            "labelPrecision": {
-              "expr": {
-                "Literal": {
-                  "Value": "0L"
-                }
-              }
-            },
-            "fontSize": {
-              "expr": {
-                "Literal": {
-                  "Value": "7D"
-                }
-              }
-            }
-          }
-        }
-      ],
       "categoryAxis": [
         {
           "properties": {
@@ -167,7 +140,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'2010-2026 (2026 partial); not filtered by Year'"
+                  "Value": "'2010-2026 (2026 partial)'"
                 }
               }
             },
@@ -203,7 +176,7 @@
   "filterConfig": {
     "filters": [
       {
-        "name": "p2Frome",
+        "name": "p2eFrom",
         "field": {
           "Column": {
             "Expression": {
@@ -251,7 +224,7 @@
         }
       },
       {
-        "name": "p2Snape",
+        "name": "p2eSnap",
         "field": {
           "Column": {
             "Expression": {
