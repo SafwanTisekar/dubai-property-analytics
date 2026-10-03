@@ -37,6 +37,7 @@ dev = [
     "nbclient>=0.10",
     "nbformat>=5.10",
     "jsonschema>=4.23",
+    "pymupdf>=1.28.2",
 ]
 
 [build-system]

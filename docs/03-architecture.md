@@ -36,7 +36,7 @@ flowchart LR
     G -->|dbt| RPT
     ML -->|dbt| RPT
     RPT -->|PostgreSQL connector,<br/>import mode| PBID[Power BI Desktop<br/>in Parallels]
-    PBID --> PBIS[Power BI Service] --> W[Publish to web] --> Site[GitHub Pages website]
+    PBID --> PBIS[Power BI Service] --> W[Publish to web] --> Site[GitHub Pages site: SafwanTisekar.github.io]
 ```
 
 ## 3. Layers (PostgreSQL schemas)
@@ -80,8 +80,7 @@ dubai-property-analytics/
 ├── .gitignore
 ├── .pre-commit-config.yaml
 ├── .github/workflows/
-│   ├── ci.yml                  # ruff, pytest, dbt build on tests/fixtures (postgres service container)
-│   └── pages.yml               # deploy website/ to GitHub Pages
+│   └── ci.yml                  # ruff, pytest, dbt build on tests/fixtures (postgres service container)
 ├── sql/
 │   ├── 00_create_database.sql  # database (UTF8), roles: dpa_owner, pbi_reader
 │   └── 01_schemas_grants.sql   # bronze, silver, gold, ml, rpt + grants (pbi_reader: SELECT on rpt only)
@@ -138,7 +137,6 @@ dubai-property-analytics/
 ├── powerbi/
 │   └── DubaiProperty.pbip      # + .Report / .SemanticModel folders
 ├── reports/                    # figures, model cards, dq_report.md
-├── website/
 └── tests/
     └── fixtures/               # committed CI extracts of the DLD/FRED files (README: attribution)
 ```

@@ -29,7 +29,8 @@ BRONZE_FLAGS ?=
 
 .PHONY: help setup db dbt-deps dbt-debug lint test \
         download bronze reconcile profile sample fixtures dbt dq kpi dictionary unzoned centroids \
-        pbi-ready pbi-measures pbi-inventory eda train score model-reports update pipeline
+        pbi-ready pbi-measures pbi-inventory eda train score model-reports site site-check \
+        site-shots site-preview update pipeline
 
 help:  ## List targets
 	@grep -hE '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | \
@@ -178,6 +179,27 @@ model-reports:  ## Model reports from ml.* -> reports/price_index.md, yields.md,
 	$(PY).models.report_4a
 	$(PY).models.report_avm
 	$(PY).models.report_4c
+
+# --- Phase 6: website (docs/07) ---------------------------------------------------------
+# The site is its own repository (GitHub Pages user site SafwanTisekar.github.io). Its local
+# clone is SITE_REPO_DIR in .env; these targets write into it and keep no copy here. Commit
+# and push in that repository to publish. Report screenshots come from Power BI Desktop:
+# File > Export > PDF, then make site-shots PDF=path/to/export.pdf (PDF unset: placeholders).
+PDF ?=
+SITE_PORT ?= 8000
+
+site-check:
+	@[ -n "$(SITE_REPO_DIR)" ] && [ -f "$(SITE_REPO_DIR)/index.html" ] || { \
+		echo "SITE_REPO_DIR must point at the site repo clone (set it in .env): got '$(SITE_REPO_DIR)'"; exit 1; }
+
+site: site-check  ## Numbers from the DB + project cards -> SITE_REPO_DIR pages and data/site.json; figures -> WebP
+	$(PY).website.build
+
+site-shots: site-check  ## Report pages from a Power BI PDF export (PDF=...) -> SITE_REPO_DIR/projects/dubai-property/assets/report
+	$(PY).website.report_pages $(if $(PDF),--pdf "$(PDF)",--placeholder)
+
+site-preview: site-check  ## Serve SITE_REPO_DIR at http://localhost:8000 for review
+	uv run python -m http.server $(SITE_PORT) --bind 127.0.0.1 -d "$(SITE_REPO_DIR)"
 
 # --- Stubs (implemented in later phases, see docs/08) ---------------------------------
 

@@ -279,6 +279,19 @@ Power BI iframe from website/config.js with a screenshot/GIF fallback; all numbe
 reports/*.md (no invented figures); DLD CC BY 4.0 attribution; pages.yml deploy to GitHub Pages;
 Lighthouse ≥ 90 via Playwright.
 ```
+Revised by the owner (2026-10-02): one page with five sections (docs/07 §3), numbers from the database via `make site`.
+
+- [x] Site pages (now in the site repo): index.html, styles.css, main.js, config.js; numbers written by `make site` into the pages and `data/site.json` (no typed figures); five findings with charts (WebP)
+- [x] Embed from config.js, lazy, with a fallback on timeout, licence end date or no JavaScript
+- [x] Pages workflow in the site repo: runs its tests, then deploys (this repo's workflow removed 2026-10-03)
+- [x] Tests: site repo `tests/test_site.py` (numbers = site.json, links and images resolve, alt text, image sizes, contrast, attribution, no em-dashes, no contact details or documents); here `tests/test_website_build.py` (build helpers; site links to this project when `SITE_REPO_DIR` is set)
+- [x] docs/07 rewritten for one page; decisions logged
+- [x] Report screenshots from the owner's PDF export (2026-10-03)
+- [x] Restructure (owner, 2026-10-03): home page about the owner from the CV, project cards from `data/projects.json`, project page under `projects/dubai-property/`
+- [x] Owner resolved the `TODO(owner)` notes (2026-10-03)
+- [x] Site moved to its own repo `SafwanTisekar.github.io` (2026-10-03): `make site` writes into `SITE_REPO_DIR`; this repo's `website/` and Pages workflow removed
+- [ ] Owner creates the GitHub repo, pushes, enables Pages (Settings > Pages > Source: GitHub Actions)
+- [ ] Lighthouse ≥ 90 (Performance, Accessibility, SEO) in Chrome DevTools on the deployed site; record the Website URL below
 
 ---
 
@@ -302,7 +315,7 @@ Lighthouse ≥ 90 via Playwright.
 | 3 EDA | ✓ | 2026-09-30 | 2026-09-30 | `make eda` runs the three notebooks in ~20 s on full data. Headlines: 211,007 market sales / AED 668.3bn in 2025; Jan–Aug 2026 −19% on 2025 (ready −37%, off-plan −7%), no sign of registration lag; the 2009 spike is a backlog (93.5% of 2009 off-plan registrations applied for earlier); 28–48% of 2025 ready purchases bank-financed (matched lower bound 27.9%); LTV norm 75% → 80%; 2023 apartment prices +1.2% raw vs +14.5% like-for-like. Register totals match DLD's published 2023–25 figures within ~1% on value. Revised the same day after owner review (mortgage KPI, villa area basis, 2026 momentum). `make dbt` 242 nodes pass. CI green on 831502c ([run](https://github.com/SafwanTisekar/dubai-property-analytics/actions/runs/36759956450)). Q9 deferred |
 | 4 Models | ✓ | 2026-10-01 | 4a, 4b, 4c: 2026-10-01 | 4a (hedonic index + yields) done, CI green: rolling-window hedonic index from 2011, 18 segments, validates vs DLD at 0.93 / 0.92 / 0.91 (timing-aligned YoY); yields 5,919 cells. Owner decisions 2026-10-01: rolling windows, 2011 start, aligned validation headline (docs/05 §8). 4b (AVM) done: LightGBM test MdAPE 6.8%, ±10% 65.2% vs comparables 9.9% / 50.3%, no leakage alarm, 904,551 sales scored; model card `reports/avm_model_card.md`. 4c (stress test + forecast) done 2026-10-01: at 80% LTV a 20% fall puts 22% of recent ready apartment buyers in negative equity; SARIMAX beats naive on the index (11/12) but not on volume (1/12); main DB restored after a fixture-run incident, bronze guard added |
 | 5 Power BI | ✓ | 2026-10-01 | 2026-10-02 | Report built and confirmed in Desktop (Phase 5 + 5b redesign): 22 rpt views, TMDL model (measures, what-if and KPI Guide tables), nine PBIR pages (Introduction, Key terms, 1–6, KPI guide) validated offline, per-page reset bookmarks, navy / magenta theme. Published to the web 2026-10-02 (URL in the Publishing record); Pro trial ends ~2026-11-27. Not yet recorded: §7 card check, Performance Analyzer timings, VertiPaq size |
-| 6 Website | ☐ | | | |
+| 6 Website | ◐ | 2026-10-02 | | Restructured and restyled 2026-10-03: personal home page + project page, moved to its own repo SafwanTisekar.github.io (docs/07 §2); 31 site tests there, build tests here. Awaiting the owner's GitHub repo creation, push and first deploy |
 | 7 Launch | ☐ | | | |
 
 | Publishing record | Value |
@@ -311,5 +324,5 @@ Lighthouse ≥ 90 via Playwright.
 | Publish-to-web URL | https://app.fabric.microsoft.com/view?r=eyJrIjoiYzgxYTFiNGEtNTQ1OC00YWExLTk2YTctY2E2MDMwNjQyNjY5IiwidCI6ImQ0M2RmOTBjLTEwYTctNDg5MC1hYjBjLWU5YWMwNDQ2NjRiNCJ9 |
 | Published on | 2026-10-02 |
 | Licence/trial expires | Pro trial started 2026-09-29, ends **~2026-11-27**. The embed stops working if the licence lapses |
-| Website URL | (Phase 6) |
+| Website URL | https://safwantisekar.github.io/ (project page: /projects/dubai-property/); repo SafwanTisekar.github.io, not yet pushed |
 | Data as of | 2026-09-25 (snapshot) |

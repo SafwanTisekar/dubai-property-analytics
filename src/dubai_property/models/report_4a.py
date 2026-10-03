@@ -433,6 +433,26 @@ def episode_kind(e: dict, frequency: str) -> str:
     return "short dip (likely noise)" if short else "cycle"
 
 
+def mix_shift_changes(
+    index: pl.DataFrame, raw_year: pl.DataFrame, snapshot_year: int
+) -> list[tuple[int, float | None, float | None]]:
+    """(year, raw median change, hedonic change) for apartments, 2012 to the last full year.
+
+    The raw change is on the yearly median AED per sq m (``RAW_YEARLY_SQL``); the hedonic
+    change is on the annual average of the monthly apartment index. Their gap is the mix
+    effect in the price_index.md table, and the website quotes the same numbers.
+    """
+    apt = series(index, "apartment").with_columns(y=pl.col("period_start").dt.year())
+    annual = apt.group_by("y").agg(pl.col("index_value").mean()).sort("y")
+    annual = dict(zip(annual["y"], annual["index_value"], strict=True))
+    raw_y = dict(zip(raw_year["year"], raw_year["median_ppsqm"], strict=True))
+
+    def change(d: dict, y: int) -> float | None:
+        return d[y] / d[y - 1] - 1 if y in d and y - 1 in d else None
+
+    return [(y, change(raw_y, y), change(annual, y)) for y in range(2012, snapshot_year)]
+
+
 def price_report(index: pl.DataFrame, diag: dict, raw: pl.DataFrame, raw_year: pl.DataFrame,
                  figs: dict[str, Path]) -> str:  # fmt: skip
     """The markdown for reports/price_index.md."""
@@ -455,21 +475,12 @@ def price_report(index: pl.DataFrame, diag: dict, raw: pl.DataFrame, raw_year: p
         dec_rows.append(cells)
 
     # Mix shift, 2023 (the Phase 3 example): raw yearly median vs hedonic annual average.
-    apt = series(index, "apartment").with_columns(y=pl.col("period_start").dt.year())
-    annual = apt.group_by("y").agg(pl.col("index_value").mean()).sort("y")
-    annual = dict(zip(annual["y"], annual["index_value"], strict=True))
-    raw_y = dict(zip(raw_year["year"], raw_year["median_ppsqm"], strict=True))
-
-    def change(d: dict, y: int) -> float | None:
-        return d[y] / d[y - 1] - 1 if y in d and y - 1 in d else None
-
+    changes = mix_shift_changes(index, raw_year, snapshot.year)
     mix_rows = [
-        [str(y), pct(change(raw_y, y)), pct(change(annual, y)),
-         pct((change(annual, y) or 0) - (change(raw_y, y) or 0))]
-        for y in range(2012, snapshot.year) if change(raw_y, y) is not None
+        [str(y), pct(r), pct(hd), pct((hd or 0) - (r or 0))]
+        for y, r, hd in changes if r is not None
     ]  # fmt: skip
-    mix = [(y, change(raw_y, y), change(annual, y)) for y in range(2012, snapshot.year)
-           if change(raw_y, y) is not None and change(annual, y) is not None]  # fmt: skip
+    mix = [(y, r, hd) for y, r, hd in changes if r is not None and hd is not None]
     up = min(mix, key=lambda m: m[2] - m[1])  # raw overstates most
     down = max(mix, key=lambda m: m[2] - m[1])  # raw understates most
     base_raw = raw.filter(pl.col("period") == config.INDEX_BASE_MONTH)["median_ppsqm"][0]

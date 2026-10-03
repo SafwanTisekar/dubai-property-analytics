@@ -4,6 +4,8 @@
 
 Built with SQL (PostgreSQL + dbt), Python (Polars, LightGBM, statsmodels, SHAP) and Power BI Service, and published on a portfolio website with an embedded interactive dashboard.
 
+**Live site:** https://safwantisekar.github.io/projects/dubai-property/
+
 ---
 
 ## The business question
