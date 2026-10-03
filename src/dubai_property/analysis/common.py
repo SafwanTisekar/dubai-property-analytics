@@ -51,7 +51,7 @@ def apply_min_n(
     value_cols: Iterable[str],
     min_n: int = config.MIN_N,
 ) -> pd.DataFrame:
-    """Blank (NaN) the values of every row whose n is under the min-n rule (CLAUDE.md).
+    """Blank (NaN) the values of every row whose n is under the min-n rule (docs/01 §7).
 
     Args:
         df: Frame with one row per segment.

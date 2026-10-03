@@ -180,7 +180,7 @@ select
     l.is_commercial_unit,
     l.has_parking,
 
-    -- Units: sq m and AED (CLAUDE.md).
+    -- Units: sq m and AED (docs/01 §7).
     l.area_sqm,
     l.actual_worth_aed::numeric(18, 2) as actual_worth_aed,
     l.actual_worth_once_aed::numeric(18, 2) as aed_counted_once,

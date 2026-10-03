@@ -1,7 +1,7 @@
 {{ config(alias='area_month') }}
 
 -- Monthly sales and financing by area x property type x bedrooms x off-plan. Counts and AED
--- add up to any level. Medians appear only where n >= min_n (CLAUDE.md); for rollups use
+-- add up to any level. Medians appear only where n >= min_n (docs/01 §7); for rollups use
 -- the area-weighted "Clean Sales Value AED" / "Clean Sales Area Sq M" (clean sales with an
 -- area within the class cap, n = "Clean Sales AW N"), within a property class: across
 -- classes it mixes land, buildings and units.

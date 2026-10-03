@@ -1,13 +1,13 @@
-# 06 – Power BI Report
+# 06. Power BI report
 
-## 1. Data connection
+The semantic model, measures, report pages, design rules and publishing of the Power BI report. Visual-by-visual detail: `powerbi/VISUALS.md`; build rules: `powerbi/BUILD.md`.
 
-- **Source: PostgreSQL** `dubai_property` on the Mac, via Get Data → **PostgreSQL database**, **Import mode** (required for Publish to web). Connection details over the Parallels network are in docs/03 §8.
-- Log in as the read-only role **`pbi_reader`**, and select only **`rpt.*` views** (built in Phase 2b: `rpt.transactions`, `rpt.area_month`, `rpt.rent_month`, `rpt.rates_monthly`, `rpt.report_info` and `rpt.dim_date` / `dim_area` / `dim_property_type` / `dim_procedure` / `dim_project`; Phase 4a added `rpt.price_index` and `rpt.yield_quarter`; 4b added `rpt.avm_score`, `rpt.avm_performance`, `rpt.feature_importance`; 4c added `rpt.stress_grid`, `rpt.stress_replay`, `rpt.forecast`, `rpt.forecast_backtest`; Phase 5 added `rpt.dld_price_index`, `rpt.dim_bedrooms`, `rpt.dim_ready_offplan`: 22 views, all imported). Columns have Title Case names (e.g. `"AED Counted Once"`), AED is whole dirhams, and medians are blank where n < 20 (docs/04 §3). All business logic lives in dbt; Power Query only confirms data types.
-- Server and database are **Power BI parameters** (`PgServer`, `PgDatabase`), so switching between the Parallels IP and localhost is one change.
-- Save as a **Power BI Project (.pbip)** for git, and attach a `.pbix` to GitHub Releases.
-- Refresh happens in Desktop (the Mac must be on, with Postgres running), then republish. No gateway is needed because the public report is republished from Desktop rather than refreshed in the Service.
-- **Model size budget (Phase 5).** Power BI Pro allows a 1 GB model; Publish to web has no lower limit but slows with model size and query count. Estimate from the measured cardinalities, anchored on Desktop's own cache: the Phase 2b import of the 10 pre-ML tables (transactions included) was a **43.8 MB** `cache.abf`.
+## 1. Data connection and size
+
+- **Source:** PostgreSQL `dubai_property`, **import mode** (required for Publish to web), as the read-only role `pbi_reader`, over the Parallels network (docs/03 §8). Server and database are the parameters `PgServer` / `PgDatabase`.
+- **Only `rpt.*` views, 22 in all:** `transactions`, `area_month`, `rent_month`, `rates_monthly`, `report_info`, the dimensions (`dim_date`, `dim_area`, `dim_property_type`, `dim_procedure`, `dim_project`, `dim_bedrooms`, `dim_ready_offplan`), the model outputs (`price_index`, `dld_price_index`, `yield_quarter`, `avm_score`, `avm_performance`, `feature_importance`, `stress_grid`, `stress_replay`, `forecast`, `forecast_backtest`). Title Case column names, AED in whole dirhams, medians blank where n < 20 (docs/04 §3). Business logic lives in dbt; Power Query only sets types.
+- **Refresh:** in Desktop with the Mac and Postgres running, then republish. No gateway: the public report is republished, not refreshed in the Service.
+- **Size budget.** Pro allows a 1 GB model; Publish to web slows with model size. Estimate, anchored on the 43.8 MB `cache.abf` of the first 10-table import:
 
   | Table | Rows | Estimate | What drives it |
   |---|---:|---:|---|
@@ -16,87 +16,88 @@
   | Rent Month | 392,190 | ~5–8 MB | four AED / area sums (~190k distinct each) |
   | Area Month | 120,799 | ~2 MB | |
   | everything else | < 40k each | < 2 MB | |
-  | **Total** | | **≈ 45–65 MB** | well inside 1 GB; nothing blocks Publish to web |
+  | **Total** | | **≈ 45–65 MB** | well inside 1 GB |
 
-  Trimmed in Phase 5 rather than in Power Query (column choice is a dbt decision): `rpt.avm_score` keeps only the **out-of-sample** valuations (validation 2024 + test 2025+, ~424k of 904,551: training-period gaps are in-sample and would flatter the chart; owner decision) and drops the comparable-sales value, AVM value per sq m, model and version columns (the baseline comparison is in `rpt.avm_performance`); `rpt.transactions` drops the per-line `"Price AED"` (it repeats a portfolio deal's total on every unit; `"AED Counted Once"` is the value). **Performance risk:** the DAX medians over Transactions (Median Price per Sq M, the raw-median mix-shift line) are the visuals most likely to exceed 1 s on a monthly axis; if Performance Analyzer says so, pre-compute the monthly median in a small rpt view. **To do (owner):** after the first refresh, record the real size from VertiPaq Analyzer (DAX Studio) here.
+  Trimmed in dbt rather than Power Query: `rpt.avm_score` keeps only the **out-of-sample** valuations (validation 2024 + test 2025+, ~424k of 904,551) and four columns; `rpt.transactions` drops the per-line `"Price AED"` (it repeats a portfolio deal's total on every unit; `"AED Counted Once"` is the value). The real size from VertiPaq Analyzer is still to be recorded (docs/08).
 
 ## 2. Semantic model
 
-Stored as **TMDL** in the PBIP project (`powerbi/DubaiProperty.SemanticModel/definition/`), the source of truth; `tests/test_powerbi_model.py` checks it offline in CI (every rpt view imported once with exactly its columns, every DAX reference resolves, what-if values equal the stress grid's, no hard-coded server).
+Stored as **TMDL** in `powerbi/DubaiProperty.SemanticModel/definition/`, the source of truth. `tests/test_powerbi_model.py` checks it offline in CI: every rpt view imported once with exactly its columns, every DAX reference resolves, what-if values equal the stress grid's, no hard-coded server.
 
-- **Friendly table names**: Transactions, Area Month, Rent Month, Rates Monthly, Date, Area, Property Type, Procedure, Project, Bedrooms, Ready Off-Plan, Price Index, DLD Price Index, Yield Quarter, AVM Score, AVM Performance, Feature Importance, Stress Grid, Stress Replay, Forecast, Forecast Backtest, Report Info. Columns keep the rpt Title Case names. Partitions read `PostgreSQL.Database(PgServer, PgDatabase)`.
-- **Star (connected)**: Transactions, Area Month, Rent Month and AVM Score relate many-to-one, single direction, to **Date** (day grain, marked as the date table), **Area**, **Property Type**, **Bedrooms** and **Ready Off-Plan** (Rent Month: no Ready / Off-Plan, rents are of ready units); Rates Monthly → Date; Transactions and AVM Score → Project; Transactions → Procedure. One synced slicer panel therefore filters every fact. Relationship autodetect is off.
-- **Model outputs are disconnected** (Price Index, DLD Price Index, Yield Quarter, Stress Grid / Replay, Forecast / Backtest, AVM Performance, Feature Importance, Report Info) and measures bridge them with `TREATAS`: dates onto `Period Start` / `Quarter Start`, `'Area'[Zone]` / `[Area Key]`, property type and bedrooms onto their columns. **Why:** those tables mix grains (Dubai, type, zone and area rows, with NULL area keys on the Dubai and zone rows), so a physical relationship to Area would make any area slicer silently drop the Dubai and zone rows a card needs.
-- **What-if and selector tables** (DAX calculated tables, integer keys so equality with `rpt.stress_grid` is exact): `Price Shock %` (0 to −50, step 5); `LTV %` with **50, 60, 70, 80, 85** only (85 labelled "UAE national first home cap (worst case)"; Phase 4c, owner 2026-10-01); `Replay Depth` (Dubai-wide = lower range / own series = upper range); `Forecast Scenario` (Rates flat / +100bp / −100bp).
-- **Display folders**: Market, Financing, Prices, Yields, Valuation, Risk (with `Risk\Concentration`, `Risk\Outlook`), Rates, and **Report** (header, footer, dynamic insight titles; added in Phase 5). Every measure has a description. `discourageImplicitMeasures` is on: visuals use measures, not dragged columns.
-- **Report (PBIR)**: the six pages are PBIR JSON (`DubaiProperty.Report/definition/pages/`), the theme (`powerbi/theme.json`) is registered in the PBIP so it applies on open, and `tests/test_powerbi_model.py` validates every report file against the official Microsoft schemas (vendored in `powerbi/schemas/pbir/`, MIT), every field against the model, and every formatting property and value against an index of Microsoft's report theme schema (`powerbi/schemas/visual_objects.json`).
-- **Format**: every AED amount is `"AED "#,0`; cards and axes show bn / M through the visual's **display units** (set explicitly to Billions or Millions with 1 decimal: Auto switches to Trillions on all-time totals). Excel-style scaling commas (`#,0.0,,,"bn"`) are **not** used: Power BI rendered them literally ("AED 3.6,,,Tbn", Phase 5 gate), and `tests/test_powerbi_model.py` rejects them. Percentages `0.0%` (MdAPE `0.00%`); changes `+0.0%;-0.0%`; index `0.0`.
+- **Tables:** Transactions, Area Month, Rent Month, Rates Monthly, Date, Area, Property Type, Procedure, Project, Bedrooms, Ready Off-Plan, Price Index, DLD Price Index, Yield Quarter, AVM Score, AVM Performance, Feature Importance, Stress Grid, Stress Replay, Forecast, Forecast Backtest, Report Info. Columns keep the rpt names.
+- **Star:** Transactions, Area Month, Rent Month and AVM Score relate many-to-one, single direction, to **Date** (marked date table), **Area**, **Property Type**, **Bedrooms** and **Ready Off-Plan** (not Rent Month: rents are of ready units); Rates Monthly → Date; Transactions and AVM Score → Project; Transactions → Procedure. One synced slicer panel filters every fact. Autodetect is off.
+- **Model outputs are disconnected** and measures bridge them with `TREATAS` (dates, zone, area key, type, bedrooms). Those tables mix grains (Dubai, type, zone and area rows, with NULL area keys on Dubai and zone rows), so a physical relationship to Area would let an area slicer silently drop the rows a card needs.
+- **What-if and selector tables** (integer keys, so equality with `rpt.stress_grid` is exact): `Price Shock %` (0 to −50, step 5); `LTV %` with 50, 60, 70, 80, 85 only; `Replay Depth` (Dubai-wide / own series); `Forecast Scenario` (rates flat / +100bp / −100bp).
+- **Report (PBIR):** pages, bookmarks and theme are PBIR JSON in `DubaiProperty.Report/definition/`, validated against the official Microsoft schemas (vendored in `powerbi/schemas/`, MIT), every field against the model, and every formatting property against an index of the theme schema.
+- **Formats:** AED `"AED "#,0`, with bn / M via display units set explicitly (Auto switches to trillions on all-time totals); percentages `0.0%` (MdAPE `0.00%`); changes `+0.0%;-0.0%`; index `0.0`. Excel-style scaling commas are rejected by a test: Power BI renders them literally.
 
 ## 3. Measures
 
-All measures live in the measure table **`_Measures`** (`tables/_Measures.tmdl`); `powerbi/measures.dax` is a read-only review copy (`make pbi-measures`; a test fails if it is stale). They only aggregate rpt views: definitions sit in dbt. `reports/kpi_reconciliation.md` §7 lists the value every card must show.
+All measures live in `_Measures` (`tables/_Measures.tmdl`); `powerbi/measures.dax` is a read-only review copy (`make pbi-measures`; a test fails if it is stale). Measures only aggregate rpt views; every card value is listed in `reports/kpi_reconciliation.md` §7.
 
 | Folder | Measures | Notes |
 |---|---|---|
 | Market | Market Sales, Market Sales Value (+ PY, YoY %), Clean Sales, Median Price per Sq M, Area-Weighted Price per Sq M (Homes), Off-Plan Sales, Off-Plan Share (Count / Value) | Counts and AED from Area Month (reconciled to Transactions); medians on Transactions, blank under min-n |
 | Financing | Ready Market Sales, Purchase Mortgages, **Purchase Mortgage Share** (headline, lower bound), Ready Sales Not Bank-Financed, New Mortgages (per 100 Sales), New Mortgage Loans, Portfolio Mortgage Deals / Value, Median Purchase LTV | docs/01 §4 definitions |
-| Rates | Fed Funds Rate, EIBOR 3M, Reference Rate (EIBOR, else Fed Funds), Reference Rate Label | EIBOR is not loaded yet, so charts show Fed Funds labelled as the proxy |
-| Prices | Index Value, Index YoY / Value (Latest Complete) / Drawdown from Peak (cards: latest non-partial period in the selection), Index Drawdown, Max Drawdown, DLD Index Value, Index Value (Apartments), Raw Median Price per Sq M (Apartments), Raw Median Rebased | Segment from a slicer on `'Price Index'[Segment]` (Dubai when none) |
-| Yields | Gross Yield (Latest 4 Quarters) (sales-weighted zone cells, as reports/yields.md), Gross Yield by Area, Gross Yield by Quarter, Index Growth 3Y (Zone), New Market Rents, Area-Weighted New Rent per Sq M (Homes), New Rent per Sq M | Min-n applied upstream (both sides) |
-| Valuation | AVM Test MdAPE / Hit Rate 10% / 20% (+ Baseline), MdAPE Gain vs Baseline, AVM Segment MdAPE, Valued Sales, AVM MdAPE / Hit Rate (Interactive), Median Sale Price / AVM Value / Gap %, Flagged for Review / Share, Mean Abs SHAP | Headline cards read AVM Performance (model card); interactive ones recompute on out-of-sample rows |
-| Risk | Selected Shock / LTV / Stress Segment / Ready / Off-Plan, Negative Equity Share / AED / Count, Stress Purchases, Negative Equity Share (CBUAE Cap / Registered Loans), Replay Negative Equity Share, Negative Equity Share by Area | Shares are read per segment row, never re-averaged; blank under min-n |
-| Risk\Concentration | Off-Plan Market Sales (Lines), Master Project Share, Top 10 Master Project Share, Master Project HHI | **Proxy** for developer concentration (Q9 needs the DLD projects file) |
-| Risk\Outlook | Forecast Actual / Central / Lower-Upper 80 / 95, Forecast 12M Change / Lower / Upper, Band label | Scenario from `Forecast Scenario` |
-| Report | Min N, Data As Of Label, Footer Attribution, Selected Year Label, Stress Disclaimer, Title * (dynamic insight titles) | |
+| Rates | Fed Funds Rate, EIBOR 3M, Reference Rate (EIBOR, else Fed Funds), Reference Rate Label | Fed Funds labelled as the proxy until EIBOR is loaded |
+| Prices | Index Value, Index YoY / Value (Latest Complete) / Drawdown from Peak, Index Drawdown, Max Drawdown, DLD Index Value, Raw Median Price per Sq M (Apartments), Raw Median Rebased | Segment from a slicer on `'Price Index'[Segment]` (Dubai when none) |
+| Yields | Gross Yield (Latest 4 Quarters), Gross Yield by Area / by Quarter, Index Growth 3Y (Zone), New Market Rents, Area-Weighted New Rent per Sq M (Homes), New Rent per Sq M | Min-n applied upstream on both sides |
+| Valuation | AVM Test MdAPE / Hit Rate 10% / 20% (+ Baseline), MdAPE Gain vs Baseline, AVM Segment MdAPE, Valued Sales, interactive MdAPE / hit rates, Median Sale Price / AVM Value / Gap %, Flagged for Review / Share, Mean Abs SHAP | Headline cards read AVM Performance (the model card); interactive ones recompute on out-of-sample rows |
+| Risk | Selected Shock / LTV / Segment, Negative Equity Share / AED / Count, Stress Purchases, Negative Equity Share (CBUAE Cap / Registered Loans), Replay Negative Equity Share, by Area | Shares read per segment row, never re-averaged; blank under min-n |
+| Risk\Concentration | Off-Plan Market Sales (Lines), Master Project Share, Top 10 Master Project Share, Master Project HHI | **Proxy** for developer concentration |
+| Risk\Outlook | Forecast Actual / Central / Lower-Upper 80 / 95, Forecast 12M Change / Lower / Upper | Scenario from `Forecast Scenario` |
+| Report | Min N, Data As Of Label, Footer Attribution, Selected Year Label, Stress Disclaimer, dynamic insight titles | |
 
-Every stress visual carries "Illustrative, not a regulatory stress test" (`[Stress Disclaimer]`). The historical replay rows have no Shock Pct; the two depths ("Replay: 2014-2020, Dubai-wide", the lower range, and "…, own series", the upper range) are chosen with `Replay Depth`. `tests/test_kpi_reconciliation.py` reproduces every docs/01 §4 KPI in SQL; the cards must match §7 of its report before publishing.
+Every stress visual carries "Illustrative, not a regulatory stress test". `tests/test_kpi_reconciliation.py` reproduces every docs/01 §4 KPI in SQL.
 
 ## 4. Report pages
 
-16:9 canvas, a consistent header (title, "Source: Dubai Land Department (CC BY 4.0)", data-as-of date), a synced slicer panel (Year, Zone/Area, Property sub-type, Bedrooms, Off-plan/Ready) and one theme.
+16:9 canvas; a navy side bar with the page navigator; a header with title, data-as-of date, Reset all filters and a link to the KPI guide; a synced slicer panel (Year, Zone / Area, Property type, Bedrooms, Ready / Off-plan); the attribution footer on every page.
 
-| # | Page | Answers | Visuals |
+| # | Page | Answers | Main visuals |
 |---|---|---|---|
-| 1 | **Executive Overview** | Q1 | KPI cards (Sales Value, Sales Count, Median AED/sq m, Index YoY, Purchase Mortgage Share, Off-plan Share) · sales value by month with **cycle annotations** (2008, 2014, 2020, 2021+) · top 10 areas by value · 3 insight text boxes |
-| 2 | **Financing & Market Mix** | Q2 | Ready sales: bank-financed (matched purchase mortgage) vs not bank-financed at registration, by month · purchase-mortgage share and EIBOR 3M as stacked panels on one time axis (no dual axis) · new mortgages per 100 sales · off-plan vs ready share over time · off-plan share by area bar |
-| 3 | **Prices & Index** | Q3, Q6 | Hedonic index lines (Dubai / apartments / villas / zones) vs DLD official index · **raw median vs hedonic** (mix-shift story) · AED/sq m by area map · bedrooms × zone matrix · drawdown chart |
-| 4 | **Rental Yields** | Q4 | Yield by area map · yield vs 3-year growth scatter (bubble = sales volume; quadrant lines) · yield trend by zone · rent per sq m by bedrooms |
-| 5 | **Valuation Model (AVM)** | Q5 | AVM KPI cards (MdAPE, ±10%/±20% hit rates vs baseline) · accuracy by segment bar · top feature importance · actual vs predicted by month · table of the largest AVM gaps by area/project |
-| 6 | **Risk & Stress Test** | Q6, Q7, Q9 | **Price Shock** and **LTV** sliders → Negative Equity Share and AED cards · negative-equity share by area map/bar · historical drawdown replay · developer concentration (HHI, top developers' off-plan share) · 12-month outlook fan chart |
+| | Introduction, Key terms and methods | | What the report is for, how to read it, the four models in plain words |
+| 1 | **Executive overview** | Q1 | KPI tiles (sales value, count, median AED / sq m, like-for-like YoY, off-plan share, mortgage share); sales value by month with cycle annotations; top areas by value; three insight texts |
+| 2 | **Financing** | Q2 | Ready sales bank-financed vs not; purchase-mortgage share and the rate on one time axis (stacked, no dual axis); new mortgages per 100 sales; off-plan share over time and by area |
+| 3 | **Prices** | Q3, Q6 | Hedonic index vs DLD's; raw median vs like-for-like (mix shift); AED / sq m by area; bedrooms × zone matrix; drawdown |
+| 4 | **Rental yields** | Q4 | Yield by area; yield vs 3-year growth; yield by zone over time; rent per sq m by bedrooms |
+| 5 | **Valuation model** | Q5 | MdAPE and hit rates vs the baseline; accuracy by segment (same sales); feature importance; actual vs predicted by month; largest gaps |
+| 6 | **Risk and stress test** | Q6–Q9 | Shock and LTV slicers → negative-equity share and AED; by area; 2014→2020 replay; master-project concentration; 12-month outlook fan |
+| | KPI guide | | Every KPI's meaning, calculation and source, generated from the measure descriptions |
 
-**Maps: none in v1 (owner decision, 2026-10-02).** The Azure Maps visual must be enabled by a tenant admin, which the owner's account isn't, and Bing maps are being retired. Every geographic view is therefore a **bar chart by zone or area, top N, sorted by the same measure** (pages 3, 4, 6; `powerbi/BUILD.md`). The OpenStreetMap centroids stay in `'Area'[Latitude]` / `[Longitude]` (`reports/area_centroids.md`: 194 of 265 areas, 97.7% of 2023+ market sales) and the footer keeps the ODbL credit, so a map can be added later without model changes. **No Python/R visuals**; SHAP images go on the website.
+**No maps in v1** (decision 2026-10-02): the Azure Maps visual must be enabled by a tenant admin and Bing maps are being retired, so every geographic view is a bar chart by zone or area, top N. The OpenStreetMap centroids stay in `'Area'[Latitude]` / `[Longitude]` (194 of 265 areas, 97.7% of 2023+ market sales) and the footer keeps the ODbL credit, so a map can be added without model changes. No Python/R visuals.
 
-**Phase 5 substitutions** (data not available, decisions 2026-10-01): page 2 shows the **Fed Funds rate as the EIBOR proxy** (labelled; EIBOR swaps in once a CBUAE file is loaded); page 6's developer concentration is a **master-project proxy** (top-10 master projects' share of off-plan market sales and an HHI over master projects, labelled as a proxy; owner decision) until the DLD projects file brings developer names.
+**Substitutions** (data not loaded, 2026-10-01): page 2 shows Fed Funds as the EIBOR proxy, labelled; page 6's developer concentration is a master-project proxy, labelled.
 
 ## 5. Design standards
 
-- Insight titles, e.g. "Off-plan now drives X% of sales value, up from Y% in 2019", rather than plain labels.
-- 6–8 visuals per page maximum, aligned grid, alt text on every visual.
-- AED everywhere. Use Dubai-appropriate naming (communities, not "neighbourhoods").
-- Performance Analyzer: under 1 s per visual.
+- Insight titles that state the finding, not plain labels.
+- 6–8 visuals per page, aligned grid, alt text on every visual.
+- AED everywhere; communities, not "neighbourhoods".
+- Built-in visuals only (custom visuals watermark without a licence and the report is public).
+- Target under 1 s per visual in Performance Analyzer.
 
 ## 6. Publishing
 
-The mechanics are the same as any Publish-to-web report: a work/school account, a Power BI Pro (trial) licence and the tenant setting enabled (see docs/03 §8–9).
-1. Publish to My workspace → File → Embed report → **Publish to web (public)**.
-2. Put the embed URL in `website/config.js` and record it, with the licence expiry date, in docs/08.
-3. Monthly refresh: `make update` → refresh in Desktop → republish (the embed URL stays the same). This is a nice "living dashboard" talking point.
-4. Everything in the model becomes public. That's fine for DLD open data under CC BY 4.0, with attribution shown.
+1. Publish to My workspace → File → Embed report → **Publish to web (public)** (licensing: docs/03 §9).
+2. The embed URL is recorded in the docs/08 Publishing record and set in the site repository's `config.js`; a test checks they match.
+3. Monthly refresh: rebuild → refresh in Desktop → republish. The embed URL stays the same.
+4. Everything in the model becomes public, which is fine for DLD open data under CC BY 4.0 with attribution.
 
-## 7. Decisions (Phase 5)
+## 7. Decisions
 
 | Date | Decision | Why |
 |---|---|---|
 | 2026-10-01 | Semantic model hand-written as TMDL; model outputs disconnected and bridged with TREATAS | §2. Their Dubai / zone rows have NULL area keys, so a relationship would let an area slicer drop them |
 | 2026-10-02 | AED formats are `"AED "#,0` only; bn / M via display units; thousands via a measure formatted `"AED "#,0"K"` | Scaling commas (`#,0.0,,,"bn"`) render literally in Power BI ("AED 3.6,,,Tbn", gate 0) |
-| 2026-10-02 | No maps in v1: bar charts by area, top N | Azure Maps needs a tenant admin (owner); centroids kept for later |
-| 2026-10-02 | Report pages built as PBIR JSON and validated offline (official schemas, model fields, theme-schema formatting index, query expressions); `powerbi/VISUALS.md` generated from them | Reproducible, reviewable report definition; Desktop remains the final check (owner gates) |
+| 2026-10-02 | No maps in v1: bar charts by area, top N | Azure Maps needs a tenant admin; centroids kept for later |
+| 2026-10-02 | Report pages built as PBIR JSON and validated offline (official schemas, model fields, theme-schema formatting index, query expressions); `powerbi/VISUALS.md` generated from them | Reproducible, reviewable report definition; Desktop remains the final check (manual review gates) |
 | 2026-10-02 | Render rules: charts ≥ 240 × 180 px, top-N bars ≥ 24 px each, subtitles only under a title, card formatting on `$id = default` | Final gate: tiny panels drew a placeholder icon, bar charts scrolled, subtitles and label settings were silently ignored |
 | 2026-10-02 | Model-output rpt views keep ratios at 6 decimals (`rpt_ratio` macro) | Power BI rounds half up: 0.650478 stored as 0.6505 showed 65.1% against the model card's 65.0% |
 | 2026-10-02 | Yield aggregates leave out cells outside the 2–15% sanity band | Two flagged Al Barsha cells drove a 14.1% zone yield; apartments 7.2% → 7.1% (docs/05 §8) |
 | 2026-10-02 | AVM features shown with readable names (`seed_avm_feature_label`, tested to cover every feature) | "proj_rel_12m" means nothing to a reader; "Project price level (12m)" does |
 | 2026-10-02 | AVM segment chart compares the models on the same sales (breakdowns "… (same sales)" in `rpt.avm_performance`) | Own coverage put LightGBM's villas at 8.91% (21,810) beside the model card's 8.66% head-to-head (20,527) |
-| 2026-10-02 | Redesign: navy side bar with a built-in page navigator, grey rounded content panel, header bar (title, Data as of, Reset all filters, ⓘ to the KPI guide), white rounded cards with section headings, KPI tiles with a split strip, navy / magenta palette | Owner request (reference screenshot, style only). Built-in visuals only: custom visuals watermark without a licence and the report is public |
+| 2026-10-02 | Redesign: navy side bar with a built-in page navigator, grey rounded content panel, header bar (title, Data as of, Reset all filters, ⓘ to the KPI guide), white rounded cards with section headings, KPI tiles with a split strip, navy / magenta palette | Restyled to a reference screenshot (style only). Built-in visuals only: custom visuals watermark without a licence and the report is public |
 | 2026-10-02 | "Reset all filters" opens a per-page bookmark (data only, the page's slicers only) restoring the defaults (Year 2025, page 6 Dubai / −20 / 80%, Accuracy by same sales) | The first version (Clear all slicers) left the single-select Year slicer on its value (gate 2); bookmarks are generated from the slicers' defaults and schema-validated |
 | 2026-10-02 | Short zone labels (`seed_zone_label`, `'Area'[Zone Short]`) for narrow columns | The page 3 matrix scrolled sideways with full zone names |
 | 2026-10-02 | Two beginner pages (Introduction, Key terms & methods) before page 1, numbers from measures | A non-specialist should understand the report in a minute per page; typed numbers would go stale at the next refresh |

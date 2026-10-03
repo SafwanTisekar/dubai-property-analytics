@@ -97,7 +97,7 @@ where t.is_clean_market_sale
   and (t.property_type_key = {apt} or t.bedrooms is not null)
 """
 
-# Rows in and out of the population, with the reason (CLAUDE.md: log every filter).
+# Rows in and out of the population, with the reason (docs/01 §7: log every filter).
 EXCLUSIONS_SQL = """
 select property_type_key,
        count(*) as clean_sales,
@@ -515,7 +515,7 @@ def run(trials: int | None = None) -> dict:
         for reason in alarm:
             log.error("LEAKAGE ALARM: %s", reason)
         raise SystemExit(
-            "AVM results too good to be true (CLAUDE.md): nothing written to ml.*. "
+            "AVM results too good to be true (docs/01 §7): nothing written to ml.*. "
             f"Investigate before going further; diagnostics in {diag_path}"
         )
 

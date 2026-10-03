@@ -1,7 +1,7 @@
 {{ config(alias='rent_month') }}
 
 -- Monthly rents by area x property type x bedrooms x new/renewal: the only rent table in
--- Power BI (no contract detail, CLAUDE.md). "Market Rent Contracts" = new comparable
+-- Power BI (no contract detail, docs/01 §7). "Market Rent Contracts" = new comparable
 -- contracts (the default market rent). Medians appear only where n >= min_n; for rollups
 -- use the sums (Σ rent / Σ area for an area-weighted rent per sq m, within a property
 -- class). Contracts starting after the data snapshot date are not included.

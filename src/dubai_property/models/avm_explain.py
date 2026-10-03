@@ -7,7 +7,7 @@ the expected value add up to the model's output, the log ratio of the AVM's AED 
 to the as-of reference price (``features.build``). The reference itself is the starting
 point of every worked example.
 
-**Worked examples are chosen by a rule, not by hand** (owner, 2026-10-01), and the rule is
+**Worked examples are chosen by a rule, not by hand** (decision, 2026-10-01), and the rule is
 published with them (``SELECTION_RULE``):
 
 * three accurate valuations (APE < 10%), one per profile below, each the test sale whose

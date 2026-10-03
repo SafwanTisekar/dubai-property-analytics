@@ -29,7 +29,7 @@ Phase 4c (docs/05 §4). **Illustrative, not a regulatory stress test.** It answe
 | Negative equity | Loan > shocked value. AED = Σ (loan − value) over those buyers |
 | Min-n | Segments with fewer than 20 purchases keep their count but no share or AED |
 
-**LTV caps used (seed `seed_ltv_rules`, verified by the owner against the CBUAE rulebook):**
+**LTV caps used (seed `seed_ltv_rules`, verified by hand against the CBUAE rulebook):**
 
 | Borrower | Status | Value band | Max LTV | In force | Source |
 | --- | --- | --- | ---: | --- | --- |

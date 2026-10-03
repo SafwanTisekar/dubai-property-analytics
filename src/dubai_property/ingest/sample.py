@@ -16,7 +16,7 @@ the same shape as the DLD files (every field quoted), so ``load_bronze --root
 data/sample`` loads it exactly like the real data. Rate files are tiny and are copied
 whole. Only rows loaded from ``data/raw`` are sampled.
 
-``data/`` is gitignored (CLAUDE.md), so the sample is a local artefact; CI builds its
+``data/`` is gitignored (docs/01 §7), so the sample is a local artefact; CI builds its
 own fixtures (see docs/04 Decisions).
 
 Usage::

@@ -1,8 +1,8 @@
 """Silver data-quality report: rows in/out per step and rows affected per rule.
 
 Writes ``reports/dq_report.md`` after ``dbt build`` (``make dq``; ``make dbt`` runs it).
-CLAUDE.md asks for row counts in and out, with the reason, for every step that filters
-rows, and docs/04 §2 for rows affected per cleaning rule. Four sections:
+The project rules (docs/01 §7) ask for row counts in and out, with the reason, for every
+step that filters rows, and docs/04 §2 for rows affected per cleaning rule. Four sections:
 
 1. **Steps.** Rows from bronze to each silver model. Silver removes rows in one place only
    (C1 de-duplication); every other step splits or flags.

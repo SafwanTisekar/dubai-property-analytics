@@ -1,95 +1,83 @@
-# 02 – Data Sources
+# 02. Data sources
 
-All row counts below are **approximate and come from third-party profiles**. **Phase 1 must verify them** and record the actual figures in §7.
+Where each dataset comes from, what its key fields mean, its known quality issues and the figures verified on load (§7).
 
 ## 1. Where the DLD data lives
 
-| Route | What you get | Use for |
+| Route | What it provides | Used for |
 |---|---|---|
-| **DLD Open Data**: [dubailand.gov.ae/en/open-data/real-estate-data](https://dubailand.gov.ae/en/open-data/real-estate-data/) | CSV download with From/To date filters for 9 datasets: Transactions, Rents, Projects, Valuations, Land, Buildings, Units, Brokers, Developers | Recent data and incremental top-ups |
-| **Dubai Pulse / Dubai Data**: [dubaipulse.gov.ae](https://www.dubaipulse.gov.ae/data/dld-transactions/dld_transactions-open) | Full-history bulk CSVs (`dld_transactions-open`, `dld_rent_contracts-open`, units, buildings, projects, lookups) plus an API that needs registered OAuth credentials | **Primary historical load** |
-| **Kaggle mirrors**, e.g. [Dubai Real Estate Transactions](https://www.kaggle.com/datasets/alexefimik/dubai-real-estate-transactions-dataset) | Snapshot copies (e.g. ~1.51M transactions, 46 columns, 2003 → mid-2025) | Fallback if the official downloads are slow or blocked. Record the snapshot date |
+| **Dubai Pulse / Dubai Data**: [dubaipulse.gov.ae](https://www.dubaipulse.gov.ae/data/dld-transactions/dld_transactions-open) | Full-history bulk CSVs (`dld_transactions-open`, `dld_rent_contracts-open`, units, buildings, projects, lookups) | **The historical load** (snapshots of 2026-09-29 / 2026-09-30) |
+| **DLD Open Data**: [dubailand.gov.ae](https://dubailand.gov.ae/en/open-data/real-estate-data/) | Date-filtered CSV downloads for nine datasets | Future incremental top-ups (deferred, docs/04 Decisions) |
+| Kaggle mirrors | Snapshot copies | Not used; fallback only |
 
-**Licence:** DLD open data is published under **CC BY 4.0**. Attribute "Dubai Land Department" on the website and in the report footer.
+**Licence:** DLD open data is published under **CC BY 4.0**, credited as "Dubai Land Department" in the report footer and on the website.
 
-**Access plan:** do a one-off bulk historical load, then incremental monthly top-ups from the DLD date-filtered download. If the DLD page limits the date range per download, script the download in monthly windows. If downloads need manual clicks, save them to `data/raw/dld/<dataset>/` with the date range in the filename, and the pipeline takes over from there.
+**Access:** bulk files are downloaded by hand into `data/raw/dld/<dataset>/` with the snapshot date in the file name; the pipeline takes over from there. Refreshing means dropping in a newer bulk snapshot.
 
-## 2. Core dataset: Transactions (sales, mortgages, gifts)
+## 2. Transactions (sales, mortgages, gifts)
 
 | | |
 |---|---|
-| Grain | One row per registered transaction procedure (a multi-unit deal can span several rows) |
-| Size | ~1.5–1.8M rows × ~46 columns, 2004 → present, updated daily/weekly |
-| Language | Bilingual: `*_en` and `*_ar` columns. Keep `_en` and drop `_ar` in silver |
-
-**Key columns (verify names in Phase 1)**
+| Grain | One row per registered transaction procedure (a multi-unit deal spans several rows) |
+| Size | 1,788,150 rows × 47 columns, 2004 → 2026-09-25 (§7) |
+| Language | Bilingual `*_en` / `*_ar` columns; `_ar` dropped in silver |
 
 | Column | Meaning | Notes |
 |---|---|---|
-| `transaction_id` | Transaction number | Candidate key, but test uniqueness. May repeat across procedure lines |
+| `transaction_id` | Transaction number | Unique on every row of the bulk file |
 | `instance_date` | Registration date | Drives all time analysis |
-| `trans_group_en` | **Sales / Mortgages / Gifts** | Top-level split, and the core of the financing analysis |
-| `procedure_name_en` | e.g. Sell, Sell - Pre registration (off-plan), Mortgage Registration, Modify Mortgage, Delayed Sell, Lease to Own | Map to a clean `procedure_category` via a seed |
-| `reg_type_en` | **Off-Plan** vs **Existing (ready)** | Key risk dimension |
-| `property_type_en` / `property_sub_type_en` | Unit/Land/Building; Flat, Villa, Office, Hotel Apartment… | |
-| `property_usage_en` | Residential / Commercial / … | |
-| `area_id`, `area_name_en` | DLD area/community | Main geographic key |
-| `project_number`, `project_name_en`, `master_project_en`, `building_name_en` | Project hierarchy | 11–18% missing |
-| `rooms_en` | Studio, 1 B/R, 2 B/R, … Penthouse | Normalise to integer `bedrooms` + flags |
-| `has_parking` | 0/1 | |
-| `procedure_area` | Area in **sq m** | Heavy tails, tiny values exist |
-| `actual_worth` | Transaction value, AED | For sales this is the price. **For mortgage rows, confirm whether it's the loan amount** (Phase 1 must verify this and document it) |
-| `meter_sale_price` | AED per sq m | Recompute and compare with `actual_worth / procedure_area` |
-| `rent_value`, `meter_rent_price` | Only for lease-to-own | ~97% missing |
-| `nearest_landmark_en`, `nearest_metro_en`, `nearest_mall_en` | Proximity features | ~26% missing |
-| `no_of_parties_role_1/2/3` | Buyer/seller/other counts | |
+| `trans_group_en` | Sales / Mortgages / Gifts | Top-level split, core of the financing analysis |
+| `procedure_name_en` | e.g. Sell, Sell - Pre registration, Mortgage Registration, Delayed Sell, Lease to Own | Mapped to `procedure_category` by `seed_procedure_map` |
+| `reg_type_en` | Off-Plan vs Existing (ready) | First-class risk dimension |
+| `property_type_en` / `property_sub_type_en` | Unit / Land / Building; Flat, Villa, Office … | Conformed with Ejari types in `dim_property_type` |
+| `area_id`, `area_name_en` | DLD area | Main geographic key |
+| `project_number`, `project_name_en`, `master_project_en`, `building_name_en` | Project hierarchy | 11–26% missing |
+| `rooms_en` | Studio, 1 B/R … Penthouse | Normalised to `bedrooms` + flags |
+| `procedure_area` | Area in **sq m** | Heavy tails, tiny values |
+| `actual_worth` | Value, AED | Sale price on sales; **loan amount** on completed-property mortgages (§7) |
+| `meter_sale_price` | AED per sq m | Compared with `actual_worth / procedure_area` (C6) |
+| `nearest_landmark_en`, `nearest_metro_en`, `nearest_mall_en` | Proximity | ~26% missing |
 
-**Known quality issues:** values as low as AED 1, areas below 0.01 sq m, AED 600M+ bulk and land deals, skewed distributions, missing project/building names, and gifts and inheritance mixed in with market sales.
+**Known issues:** values as low as AED 1, areas under 0.01 sq m, AED 600M+ bulk and land deals, missing project and building names, Hijri and pre-2004 dates, and portfolio deals that repeat one value on every unit line. Cleaning rules: docs/04 §2.
 
 ## 3. Rent contracts (Ejari)
 
 | | |
 |---|---|
-| Grain | One row per contract **line**. Multi-property contracts repeat with `line_number` and `no_of_prop` |
-| Size | **~4.4 GB across 11 CSV files (~400 MB each)** from the DLD portal export, so likely 10M+ contract lines. Exact count verified in Phase 1 |
+| Grain | One row per contract **line**; multi-property contracts repeat with `line_number` and `no_of_prop` |
+| Size | 10,538,926 lines in 11 CSV files (~4.4 GB) |
 
-**Key columns (verify):** `contract_id`, `contract_reg_type_en` (New/Renew), `contract_start_date`, `contract_end_date`, `contract_amount`, `annual_amount`, `no_of_prop`, `line_number`, `ejari_property_type_en`, `ejari_property_sub_type_en`, `property_usage_en`, `area_id`, `area_name_en`, `project_number`, `project_name_en`, `actual_area`, `tenant_type_en`, `is_free_hold`, `nearest_*`.
+Key columns: `contract_id`, `contract_reg_type_en` (New / Renew), `contract_start_date`, `contract_end_date`, `contract_amount`, `annual_amount`, `no_of_prop`, `line_number`, `ejari_property_type_en`, `ejari_property_sub_type_en`, `property_usage_en`, `area_id`, `project_number`, `actual_area`, `tenant_type_en`, `is_free_hold`.
 
-**Critical trap:** on multi-property contracts the contract amount may repeat on every line. De-duplicate or allocate per line before summing, or rent totals will be inflated.
+**The trap:** every multi-line contract repeats the full contract amount on each line, so a naive sum overstates rent 5.24×. Rule C11 allocates it before any sum (docs/04 §2).
 
 ## 4. Reference and supporting DLD tables
 
-| Table | Use |
-|---|---|
-| Projects | Developer, project status, start/completion dates, % complete. Used for off-plan pipeline and property age |
-| Buildings | Floors, units, completion year, per building |
-| Units | Unit-level attributes (size, rooms, floor) |
-| Land | Land parcels, zoning/usage |
-| Valuations | Official valuation records. A useful comparison for the AVM |
-| Developers / Brokers | Developer names and registration details, for concentration analysis |
-| Lookups (areas, transaction groups, procedures) | Code → name mappings |
-| **DLD Residential Price Index** (published separately) | External benchmark to validate the hedonic index built in this project. **Loaded 2026-10-01:** "Residential Properties Sale Index" from data.dubai (issued by DLD) in `data/raw/dld/price_index/` → `bronze.dld_price_index` (159 rows) → `silver.stg_dld_price_index` (long form). Wide file: one row per month 2011-03 → **2024-05** (the 2026-09-01 stamp is the load time), all / flat / villa × monthly / quarterly / yearly × `_index` (ratio, Jan 2012 = 1.000) and `_price_index` (AED level of a typical unit). CI uses a synthetic 36-row fixture (licence not confirmed as CC BY 4.0) |
+| Table | Use | Status |
+|---|---|---|
+| Projects, Developers | Developer names, completion dates (property age, off-plan pipeline, Q9) | Not loaded in v1 |
+| Buildings, Units, Land, Valuations, Brokers | Unit and building attributes, official valuations | Not loaded in v1 |
+| **DLD Residential Sale Index** (data.dubai, issued by DLD) | External benchmark for the hedonic index | Loaded 2026-10-01: `bronze.dld_price_index` (159 rows) → `silver.stg_dld_price_index` (long form). Monthly 2011-03 → **2024-05** (the 2026-09-01 stamp is the load time); all / flat / villa × monthly / quarterly / yearly × `_index` (ratio, Jan 2012 = 1.000) and `_price_index` (AED level). CI uses a synthetic 36-row fixture because the file's licence is not confirmed as CC BY 4.0 |
 
 ## 5. Rates and economy data
 
 | Series | Source | Frequency | Use |
 |---|---|---|---|
-| **EIBOR** (1M/3M/12M) | [CBUAE](https://www.centralbank.ae/en/open-data-landing/) | Daily → monthly average | Mortgage cost driver |
-| **Fed Funds rate** (`FEDFUNDS`) | FRED | Monthly | The AED is pegged to the USD, so UAE rates track the Fed. This series is clean and long-history |
-| Brent crude (`DCOILBRENTEU`) | FRED | Daily → monthly | Regional liquidity and sentiment proxy |
-| UAE banking indicators: credit to the real-estate sector, mortgage lending | CBUAE statistical bulletins / [Bayanat](https://bayanat.ae/) | Monthly/quarterly | Context for the financing story |
-| Dubai population | Dubai Statistics Center | Annual | Demand context |
+| **Fed Funds** (`FEDFUNDS`) | FRED | Monthly | The rate driver: the AED is pegged to the USD, so UAE rates track the Fed |
+| **EIBOR** 1M/3M/6M/12M | [CBUAE](https://www.centralbank.ae/en/open-data-landing/) | Daily → monthly | Mortgage cost driver; manual download, not loaded yet (Fed Funds stands in) |
+| Brent crude (`DCOILBRENTEU`) | FRED | Daily → monthly | Regional liquidity proxy |
 
 ## 6. Hand-built seeds (dbt)
 
-- `seed_procedure_map.csv`: procedure → category (market_sale, offplan_sale, mortgage, gift, inheritance, other) + `is_market_sale` flag
-- `seed_rooms_map.csv`: `rooms_en` → bedrooms (Studio = 0) + flags (penthouse, office, shop)
-- `seed_area.csv`: `area_id` → cleaned name, zone/cluster (e.g. Downtown/Business Bay, Marina/JBR, JVC/JVT, Palm, Emirates Hills/Meadows, Deira/Bur Dubai, Dubai South), lat/long centroid. **Centroids (Phase 5)** come from **OpenStreetMap Nominatim** (`make centroids`, `ingest/geocode_areas.py`): only the public DLD area name is sent, with a descriptive User-Agent at ≤ 1 request/s; responses are cached in `data/raw/osm/`; a result must be an area feature named like the query, in emirate AE-DU and inside the Dubai box. `centroid_source` records how each was found (`osm_nominatim`, `_alias`, `_approx`, `manual`). Licence: ODbL, credited as "Area locations © OpenStreetMap contributors (ODbL)" (`rpt.report_info`, report footer, website). Result: `reports/area_centroids.md`
-- `seed_ltv_rules.csv`: CBUAE mortgage LTV caps used in the stress test, e.g. expat first home ≤ AED 5M; off-plan cap. Created in Phase 2b; **verified by the owner 2026-09-30** against the CBUAE rulebook (Regulations Regarding Mortgage Loans, Art. 3(2), as amended by Board Resolution 31/2/2020, effective 2020-04-08) and extended with the pre-2020 regime (Circular No. 31/2013, 2013-10-28 to 2020-04-07): 14 rows, each with `effective_from` / `effective_to`, `source_citation` and `source_url`
+- `seed_procedure_map.csv`: (trans group, procedure) → category, `is_market_sale` and the mortgage flags (docs/04 C2).
+- `seed_rooms_map.csv`, `seed_rent_subtype_map.csv`: room and Ejari sub-type labels → bedrooms (Studio = 0) and flags.
+- `seed_area.csv`: all 265 `area_id`s → canonical name, zone, and an OpenStreetMap centroid. Centroids come from **Nominatim** (`make centroids`, `ingest/geocode_areas.py`): only the public area name is sent, with a descriptive User-Agent at ≤ 1 request/s; responses are cached in `data/raw/osm/`; a match must be an area feature in Dubai named like the query. `centroid_source` records how each was found. Licence ODbL, credited as "Area locations © OpenStreetMap contributors (ODbL)". Result: `reports/area_centroids.md`.
+- `seed_ltv_rules.csv`: CBUAE mortgage LTV caps for the stress test, 14 dated rows with `effective_from` / `effective_to`, `source_citation` and `source_url`. Verified by hand on 2026-09-30 against the CBUAE rulebook: Regulations Regarding Mortgage Loans, Art. 3(2), as amended by Board Resolution 31/2/2020 (effective 2020-04-08), and the earlier regime of Circular No. 31/2013 (2013-10-28 to 2020-04-07).
+- Property-type, zone-label and AVM feature-label seeds: see `dbt/seeds/_seeds.yml`.
 
 ## 7. Verified profile (Phase 1, 2026-09-30)
 
-Source: `reports/phase1_findings.md` (interpretation), `reports/phase1_evidence.md` (queries, regenerate with `make profile`), `reports/bronze_reconciliation.md` (file vs bronze counts).
+Sources: `reports/phase1_findings.md` (interpretation), `reports/phase1_evidence.md` (queries; `make profile`), `reports/bronze_reconciliation.md` (file vs bronze counts).
 
 | Item | Expected | Actual | Notes |
 |---|---|---|---|

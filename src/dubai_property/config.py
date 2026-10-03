@@ -124,7 +124,7 @@ DATASETS_BY_NAME = {d.name: d for d in DATASETS}
 FRED_CSV_URL = "https://fred.stlouisfed.org/graph/fredgraph.csv?id={series}"
 FRED_SERIES = {"FEDFUNDS": "fedfunds", "DCOILBRENTEU": "brent"}
 
-# Area centroids for the Power BI bubble map (docs/06 §4, owner 2026-10-01): OpenStreetMap
+# Area centroids for the Power BI bubble map (docs/06 §4, decision 2026-10-01): OpenStreetMap
 # Nominatim, queried once with the public DLD area names only. The usage policy requires a
 # descriptive User-Agent and at most 1 request per second; raw responses are cached under
 # data/raw/osm so a re-run makes no network calls. Attribution: docs/06 §4, docs/07.
@@ -139,7 +139,7 @@ OSM_ATTRIBUTION = "Area locations © OpenStreetMap contributors (ODbL)"
 # Dubai emirate (incl. Hatta) as lon_min, lat_min, lon_max, lat_max; dbt tests the same box.
 DUBAI_BBOX = (54.89, 24.60, 56.20, 25.40)
 
-# `make sample` (CLAUDE.md): share of deals/contracts kept per year x area stratum.
+# `make sample` (docs/01 §7): share of deals/contracts kept per year x area stratum.
 SAMPLE_FRACTION = 0.02
 
 # --- Out-of-time split (docs/05 §1). Never random: time order is the whole point. -----
@@ -151,10 +151,10 @@ VALID_END = date(2024, 12, 31)
 TEST_START = date(2025, 1, 1)  # test runs to the latest available transaction
 
 # --- Business rules ------------------------------------------------------------------
-# Min-n rule (CLAUDE.md, docs/05 §3): no median/yield/index point below 20 observations;
+# Min-n rule (docs/01 §7, docs/05 §3): no median/yield/index point below 20 observations;
 # roll up to zone level instead.
 MIN_N = 20
-# Units (CLAUDE.md): areas are stored in sq m; convert explicitly when showing sq ft.
+# Units (docs/01 §7): areas are stored in sq m; convert explicitly when showing sq ft.
 SQM_TO_SQFT = 10.7639
 # Reporting scope (docs/04 §3): from dim_date_start (dbt var; tests/test_config.py checks
 # they agree) to the data snapshot date, which is data (silver.int_data_snapshot, the latest
@@ -164,7 +164,7 @@ REPORT_SCOPE_START = date(2004, 1, 1)
 # other classes use AREA_CAP_OTHER_SQM. Mirrors the dbt vars area_cap_* (checked by a test).
 AREA_CAP_SQM = {1: 1000, 2: 3000, 4: 5000, 5: 5000}
 AREA_CAP_OTHER_SQM = 10000
-# Headline area-weighted AED per sq m (owner, 2026-09-30): residential apartments and
+# Headline area-weighted AED per sq m (decision, 2026-09-30): residential apartments and
 # villas / townhouses only, i.e. property_type_key 101 and 102 (usage group 1 x class 1, 2).
 RESIDENTIAL_HOMES_KEYS = (101, 102)
 RESIDENTIAL_APARTMENT_KEY = 101
@@ -173,7 +173,7 @@ INDEX_BASE_MONTH = date(2019, 1, 1)
 INDEX_BASE_VALUE = 100.0
 
 # --- Hedonic price index (docs/05 §2, decisions in §8) --------------------------------
-# Every index starts in Jan 2011 (owner, 2026-10-01). In 2009-10, 30-50% of clean sales were
+# Every index starts in Jan 2011 (decision, 2026-10-01). In 2009-10, 30-50% of clean sales were
 # registered after their application year (the Law 13/2008 backlog), so their prices date
 # from the earlier boom and the index showed a rise through the 2009 crash. DLD's own index
 # starts in 2011-03.
@@ -189,7 +189,7 @@ NOISE_MAX_SD = 0.10
 # Peak-to-trough episodes: a fall of at least 10% from the running peak. Smaller dips are
 # within the noise of a monthly hedonic index.
 EPISODE_MIN_DRAWDOWN = 0.10
-# Published method (owner, 2026-10-01): rolling-window time dummy (RTD), 36-month windows
+# Published method (decision, 2026-10-01): rolling-window time dummy (RTD), 36-month windows
 # stepped 12 months, chained on the overlapping periods. One pooled fit over the whole span
 # is kept as the robustness comparison; a gap above these limits is called "material".
 RTD_WINDOW_MONTHS = 36
@@ -211,7 +211,7 @@ YIELD_START = date(2010, 1, 1)
 YIELD_MODEL_VERSION = "yield-gross-v1"
 
 # --- AVM (docs/05 §1, decisions in §8) ------------------------------------------------
-# Fitting starts in 2011, like the index (owner, 2026-10-01): 2009-10 registrations carry
+# Fitting starts in 2011, like the index (decision, 2026-10-01): 2009-10 registrations carry
 # backlog prices agreed in the 2006-08 boom. 2010 sales are loaded only as history for the
 # trailing features of early-2011 sales. TRAIN_START (2010) is kept for the ablation.
 AVM_TRAIN_START = date(2011, 1, 1)
@@ -223,18 +223,18 @@ AVM_COMPS_MIN_N = 5
 AVM_COMPS_MONTHS = 6  # baseline (a): median over the previous 6 months (docs/05 §1)
 AVM_COMPS_INDEXED_MONTHS = 12  # baseline (b): comps of the last 12 months, index-adjusted
 # |gap| above this flags a sale for collateral review: a statistical anomaly, not an
-# accusation (docs/05 §1). Set only on out-of-sample rows (owner, 2026-10-01).
+# accusation (docs/05 §1). Set only on out-of-sample rows (decision, 2026-10-01).
 AVM_REVIEW_GAP = 0.25
 AVM_OPTUNA_TRIALS = 20  # docs/05 §1 allows 50; 20 on full data (docs/05 §8)
 AVM_SEED = 42
-# Breakdowns: price bands (AED) by *predicted* value (owner, 2026-10-01: banding by the
+# Breakdowns: price bands (AED) by *predicted* value (decision, 2026-10-01: banding by the
 # actual price builds in regression to the mean); the top areas by test volume.
 AVM_PRICE_BANDS = (1_000_000, 2_000_000, 5_000_000)
 AVM_TOP_AREAS = 20
 AVM_SHAP_SAMPLE = 20_000
 AVM_MODEL_VERSION = "avm-lgbm-v1"
 
-# --- AVM leakage alarms (CLAUDE.md) ---------------------------------------------------
+# --- AVM leakage alarms (docs/01 §7) ---------------------------------------------------
 # Real-world AVMs rarely beat ~5-8% MdAPE. Results better than this mean: investigate.
 LEAKAGE_MDAPE_FLOOR = 0.03
 LEAKAGE_HIT10_CEILING = 0.90
@@ -247,7 +247,7 @@ LEAKAGE_MIN_SCORED = 1_000
 # the last 36 complete months before the snapshot (the recent-vintage buyers).
 STRESS_WINDOW_MONTHS = 36
 # Assumed-LTV grid (integer %, the Power BI what-if keys; docs/06). 85 is the CBUAE cap for a
-# UAE national's first home up to AED 5M: the most permissive cap, so the worst case (owner,
+# UAE national's first home up to AED 5M: the most permissive cap, so the worst case (decision,
 # 2026-10-01).
 STRESS_LTV_GRID = (50, 60, 70, 80, 85)
 STRESS_LTV_LABELS = {85: "UAE national first home cap (worst case)"}
@@ -259,7 +259,7 @@ STRESS_SHOCKS = tuple(range(0, -55, -5))
 STRESS_CAP_BORROWER = "Expatriate"
 STRESS_CAP_HOME = "first"
 STRESS_CAP_VALUE_BAND_AED = 5_000_000  # "up to AED 5M" / "above AED 5M" in the seed
-# Historical replay (owner, 2026-10-01): the 2014 -> 2020 episode, peak to trough, measured
+# Historical replay (decision, 2026-10-01): the 2014 -> 2020 episode, peak to trough, measured
 # per series inside this window. A zone series is used only if it is published from the
 # peak month on (so it saw the 2014 peak); otherwise its type series.
 STRESS_REPLAY_START = date(2014, 1, 1)
@@ -267,7 +267,7 @@ STRESS_REPLAY_END = date(2021, 12, 1)
 STRESS_REPLAY_PEAK_BY = date(2014, 6, 1)
 STRESS_REPLAY_NAME = "replay_2014_2020"
 # The same episode at the Dubai-wide depth (the Dubai series' drawdown, -24%, for every
-# buyer), shown beside the zone-level replay (owner, 2026-10-01): zone max-drawdowns come
+# buyer), shown beside the zone-level replay (decision, 2026-10-01): zone max-drawdowns come
 # from noisier series and overstate the depth, so the zone replay is an upper range.
 STRESS_REPLAY_DUBAI_NAME = "replay_2014_2020_dubai"
 STRESS_MODEL_VERSION = "stress-mtm-v1"

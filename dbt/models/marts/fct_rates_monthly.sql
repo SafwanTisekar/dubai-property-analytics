@@ -1,6 +1,6 @@
 -- Monthly rate drivers from 2004 (dim_date start) to the latest month: Fed Funds (the AED
 -- is pegged to the USD, so it is the fallback rate driver) and Brent. Rates are decimals
--- (0.0525, not 5.25; CLAUDE.md). EIBOR columns are NULL until a CBUAE file is loaded
+-- (0.0525, not 5.25; docs/01 §7). EIBOR columns are NULL until a CBUAE file is loaded
 -- (docs/04 §6, manual download); the columns exist now so the Power BI model won't change.
 
 select

@@ -8,7 +8,7 @@ Generated 2026-10-02 16:44 UTC by `quality/data_dictionary.py` from the dbt mani
 |---|---|---|
 | [`silver.seed_area`](#silverseed_area) | seed | C8: every DLD area_id seen in transactions or rents (265 IDs; Phase 1's "266" counted the blank area_id on 3 rent lines as a value) -> canonical name and zone. Zones group areas into markets for the min-n roll-up. Every area has a zone; `make unzoned` (reports/unzoned_areas.md) lists any that don't, e.g. a new area in a later snapshot. |
 | [`silver.seed_avm_feature_label`](#silverseed_avm_feature_label) | seed | Business-readable name for every AVM feature (rpt.feature_importance "Feature Label", the SHAP chart). "price level" = the median price per sq m of those sales relative to the index (a ratio), "sales count" = how many there were; (12m) = the trailing window before the sale month (docs/05 §1). |
-| [`silver.seed_ltv_rules`](#silverseed_ltv_rules) | seed | CBUAE mortgage loan-to-value caps for the Phase 4 stress test (docs/05 §4), one row per rule (borrower x property status x home number x value band) per regulatory period. Current regime: CBUAE Regulations Regarding Mortgage Loans, Art. 3(2), as amended by Board Resolution 31/2/2020 (effective 2020-04-08). Earlier regime: Circular No. 31/2013 (2013-10-28 to 2020-04-07). Every row verified by the owner against the CBUAE rulebook (2026-09-30). The stress test is illustrative and must say which LTVs it assumed. |
+| [`silver.seed_ltv_rules`](#silverseed_ltv_rules) | seed | CBUAE mortgage loan-to-value caps for the Phase 4 stress test (docs/05 §4), one row per rule (borrower x property status x home number x value band) per regulatory period. Current regime: CBUAE Regulations Regarding Mortgage Loans, Art. 3(2), as amended by Board Resolution 31/2/2020 (effective 2020-04-08). Earlier regime: Circular No. 31/2013 (2013-10-28 to 2020-04-07). Every row verified by hand against the CBUAE rulebook (2026-09-30). The stress test is illustrative and must say which LTVs it assumed. |
 | [`silver.seed_phase1_reconciliation`](#silverseed_phase1_reconciliation) | seed | The Phase 1 figures (reports/phase1_findings.md, phase1_evidence.md) that silver must reproduce. The reconciliation tests check them only when bronze holds exactly the Phase 1 snapshot (the `bronze_rows` gate), so they are skipped on the CI fixtures. |
 | [`silver.seed_procedure_category`](#silverseed_procedure_category) | seed | The procedure categories used by seed_procedure_map, with the market-sale flag each implies. `inheritance` is kept although no procedure maps to it in the 2026-09 extract (phase1_findings §1), so a future snapshot has a place to land. |
 | [`silver.seed_procedure_map`](#silverseed_procedure_map) | seed | C2: every (trans_group, procedure_id) pair in the DLD register (58 in the 2026-09 extract) -> category and flags. Keyed on the pair, not the name, because six lease-to-own codes are registered under both Sales and Mortgages (phase1_findings §1). A procedure missing from this seed fails the stg_transactions not_null test on procedure_category, so a new DLD procedure can't slip through unmapped. |
@@ -40,9 +40,9 @@ C8: every DLD area_id seen in transactions or rents (265 IDs; Phase 1's "266" co
 | `area_id` | integer |  | not_null, unique |
 | `area_name_en` | text |  | not_null |
 | `zone` | text | Market zone for roll-ups. NULL = not assigned yet. |  |
-| `latitude` | numeric | Area centroid latitude (WGS84) for the Power BI bubble map, from OpenStreetMap Nominatim (`make centroids`, reports/area_centroids.md) or typed in by the owner. NULL = not located (no bubble; never a zone centroid). © OpenStreetMap contributors (ODbL). | between |
+| `latitude` | numeric | Area centroid latitude (WGS84) for the Power BI bubble map, from OpenStreetMap Nominatim (`make centroids`, reports/area_centroids.md) or typed in by hand. NULL = not located (no bubble; never a zone centroid). © OpenStreetMap contributors (ODbL). | between |
 | `longitude` | numeric | Area centroid longitude (WGS84); see latitude. | between |
-| `centroid_source` | text | Where the centroid came from: osm_nominatim (the DLD name or a spelling of it), osm_nominatim_alias (a better-known name for the place), osm_nominatim_approx (the parent community only), manual (owner; never overwritten), or NULL (not located). | accepted_values |
+| `centroid_source` | text | Where the centroid came from: osm_nominatim (the DLD name or a spelling of it), osm_nominatim_alias (a better-known name for the place), osm_nominatim_approx (the parent community only), manual (typed in by hand; never overwritten), or NULL (not located). | accepted_values |
 
 <a id="silverseed_avm_feature_label"></a>
 ### `silver.seed_avm_feature_label`
@@ -57,7 +57,7 @@ Business-readable name for every AVM feature (rpt.feature_importance "Feature La
 <a id="silverseed_ltv_rules"></a>
 ### `silver.seed_ltv_rules`
 
-CBUAE mortgage loan-to-value caps for the Phase 4 stress test (docs/05 §4), one row per rule (borrower x property status x home number x value band) per regulatory period. Current regime: CBUAE Regulations Regarding Mortgage Loans, Art. 3(2), as amended by Board Resolution 31/2/2020 (effective 2020-04-08). Earlier regime: Circular No. 31/2013 (2013-10-28 to 2020-04-07). Every row verified by the owner against the CBUAE rulebook (2026-09-30). The stress test is illustrative and must say which LTVs it assumed.
+CBUAE mortgage loan-to-value caps for the Phase 4 stress test (docs/05 §4), one row per rule (borrower x property status x home number x value band) per regulatory period. Current regime: CBUAE Regulations Regarding Mortgage Loans, Art. 3(2), as amended by Board Resolution 31/2/2020 (effective 2020-04-08). Earlier regime: Circular No. 31/2013 (2013-10-28 to 2020-04-07). Every row verified by hand against the CBUAE rulebook (2026-09-30). The stress test is illustrative and must say which LTVs it assumed.
 
 | Column | Type | Description | Tests |
 |---|---|---|---|
@@ -72,7 +72,7 @@ CBUAE mortgage loan-to-value caps for the Phase 4 stress test (docs/05 §4), one
 | `source_citation` | text |  | not_null |
 | `source_url` | text | CBUAE rulebook page for the regulation. | not_null |
 | `secondary_source_url` | text | Secondary summary used alongside the rulebook (pre-2020 rows). |  |
-| `verified` | boolean | The owner has checked this row against the CBUAE regulation (2026-09-30). | expression_is_true, not_null |
+| `verified` | boolean | Checked by hand against the CBUAE regulation (2026-09-30). | expression_is_true, not_null |
 | `note` | text |  |  |
 
 <a id="silverseed_phase1_reconciliation"></a>
@@ -219,7 +219,7 @@ Ownership transfers: every Sales- and Gifts-group line with the price-quality fl
 | `property_usage` | text | C19. Residential / Commercial / Other / ...; the swapped Arabic label is fixed to 'Other'. (from `stg_transactions`) |  |
 | `is_residential` | boolean | C15 helper. property_usage = 'Residential'. (from `stg_transactions`) |  |
 | `reg_type` | text |  |  |
-| `is_offplan` | boolean | Off-plan vs ready, a first-class dimension (CLAUDE.md). (from `stg_transactions`) |  |
+| `is_offplan` | boolean | Off-plan vs ready, a first-class dimension (docs/01 §7). (from `stg_transactions`) |  |
 | `area_id` | integer | C8. DLD area; joins seed_area. (from `stg_transactions`) |  |
 | `area_name` | text | Canonical name from seed_area. (from `stg_transactions`) |  |
 | `zone` | text | Market zone from seed_area (NULL where not assigned yet). (from `stg_transactions`) |  |
@@ -286,7 +286,7 @@ Financing: every Mortgages-group line (C10, C16-C18), analysed separately from p
 | `property_usage` | text | C19. Residential / Commercial / Other / ...; the swapped Arabic label is fixed to 'Other'. (from `stg_transactions`) |  |
 | `is_residential` | boolean | C15 helper. property_usage = 'Residential'. (from `stg_transactions`) |  |
 | `reg_type` | text |  |  |
-| `is_offplan` | boolean | Off-plan vs ready, a first-class dimension (CLAUDE.md). (from `stg_transactions`) |  |
+| `is_offplan` | boolean | Off-plan vs ready, a first-class dimension (docs/01 §7). (from `stg_transactions`) |  |
 | `area_id` | integer | C8. DLD area; joins seed_area. (from `stg_transactions`) |  |
 | `area_name` | text | Canonical name from seed_area. (from `stg_transactions`) |  |
 | `zone` | text | Market zone from seed_area (NULL where not assigned yet). (from `stg_transactions`) |  |
@@ -534,7 +534,7 @@ DLD transaction lines, typed and decoded (view). C1 keeps the latest snapshot of
 | `is_residential` | boolean | C15 helper. property_usage = 'Residential'. |  |
 | `reg_type_id` | smallint |  |  |
 | `reg_type` | text |  | accepted_values |
-| `is_offplan` | boolean | Off-plan vs ready, a first-class dimension (CLAUDE.md). | not_null |
+| `is_offplan` | boolean | Off-plan vs ready, a first-class dimension (docs/01 §7). | not_null |
 | `area_id` | integer | C8. DLD area; joins seed_area. | not_null, relationships |
 | `area_name` | text | Canonical name from seed_area. |  |
 | `area_name_source` | text | Name as published in this snapshot (name drift is tested against the seed). |  |
@@ -592,7 +592,7 @@ Sales and financing by month x area x property type x bedrooms x off-plan, repor
 | `area_key` | integer | DLD area_id (-1 = Unknown). (from `fct_transaction`) | relationships |
 | `property_type_key` | integer | usage_group_id * 100 + property_class_id. (from `int_property_type_lookup`) | relationships |
 | `bedrooms` | smallint | C7. From seed_rooms_map; Studio = 0; NULL for offices, shops, penthouses, land. (from `stg_transactions`) |  |
-| `is_offplan` | boolean | Off-plan vs ready, a first-class dimension (CLAUDE.md). (from `stg_transactions`) |  |
+| `is_offplan` | boolean | Off-plan vs ready, a first-class dimension (docs/01 §7). (from `stg_transactions`) |  |
 | `transaction_lines` | bigint |  |  |
 | `aed_counted_once` | numeric | AED counted once per deal (C16): the deal value on the lead line, 0 on repeats. The only transaction AED column that is safe to SUM. (from `fct_transaction`) |  |
 | `market_sales` | bigint |  |  |
@@ -647,9 +647,9 @@ One row per DLD area (seed_area, 265 IDs, all zoned) plus Unknown (-1). area_key
 | `area_id` | integer |  |  |
 | `area_name` | text |  | not_null |
 | `zone` | text | Market zone used for the min-n roll-up. | not_null |
-| `latitude` | numeric | Area centroid latitude (WGS84) for the Power BI bubble map, from OpenStreetMap Nominatim (`make centroids`, reports/area_centroids.md) or typed in by the owner. NULL = not located (no bubble; never a zone centroid). © OpenStreetMap contributors (ODbL). (from `seed_area`) |  |
+| `latitude` | numeric | Area centroid latitude (WGS84) for the Power BI bubble map, from OpenStreetMap Nominatim (`make centroids`, reports/area_centroids.md) or typed in by hand. NULL = not located (no bubble; never a zone centroid). © OpenStreetMap contributors (ODbL). (from `seed_area`) |  |
 | `longitude` | numeric | Area centroid longitude (WGS84); see latitude. (from `seed_area`) |  |
-| `centroid_source` | text | Where the centroid came from: osm_nominatim (the DLD name or a spelling of it), osm_nominatim_alias (a better-known name for the place), osm_nominatim_approx (the parent community only), manual (owner; never overwritten), or NULL (not located). (from `seed_area`) |  |
+| `centroid_source` | text | Where the centroid came from: osm_nominatim (the DLD name or a spelling of it), osm_nominatim_alias (a better-known name for the place), osm_nominatim_approx (the parent community only), manual (typed in by hand; never overwritten), or NULL (not located). (from `seed_area`) |  |
 
 <a id="golddim_date"></a>
 ### `gold.dim_date`
@@ -812,7 +812,7 @@ Every DLD transaction line (Sales, Gifts, Mortgages; 1.79M) with dimension keys 
 | `amount_is_loan` | boolean | C10. True for Mortgage Registration and Delayed Mortgage only. (from `int_mortgages`) |  |
 | `is_lease_to_own` | boolean | C17. Sales leg of a lease-to-own deal; is_market_sale is false (volume only). (from `int_market_sales`) |  |
 | `reg_type` | text |  |  |
-| `is_offplan` | boolean | Off-plan vs ready, a first-class dimension (CLAUDE.md). (from `stg_transactions`) |  |
+| `is_offplan` | boolean | Off-plan vs ready, a first-class dimension (docs/01 §7). (from `stg_transactions`) |  |
 | `property_type` | text |  |  |
 | `property_sub_type` | text |  |  |
 | `property_usage` | text | C19. Residential / Commercial / Other / ...; the swapped Arabic label is fixed to 'Other'. (from `stg_transactions`) |  |

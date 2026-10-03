@@ -9,7 +9,7 @@
 
 -- Rents by month (contract start) x area x conformed property type x bedrooms x new/renewal,
 -- over the reporting scope. The only rent table Power BI imports: the 10.5M contract lines
--- stay in Postgres (CLAUDE.md). Counts and AED columns are additive; recon_agg_rent_month_vs_fct
+-- stay in Postgres (docs/01 §7). Counts and AED columns are additive; recon_agg_rent_month_vs_fct
 -- checks each total against fct_rent_contract.
 --
 -- Populations:

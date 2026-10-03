@@ -2,7 +2,7 @@
 
 Every function aggregates in Postgres and returns at most a few thousand rows, so the
 notebooks never pull ``fct_transaction`` or ``fct_rent_contract`` lines into pandas
-(CLAUDE.md). The notebooks in ``notebooks/`` only call these functions and plot.
+(docs/01 §7). The notebooks in ``notebooks/`` only call these functions and plot.
 
 Modules:
     common: snapshot date, SQL runner, min-n masking, partial-year helper.

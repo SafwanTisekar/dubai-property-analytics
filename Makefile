@@ -1,5 +1,5 @@
-# Dubai Property Analytics: one entry point for every pipeline step (CLAUDE.md "Commands").
-# Targets marked [stub] are placeholders until their phase in docs/08 is built.
+# Dubai Property Analytics: one entry point for every pipeline step (README, How to run).
+# Targets marked [stub] are not built yet (docs/08, Open items).
 
 SHELL := /bin/bash
 .DEFAULT_GOAL := help
@@ -204,7 +204,7 @@ site-preview: site-check  ## Serve SITE_REPO_DIR at http://localhost:8000 for re
 # --- Stubs (implemented in later phases, see docs/08) ---------------------------------
 
 update:  ## [stub] incremental monthly refresh end to end (Phases 1-4)
-	@echo "update: not implemented yet (Phases 1-4, docs/08)"
+	@echo "update: not implemented yet (docs/08, Open items)"
 
 pipeline: download bronze dbt train score  ## Everything, in order
 	@echo "pipeline: done"

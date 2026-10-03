@@ -3,7 +3,7 @@
 -- AVM valuations (docs/05 §1) for Power BI: one row per clean residential market sale the
 -- champion model valued OUT OF SAMPLE (validation 2024, test 2025+; ~424k rows). The
 -- training-period rows (2011-2023) stay in ml.avm_score: their gaps are in-sample, so they
--- would flatter the actual-vs-AVM chart, and they would double the model (owner, Phase 5).
+-- would flatter the actual-vs-AVM chart, and they would double the model (decision, Phase 5).
 -- The headline accuracy cards read rpt.avm_performance, which is unchanged.
 -- "Gap Pct" = (price - AVM value) / AVM value: positive = sold above the AVM.
 --

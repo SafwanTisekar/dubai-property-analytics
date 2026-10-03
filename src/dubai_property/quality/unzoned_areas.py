@@ -1,6 +1,6 @@
 """List the areas in ``seed_area`` that have no zone yet → ``reports/unzoned_areas.md``.
 
-A worksheet for the owner: for every area with a blank zone, its market-sale volume since
+A review worksheet: for every area with a blank zone, its market-sale volume since
 2020 and its top master projects and projects, so the zone can be chosen from what is
 actually built there. The allowed zones are the ones already used in ``seed_area``.
 Copy the chosen zones into ``dbt/seeds/seed_area.csv`` and run ``make dbt``; a re-run of

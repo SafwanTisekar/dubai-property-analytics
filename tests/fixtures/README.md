@@ -23,4 +23,4 @@ tests still run.
   unmodified extracts of the bulk exports of 2026-09-29 (transactions) and 2026-09-30
   (rents); only a subset of rows is included.
 - Fed Funds (FEDFUNDS) and Brent (DCOILBRENTEU): Federal Reserve Bank of St. Louis, FRED.
-- DLD Residential Properties Sale Index: the fixture is **synthetic** (owner decision, 2026-10-01): the data.dubai licence for this file isn't confirmed as CC BY 4.0, so no value from it is committed. Only its column layout is reproduced.
+- DLD Residential Properties Sale Index: the fixture is **synthetic** (decision, 2026-10-01): the data.dubai licence for this file isn't confirmed as CC BY 4.0, so no value from it is committed. Only its column layout is reproduced.

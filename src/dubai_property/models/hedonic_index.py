@@ -11,7 +11,7 @@ the pure price change:
 ``exp(β_t)`` is a ratio of geometric means between period t and the base, so no smearing
 correction is needed (that matters for predicting AED levels, not for an index).
 
-**Published method: rolling-window time dummy (RTD)** (owner, 2026-10-01). The regression
+**Published method: rolling-window time dummy (RTD)** (decision, 2026-10-01). The regression
 is re-fitted on 36-month windows stepped 12 months, and the windows are chained on the
 periods they share. One pooled fit over 2011-2026 assumes the off-plan premium, bedroom
 premia and area effects never change, but they do (the apartment off-plan premium went
@@ -96,7 +96,7 @@ where t.is_clean_market_sale
   and (t.property_type_key = {apt} or t.bedrooms is not null)
 """
 
-# Row counts in and out, with the reason (CLAUDE.md: log every filtering step).
+# Row counts in and out, with the reason (docs/01 §7: log every filtering step).
 EXCLUSIONS_SQL = """
 select property_type_key,
        count(*) as clean_sales,
@@ -851,7 +851,7 @@ def compare_with_dld(
     Levels aren't compared (different bases, baskets and methods); growth rates are:
 
     * **raw**: our monthly index vs DLD's, month for month;
-    * **aligned** (the headline, owner 2026-10-01): our index averaged over the trailing
+    * **aligned** (the headline, decision 2026-10-01): our index averaged over the trailing
       ``align_months`` vs DLD's. Ours leads DLD by ~6 months, and a 12-month trailing
       average of ours lines up at lag 0, which suggests DLD's monthly figure averages the
       last 12 months of sales (an inference: the file has no methodology);

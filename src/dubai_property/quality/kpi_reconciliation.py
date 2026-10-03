@@ -19,7 +19,7 @@ differ by up to 1 AED. Ratios (shares, AED per sq m) are derived from the checke
 
 Area-weighted AED per sq m (Σ AED / Σ sq m) is only meaningful within a property class,
 so the headline figures cover **residential apartments and villas / townhouses** with an
-area within the class cap (owner, 2026-09-30). A sanity check requires the apartment
+area within the class cap (decision, 2026-09-30). A sanity check requires the apartment
 area-weighted price to stay within ±40% of the apartment median in every year from 2010.
 
 §7 is the Power BI card checklist (``quality/pbi_cards.py``): the value each KPI card

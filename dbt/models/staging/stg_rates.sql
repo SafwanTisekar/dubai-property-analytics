@@ -1,5 +1,5 @@
 -- Monthly rate drivers, one row per month (docs/02 §5). Rates are decimals (0.0525, not
--- 5.25; CLAUDE.md). Brent is averaged from daily prices, skipping non-trading days ('').
+-- 5.25; docs/01 §7). Brent is averaged from daily prices, skipping non-trading days ('').
 -- EIBOR joins here once a CBUAE file is loaded (docs/08 Phase 1 open item).
 
 with fed_funds as (

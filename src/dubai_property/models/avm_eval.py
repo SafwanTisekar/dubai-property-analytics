@@ -12,7 +12,7 @@ compares with a valuation:
   cases looks better than it is, so every comparison also runs on the **common subset**
   that every model can value.
 
-**Price bands are by predicted value** (owner, 2026-10-01). Banding by the actual price
+**Price bands are by predicted value** (decision, 2026-10-01). Banding by the actual price
 builds in regression to the mean: a sale that closed unusually low lands in a low band
 *because* it was low, so cheap bands look over-valued and dear ones under-valued even for
 a perfect model. Predicted value is known before the sale, so its bands are fair. The
@@ -185,7 +185,7 @@ def leakage_alarm(
     hit10_ceiling: float = config.LEAKAGE_HIT10_CEILING,
     min_scored: int = config.LEAKAGE_MIN_SCORED,
 ) -> list[str]:
-    """Reasons to stop (CLAUDE.md): any model too good on the test set to be believable.
+    """Reasons to stop (docs/01 §7): any model too good on the test set to be believable.
 
     Real AVMs rarely beat ~5-8% MdAPE; below ~3%, or more than ~90% within ±10%, the
     usual cause is a feature that saw the answer. Only applies with ``min_scored`` scored

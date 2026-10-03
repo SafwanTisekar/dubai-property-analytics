@@ -1,6 +1,6 @@
 -- Conformed property type: every (source, usage, property type, sub-type) combination in
 -- the data -> one dim_property_type key, so a single Power BI slicer filters sales, rents
--- and the aggregates alike (docs/06 §2; owner decision 2026-09-30).
+-- and the aggregates alike (docs/06 §2; decision 2026-09-30).
 --
 -- DLD sales and Ejari rents describe property differently (DLD: Unit / Villa / Land /
 -- Building x Flat / Office / Shop ...; Ejari: ~70 property types x layout sub-types), so

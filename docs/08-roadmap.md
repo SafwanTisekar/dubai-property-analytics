@@ -1,104 +1,45 @@
-# 08 – Roadmap & Claude Code Playbook
+# 08. Roadmap and changelog
 
-Work one phase at a time. Start each phase in a fresh Claude Code session (or `/clear`) and use **plan mode** (Shift+Tab) for the first prompt. Estimated effort: **4–6 weeks part-time**.
+What was built in each phase, the key results and decisions, what is still open, and the publishing record. Detailed decision logs live in docs/01, 04, 05, 06 and 07.
 
----
+## Status
 
-## Phase 0: Setup & decisions (½ day)
+| Phase | Status | Dates | Summary |
+|---|---|---|---|
+| 0 Setup | Done | 2026-09-29 → 09-30 | Repository scaffold, Postgres, roles and schemas, CI; Power BI licensing and Publish to web tested |
+| 1 Ingestion | Done | 2026-09-30 | 15 files loaded to bronze with COPY and reconciled; profiles and the four Phase 1 investigations |
+| 2 dbt | Done | 2026-09-30 | Silver (rules C1–C22), gold star schema, 10 rpt views; reconciliation exact; `make dbt` 7 min 43 s |
+| 3 EDA | Done | 2026-09-30 | Three notebooks over SQL functions; findings Q1–Q4; mortgage KPI redefined after review |
+| 4 Models | Done | 2026-10-01 | Hedonic index, yields, AVM, stress test, forecast; model cards and reports |
+| 5 Power BI | Done | 2026-10-01 → 10-02 | TMDL model, nine PBIR pages, redesign, published to the web |
+| 6 Website | In progress | 2026-10-02 → | Site in its own repository, numbers from the database; deploy and Lighthouse pending |
+| 7 Launch | Open | | README, release, final review |
 
-- [x] Power BI Desktop: Windows VM under Parallels (docs/03 §8)
-- [x] PostgreSQL 18 installed via Homebrew (2026-09-29)
-- [x] Postgres service running (`brew services start postgresql@18`), `psql` on PATH, pgAdmin or DBeaver installed (docs/03 §6). PG 18.6 + DBeaver 26.2.1 (2026-09-30)
-- [x] Work account on own domain (Zoho Mail) signs in to Power BI Service
-- [x] Power BI Pro trial started 2026-09-29 (expiry: see the Phase 5 to-do and the Publishing record below). See docs/03 §9
-- [x] Admin access confirmed (admin takeover via DNS TXT if the tenant is unmanaged) and **Publish to web** enabled
-- [x] Throwaway report published to web and rendering in a private browser window (tested 2026-09-29)
-- [x] Download the DLD bulk files manually if needed (Dubai Pulse `dld_transactions-open`, `dld_rent_contracts-open`, projects, buildings, units, lookups) into `data/raw/dld/<dataset>/`. Done 2026-09-30: transactions (2 files, 1,788,150 rows) and rents (11 files, ~10.5M lines). **Deferred:** projects, buildings, units and lookups are optional for v1 and not downloaded yet
-- [x] Public GitHub repo connected to the project folder (kept out of OneDrive/iCloud sync). Don't commit until Phase 0 has created `.gitignore`
+## Phase 0: Setup
 
-**Prompt**
-```
-Read CLAUDE.md and every file in docs/. Scaffold the repository per docs/03 §5 (package name dubai_property):
-uv-managed pyproject.toml (Python 3.11) with the stack in CLAUDE.md, a Makefile with all targets from
-CLAUDE.md (stub the unimplemented ones), .gitignore, .env.example (PG_* settings), pre-commit with ruff,
-config.py, db.py (psycopg 3 connection, SQLAlchemy engine and connectorx URI built from .env),
-sql/00_create_database.sql and sql/01_schemas_grants.sql per docs/03 §3/§5 (UTF-8 database dubai_property;
-roles dpa_owner and pbi_reader; schemas bronze, silver, gold, ml, rpt; pbi_reader gets SELECT on rpt only,
-including default privileges), a working `make db`, an empty dbt-postgres project (profiles.yml reading
-env vars) with dbt_utils and dbt_expectations, and a GitHub Actions ci.yml running ruff + pytest with a
-postgres:18 service container. No pipeline logic yet. Show the plan first.
-```
-**Done when:** `make setup`, `make db`, `uv run pytest` and `dbt debug` all pass, the five schemas are visible in pgAdmin/DBeaver, and the first commit is pushed.
+- Repository scaffold: uv project (Python 3.11), Makefile, pre-commit with ruff, `config.py`, `db.py` (psycopg 3, SQLAlchemy, connectorx), dbt-postgres project with `dbt_utils` and `dbt_expectations`, GitHub Actions with a `postgres:18` service.
+- `make db`: UTF-8 database `dubai_property` (C collation), roles `dpa_owner` and `pbi_reader`, schemas bronze / silver / gold / ml / rpt; `pbi_reader` gets SELECT on rpt only, including default privileges. Idempotent.
+- PostgreSQL 18.6 via Homebrew; Power BI Desktop in a Windows 11 VM under Parallels (docs/03 §8).
+- Power BI: work account on my own domain, admin takeover via DNS TXT, Publish to web enabled, Pro trial started 2026-09-29; a throwaway report rendered in a private window (docs/03 §9).
+- DLD bulk files downloaded by hand: transactions (2 files, 1,788,150 rows) and rents (11 files, ~10.5M lines). Projects, buildings, units and lookups deferred.
 
----
+## Phase 1: Ingestion, bronze and profiling
 
-## Phase 1: Ingestion, bronze & profiling (2–3 days)
+- `load_bronze.py`: every CSV → `bronze.*` as `text` via `COPY`, BOM- and encoding-safe, metadata columns, a transactional load manifest so re-runs skip loaded files, and a parser record count that must equal the COPY count (docs/04 §1).
+- `download_rates.py`: FRED Fed Funds and Brent. EIBOR is a manual CBUAE download, not yet placed.
+- Profiles (`reports/profile_*.md`), `reports/bronze_reconciliation.md` (15/15 files match), docs/02 §7 filled in.
+- Investigations in `reports/phase1_findings.md`: procedure values, `actual_worth` on mortgage rows (it is the loan amount on completed-property mortgages, median loan / price 0.795), multi-line rent contracts (full amount repeated on every line, 5.24× inflation), date formats; portfolio double counting quantified (+AED 130.9bn on a naive mortgage sum).
+- `max_wal_size` raised to 4 GB after checkpoint pressure slowed the rent load (docs/03 §7).
 
-**Prompt**
-```
-Implement Phase 1 per docs/02 and docs/04 §1: load_bronze.py (every CSV in data/raw/dld/<dataset>/ →
-bronze.<dataset> with all columns as text via psycopg COPY, BOM/encoding-safe, metadata columns, manifest
-so re-runs skip loaded files, ANALYZE after load), download_dld_increment.py (monthly date windows from DLD
-Open Data; if automated download isn't possible, skip and rely on manually dropped files) and
-download_rates.py (FRED FEDFUNDS and DCOILBRENTEU via the CSV endpoint; EIBOR from files in data/raw/cbuae),
-loading rates into bronze the same way. Log row counts to reports/ingest_log.csv and verify file row counts
-equal bronze row counts. Write quality/profile.py to profile every bronze column
-(SQL-based: null %, distinct count, min/max, top values) into reports/profile_*.md. Specifically investigate and document: (1) the distinct procedure_name_en values
-with counts, (2) whether actual_worth on mortgage rows is the loan amount, (3) how multi-property rent
-contracts repeat amounts, (4) date formats. Build `make sample` (small CSV samples in data/sample for CI). Fill in docs/02 §7 with actual numbers.
-```
-**Done when:** bronze tables are loaded and reconciled to the files, profiles are written, docs/02 §7 is complete, and the four investigations are answered in `reports/phase1_findings.md`.
+## Phase 2: dbt silver and gold
 
-- [x] Bronze loaded and reconciled to the files (`reports/bronze_reconciliation.md`, 15/15 files match)
-- [x] Profiles written (`reports/profile_*.md`)
-- [x] docs/02 §7 complete
-- [x] Four investigations answered (`reports/phase1_findings.md`), plus portfolio double-counting quantified
-- [ ] EIBOR: download CBUAE EIBOR history as CSV into `data/raw/cbuae/`, then `make bronze`
+**2a, silver.** Seeds (procedure map with 58 pairs, rooms, rent sub-types, 265 areas all zoned), staging and intermediate models with rules C1–C22 as flags (docs/04 §2), `reports/dq_report.md` (rows per step and per rule, population waterfalls), committed CI fixtures (`make fixtures`, ~2k real lines per table). Every Phase 1 count and AED total is reproduced exactly on full data.
 
----
+**2b, gold and rpt.** Conformed `dim_property_type` (usage group × class, 66 rows), `dim_date`, `dim_area`, `dim_procedure`, `dim_project`; facts `fct_transaction` (with `aed_counted_once`), `fct_rent_contract` (allocated rent), `fct_rates_monthly`; additive aggregates `agg_area_month`, `agg_rent_month`; 10 rpt views (Title Case, whole-dirham AED, medians blank under min-n). Tests: keys and relationships, gold = silver, aggregates = facts, and `reports/kpi_reconciliation.md` (0 mismatches). `seed_ltv_rules` verified against the CBUAE rulebook and dated. `docs/data-dictionary.md` generated.
 
-## Phase 2: dbt silver & gold (3–4 days)
+Changes after review: per-class rent area caps (C21, 85,298 lines), the data snapshot date (2026-09-25) ends the reporting scope (C18, 24,223 rent lines start after it), and the area-weighted headline covers residential apartments and villas only.
 
-**Prompt**
-```
-Implement Phase 2 per docs/04 §2–4: seeds (procedure_map, rooms_map, area with zones, ltv_rules with a
-source-citation column left for me to verify), staging, intermediate (int_market_sales, int_mortgages,
-int_rent_contracts) applying rules C1–C15 as flags (typing happens in staging), gold marts except the
-post_ml ones with dbt indexes on the big facts, and rpt views for the gold tables. Add YAML
-docs and all tests, including the reconciliation and rent de-duplication tests. Generate reports/dq_report.md
-(rows affected per rule) and docs/data-dictionary.md from the dbt YAML. Run on the sample first, then the
-full data, and report timings.
-```
-**Done when:** `dbt build` passes on full data, reconciliation holds, and the DQ report and dictionary are generated.
-
-Phase 2 is split. **2a = silver** (seeds, staging, intermediate, DQ report, CI fixtures); **2b = gold + rpt** (marts with indexes, rpt views, `seed_ltv_rules`, `docs/data-dictionary.md`).
-
-**2a checklist (silver)**
-- [x] Postgres server settings from docs/03 §7 applied and verified (2026-09-30)
-- [x] Seeds: `seed_procedure_map` (58 pairs) + `seed_procedure_category`, `seed_rooms_map`, `seed_rent_subtype_map`, `seed_area` (265 IDs), `seed_phase1_reconciliation`
-- [x] Staging (`stg_transactions`, `stg_rent_contracts`, `stg_rates`) and intermediate (`int_transaction_deal_groups`, `int_market_sales`, `int_mortgages`, `int_rent_contracts`) with YAML docs and tests; rules C1–C22 (docs/04 §2)
-- [x] `reports/dq_report.md` (`make dq`): rows per step, rows and AED per rule, population waterfalls, Phase 1 reconciliation
-- [x] Reconciliation: every Phase 1 AED total and count reproduced exactly on full data
-- [x] CI fixtures committed (`tests/fixtures/`, `make fixtures`); CI runs `make bronze BRONZE_ROOT=tests/fixtures && make dbt`
-- [x] Mortgage share = individual new mortgages only; portfolio registrations flagged `is_portfolio_mortgage` and reported separately (dq_report §5)
-- [x] CI green on 92b6191 (fixtures loaded, `make dbt` passes)
-- [x] All 265 areas zoned (42 by the owner, 2026-09-30); `make unzoned` lists 0
-- [x] 2b (see below)
-
-**2b checklist (gold + rpt)**
-- [x] Seeds: conformed property type (`seed_property_class`, `seed_property_usage_map`, `seed_property_type_map`), `procedure_key` in `seed_procedure_map`, empty centroid columns in `seed_area`, `seed_ltv_rules` (verified by the owner 2026-09-30 against the CBUAE rulebook, with effective dates and the pre-2020 regime; see docs/04 Decisions)
-- [x] Dimensions: `dim_date` (day, 2004-01-01 → 2027-12-31), `dim_area`, `dim_property_type` (conformed), `dim_procedure`, `dim_project` (no developer yet)
-- [x] Facts: `fct_transaction` (all lines, `aed_counted_once`), `fct_rent_contract` (all lines, allocated rent, market-rent flag), `fct_rates_monthly` (EIBOR columns NULL); indexed per docs/03 §7
-- [x] Aggregates: `agg_area_month`, `agg_rent_month` (additive, medians with n, Σ value / Σ area)
-- [x] rpt views (10), Title Case, AED whole dirhams, medians blank under min-n; pbi_reader reads rpt only (`tests/test_rpt_access.py`)
-- [x] Tests: keys and relationships on every fact / agg → dim; gold = silver (`recon_gold_*`), aggregates = facts (`recon_agg_*`); `tests/test_kpi_reconciliation.py` → `reports/kpi_reconciliation.md` (0 mismatches; residential apartment area-weighted vs median within ±40% every year from 2010)
-- [x] Owner review: per-class C21 area caps, area-weighted KPI on residential apartments + villas, data snapshot date (2026-09-25) ends the scope
-- [x] `docs/data-dictionary.md` (`make dictionary`), docs/04 §3 and Decisions updated
-- [x] CI green on 5076e27 ([run 36736326132](https://github.com/SafwanTisekar/dubai-property-analytics/actions/runs/36736326132)): fixtures through `make dbt`, then rpt access + KPI reconciliation. The first 2b push (1bd2800) failed: `make kpi` ran the apartment sanity check on the ~2k-line fixtures; the check now applies only from 100k transaction lines
-- [x] `seed_ltv_rules` verified by the owner against the CBUAE rulebook (2026-09-30/10-01): current caps from 2020-04-08 (Board Resolution 31/2/2020), pre-2020 regime from Circular 31/2013 (2013-10-28 to 2020-04-07; gazette date not verified), with no-overlap and range tests. CI green on fa05bd2 ([run 36773158323](https://github.com/SafwanTisekar/dubai-property-analytics/actions/runs/36773158323))
-- [x] Phase 5: centroids in `seed_area` (OpenStreetMap), DAX rewritten against rpt column names (see Phase 5 below)
-
-**2b timings and rpt row counts**: full data, 16 GB M-series Mac, 4 dbt threads, final build (per-class C21 caps and the data snapshot date). `make dbt` **7 min 43 s** wall time: `dbt build` 6 min 37 s for 10 seeds, 16 tables, 13 views and 190 tests (gold: `fct_rent_contract` ~50 s, `fct_transaction` ~12 s, `agg_rent_month` ~8 s, `agg_area_month` ~2 s; the slowest step is still silver `int_rent_contracts`, ~140 s), then `make dq` ~45 s, `make kpi` 15 s, `make dictionary` < 1 s. Gold on disk: `fct_rent_contract` 2.6 GB, `fct_transaction` 0.6 GB. Fixture build in CI: seconds.
+**Timings and rpt row counts** (full data, 16 GB M-series Mac, 4 dbt threads): `make dbt` 7 min 43 s, of which `dbt build` 6 min 37 s for 10 seeds, 16 tables, 13 views and 190 tests (`fct_rent_contract` ~50 s, `fct_transaction` ~12 s).
 
 | rpt view | Rows |
 |---|---|
@@ -113,216 +54,65 @@ Phase 2 is split. **2a = silver** (seeds, staging, intermediate, DQ report, CI f
 | `rpt.dim_procedure` | 58 |
 | `rpt.report_info` | 1 (Data As Of 2026-09-25) |
 
-Phase 2b changed two silver rules (docs/04 Decisions): C21 per-class rent area caps (85,298 lines) and C18 `is_start_after_snapshot` (24,223 lines). Market-rent lines went from 3,601,613 (2a) to 3,593,480.
+## Phase 3: Exploratory analysis
 
----
+- `src/dubai_property/analysis/`: every function aggregates in SQL over gold / rpt and returns a small frame; the three notebooks only call these functions and plot (`make eda`, ~20 s).
+- 16 charts in one style (colour-blind-safe palette, 2026 marked partial, DLD attribution).
+- `reports/findings.md`: 211,007 market sales worth AED 668.3bn in 2025; Jan–Aug 2026 −19% on 2025 (ready −37%, off-plan −7%); the 2009 spike is a registration backlog; 28–48% of 2025 ready purchases bank-financed; LTV norm 75% → 80% from April 2020; 2023 apartment prices +1.2% raw vs +14.5% like for like. Register totals match DLD's published 2023–25 figures within ~1% on value.
+- Revised after review: the mortgage KPI became the purchase-mortgage share of ready sales (docs/04 Decisions), the villa vs apartment price comparison was withdrawn (villa areas mix plot and built-up sizes), and a 2026 momentum check with registration-lag tests was added.
+- Q9 (developer concentration) deferred: it needs developer names from the DLD projects file.
 
-## Phase 3: EDA (2 days)
+## Phase 4: Models
 
-**Prompt**
-```
-Create notebooks 01_market_cycles, 02_financing_mix, 03_prices_and_rents that query gold via
-SQLAlchemy/connectorx (aggregate in SQL, not pandas) and
-answer Q1–Q4 and Q9 from docs/01, with charts saved to reports/figures/. Include an explicit mix-shift
-example (raw median vs like-for-like). End each notebook with 3–5 quantified findings and collect them in
-reports/findings.md.
-```
+**4a, hedonic index and yields.** DLD's Residential Sale Index loaded as the benchmark (data ends May 2024). Rolling-window hedonic index from January 2011, 18 segments, Jan 2019 = 100; validates against DLD at r = 0.93 / 0.92 / 0.91 (timing-aligned YoY). The pooled-fit robustness check was material (off-plan premium +6% → +38%), which decided the rolling-window method. Yields: 5,919 area and zone cells with n ≥ 20 on both sides; apartments 7.1%, villas 5.2% gross. `make train` ~37 s.
 
-**Checklist**
-- [x] `src/dubai_property/analysis/` (`market_cycles`, `financing`, `prices_rents`, `plotting`, `common`): every function aggregates in SQL over gold / rpt and returns a small frame; `fct_rent_contract` and `fct_transaction` never reach pandas
-- [x] Three notebooks executed with `make eda` (01 market cycles 344 KB, 02 financing mix 351 KB, 03 prices and rents 740 KB; the run fails over 1 MB). They only call `analysis` and plot
-- [x] 16 charts in `reports/figures/` (one style: colour-blind-safe slots, one y-axis per panel, 2026 marked partial, DLD CC BY 4.0 footer)
-- [x] Q1 incl. the 2009 spike test (registration backlog under Law No. 13 of 2008), Q2 incl. observed LTV and portfolio mortgages, Q3 incl. the mix-shift example, Q4 preview (yields, min-n)
-- [x] `reports/findings.md`: executive summary, every finding with chart, function and caveat, sanity check vs DLD's published 2023–2025 totals (within ~1% on value)
-- [x] `tests/test_analysis.py` (15 tests: pure logic + every query on the DB), passing on full data and on the CI fixtures (scratch DB); added to the post-build CI step
-- [x] Q9 (developer HHI) deferred: needs the DLD projects file (developer names)
-- [x] **Revision after owner review (2026-09-30):**
-  - [x] Mortgage KPI redefined as the purchase-mortgage share of ready sales (`int_purchase_mortgage_pairs`, gold flags, rpt columns); new mortgages per 100 market sales kept as secondary; KPI reconciliation, DQ report §5, docs/01 §4, docs/04 Decisions and docs/06 measures updated
-  - [x] Villa AED/sq m area basis checked (villa areas mix plot and built-up sizes): "villas passed apartments" withdrawn, growth quoted on the bedroom-known subset and per unit
-  - [x] 2026 momentum (Jan–Aug vs 2025, by type and zone) with registration-lag checks (daily tail, published-vs-extracted)
-- [x] CI green on 831502c ([run 36759956450](https://github.com/SafwanTisekar/dubai-property-analytics/actions/runs/36759956450)): fixtures through `make dbt`, then rpt access, KPI reconciliation and the analysis queries
+**4b, AVM.** Real-time index vintages and as-of features with a no-look-ahead test; out-of-time split; comparables, index-adjusted comparables, rolling hedonic OLS and LightGBM. Test MdAPE **6.8%**, ±10% **65.0%**, ±20% **88.2%** vs comparables 9.9% / 50.3% / 76.1%; no leakage alarm. Honest negatives reported: index-adjusted comparables lose to plain ones, comparables edge LightGBM on villa MdAPE, and Optuna results were flat. 904,551 sales scored. `make train` AVM step ~33 min (≈12 min with the committed tuned parameters).
 
----
+**4c, stress test and forecast.** 459,644 recent sales marked to market; at 80% LTV a 20% fall puts 22% of recent ready apartment buyers in negative equity; the 2014→2020 replay gives 43% to 80%. SARIMAX beats naive on the index (11 of 12 cells) but not on volume (1 of 12); central path +4.6% to Aug 2027. Two bugs found in review and fixed with tests (an accelerating drift term, a double log in the volume backtest).
 
-## Phase 4: Models (5–7 days)
+**Incident (2026-10-01).** A fixture run meant for a scratch database reset the main database's bronze, because the Makefile's `-include .env` overrode the environment variable. The database was rebuilt from `data/raw`; the AVM was re-tuned (test MdAPE 6.83% vs 6.82%, so the result is stable) and its parameters committed. The loader now refuses non-`data/raw` roots and un-flagged resets on the main database (docs/05 §8).
 
-**4a: Hedonic index + yields**
-```
-Implement hedonic_index.py and yields.py per docs/05 §2–3. Validate the index against DLD's official
-Residential Price Index (I'll place it in data/raw/dld/price_index/) and write reports/price_index.md.
-Write fct_price_index and agg_yield_quarter with the min-n rule.
-```
+## Phase 5: Power BI
 
-**4a checklist**
-- [x] DLD "Residential Properties Sale Index" (data.dubai) profiled and loaded (`make bronze BRONZE_FLAGS="--dataset price_index"`, owner-approved; 159 rows, only `bronze.dld_price_index` added, 16/16 files reconcile), `stg_dld_price_index` (long form, base-month test), README.txt note. Its data ends in **May 2024** (the 2026-09-01 stamp is the load time)
-- [x] `models/hedonic_index.py`: time-dummy hedonic regression on clean residential sales (villas: bedroom-known only), **rolling-window (36 months, step 12) chained index** from **Jan 2011** (owner decisions after the material robustness gap and the 2009–10 backlog finding, docs/05 §8). 18 segments published (Dubai, apartments, villas monthly; 15 zone × type, 8 monthly + 7 quarterly), Jan 2019 = 100, min-n per period, noise gate; YoY, MoM, 3-month mean, 12-month volatility, drawdown, episodes → `ml.fct_price_index` (2,432 rows, COPY)
-- [x] Robustness: pooled vs rolling windows (material: up to −11% level, +11 pp YoY on apartments; off-plan premium +6% → +38%), reported in `reports/price_index.md`
-- [x] Validation vs DLD (2012–2024-05): timing-aligned YoY r **0.93 Dubai, 0.92 apartments, 0.91 villas** (target ≥ 0.9 met); raw month-for-month 0.72 / 0.70 / 0.68, ours leads by ~6 months; divergences explained; mix-shift chart and table
-- [x] Episodes as found: one 2014→2020 Dubai episode (−24%, recovered Nov 2022) plus a 2011 dip; villas fell 11% from their Dec 2025 peak to Jul 2026 (episode ongoing, −8% in Sep 2026)
-- [x] `models/yields.py`: new single-line rents (C11) vs clean ready sales, area × type × bedrooms × quarter, zone roll-up with recomputed medians, n ≥ 20 both sides → `ml.agg_yield_quarter` (5,919 cells; 8 outside 2–15%, flagged). Apartments 7.2% / villas 5.2% gross (Q3 2025–Q2 2026); **7.1%** / 5.2% since Phase 5 excludes the out-of-band cells from aggregates
-- [x] `rpt.price_index`, `rpt.yield_quarter` (tag `post_ml`, `make score`) with dbt tests (base = 100, n ≥ min-n, yield ∈ [0, 1], unique keys); pbi_reader reads them (`tests/test_rpt_access.py`)
-- [x] `reports/price_index.md`, `reports/yields.md`, 8 figures (`make model-reports`), pointer in `reports/findings.md`; docs/02, 04, 05 (§8 decisions), 06 updated
-- [x] Tests: `tests/test_hedonic_index.py` (synthetic market: recovery vs median bias, drifting off-plan premium, min-n, frequency fallback, noise gate, metrics, episodes, DLD alignment; DB checks), `tests/test_yields.py`, config ↔ dbt vars. CI sequence reproduced on a scratch database (fixtures incl. the synthetic DLD index file → `make dbt` → `make train score` → post-build pytest: 48 passed, 1 expected skip)
-- [x] CI green on the pushed commit (owner confirmed, 2026-10-01)
+- rpt extended to 22 views (DLD index rebased, bedroom and ready / off-plan slicer dimensions, map attribution); `rpt.avm_score` trimmed to out-of-sample rows for size.
+- Area centroids from OpenStreetMap Nominatim: 194 of 265 areas, 97.7% of 2023+ market sales.
+- Semantic model hand-written as TMDL: 22 tables, 23 relationships, model outputs bridged with `TREATAS`, integer what-if tables, all measures with descriptions; validated offline in CI (`tests/test_powerbi_model.py`).
+- Report pages built as PBIR JSON and validated against the official schemas, then reviewed in Desktop through several gates: Introduction, Key terms, six report pages and a KPI guide generated from the measure descriptions; per-page reset bookmarks; single-select Year slicer showing only years with data.
+- Redesign (5b): navy side bar with page navigator, header bar, white cards, navy / magenta palette.
+- No maps in v1: Azure Maps needs a tenant admin, so geographic views are top-N bar charts.
+- Published to the web on 2026-10-02.
 
-**4a timings** (full data, 16 GB M-series Mac): `make train` ~37 s (index 32 s incl. 18 segments × 14 windows + robustness and validation; yields 4–6 s, all medians in Postgres), `make score` ~3 s, `make model-reports` ~5 s. `make dbt` unchanged apart from the new staging view (10 min 43 s this run, with model runs competing for the database; 7 min 43 s before).
+## Phase 6: Website
 
-**4b: AVM**
-```
-Implement features (as-of lag features, no look-ahead, with a pytest proving it), split.py, avm_baseline.py
-and avm_lgbm.py per docs/05 §1. Evaluate on the out-of-time test set by segment (MdAPE, ±10/±20% hit rates,
-vs baseline), run SHAP, and write reports/avm_model_card.md. Stop and investigate if results look too good
-(see CLAUDE.md).
-```
-**4b checklist**
-- [x] Scratch-DB guard: reports, figures, artifacts and the data dictionary go to `reports/scratch/<db>/` / `artifacts/scratch/<db>/` when `PG_DB` isn't `dubai_property` (`db.reports_dir`, `tests/test_output_dirs.py`); `hedonic_index` refactor (a full re-fit reproduces all 2,432 index points exactly)
-- [x] `features/`: real-time index vintages (43,177 points), as-of comparables (month-granular: months < M only), relative target; **no-look-ahead pytest** (`tests/test_avm_features.py`: rewriting every sale from month M on leaves month M's features unchanged; a power check shows they move when M−1 changes)
-- [x] `models/split.py` (history 2010 / train 2011–2023 / validation 2024 / test 2025+; 23,519 / 480,489 / 148,360 / 275,702 sales), `avm.py` (comparables, index-adjusted comparables, rolling hedonic OLS, LightGBM + Optuna 20 trials), `avm_eval.py`, `avm_explain.py`
-- [x] Full-data training (owner ran it): **test MdAPE 6.82%, ±10% 65.2%, ±20% 88.2%** vs comparables 9.90% / 50.3% / 76.1%, index-adjusted comparables 10.13%, rolling OLS 12.33%; head to head on 271,974 sales 6.75% vs 9.90%. **No leakage alarm** (thresholds MdAPE < 3%, ±10% > 90%). 2010-start ablation 7.57% vs 7.55%
-- [x] Honest negatives explained (docs/05 §8, findings F4b.1–2): index-adjusted comparables lose to plain ones (decomposition: indexing removes the 12-month lag bias but six fresh months carry little drift); villas tie comparables on MdAPE (8.52% vs 8.51%), LightGBM ahead on ±20%; Optuna flat (7.04–7.33% validation MdAPE across 20 trials)
-- [x] `ml.avm_score` (904,551), `ml.avm_performance` (436), `ml.feature_importance` (35) via COPY; `rpt.avm_score`, `rpt.avm_performance`, `rpt.feature_importance` (tag `post_ml`) with dbt tests; `make score` PASS=38
-- [x] `reports/avm_model_card.md` (summary, split, features, models, results by segment / band / area / month, SHAP, worked examples incl. one large miss chosen by a published rule, review flags, limitations), `reports/avm_examples.json` for the website, 9 figures (`make model-reports`); pointer and findings F4b.1–2 in `reports/findings.md`; docs/03, 04, 05 (§1 as built, §8), 06 updated; `make dictionary`
-- [x] Card claims checked against `artifacts/avm/train.log` and `ml.*`. Large-miss reasons are now derived from the example's own numbers (`avm_explain.miss_reasons`): the earlier text said the price was far from its building's median, when it was within 5% of it and the project median drove the miss
-- [x] Tests: `tests/test_avm_model.py` (metrics, bands, coverage and common subset, min-n, leakage alarm, review flag, example rule, tuning summary, card wording follows the numbers, miss reasons; DB checks on ml.avm_*), `tests/test_avm_features.py`; `make lint test` green
-- [x] Fixed a scratch-guard regression from the WIP commit: `append_ingest_log` dropped a test's redirected `config.INGEST_LOG` folder, so every pytest run left `reports/log.csv` in the repo (`tests/test_output_dirs.py`)
-- [x] CI green on the pushed commit (owner confirmed, 2026-10-01)
+- Personal site with this project on its own page, moved to its own repository `SafwanTisekar.github.io` (docs/07). `make site` writes every number from the database into the pages and `data/site.json`; `make site-shots` turns a Desktop PDF export into page screenshots.
+- Embed loads lazily with a fallback on timeout, licence end date or no JavaScript.
+- Tests in both repositories (numbers, links, images, contrast, attribution, no contact details).
 
-**4b timings** (full data, 16 GB M-series Mac, `make train` AVM step, 1,974 s ≈ 33 min): real-time index vintages 161 s, features 5 s, Optuna 20 trials 1,247 s (10–126 s per trial), final LightGBM fits 172 s, 2010 ablation 185 s, SHAP and worked examples 174 s. With the saved study reused (`artifacts/avm/best_params.json`, same feature signature), `make train` skips tuning (~12 min). `make score` 5 s, `make model-reports` 7 s. macOS needs `brew install libomp` for LightGBM.
+## Phase 7: Launch
 
-**4c: Stress test + forecast**
-```
-Implement stress_test.py (shock × LTV grid plus historical drawdown replay) and forecast.py (seasonal naive
-vs SARIMAX with lagged EIBOR, rolling-origin backtest, rate scenarios) per docs/05 §4–5. Write
-reports/stress_test.md, then score.py to write all ml.* tables and build the post_ml marts.
-```
-**4c checklist**
-- [x] `models/stress_test.py` (docs/05 §4, illustrative): 459,644 clean residential sales of the last 36 complete months (Sep 2023 – Aug 2026), marked to market with the published index (zone × type where published, else type; "now" = latest complete period); loans held at origination; assumed LTV grid 50 / 60 / 70 / 80 / 85 (85 = UAE national first-home cap, worst case), CBUAE cap reference (expatriate, first home, by sale date and value band), registered loans of 48,235 matched purchases (match rate 36.8%); shocks 0 to −50 (integers) + 2014→2020 replay at two depths (Dubai-wide −24%; each buyer's own series, upper range); off-plan never pooled with ready; min-n → `ml.stress_grid` (25,454 rows), `ml.stress_replay` (18)
-- [x] `models/forecast.py` (docs/05 §5): index (Dubai, apartments, villas) and volume, partial month dropped; naive / seasonal naive / SARIMAX with Fed Funds lagged 6 months (EIBOR proxy); rolling-origin backtest over 24 months on **real-time index vintages** (4b code, `keep_periods=None`, cached in `artifacts/forecast/`), h = 1 / 3 / 6 / 12; rate scenarios flat / ±100bp with 80% / 95% intervals → `ml.forecast` (1,344), `ml.forecast_backtest` (72). LightGBM not built (decision logged)
-- [x] Results: stress at 80% LTV, ready apartments 0% / 22% / 73% at 0 / −20 / −30%, 2014→2020 replay 43% (Dubai-wide −24%) to 80% (own series, upper range); forecast SARIMAX beats naive in 11/12 index cells, 1/12 volume cells; Dubai +4.6% central path (80%: −5% to +15%); rate coefficient positive and insignificant in all six series (reported as a limitation)
-- [x] Two bugs found in review of the first full run and fixed with tests: SARIMAX `trend="t"` (an accelerating drift; now `"c"`, constant) and a double log in the volume backtest (docs/05 §8)
-- [x] Wiring: `make train` runs the forecast; `make score` = `models/score.py` (stress test, every ml table checked, dbt `tag:post_ml`); `make model-reports` adds `report_4c`. Views `rpt.stress_grid`, `rpt.stress_replay`, `rpt.forecast`, `rpt.forecast_backtest` with dbt tests (shares ∈ [0, 1], keys, interval order, monotone in shock and LTV, none under water at 0% / 50% LTV); pbi_reader reads them (`tests/test_rpt_access.py`)
-- [x] `reports/stress_test.md`, `reports/forecast.md`, 6 figures; pointers and F4c.1–2 in `reports/findings.md`; docs/03, 04, 05 (§4–5 as built, §8), 06 (LTV slicer values 50/60/70/80/85, stress DAX on rpt names) updated; `make dictionary`
-- [x] Tests: `tests/test_stress_test.py` (cap by date / band / status, zone → type fallback, quarterly periods, partial period never "now", replay, shares, monotonicity, 0 shock, min-n, off-plan split; DB invariants), `tests/test_forecast.py` (no look-ahead with power check, vintage chain, intervals contain the point, scenarios equal up to the lag, scoring, constant drift, volume end to end; DB checks). Fixture sequence run on the scratch DB (`make ... PG_DB=dubai_property_scratch`): post_ml PASS=70, empty-but-valid 4c tables
-- [x] **Incident (docs/05 §8):** the first fixture run hit the main database (`PG_DB=x make` doesn't override `.env`); restored from `data/raw` with owner approval (reports identical to the committed ones apart from timestamps; index 2,432 rows exactly; AVM re-tuned, test MdAPE 6.83% vs 6.82%). `load_bronze` now refuses non-`data/raw` roots and un-flagged `--reset` on the main database (`ALLOW_MAIN_RESET=1`)
-- [x] AVM model card regenerated after the restore (owner approved): test MdAPE 6.83%, ±10% 65.0% (first run 6.82% / 65.2%), villas: comparables slightly better on MdAPE (8.51% vs 8.66%); reproducibility line in the card; `artifacts/avm/best_params.json` committed (whitelisted) so a restore reuses the tuned parameters
-- [x] CI green on the pushed commit (owner confirmed, 2026-10-01)
+- [x] README with the architecture diagram, report screenshot, findings and how to run
+- [x] Repository cleanup: licence, `.gitattributes`, documentation tightened
+- [ ] v1.0 release with the PBIX
+- [ ] Monthly refresh routine
 
-**4c timings** (full data, 16 GB M-series Mac): forecast 108 s on first run (real-time vintages for three segments × 24 origins 76 s, then cached; 6 series × 24 origins of SARIMAX ~30 s), 26 s with cached vintages; stress test 2 s; `make score` ~10 s (stress + 70 post_ml dbt nodes); `report_4c` ~3 s. Restore: bronze from `data/raw` 3 min 35 s, `make dbt` 8 min 10 s, `make train` 34 min (AVM with 20 Optuna trials ~32 min).
+## Open items
 
-**Done when:** the model cards and reports are complete, the AVM beats the baseline (or the result is honestly explained), and the index validates against DLD's.
+- [ ] EIBOR: place the CBUAE history in `data/raw/cbuae/` and run `make bronze`; Fed Funds stands in until then.
+- [ ] DLD projects file: developer names (Q9 developer HHI, property age for the AVM).
+- [ ] Every Power BI card checked against `reports/kpi_reconciliation.md` §7; Performance Analyzer timings; model size from VertiPaq Analyzer (docs/06 §1).
+- [ ] Reset all filters confirmed in the Service after republishing.
+- [ ] 71 areas without a centroid (`centroid_source = manual` in `seed_area.csv`), if a map is added.
+- [ ] Site: first deploy (Settings > Pages > Source: GitHub Actions) and Lighthouse ≥ 90.
+- [ ] Renew Power BI Pro or buy a licence before the trial ends (~2026-11-27).
+- [ ] `make update` (incremental monthly refresh) is a stub.
 
-**Stretch:** developer HHI and handover pipeline; area segmentation; rent-vs-buy calculator.
-
----
-
-## Phase 5: Power BI (5–7 days)
-
-**Prompt**
-```
-Finalise the rpt.* views per docs/06 §1 (friendly names, only needed columns, Power BI-friendly types,
-AED rounded, _ar columns excluded) and confirm pbi_reader can read them and nothing else. Configure
-postgresql.conf / pg_hba.conf guidance for the Parallels network (docs/03 §8) as a checklist in
-powerbi/CONNECT.md. Write tests/test_kpi_reconciliation.py for every KPI in docs/01 §4 → reports/kpi_reconciliation.md,
-powerbi/theme.json and powerbi/measures.dax with every measure from docs/06 §3 (integer-based what-if
-values). Also expose area centroids from seed_area in rpt.dim_area for the map.
-```
-Then, in Power BI Desktop (Parallels), connect to PostgreSQL as pbi_reader (import mode), build the six pages per docs/06 §4–5, save as PBIP, publish, and create the Publish-to-web embed code.
-
-**Done when:** the cards match `kpi_reconciliation.md`, every visual is under 1 s, and the embed URL is recorded below.
-
-**Phase 5 checklist (preparation, Claude Code)**
-- [x] rpt review against docs/06 §4's six pages; gaps fixed in dbt: `rpt.dld_price_index` (DLD's official index rebased to Jan 2019 = 100), shared slicer dimensions `rpt.dim_bedrooms` / `rpt.dim_ready_offplan` with `"Bedrooms Key"` / `"Ready / Off-Plan"` on the facts, `"Project Key"` on `rpt.avm_score`, `"Map Attribution"` on `rpt.report_info`. 22 rpt views; `pbi_reader` reads all of them and nothing else (`tests/test_rpt_access.py`)
-- [x] Area centroids: `make centroids` (OpenStreetMap Nominatim, names only, descriptive User-Agent, cached in `data/raw/osm/`) → `seed_area` latitude / longitude / `centroid_source`; 194 of 265 areas, **97.7% of 2023+ market sales**; misses listed in `reports/area_centroids.md`; credit "© OpenStreetMap contributors (ODbL)" in the report footer and on the website (owner, 2026-10-01)
-- [x] Size budget (docs/06 §1): `rpt.avm_score` trimmed to out-of-sample rows (owner decision) and 4 columns; `"Price AED"` dropped from `rpt.transactions`
-- [x] Semantic model rewritten as TMDL (checkpoint: local tag `pbip-checkpoint-phase2b`; `git checkout pbip-checkpoint-phase2b -- powerbi/` restores the old model): 22 imported tables with friendly names, `PgServer` / `PgDatabase` parameters, 23 named relationships, model outputs disconnected and bridged with TREATAS, what-if tables (`Price Shock %` 0 to −50 step 5, `LTV %` 50/60/70/80/85, `Replay Depth`, `Forecast Scenario`), every measure in `_Measures` with display folders and descriptions; `powerbi/measures.dax` review copy (`make pbi-measures`); `tests/test_powerbi_model.py`
-- [x] Card checklist: `reports/kpi_reconciliation.md` §7 (`quality/pbi_cards.py`, regenerated by `make kpi` and `make score`)
-- [x] **Gate (owner, 2026-10-02):** Desktop opens the PBIP and refreshes. One defect found: Excel-style scaling commas in the AED bn format (`#,0.0,,,"bn"`) rendered literally ("AED 3.6,,,Tbn"); every AED measure is now `"AED "#,0` with card display units set to Billions, and `tests/test_powerbi_model.py` rejects scaling commas
-- [x] `powerbi/theme.json` (the figures' colour-blind-validated palette, text contrast 19.2:1 / 7.7:1) and `powerbi/BUILD.md` (setup, layout grid, six pages with fields, positions, interactions, insight titles and alt text, pre-publish checks)
-- [x] Power BI Pro trial expiry recorded: **~2026-11-27** (owner, 2026-10-02). The Publish-to-web embed stops working if the licence lapses: renew or buy Pro before then (Publishing record below)
-- [ ] Owner: fill the 71 unlocated areas in `seed_area.csv` (`centroid_source = manual`) if they matter for the map; Al Warsan First and Zaabeel First are the largest
-
-- [x] Maps dropped for v1 (owner, 2026-10-02: Azure Maps needs a tenant admin): bar charts by area, top N by the same measure; centroids kept in the model
-- [x] Theme registered inside the PBIP (applies on open); PBIR schemas vendored (`powerbi/schemas/`), visuals validated offline (schema, model fields, formatting names and values: `tests/test_powerbi_model.py`)
-- [x] Page 1 (Executive Overview) + synced slicer panel built as PBIR → **gate passed (owner, 2026-10-02)**: renders, Sales value and Market sales match §7. Fixes: new-card formatting needs `$id = default` selectors (label / padding were ignored), one-line header and footer, no auto subtitles, mortgage share as its own lower-bound card, staggered reference-line labels, bars without scrollbar, "not filtered by Year" notes
-- [x] Pages 2–6 built as PBIR, checkpoint `4df7b62`
-- [x] Final-gate fixes (owner review 2026-10-02): render minimum 240 × 180 (page 2 panels side by side), heatmap with all 11 shock rows / short LTV labels / no totals, CBUAE-cap vs registered-loan cards verified as distinct rows (20.69% vs 20.73% Dubai-wide), rpt ratios at 6 decimals (±10% shows 65.0%), page 3 residential-only + explicit min-n + "AED 18K" + no Unknown bedrooms, yield aggregates exclude out-of-band cells (apartments 7.1%), taller slicers, shorter titles and labels, top-N bars sized to fit, mortgage-share subtitle shown (title on), readable SHAP feature names, axes ending at the snapshot, outlook axis from 150, scatter and rent-by-bedrooms tidied; guards added to the tests; `powerbi/VISUALS.md` generated (`make pbi-inventory`)
-- [x] Round 1 committed as checkpoint `d31ef86`
-- [x] Round 2 (owner review 2026-10-02): size model recalibrated on Desktop's rendered sizes (cards, bars, tables; BUILD.md rule), KPI rows label + value only, single cards 100 px, page 2 year axes 2010–2026, every top-N chart and the flags table sized to show all N with matching titles, page 3 matrix fits all bedroom columns ("18K"), AVM segment chart on the same sales as the model card (villas 8.66%), page 1 footer gap closed, "Island 2 (Jumeira Bay)"
-- [x] **Gate (owner): round 2 confirmed 2026-10-02**, committed `f1f9b78`
-- [x] Final batch: flags table without project "Unknown", mortgage-share and deepest-fall cards in the row's style ("Mortgage share (ready, at least)", "Deepest fall since 2011"), page 3 matrix Studio–4 BR (no horizontal scroll), page 6 master-projects bar shows all 5 (one-line title, 208 px)
-
-**Phase 5b: redesign (owner request 2026-10-02)**
-- [x] Gate 1 built: navy / magenta theme (validated against the theme schema; WCAG AA text), figures regenerated in the same palette, side bar with page navigator, header bar (Data as of, Reset all filters = Clear all slicers, ⓘ to the KPI guide), white-card sections, Introduction and Key terms & methods (numbers from measures), page 1 with KPI split strips and data-driven insights
-- [x] Gate 1 checkpoint `01be58b` (owner: panel, titles, headings, padding and side bar confirmed)
-- [x] Gate 1 round 2: dynamic text in wrapping one-column tables (cards cut it to one line), headings inside the insight and data cards, strips ≤ 26 characters at 7.5 pt, "Mortgage share (ready)", symmetric frame, panel `#e8ebf0`
-- [x] Gate 2 built: pages 2–6 in the new frame (KPI tiles with strips, section headings, 180 px chart cards, top-N sized to fit), KPI guide page generated from structured measure descriptions (25 KPI descriptions rewritten in plain English; `'KPI Guide'` table; tests), card checklist (§7) aligned
-- [x] **Gate 2 (owner): checked in Desktop 2026-10-02**; final fixes: KPI guide shows all 27 KPIs with a page column and a no-default page filter, page 3 matrix fits (short zone labels, 400 px), Key terms text fits without scrolling, page 5 segment labels outside the bars, **Reset all filters = per-page bookmarks** restoring the defaults (owner to confirm they load in Desktop; fallback: recreate by hand, BUILD.md)
-- [x] **Phase 5b gate 2 confirmed in Desktop (owner, 2026-10-02)**, including the reset bookmarks and the single-select Year slicer. Desktop's saved PBIP (re-serialised: visualContainer 2.13.0, bookmark state 1.0, lineage tags) is committed as the source; the offline checks validate a not-yet-published schema version against the newest vendored one of the same major, and the KPI Guide generator keeps Desktop's lineage tags. A page left selected in the KPI guide filter during testing was cleared, so the guide opens with all 27 KPIs
-- [x] Slicer fixes: Year (and shock, LTV, segment controls) single select + Require single selection, tested; Year shows "2026 (to 25 Sep)" and only years with data (`rpt.dim_date` "Year Label", "Is Data Year" from the snapshot date)
-
-**Phase 5 checklist (owner, Power BI Desktop)**
-- [x] Report built (PBIR, generated and validated offline): Introduction, Key terms, six report pages and the KPI guide, reviewed and **confirmed in Desktop** over the Phase 5 and 5b gates (2026-10-02); `powerbi/VISUALS.md` lists every visual
-- [ ] Every card matches `reports/kpi_reconciliation.md` §7
-- [ ] Performance Analyzer: every visual under 1 s
-- [ ] Model size checked with VertiPaq Analyzer and recorded in docs/06 §1
-- [x] Published to the web (owner, 2026-10-02); embed URL in the Publishing record below
-- [x] Reset all filters checked in the Service: the button did not show there (Desktop was fine). Every button state (default, hover, pressed, disabled) now has the same text, icon and fill, plus a thin outline, so no state can render blank; a test covers it. **Owner: republish and confirm it shows** (if not, check the button in the Service's edit mode, Selection pane)
-
----
-
-## Phase 6: Website (3–4 days)
-
-**Prompt**
-```
-Build the static site in website/ per docs/07: index, case-study, methodology, data, about; responsive
-Power BI iframe from website/config.js with a screenshot/GIF fallback; all numbers drawn from
-reports/*.md (no invented figures); DLD CC BY 4.0 attribution; pages.yml deploy to GitHub Pages;
-Lighthouse ≥ 90 via Playwright.
-```
-Revised by the owner (2026-10-02): one page with five sections (docs/07 §3), numbers from the database via `make site`.
-
-- [x] Site pages (now in the site repo): index.html, styles.css, main.js, config.js; numbers written by `make site` into the pages and `data/site.json` (no typed figures); five findings with charts (WebP)
-- [x] Embed from config.js, lazy, with a fallback on timeout, licence end date or no JavaScript
-- [x] Pages workflow in the site repo: runs its tests, then deploys (this repo's workflow removed 2026-10-03)
-- [x] Tests: site repo `tests/test_site.py` (numbers = site.json, links and images resolve, alt text, image sizes, contrast, attribution, no em-dashes, no contact details or documents); here `tests/test_website_build.py` (build helpers; site links to this project when `SITE_REPO_DIR` is set)
-- [x] docs/07 rewritten for one page; decisions logged
-- [x] Report screenshots from the owner's PDF export (2026-10-03)
-- [x] Restructure (owner, 2026-10-03): home page about the owner from the CV, project cards from `data/projects.json`, project page under `projects/dubai-property/`
-- [x] Owner resolved the `TODO(owner)` notes (2026-10-03)
-- [x] Site moved to its own repo `SafwanTisekar.github.io` (2026-10-03): `make site` writes into `SITE_REPO_DIR`; this repo's `website/` and Pages workflow removed
-- [ ] Owner creates the GitHub repo, pushes, enables Pages (Settings > Pages > Source: GitHub Actions)
-- [ ] Lighthouse ≥ 90 (Performance, Accessibility, SEO) in Chrome DevTools on the deployed site; record the Website URL below
-
----
-
-## Phase 7: Polish & launch (1–2 days)
-
-- [ ] README with the architecture image, results table and GIF
-- [ ] CI green; v1.0 release with the PBIX
-- [ ] Docs reviewed against final results; decision logs filled in
-- [ ] LinkedIn post + quantified CV bullet
-- [ ] Set a monthly reminder to run `make update` and republish
-
----
-
-## Tracking
-
-| Phase | Status | Started | Finished | Notes |
-|---|---|---|---|---|
-| 0 Setup | ✓ | 2026-09-30 | 2026-09-30 | Scaffold done: `make setup`, `make db` (idempotent), `uv run pytest` (12 passed incl. pbi_reader grant tests) and `dbt debug` pass locally on PG 18.6 / dbt 1.12.5. First push e360d92, CI green |
-| 1 Ingestion | ✓ | 2026-09-30 | 2026-09-30 | CI green on 00340f6. Bronze loaded and reconciled (15 files: 1,788,150 transactions, 10,538,926 rent lines, FRED Fed Funds + Brent); re-runs are a no-op. Profiles, `phase1_findings.md` and docs/02 §7 done. Deferred: DLD increment download (stub), EIBOR (manual CBUAE file not yet placed). Open: C11 option and CI sample data (docs/04 §6) |
-| 2 dbt | ✓ | 2026-09-30 | 2a, 2b: 2026-09-30 | 2a (silver) done 2026-09-30, CI green on 92b6191: `dbt build` PASS=98 on full data in 4 min 38 s and on the CI fixtures; Phase 1 figures reproduced exactly (reports/dq_report.md §4). 1,267,760 clean market sales, 3,601,613 market-rent lines. All 265 areas zoned. 2b (gold + rpt) done 2026-09-30: `make dbt` 7 min 43 s on full data, 229 dbt nodes pass, gold = silver exactly, `reports/kpi_reconciliation.md` 0 mismatches and the apartment sanity check passes, 10 rpt views (1.77M transaction rows + 392k rent-month cells), data snapshot 2026-09-25. CI green on 5076e27 ([run](https://github.com/SafwanTisekar/dubai-property-analytics/actions/runs/36736326132)) |
-| 3 EDA | ✓ | 2026-09-30 | 2026-09-30 | `make eda` runs the three notebooks in ~20 s on full data. Headlines: 211,007 market sales / AED 668.3bn in 2025; Jan–Aug 2026 −19% on 2025 (ready −37%, off-plan −7%), no sign of registration lag; the 2009 spike is a backlog (93.5% of 2009 off-plan registrations applied for earlier); 28–48% of 2025 ready purchases bank-financed (matched lower bound 27.9%); LTV norm 75% → 80%; 2023 apartment prices +1.2% raw vs +14.5% like-for-like. Register totals match DLD's published 2023–25 figures within ~1% on value. Revised the same day after owner review (mortgage KPI, villa area basis, 2026 momentum). `make dbt` 242 nodes pass. CI green on 831502c ([run](https://github.com/SafwanTisekar/dubai-property-analytics/actions/runs/36759956450)). Q9 deferred |
-| 4 Models | ✓ | 2026-10-01 | 4a, 4b, 4c: 2026-10-01 | 4a (hedonic index + yields) done, CI green: rolling-window hedonic index from 2011, 18 segments, validates vs DLD at 0.93 / 0.92 / 0.91 (timing-aligned YoY); yields 5,919 cells. Owner decisions 2026-10-01: rolling windows, 2011 start, aligned validation headline (docs/05 §8). 4b (AVM) done: LightGBM test MdAPE 6.8%, ±10% 65.2% vs comparables 9.9% / 50.3%, no leakage alarm, 904,551 sales scored; model card `reports/avm_model_card.md`. 4c (stress test + forecast) done 2026-10-01: at 80% LTV a 20% fall puts 22% of recent ready apartment buyers in negative equity; SARIMAX beats naive on the index (11/12) but not on volume (1/12); main DB restored after a fixture-run incident, bronze guard added |
-| 5 Power BI | ✓ | 2026-10-01 | 2026-10-02 | Report built and confirmed in Desktop (Phase 5 + 5b redesign): 22 rpt views, TMDL model (measures, what-if and KPI Guide tables), nine PBIR pages (Introduction, Key terms, 1–6, KPI guide) validated offline, per-page reset bookmarks, navy / magenta theme. Published to the web 2026-10-02 (URL in the Publishing record); Pro trial ends ~2026-11-27. Not yet recorded: §7 card check, Performance Analyzer timings, VertiPaq size |
-| 6 Website | ◐ | 2026-10-02 | | Restructured and restyled 2026-10-03: personal home page + project page, moved to its own repo SafwanTisekar.github.io (docs/07 §2); 31 site tests there, build tests here. Awaiting the owner's GitHub repo creation, push and first deploy |
-| 7 Launch | ☐ | | | |
+## Publishing record
 
 | Publishing record | Value |
 |---|---|
-| Power BI tenant/account | Own-domain tenant; the owner is Global Admin (admin takeover via DNS TXT) and **Publish to web** is enabled in the tenant settings |
+| Power BI tenant/account | Own-domain tenant, Global Admin via DNS TXT admin takeover; **Publish to web** enabled in the tenant settings |
 | Publish-to-web URL | https://app.fabric.microsoft.com/view?r=eyJrIjoiYzgxYTFiNGEtNTQ1OC00YWExLTk2YTctY2E2MDMwNjQyNjY5IiwidCI6ImQ0M2RmOTBjLTEwYTctNDg5MC1hYjBjLWU5YWMwNDQ2NjRiNCJ9 |
 | Published on | 2026-10-02 |
 | Licence/trial expires | Pro trial started 2026-09-29, ends **~2026-11-27**. The embed stops working if the licence lapses |
-| Website URL | https://safwantisekar.github.io/ (project page: /projects/dubai-property/); repo SafwanTisekar.github.io, not yet pushed |
+| Website URL | https://safwantisekar.github.io/ (project page: /projects/dubai-property/) |
 | Data as of | 2026-09-25 (snapshot) |

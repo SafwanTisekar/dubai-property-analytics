@@ -7,7 +7,7 @@ Populations (docs/01 §4, docs/04):
   ``gold.agg_area_month``, over sales within the class area cap, per property class.
 * **Rents**: new market rents (``is_market_rent``: new, single-line, comparable). Rent per
   sq m only where the line has a real area (C21).
-* **Min-n** (CLAUDE.md): a segment with fewer than 20 observations gets no median; the
+* **Min-n** (docs/01 §7): a segment with fewer than 20 observations gets no median; the
   functions return n and blank the value, and the yield preview rolls up to the zone.
 
 Everything is grouped in SQL. ``fct_rent_contract`` (10.5M lines) never leaves Postgres.

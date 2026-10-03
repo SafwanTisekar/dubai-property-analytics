@@ -1,4 +1,4 @@
-"""AVM features: the no-look-ahead proof (CLAUDE.md, docs/05 §1) and the as-of mechanics.
+"""AVM features: the no-look-ahead proof (docs/01 §7, docs/05 §1) and the as-of mechanics.
 
 The leakage test is behavioural, not a code review: build every feature on a synthetic
 market, then rewrite history from month M on (reprice every sale dated M or later,

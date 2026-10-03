@@ -23,7 +23,7 @@ alter schema rpt    owner to dpa_owner;
 revoke all on schema public from public;
 
 -- ---------------------------------------------------------------------------------
--- pbi_reader: SELECT on rpt only (CLAUDE.md "Secrets and publishing").
+-- pbi_reader: SELECT on rpt only (docs/01 §7).
 -- Power BI must never see bronze/silver/gold/ml, so no USAGE is granted on them.
 -- ---------------------------------------------------------------------------------
 grant usage on schema rpt to pbi_reader;

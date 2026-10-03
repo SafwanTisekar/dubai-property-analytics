@@ -2,7 +2,7 @@
 -- Rules applied here (docs/04 §2): C1 de-duplication and typing, C2 procedure map,
 -- C7 rooms map, C8 area seed, C9 has_project, C18 date flags, C19 property_usage fix.
 -- No row is filtered except C1 duplicates; everything else is a column or a flag.
--- Arabic (_ar) columns are dropped here (CLAUDE.md).
+-- Arabic (_ar) columns are dropped here (docs/01 §7).
 
 with source as (
 
@@ -66,7 +66,7 @@ typed as (
         {{ clean_text('rooms_en') }} as rooms_en,
         {{ to_bool01('has_parking') }} as has_parking,
 
-        -- Units: sq m and AED, as published (CLAUDE.md). No sq ft anywhere.
+        -- Units: sq m and AED, as published (docs/01 §7). No sq ft anywhere.
         {{ to_num('procedure_area') }} as area_sqm,
         {{ to_num('actual_worth') }} as actual_worth_aed,
         {{ to_num('meter_sale_price') }} as meter_sale_price_aed,

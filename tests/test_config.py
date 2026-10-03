@@ -8,7 +8,7 @@ def test_out_of_time_split_is_ordered_and_disjoint():
     assert config.VALID_START <= config.VALID_END < config.TEST_START
 
 
-def test_business_thresholds_match_claude_md():
+def test_business_thresholds_match_project_rules():
     assert config.MIN_N == 20
     assert config.SQM_TO_SQFT == 10.7639
     assert config.INDEX_BASE_MONTH.isoformat() == "2019-01-01"

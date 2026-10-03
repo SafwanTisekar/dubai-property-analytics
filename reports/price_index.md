@@ -12,7 +12,7 @@ Phase 4a (docs/05 §2). Like-for-like residential price index for Dubai, apartme
 2. **One long down-cycle.** The ≥10% rule finds the main Dubai episode from a Jun 2014 peak to a Sep 2020 trough (-23.6%), recovered only in Nov 2022: the 2020 COVID dip came before prices had regained their 2014 peak, so the 2014–19 correction and 2020 are one episode (plus 1 shorter one: Feb 2011 -11.6%). (table below)
 3. **Validates against DLD:** YoY correlation **0.93** (Dubai), with every headline series ≥ 0.9 once our index is averaged over the same trailing 12 months as DLD's appears to be. Month for month the correlation is 0.72: our index leads DLD by about 6 months. ([chart](figures/price_index_validation.png))
 4. **The raw median misses most of the rise.** Apartment raw median AED per sq m: 152.4 in Sep 2026 (Jan 2019 = 100) against a hedonic 176.0. ([chart](figures/price_index_mix_shift.png))
-5. **Published method: rolling windows.** One pooled 2011–2026 fit would hold the apartment off-plan premium fixed, but it moved from +6% to +38% across the windows; the pooled index differs by up to -9.8% (Dubai), so it is kept only as the robustness check (owner decision, 2026-10-01). ([chart](figures/price_index_robustness.png))
+5. **Published method: rolling windows.** One pooled 2011–2026 fit would hold the apartment off-plan premium fixed, but it moved from +6% to +38% across the windows; the pooled index differs by up to -9.8% (Dubai), so it is kept only as the robustness check (decision, 2026-10-01). ([chart](figures/price_index_robustness.png))
 
 ## Method
 
@@ -160,7 +160,7 @@ Zones (all episodes found, of which cycles rather than short dips, and the deepe
 
 ## Robustness: rolling windows vs one pooled fit
 
-The owner asked for this check because the pooled fit assumes the off-plan discount, bedroom premia and area effects never change, while the off-plan share swung after 2021. The gap is **material** (> 5% in level or > 3 pp in YoY), so the choice went to the owner, who chose the rolling-window index for every segment (2026-10-01).
+This check was run because the pooled fit assumes the off-plan discount, bedroom premia and area effects never change, while the off-plan share swung after 2021. The gap is **material** (> 5% in level or > 3 pp in YoY), so the choice was made explicitly: I chose the rolling-window index for every segment (2026-10-01).
 
 | Series | Max level gap (RTD vs pooled) | When | Max YoY gap | When | Mean abs YoY gap | Material |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
@@ -197,7 +197,7 @@ The gap is largest before 2017: the pooled fit applies one off-plan premium (+30
 
 **Method.** Growth rates, not levels (different bases, baskets and methods). Both series rebased to their first common month for the chart only.
 
-- **Headline (aligned):** YoY of our index averaged over the trailing 12 months, vs DLD's YoY, at lag 0. Owner decision 2026-10-01: our monthly index leads DLD's by about six months, and a 12-month trailing average of ours lines up with DLD at lag 0, which suggests DLD's monthly figure averages the last 12 months of sales. That is an inference from the data; the file carries no methodology.
+- **Headline (aligned):** YoY of our index averaged over the trailing 12 months, vs DLD's YoY, at lag 0. Decision 2026-10-01: our monthly index leads DLD's by about six months, and a 12-month trailing average of ours lines up with DLD at lag 0, which suggests DLD's monthly figure averages the last 12 months of sales. That is an inference from the data; the file carries no methodology.
 - **Raw:** month-for-month YoY, the best lead, and MoM correlations are shown alongside so nothing is hidden.
 
 | Pair | YoY r, aligned | Months | ≥ 0.9 | YoY r, raw | Best lead, months (r) | MoM r | MoM r, 3m mean | Our growth | DLD growth |

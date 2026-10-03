@@ -1,5 +1,5 @@
 -- Financing: every Mortgages-group line (C10, C16, C17, C18). Analysed separately from
--- prices (CLAUDE.md): nothing here feeds the price index, yields or the AVM.
+-- prices (docs/01 §7): nothing here feeds the price index, yields or the AVM.
 --
 -- C10: `actual_worth` is the LOAN amount for Mortgage Registration and Delayed Mortgage
 -- (median 0.795 / 0.800 of the same-day sale price, following the CBUAE LTV caps;

@@ -486,7 +486,7 @@ def stress_report(grid, replay, rules, diag, figs) -> str:
             ],
         ),
         "",
-        "**LTV caps used (seed `seed_ltv_rules`, verified by the owner against the CBUAE rulebook):**",
+        "**LTV caps used (seed `seed_ltv_rules`, verified by hand against the CBUAE rulebook):**",
         "",
     ]
     cap_rules = rules.filter(

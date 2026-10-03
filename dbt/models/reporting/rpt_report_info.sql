@@ -2,7 +2,7 @@
 
 -- One row for the report header and footer: the data snapshot date (latest transaction
 -- date, the end of the reporting scope), the min-n threshold and the attributions the
--- licences require: DLD data (CC BY 4.0, CLAUDE.md) and the OpenStreetMap area centroids
+-- licences require: DLD data (CC BY 4.0, docs/01 §7) and the OpenStreetMap area centroids
 -- behind the map (ODbL).
 select
     (select max(date) from {{ ref('dim_date') }} where not is_after_snapshot) as "Data As Of",

@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 330" role="img" aria-labelledby="t d" font-family="system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif">
+  <title id="t">Dubai Property Risk: architecture</title>
+  <desc id="d">Sources (DLD transactions, Ejari rents, Fed Funds) are loaded by Python with COPY into PostgreSQL bronze; dbt builds silver and gold; Python models write ml tables; dbt builds rpt views; Power BI imports rpt and is published to the web; the static website embeds it.</desc>
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 10 5 0 10z" fill="#5f6673"/></marker>
+  </defs>
+  <rect width="1200" height="330" fill="#ffffff"/>
+  <rect x="210" y="16" width="770" height="140" rx="12" fill="#f2f3f5" stroke="#d9dde4"/>
+  <text x="226" y="40" font-size="14" font-weight="700" fill="#5f6673">PostgreSQL 18, database dubai_property</text>
+  <g font-size="15" fill="#1b2a4a">
+    <g><rect x="16" y="56" width="170" height="80" rx="8" fill="#fff" stroke="#1b2a4a" stroke-width="2"/>
+      <text x="101" y="84" text-anchor="middle" font-weight="700">Sources</text>
+      <text x="101" y="104" text-anchor="middle" font-size="12" fill="#5f6673">DLD sales, Ejari rents</text>
+      <text x="101" y="121" text-anchor="middle" font-size="12" fill="#5f6673">Fed Funds (FRED)</text></g>
+    <g><rect x="232" y="56" width="160" height="80" rx="8" fill="#fff" stroke="#1b2a4a" stroke-width="2"/>
+      <text x="312" y="84" text-anchor="middle" font-weight="700">bronze</text>
+      <text x="312" y="104" text-anchor="middle" font-size="12" fill="#5f6673">raw text, Python COPY</text>
+      <text x="312" y="121" text-anchor="middle" font-size="12" fill="#5f6673">row counts reconciled</text></g>
+    <g><rect x="420" y="56" width="160" height="80" rx="8" fill="#fff" stroke="#1b2a4a" stroke-width="2"/>
+      <text x="500" y="84" text-anchor="middle" font-weight="700">silver, gold</text>
+      <text x="500" y="104" text-anchor="middle" font-size="12" fill="#5f6673">dbt: types, flags,</text>
+      <text x="500" y="121" text-anchor="middle" font-size="12" fill="#5f6673">facts and dimensions</text></g>
+    <g><rect x="608" y="56" width="160" height="80" rx="8" fill="#fff" stroke="#d6247f" stroke-width="2"/>
+      <text x="688" y="84" text-anchor="middle" font-weight="700">ml</text>
+      <text x="688" y="104" text-anchor="middle" font-size="12" fill="#5f6673">Python: index, AVM,</text>
+      <text x="688" y="121" text-anchor="middle" font-size="12" fill="#5f6673">yields, stress, forecast</text></g>
+    <g><rect x="796" y="56" width="160" height="80" rx="8" fill="#fff" stroke="#1b2a4a" stroke-width="2"/>
+      <text x="876" y="84" text-anchor="middle" font-weight="700">rpt</text>
+      <text x="876" y="104" text-anchor="middle" font-size="12" fill="#5f6673">dbt views, the only</text>
+      <text x="876" y="121" text-anchor="middle" font-size="12" fill="#5f6673">schema Power BI reads</text></g>
+    <g><rect x="1010" y="56" width="174" height="80" rx="8" fill="#1b2a4a"/>
+      <text x="1097" y="84" text-anchor="middle" font-weight="700" fill="#fff">Power BI</text>
+      <text x="1097" y="104" text-anchor="middle" font-size="12" fill="#c7cfdd">import, read-only role</text>
+      <text x="1097" y="121" text-anchor="middle" font-size="12" fill="#c7cfdd">nine report pages</text></g>
+    <g><rect x="1010" y="216" width="174" height="80" rx="8" fill="#d6247f"/>
+      <text x="1097" y="244" text-anchor="middle" font-weight="700" fill="#fff">Web</text>
+      <text x="1097" y="264" text-anchor="middle" font-size="12" fill="#fff">Publish to web, embedded</text>
+      <text x="1097" y="281" text-anchor="middle" font-size="12" fill="#fff">in this site (GitHub Pages)</text></g>
+    <g><rect x="420" y="216" width="348" height="80" rx="8" fill="#fff" stroke="#d9dde4" stroke-dasharray="5 4"/>
+      <text x="594" y="244" text-anchor="middle" font-weight="700">Checks on every push (GitHub Actions)</text>
+      <text x="594" y="264" text-anchor="middle" font-size="12" fill="#5f6673">dbt tests, pytest, KPI reconciliation silver = rpt,</text>
+      <text x="594" y="281" text-anchor="middle" font-size="12" fill="#5f6673">no-look-ahead test, real-data CI fixtures</text></g>
+  </g>
+  <g stroke="#5f6673" stroke-width="2" fill="none" marker-end="url(#a)">
+    <path d="M186 96h42"/><path d="M392 96h24"/><path d="M580 96h24"/><path d="M768 96h24"/><path d="M956 96h50"/><path d="M1097 136v76"/>
+  </g>
+</svg>

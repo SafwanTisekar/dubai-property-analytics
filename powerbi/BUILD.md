@@ -4,7 +4,7 @@ A step-by-step guide to the six pages of docs/06 §4 on the semantic model in `D
 
 ## 0. Setup (once)
 
-1. **No maps in v1** (owner decision, 2026-10-02): the Azure Maps visual needs a tenant admin to enable it, so every geographic view is a **bar chart by zone or area, top N, sorted by the same measure**. `'Area'[Latitude]` / `[Longitude]` stay in the model (OpenStreetMap centroids) for a map later. **Publish to web** is already on (docs/03 §9).
+1. **No maps in v1** (decision, 2026-10-02): the Azure Maps visual needs a tenant admin to enable it, so every geographic view is a **bar chart by zone or area, top N, sorted by the same measure**. `'Area'[Latitude]` / `[Longitude]` stay in the model (OpenStreetMap centroids) for a map later. **Publish to web** is already on (docs/03 §9).
 2. Close Desktop. On the Mac: start Parallels, then `make pbi-ready` (docs/03 §8).
 3. If the model changed since the last open, delete `powerbi/DubaiProperty.SemanticModel/.pbi/cache.abf` (stale imported data; gitignored, rebuilt by the refresh).
 4. Open `powerbi/DubaiProperty.pbip` → **Refresh**. Parameters (Transform data → Manage parameters): `PgServer` = `10.211.55.2:5432`, `PgDatabase` = `dubai_property`.

@@ -36,7 +36,7 @@ Phase 4b (docs/05 §1). Automated valuation model for Dubai residential sales: w
 
 0 sales without any earlier sale of their type (the first month of the history) have no reference price and are not modelled. The split is by date, never random: a random split would put a 2025 sale's neighbours, month and building in training. **The test period includes the 2026 slowdown** (Jan–Aug 2026 sales −19% on 2025, ready −37%; findings F1), which is why accuracy is also shown by month.
 
-**Why fitting starts in 2011** (owner, 2026-10-01): 30–50% of 2009–10 sales were registered after their application year (the Law 13/2008 backlog, findings F1.3), so their prices date from the 2006–08 boom. The index starts in 2011 for the same reason.
+**Why fitting starts in 2011** (decision, 2026-10-01): 30–50% of 2009–10 sales were registered after their application year (the Law 13/2008 backlog, findings F1.3), so their prices date from the 2006–08 boom. The index starts in 2011 for the same reason.
 
 **Reproducibility.** On 2026-10-01 the model was re-tuned from scratch (a new 20-trial Optuna study) when the database was restored (docs/05 §8): test MdAPE moved 6.82% → 6.83% and the ±10% hit rate 65.2% → 65.0%, so the result is stable across tuning runs. The tuned parameters are committed (`artifacts/avm/best_params.json`): a rebuild with the same features reuses them and reproduces this model, up to small differences from LightGBM's multithreading.
  Ablation (train-only models, same parameters): starting in 2011 gives test MdAPE 7.50% (±10%: 61.3%); starting in 2010, 7.54% (61.2%).
@@ -111,7 +111,7 @@ Head to head, on the sales every model can value:
 | apartment | 6.7% / 66% | 10.2% / 49% | 10.0% / 50% | 12.6% / 41% |
 | villa | 8.9% / 55% | 8.9% / 54% | 8.5% / 56% | 9.7% / 51% |
 
-**Price bands by predicted value** (owner, 2026-10-01). Banding by the sale price builds in regression to the mean: a sale that closed unusually low lands in a low band *because* it was low, so low bands look over-valued and high bands under-valued even for a perfect model. The AVM value is known before the sale, so its bands are fair. The sale-price version follows, labelled, for comparison only.
+**Price bands by predicted value** (decision, 2026-10-01). Banding by the sale price builds in regression to the mean: a sale that closed unusually low lands in a low band *because* it was low, so low bands look over-valued and high bands under-valued even for a perfect model. The AVM value is known before the sale, so its bands are fair. The sale-price version follows, labelled, for comparison only.
 
 | Segment | LightGBM MdAPE / ±10% | Index-adjusted comparables MdAPE / ±10% | Comparable sales (6 months) MdAPE / ±10% | Hedonic OLS (rolling) MdAPE / ±10% |
 | --- | ---: | ---: | ---: | ---: |
@@ -245,7 +245,7 @@ Why the model missed:
 
 ## Review flags (|gap| > 25%)
 
-`gap = (price − AVM value) / AVM value`. A sale more than 25% above or below its AVM value is flagged **for collateral review as a statistical anomaly, not as an accusation**: the register doesn't record floor, view, condition, furnishing or the circumstances of a sale, any of which can explain a gap. **Flags are set only out of sample** (validation 2024 and test 2025+; owner, 2026-10-01): for 2011–2023 the model has fitted the sales, so their gaps understate how unusual the price was, and the flag is left blank.
+`gap = (price − AVM value) / AVM value`. A sale more than 25% above or below its AVM value is flagged **for collateral review as a statistical anomaly, not as an accusation**: the register doesn't record floor, view, condition, furnishing or the circumstances of a sale, any of which can explain a gap. **Flags are set only out of sample** (validation 2024 and test 2025+; decision, 2026-10-01): for 2011–2023 the model has fitted the sales, so their gaps understate how unusual the price was, and the flag is left blank.
 
 | Set | Sales valued | Flagged | Share | Median gap |
 | --- | ---: | ---: | ---: | ---: |

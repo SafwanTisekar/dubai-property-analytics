@@ -690,7 +690,7 @@ def reset_dataset(conn: psycopg.Connection, dataset: Dataset) -> None:
 # On 2026-10-01 a fixture run meant for a scratch database reset the main database's bronze
 # (``PG_DB=x make ...`` doesn't override the PG_DB the Makefile reads from .env; it has to
 # be a make argument). Rebuilding bronze from data/raw takes most of an hour, so the main
-# database now refuses both mistakes outright (owner decision, docs/05 §8).
+# database now refuses both mistakes outright (decision, docs/05 §8).
 ALLOW_MAIN_RESET_ENV = "ALLOW_MAIN_RESET"
 
 

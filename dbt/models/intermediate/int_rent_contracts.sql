@@ -11,7 +11,7 @@
 --     not is_multi_unit): a bulk lease of a whole floor is not a like-for-like unit rent,
 --     and an equal split is not a unit's rent either.
 --
--- Rent detail never goes to Power BI (CLAUDE.md); gold will aggregate it.
+-- Rent detail never goes to Power BI (docs/01 §7); gold will aggregate it.
 
 with lines as (
 

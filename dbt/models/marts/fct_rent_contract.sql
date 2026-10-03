@@ -10,7 +10,7 @@
 }}
 
 -- One row per Ejari contract line (~10.5M), de-duplicated in silver (C1), with keys to the
--- shared dimensions. Never sent to Power BI in detail (CLAUDE.md): agg_rent_month is the
+-- shared dimensions. Never sent to Power BI in detail (docs/01 §7): agg_rent_month is the
 -- rent table the report imports.
 --
 -- AED: every line of a multi-unit contract repeats the whole contract amount (C11), so
@@ -20,7 +20,7 @@
 --
 -- is_rent_comparable = a like-for-like unit rent (single line, market property type,
 -- inside the C14 band, usable dates, started by the data snapshot date) whether new or
--- renewed; is_market_rent adds "new contract" (C13), the default market rent (CLAUDE.md).
+-- renewed; is_market_rent adds "new contract" (C13), the default market rent (docs/01 §7).
 
 select
     r.contract_id,

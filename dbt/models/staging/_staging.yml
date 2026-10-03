@@ -82,7 +82,7 @@ models:
               arguments:
                 values: [Existing Properties, Off-Plan Properties]
       - name: is_offplan
-        description: Off-plan vs ready, a first-class dimension (CLAUDE.md).
+        description: Off-plan vs ready, a first-class dimension (docs/01 §7).
         tests: [not_null]
       - name: area_id
         description: C8. DLD area; joins seed_area.

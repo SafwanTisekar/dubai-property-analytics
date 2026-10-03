@@ -25,7 +25,7 @@ to *exercise every rule*, so a small file still tests the tricky cases:
 The files keep the DLD shape (every field quoted, same header), so CI loads them with the
 normal loader: ``make bronze BRONZE_ROOT=tests/fixtures``.
 
-The DLD Residential Sale Index fixture is the exception: it is **synthetic** (owner,
+The DLD Residential Sale Index fixture is the exception: it is **synthetic** (decision,
 2026-10-01). The file comes from data.dubai, whose licence for it hasn't been confirmed as
 CC BY 4.0, so no DLD value is committed. ``write_price_index_fixture`` generates 36 months
 with the real header and blank pattern, which is all the dbt staging model needs.

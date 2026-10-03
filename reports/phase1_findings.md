@@ -68,7 +68,7 @@ The full list of 58 pairs is in the evidence file, §1. Points that matter for `
 - In **2014–2019**, 28–34% of pairs sit exactly at **0.75** and the median is 0.75. That matches the 75% cap for expat first homes ≤ AED 5M in the 2013 CBUAE mortgage regulation.
 - From **2021**, the median is **0.80**, and in 2025–2026 41–50% of pairs sit exactly at 0.80. That follows the 2020 relaxation for first-time buyers.
 
-The regulatory history is from domain knowledge. The Phase 2 LTV seed must cite the CBUAE source per CLAUDE.md.
+The regulatory history is from domain knowledge. The Phase 2 LTV seed must cite the CBUAE source per docs/01 §7.
 
 **Caveats**
 
@@ -178,4 +178,4 @@ No `dd-mm-yyyy` values exist, which answers the C1 question in docs/04: every no
 - The mortgage-to-sale match covers 42% of mortgage rows. Refinancings and mortgages on units bought earlier can't be matched by design, so the loan-amount conclusion is proven on purchase mortgages and assumed for the rest.
 - The portfolio rule is a heuristic, and its thresholds (span ≤ 2 × lines, size spread > 10%) are judgement calls. The evidence file shows the excluded "similar size" groups, so a reviewer can see what the rule leaves out.
 - EIBOR is not loaded yet. CBUAE doesn't provide a stable CSV endpoint, so a manual download into `data/raw/cbuae/` is needed. Fed Funds is the fallback rate driver.
-- `data/sample/` is gitignored per CLAUDE.md, so CI can't use it yet. See the open question in docs/04 Decisions.
+- `data/sample/` is gitignored per docs/01 §7, so CI can't use it yet. See the open question in docs/04 Decisions.

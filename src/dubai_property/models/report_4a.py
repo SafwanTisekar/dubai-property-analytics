@@ -680,7 +680,7 @@ def price_report(index: pl.DataFrame, diag: dict, raw: pl.DataFrame, raw_year: p
         f"{pct(max(prems), 0)} across the windows; the pooled index "
         "differs by up to "
         f"{pct(rob.get('dubai', {}).get('comparison', {}).get('max_level_gap'))} (Dubai), "
-        "so it is kept only as the robustness check (owner decision, 2026-10-01). "
+        "so it is kept only as the robustness check (decision, 2026-10-01). "
         f"([chart]({rel(figs['robustness'])}))",
         "",
         "## Method",
@@ -826,10 +826,10 @@ def price_report(index: pl.DataFrame, diag: dict, raw: pl.DataFrame, raw_year: p
         "",
         "## Robustness: rolling windows vs one pooled fit",
         "",
-        "The owner asked for this check because the pooled fit assumes the off-plan "
+        "This check was run because the pooled fit assumes the off-plan "
         "discount, bedroom premia and area effects never change, while the off-plan share "
         "swung after 2021. The gap is **material** (> 5% in level or > 3 pp in YoY), so the "
-        "choice went to the owner, who chose the rolling-window index for every segment "
+        "choice was made explicitly: I chose the rolling-window index for every segment "
         "(2026-10-01).",
         "",
         table(
@@ -873,7 +873,7 @@ def price_report(index: pl.DataFrame, diag: dict, raw: pl.DataFrame, raw_year: p
         "series rebased to their first common month for the chart only.",
         "",
         "- **Headline (aligned):** YoY of our index averaged over the trailing 12 months, "
-        "vs DLD's YoY, at lag 0. Owner decision 2026-10-01: our monthly index leads DLD's by "
+        "vs DLD's YoY, at lag 0. Decision 2026-10-01: our monthly index leads DLD's by "
         "about six months, and a 12-month trailing average of ours lines up with DLD at lag "
         "0, which suggests DLD's monthly figure averages the last 12 months of sales. That is "
         "an inference from the data; the file carries no methodology.",
@@ -1000,7 +1000,7 @@ def weighted(df: pl.DataFrame, by: list[str]) -> pl.DataFrame:
 def yield_report(yl: pl.DataFrame, index: pl.DataFrame, snapshot: date) -> tuple[str, dict]:
     """The markdown for reports/yields.md and its figures."""
     figs: dict[str, Path] = {}
-    # Aggregates leave out cells outside the 2-15% sanity band (owner, Phase 5): two such
+    # Aggregates leave out cells outside the 2-15% sanity band (decision, Phase 5): two such
     # Al Barsha cells (25%, 23%) with heavy sales weights pushed that zone to 14% and the
     # apartment headline from 7.1% to 7.2%. The cells stay in ml / rpt, flagged, and are
     # listed in the sanity section below; the Power BI yield measures exclude them too.

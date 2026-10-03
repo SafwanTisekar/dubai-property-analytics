@@ -141,7 +141,7 @@ seeds:
       - name: latitude
         description: >
           Area centroid latitude (WGS84) for the Power BI bubble map, from OpenStreetMap
-          Nominatim (`make centroids`, reports/area_centroids.md) or typed in by the owner.
+          Nominatim (`make centroids`, reports/area_centroids.md) or typed in by hand.
           NULL = not located (no bubble; never a zone centroid). © OpenStreetMap contributors (ODbL).
         tests:
           - dbt_expectations.expect_column_values_to_be_between:
@@ -159,7 +159,7 @@ seeds:
         description: >
           Where the centroid came from: osm_nominatim (the DLD name or a spelling of it),
           osm_nominatim_alias (a better-known name for the place), osm_nominatim_approx (the
-          parent community only), manual (owner; never overwritten), or NULL (not located).
+          parent community only), manual (typed in by hand; never overwritten), or NULL (not located).
         tests:
           - accepted_values:
               arguments:
@@ -232,7 +232,7 @@ seeds:
       rule (borrower x property status x home number x value band) per regulatory period.
       Current regime: CBUAE Regulations Regarding Mortgage Loans, Art. 3(2), as amended by
       Board Resolution 31/2/2020 (effective 2020-04-08). Earlier regime: Circular No. 31/2013
-      (2013-10-28 to 2020-04-07). Every row verified by the owner against the CBUAE rulebook
+      (2013-10-28 to 2020-04-07). Every row verified by hand against the CBUAE rulebook
       (2026-09-30). The stress test is illustrative and must say which LTVs it assumed.
     tests:
       - dbt_utils.expression_is_true:
@@ -262,7 +262,7 @@ seeds:
       - name: secondary_source_url
         description: Secondary summary used alongside the rulebook (pre-2020 rows).
       - name: verified
-        description: The owner has checked this row against the CBUAE regulation (2026-09-30).
+        description: Checked by hand against the CBUAE regulation (2026-09-30).
         tests:
           - not_null
           - dbt_utils.expression_is_true:

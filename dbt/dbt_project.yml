@@ -12,10 +12,10 @@ snapshot-paths: ["snapshots"]
 clean-targets: ["target", "dbt_packages"]
 
 # Business thresholds used by the cleaning rules (docs/04 §2). Kept here, not in the SQL,
-# so every rule reads its threshold from one place (CLAUDE.md: never hard-code).
+# so every rule reads its threshold from one place (docs/01 §7: never hard-code).
 vars:
   analysis_start_date: "2004-01-01"   # charter scope; earlier rows are flagged is_pre_2004
-  min_n: 20                           # min-n rule (CLAUDE.md), also used for outlier bands
+  min_n: 20                           # min-n rule (docs/01 §7), also used for outlier bands
   band_low: 0.005                     # C4 / C14 outlier band: P0.5 ...
   band_high: 0.995                    # ... to P99.5
   price_floor_aed: 50000              # C4: a sale below AED 50k is not a real unit price
@@ -29,7 +29,7 @@ vars:
   rent_floor_aed: 1000                # C14: allocated annual rent below AED 1,000
   rent_area_placeholder_sqm: 1        # C21: actual_area <= 1 sq m is a placeholder
   # C21 (rents) and the area-weighted price population (sales): an area above the cap for its
-  # property class is a community / plot / building area, not the unit's (owner, 2026-09-30).
+  # property class is a community / plot / building area, not the unit's (decision, 2026-09-30).
   area_cap_apartment_sqm: 1000
   area_cap_villa_sqm: 3000
   area_cap_office_retail_sqm: 5000

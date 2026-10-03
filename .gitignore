@@ -16,7 +16,7 @@
 # --- Trained model binaries (large, reproducible via `make train`) ------------
 # Everything under artifacts/ is ignored except the AVM's tuned parameters (7 KB): with
 # them a rebuild skips the 20-trial Optuna study and reproduces the published model
-# (owner, 2026-10-01). A directory can't be re-included once ignored, hence /* patterns.
+# (decision, 2026-10-01). A directory can't be re-included once ignored, hence /* patterns.
 /artifacts/*
 !/artifacts/avm/
 /artifacts/avm/*
@@ -61,3 +61,6 @@ logs/
 .vscode/
 .idea/
 .claude/
+
+# --- Local assistant notes (kept on disk, not published) ----------------------
+CLAUDE.md

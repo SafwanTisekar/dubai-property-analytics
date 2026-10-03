@@ -1,6 +1,6 @@
 """As-of market features: what was known about the market before a sale's month.
 
-**The as-of rule (docs/05 §1, CLAUDE.md "no look-ahead").** Every feature of a sale dated
+**The as-of rule (docs/05 §1, docs/01 §7).** Every feature of a sale dated
 in month M is computed from sales dated in months **before M**: M-1, M-2, ... Sales earlier
 in the same month are left out too, which is stricter than "dated before the sale" and
 removes any question about same-day ordering or registration order within a month.

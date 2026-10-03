@@ -2,7 +2,7 @@
 table _Measures
 	lineageTag: 14f4c052-914f-5d16-b760-b994704495e8
 
-	/// Min-n rule (CLAUDE.md): no median, yield or index point from fewer than this many observations.
+	/// Min-n rule (docs/01 §7): no median, yield or index point from fewer than this many observations.
 	measure 'Min N' = MAX ( 'Report Info'[Min N] )
 		formatString: 0
 		displayFolder: Report

@@ -431,7 +431,7 @@ def villa_comparison(perf: pl.DataFrame) -> str | None:
     )
     if lg["mdape"] < 0.97 * cp["mdape"]:
         return f"4. **Villas:** LightGBM also beats comparables {head}."
-    # Within 0.05 pp is a tie; otherwise say which side is ahead (owner, 2026-10-01: the
+    # Within 0.05 pp is a tie; otherwise say which side is ahead (decision, 2026-10-01: the
     # re-tuned model's 8.66% vs 8.51% is comparables ahead, not a tie).
     if abs(lg["mdape"] - cp["mdape"]) <= 0.0005:
         verdict = "Villas are a tie on MdAPE"
@@ -629,7 +629,7 @@ def render(perf, imp, diag, summary, figs, examples, tuning=None) -> str:  # noq
         "sales −19% on 2025, ready −37%; findings F1), which is why accuracy is also shown by "
         "month.",
         "",
-        "**Why fitting starts in 2011** (owner, 2026-10-01): 30–50% of 2009–10 sales were "
+        "**Why fitting starts in 2011** (decision, 2026-10-01): 30–50% of 2009–10 sales were "
         "registered after their application year (the Law 13/2008 backlog, findings F1.3), so "
         "their prices date from the 2006–08 boom. The index starts in 2011 for the same reason.",
     ]
@@ -761,7 +761,7 @@ def render(perf, imp, diag, summary, figs, examples, tuning=None) -> str:  # noq
     ].unique()
     order = ["< AED 1M", "AED 1M-2M", "AED 2M-5M", ">= AED 5M"]
     lines += [
-        "**Price bands by predicted value** (owner, 2026-10-01). Banding by the sale price builds "
+        "**Price bands by predicted value** (decision, 2026-10-01). Banding by the sale price builds "
         "in regression to the mean: a sale that closed unusually low lands in a low band *because* "
         "it was low, so low bands look over-valued and high bands under-valued even for a perfect "
         "model. The AVM value is known before the sale, so its bands are fair. The sale-price "
@@ -866,7 +866,7 @@ def render(perf, imp, diag, summary, figs, examples, tuning=None) -> str:  # noq
         "value is flagged **for collateral review as a statistical anomaly, not as an "
         "accusation**: the register doesn't record floor, view, condition, furnishing or the "
         "circumstances of a sale, any of which can explain a gap. **Flags are set only out of "
-        "sample** (validation 2024 and test 2025+; owner, 2026-10-01): for 2011–2023 the model "
+        "sample** (validation 2024 and test 2025+; decision, 2026-10-01): for 2011–2023 the model "
         "has fitted the sales, so their gaps understate how unusual the price was, and the flag "
         "is left blank.",
         "",

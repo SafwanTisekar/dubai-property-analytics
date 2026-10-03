@@ -1,7 +1,7 @@
 """Area centroids for the Power BI bubble map → ``dbt/seeds/seed_area.csv`` (docs/06 §4).
 
 DLD publishes no coordinates, so each area's centroid comes from OpenStreetMap Nominatim
-(owner decision, 2026-10-01). Only the public DLD area name is sent, as
+(decision, 2026-10-01). Only the public DLD area name is sent, as
 ``"<name>, Dubai, United Arab Emirates"``, with the descriptive User-Agent and the
 1-request-per-second limit the Nominatim usage policy asks for. Every raw response is
 cached under ``data/raw/osm/nominatim/`` (gitignored), so a re-run makes no network calls.
@@ -17,13 +17,13 @@ How a centroid is chosen, and recorded in ``centroid_source``:
 * ``osm_nominatim_approx``: only the parent community was found (the name without its
   "First" / "2" / ... suffix). Close, but several sub-areas then share one point; listed
   for review.
-* ``manual``: typed in by the owner. Never overwritten.
+* ``manual``: typed in by hand. Never overwritten.
 * blank: not found. The bubble map leaves the area out; there is **no** silent fallback
   to a zone centroid, which would put a bubble somewhere the area isn't.
 
 Writes the seed in place (only latitude / longitude / centroid_source change) and
 ``reports/area_centroids.md``, which lists every miss, alias and approximation as the
-owner's review list. Then ``make dbt`` loads the seed into ``dim_area`` / ``rpt.dim_area``.
+manual review list. Then ``make dbt`` loads the seed into ``dim_area`` / ``rpt.dim_area``.
 
 Usage::
 
@@ -365,7 +365,7 @@ def geocode(rows: list[dict[str, str]], client: Nominatim) -> list[dict[str, Any
 
 
 def render(log_rows: list[dict[str, Any]], network_calls: int) -> str:
-    """``reports/area_centroids.md``: counts by outcome and the owner's review lists."""
+    """``reports/area_centroids.md``: counts by outcome and the manual review lists."""
     counts: dict[str, int] = {}
     for r in log_rows:
         counts[r["outcome"]] = counts.get(r["outcome"], 0) + 1
